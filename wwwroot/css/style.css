@@ -174,19 +174,18 @@ a {
   animation: emblemPulseGlow 1.8s infinite alternate ease-in-out;
 }
 
-#intro-logo-container.intro-animating .sat-monogram-svg path {
-  stroke-dasharray: 200;
-  stroke-dashoffset: 200;
-  animation: drawMonogram 1.4s ease-out forwards;
+#intro-logo-container.intro-animating .official-sat-logo-img {
+  animation: logoPulseShimmer 1.4s ease-in-out infinite alternate;
 }
 
-#intro-logo-container.intro-animating .sat-logo-text-wrap {
-  animation: textFadeIn 1.2s ease-out forwards;
-}
-
-@keyframes drawMonogram {
-  to {
-    stroke-dashoffset: 0;
+@keyframes logoPulseShimmer {
+  0% {
+    transform: scale(0.92);
+    filter: drop-shadow(0 0 8px rgba(212, 178, 112, 0.4));
+  }
+  100% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.9));
   }
 }
 
@@ -196,34 +195,24 @@ a {
     border-color: #d4b270;
   }
   100% {
-    box-shadow: 0 0 45px rgba(212, 178, 112, 0.8), 0 0 90px rgba(212, 178, 112, 0.4);
+    box-shadow: 0 0 50px rgba(212, 178, 112, 0.9), 0 0 100px rgba(245, 158, 11, 0.5);
     border-color: #f8f5f0;
   }
 }
 
-@keyframes textFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .sat-logo-emblem {
-  width: 58px;
-  height: 58px;
-  background: rgba(20, 42, 33, 0.85);
-  border: 2px solid var(--champagne-gold);
-  border-radius: 12px;
+  width: 72px;
+  height: 72px;
+  background: radial-gradient(circle, rgba(20, 42, 80, 0.95) 0%, rgba(8, 18, 36, 0.98) 100%);
+  border: 2.5 solid var(--champagne-gold);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 30px rgba(212, 178, 112, 0.35);
+  box-shadow: 0 0 35px rgba(212, 178, 112, 0.4);
   position: relative;
   overflow: hidden;
+  transition: width 0.4s ease, height 0.4s ease, border-radius 0.4s ease;
 }
 
 .sat-logo-emblem::after {
@@ -231,40 +220,14 @@ a {
   position: absolute;
   inset: 3px;
   border: 1px solid rgba(212, 178, 112, 0.4);
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
-.sat-monogram-svg {
-  width: 32px;
-  height: 32px;
-}
-
-.sat-logo-text-wrap {
-  display: flex;
-  flex-direction: column;
-}
-
-.sat-logo-brand {
-  font-family: var(--font-serif);
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--cream-ivory);
-  letter-spacing: 0.08em;
-  line-height: 1;
-}
-
-.sat-logo-brand span {
-  color: var(--champagne-gold);
-  font-style: italic;
-}
-
-.sat-logo-tagline {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.25em;
-  color: var(--terracotta-light);
-  text-transform: uppercase;
-  margin-top: 4px;
+.official-sat-logo-img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(212, 178, 112, 0.6));
 }
 
 #intro-logo-container.nav-landed {
@@ -277,23 +240,16 @@ a {
 }
 
 #intro-logo-container.nav-landed .sat-logo-emblem {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: 10px;
   animation: none;
 }
 
-#intro-logo-container.nav-landed .sat-monogram-svg {
-  width: 24px;
-  height: 24px;
-}
-
-#intro-logo-container.nav-landed .sat-logo-brand {
-  font-size: 20px;
-}
-
-#intro-logo-container.nav-landed .sat-logo-tagline {
-  font-size: 8px;
+#intro-logo-container.nav-landed .official-sat-logo-img {
+  animation: none;
+  width: 78%;
+  height: 78%;
 }
 
 /* ANIMATED BACKGROUND FLOATING ORBS */
