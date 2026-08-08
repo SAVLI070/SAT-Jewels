@@ -4,16 +4,16 @@
 */
 
 :root {
-  /* Color Palette — Transparent Glass over Dark Backdrop for Landing Page */
-  --emerald-dark: rgba(15, 34, 27, 0.65);
-  --emerald-base: rgba(24, 51, 41, 0.7);
-  --emerald-card: rgba(15, 30, 24, 0.55);
-  --emerald-solid: rgba(20, 42, 33, 0.75);
-  --emerald-light: rgba(44, 92, 74, 0.8);
+  /* Color Palette — Royal Sapphire Blue & Champagne Gold Luxury Theme */
+  --emerald-dark: rgba(10, 24, 48, 0.75);
+  --emerald-base: rgba(16, 38, 74, 0.75);
+  --emerald-card: rgba(10, 22, 44, 0.65);
+  --emerald-solid: rgba(14, 30, 60, 0.85);
+  --emerald-light: rgba(28, 64, 128, 0.8);
 
-  --terracotta: #a26046;
-  --terracotta-dark: #7b422e;
-  --terracotta-light: #c27d63;
+  --terracotta: #2563eb;
+  --terracotta-dark: #1d4ed8;
+  --terracotta-light: #60a5fa;
 
   --champagne-gold: #d4b270;
   --gold-400: #e2ca94;
@@ -24,24 +24,24 @@
   --cream-surface: #f3eee7;
   --cream-muted: #d8cebe;
 
-  --burgundy: #541b1c;
-  --taupe-beige: #c5b8a5;
-  --onyx: #0a0e0c;
+  --burgundy: #1e3a8a;
+  --taupe-beige: #b0c4de;
+  --onyx: #040914;
 
-  /* Surface System — Glassmorphism */
+  /* Surface System — Sapphire Blue Glassmorphism */
   --bg-dark: transparent;
   --bg-surface: transparent;
   --bg-card: var(--emerald-card);
   --bg-card-solid: var(--emerald-solid);
-  --bg-glass: rgba(10, 20, 16, 0.55);
-  --bg-glass-strong: rgba(10, 20, 16, 0.75);
+  --bg-glass: rgba(8, 18, 36, 0.65);
+  --bg-glass-strong: rgba(8, 18, 36, 0.85);
 
   /* Glass Borders & Shadows */
   --border-gold: rgba(212, 178, 112, 0.45);
   --border-gold-soft: rgba(212, 178, 112, 0.25);
-  --border-glass: rgba(255, 255, 255, 0.18);
+  --border-glass: rgba(96, 165, 250, 0.22);
 
-  --shadow-card: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 178, 112, 0.1);
+  --shadow-card: 0 12px 36px rgba(0, 0, 0, 0.7), 0 0 20px rgba(37, 99, 235, 0.18);
   --shadow-gold-glow: 0 0 35px rgba(212, 178, 112, 0.35);
   --shadow-hero: 0 25px 80px rgba(0, 0, 0, 0.85);
 
@@ -78,7 +78,7 @@
 html {
   scroll-behavior: smooth;
   font-family: var(--font-body);
-  background-color: #060d0a;
+  background-color: #040a18;
   color: var(--text-primary);
   overflow-x: hidden;
 }
@@ -143,7 +143,7 @@ a {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: radial-gradient(circle at center, #0f1c16 0%, #060d0a 100%);
+  background: radial-gradient(circle at center, #0e2040 0%, #040a18 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
