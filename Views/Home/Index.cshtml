@@ -70,6 +70,11 @@
     </div>
 
     <div class="nav-actions">
+      <!-- Sign In Button (Left of Contact Us) -->
+      <a href="/Account/SignIn" class="btn-auth-nav" id="navSignInBtn">
+        <i class="fa-regular fa-user"></i> Sign In
+      </a>
+
       <!-- Single Clean Contact Us Button -->
       <a href="#cta" class="btn-primary">
         <i class="fa-solid fa-envelope"></i> Contact Us
@@ -99,7 +104,10 @@
   <a href="#why" class="mobile-link" onclick="toggleMenu()">
     <i class="fa-solid fa-shield-halved"></i> Why SAT Jewel
   </a>
-  <div style="padding: 16px 24px; border-top: 1px solid var(--border-glass); margin-top: 10px;">
+  <div style="padding: 16px 24px; border-top: 1px solid var(--border-glass); margin-top: 10px; display:flex; flex-direction:column; gap:10px;">
+    <a href="/Account/SignIn" class="btn-auth-nav" style="width: 100%; justify-content: center; text-align:center; box-sizing:border-box;">
+      <i class="fa-regular fa-user"></i> Sign In / Sign Up
+    </a>
     <a href="#cta" class="btn-primary" onclick="toggleMenu()" style="width: 100%; justify-content: center;">
       <i class="fa-solid fa-envelope"></i> Contact Us
     </a>

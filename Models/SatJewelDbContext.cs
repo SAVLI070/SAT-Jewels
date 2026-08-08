@@ -8,10 +8,33 @@ namespace SAT1.Models
 
         public DbSet<CatalogItem> CatalogItems { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<User> Users { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // Seed Admin & Sample Customer
+            modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = "user_admin",
+                    FullName = "SAT Administrator",
+                    Email = "admin@satjewels.com",
+                    Phone = "+18005557285",
+                    Password = "admin",
+                    Role = "Admin"
+                },
+                new User
+                {
+                    Id = "user_vip_client",
+                    FullName = "Eleanor Vance",
+                    Email = "client@satjewels.com",
+                    Phone = "+12125550199",
+                    Password = "password123",
+                    Role = "VIP"
+                }
+            );
 
             // Seed initial store items in USD
             modelBuilder.Entity<CatalogItem>().HasData(

@@ -568,6 +568,32 @@ a {
   background: rgba(212, 178, 112, 0.18);
 }
 
+.btn-auth-nav {
+  padding: 9px 20px;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 178, 112, 0.5);
+  color: var(--champagne-gold);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+}
+
+.btn-auth-nav:hover {
+  background: var(--champagne-gold);
+  color: #060d0a;
+  box-shadow: 0 4px 20px rgba(212, 178, 112, 0.45);
+  transform: translateY(-2px);
+}
+
 .btn-primary {
   padding: 10px 24px;
   border-radius: var(--radius-full);
