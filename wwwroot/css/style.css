@@ -677,6 +677,7 @@ a {
 .typewriter-line.accent-gold {
   background: linear-gradient(135deg, var(--champagne-gold) 0%, var(--terracotta-light) 50%, var(--gold-300) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 2px 10px rgba(0, 0, 0, 0.8));
 }

@@ -1,107 +1,109 @@
 /* 
-  SAT Jewel — Interactive Script Engine, Automatic IP Location Currency & FarmBridge-Style Admin Portal
+  SAT Jewel — Interactive Script Engine (Exclusively USD ($) Transactions)
+  Includes FarmBridge-Style Admin Portal & 3D Diamond Intelligence
 */
 
-// Multi-Currency Exchange Rates relative to INR base
-const currencyConfig = {
-  INR: { rate: 1, symbol: '₹', flag: '🇮🇳', name: 'Indian Rupee' },
-  USD: { rate: 1 / 83.50, symbol: '$', flag: '🇺🇸', name: 'US Dollar' },
-  EUR: { rate: 1 / 90.80, symbol: '€', flag: '🇪🇺', name: 'Euro' },
-  GBP: { rate: 1 / 106.20, symbol: '£', flag: '🇬🇧', name: 'British Pound' },
-  AED: { rate: 1 / 22.74, symbol: 'AED ', flag: '🇦🇪', name: 'UAE Dirham' },
-  CAD: { rate: 1 / 61.20, symbol: 'CA$', flag: '🇨🇦', name: 'Canadian Dollar' },
-  AUD: { rate: 1 / 54.80, symbol: 'A$', flag: '🇦🇺', name: 'Australian Dollar' }
-};
-
-let currentCurrency = 'INR';
-let userCountryName = 'India';
+// Currency Configuration — Exclusively USD ($)
+const currentCurrency = 'USD';
+const currencyConfig = { symbol: '$', name: 'US Dollar', flag: '🇺🇸' };
 let isAdminLoggedIn = false;
 
-// Initial Catalog Data
+// Default Catalog Data in USD ($)
 const defaultCollectionData = {
   rings: [
     {
-      id: 'ring_1',
+      id: "ring_1",
       name: "Royal Solitaire Diamond Ring",
       spec: "18K Gold | 1.5ct GIA VVS1, E Color | Brilliant Cut",
-      priceINR: 185000,
-      img: "assets/ring_1.jpg"
+      priceUSD: 2200,
+      img: "assets/ring_1.jpg",
+      tags: ["Solitaire", "18K Gold", "GIA VVS1"]
     },
     {
-      id: 'ring_2',
-      name: "Emerald Cut Halo Ring",
-      spec: "Platinum 950 | 2.0ct GIA VS1 | Pavé Diamond Halo",
-      priceINR: 240000,
-      img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=600&q=80&fm=jpg"
+      id: "ring_2",
+      name: "Halo Cushion Cut Engagement Ring",
+      spec: "Platinum 950 | 2.0ct Halo Diamond Setting | IF Clarity",
+      priceUSD: 2900,
+      img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80",
+      tags: ["Platinum 950", "Halo", "2.0ct"]
     },
     {
-      id: 'ring_3',
-      name: "Sapphire & Diamond Vintage Ring",
-      spec: "18K Rose Gold | 1.8ct Natural Sapphire & Diamonds",
-      priceINR: 195000,
-      img: "assets/hero_2.jpg"
+      id: "ring_3",
+      name: "Emerald Cut Vintage Gold Band",
+      spec: "18K Yellow Gold | 1.8ct Emerald Cut Diamond",
+      priceUSD: 2350,
+      img: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=800&q=80",
+      tags: ["18K Gold", "Emerald Cut", "Vintage"]
     },
     {
-      id: 'ring_4',
-      name: "Pavé Diamond Eternity Band",
-      spec: "18K White Gold | 1.2ct Total Weight | Round Cut",
-      priceINR: 120000,
-      img: "assets/ring_1.jpg"
+      id: "ring_4",
+      name: "Pavé Diamond Eternity Ring",
+      spec: "18K White Gold | 1.2ct Continuous Micro-Pavé",
+      priceUSD: 1450,
+      img: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=800&q=80",
+      tags: ["18K Gold", "Pavé", "Eternity"]
     }
   ],
   necklaces: [
     {
-      id: 'neck_1',
+      id: "neck_1",
       name: "Imperial Diamond Floral Pendant",
-      spec: "18K Yellow Gold | Marquise & Pear Cut Diamonds",
-      priceINR: 350000,
-      img: "assets/necklace_1.jpg"
+      spec: "18K Yellow Gold | Marquise & Pear Cut Diamonds | 3.5ct",
+      priceUSD: 4200,
+      img: "assets/necklace_1.jpg",
+      tags: ["18K Gold", "Pendant", "Marquise"]
     },
     {
-      id: 'neck_2',
-      name: "Solitaire Diamond Y-Necklace",
-      spec: "18K White Gold | 1.0ct Drop Solitaire",
-      priceINR: 165000,
-      img: "assets/hero_1.jpg"
+      id: "neck_2",
+      name: "Rivière Diamond Solitaire Choker",
+      spec: "Platinum 950 | Graduated Round Diamonds | 5.0ct Total",
+      priceUSD: 6250,
+      img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
+      tags: ["Platinum 950", "Choker", "5.0ct"]
     },
     {
-      id: 'neck_3',
-      name: "Royal Emerald & Diamond Collar",
-      spec: "18K Gold | 4.5ct Colombian Emerald & Pavé",
-      priceINR: 520000,
-      img: "assets/necklace_1.jpg"
+      id: "neck_3",
+      name: "Celestial Sapphire & Diamond Lariat",
+      spec: "18K White Gold | Royal Blue Sapphire 2.5ct + Diamonds",
+      priceUSD: 2000,
+      img: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
+      tags: ["Sapphire", "18K Gold", "Lariat"]
     }
   ],
   earrings: [
     {
-      id: 'ear_1',
+      id: "ear_1",
       name: "Chandelier Diamond Drop Earrings",
-      spec: "18K Gold | 2.2ct Triple Drop Diamonds",
-      priceINR: 210000,
-      img: "assets/earring_card.jpg"
+      spec: "18K Gold | 2.2ct Triple Drop Cascading Diamonds",
+      priceUSD: 2500,
+      img: "assets/earring_card.jpg",
+      tags: ["18K Gold", "Drops", "Chandelier"]
     },
     {
-      id: 'ear_2',
+      id: "ear_2",
       name: "Classic Solitaire Diamond Studs",
-      spec: "Platinum 950 | 1.0ct Each (2.0ct t.w.) GIA VVS1",
-      priceINR: 260000,
-      img: "assets/earring_card.jpg"
+      spec: "Platinum 950 | 1.0ct Each (2.0ct Total) | GIA Ideal Cut",
+      priceUSD: 3150,
+      img: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=800&q=80",
+      tags: ["Platinum 950", "Studs", "GIA Ideal"]
     }
   ],
   bracelets: [
     {
-      id: 'brac_1',
+      id: "brac_1",
       name: "Classic Diamond Tennis Bracelet",
-      spec: "Platinum 950 | 5.0ct Total Weight | Round Cut",
-      priceINR: 390000,
-      img: "assets/bracelet_card.jpg"
+      spec: "Platinum 950 | 5.0ct Total Weight | Round Brilliant Diamonds",
+      priceUSD: 4700,
+      img: "assets/bracelet_card.jpg",
+      tags: ["Platinum 950", "Tennis", "5.0ct"]
     },
     {
-      id: 'brac_2',
-      name: "18K Gold & Diamond Bangle Set",
-      spec: "18K Yellow Gold | Hand-Carved Filigree Pattern",
-      priceINR: 285000,
-      img: "assets/bracelet_card.jpg"
+      id: "brac_2",
+      name: "Heritage 18K Gold Diamond Bangle",
+      spec: "18K Solid Yellow Gold | 2.8ct Channel Set Diamonds",
+      priceUSD: 3450,
+      img: "https://images.unsplash.com/photo-1611591475155-4286fa2c2e74?w=800&q=80",
+      tags: ["18K Gold", "Bangle", "Channel Set"]
     }
   ]
 };
@@ -109,7 +111,7 @@ const defaultCollectionData = {
 let collectionData = loadCatalog();
 
 function loadCatalog() {
-  const saved = localStorage.getItem('sat_catalog');
+  const saved = localStorage.getItem('sat_catalog_usd');
   if (saved) {
     try {
       return JSON.parse(saved);
@@ -121,7 +123,7 @@ function loadCatalog() {
 }
 
 function saveCatalog() {
-  localStorage.setItem('sat_catalog', JSON.stringify(collectionData));
+  localStorage.setItem('sat_catalog_usd', JSON.stringify(collectionData));
   updateCategoryCounts();
 }
 
@@ -135,108 +137,69 @@ document.addEventListener('DOMContentLoaded', () => {
   initScrollReveals();
   updateCategoryCounts();
   refreshFbAdminCatalogTable();
-  detectLocationAndSetCurrency();
+  setUsdCurrencyBadge();
 });
 
-// Automatic IP Location & Currency Detection Engine
-async function detectLocationAndSetCurrency() {
-  try {
-    const res = await fetch('https://ipapi.co/json/');
-    const data = await res.json();
-
-    if (data && data.currency) {
-      const code = data.currency.toUpperCase();
-      userCountryName = data.country_name || 'Your Location';
-
-      if (currencyConfig[code]) {
-        currentCurrency = code;
-      } else if (code === 'USD' || data.country_code === 'US') {
-        currentCurrency = 'USD';
-      } else {
-        currentCurrency = 'USD';
-      }
-    }
-  } catch (err) {
-    console.log('IP Location fetch fallback to timezone:', err);
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
-    if (tz.includes('Kolkata') || tz.includes('Calcutta') || tz.includes('Asia/Colombo')) {
-      currentCurrency = 'INR';
-      userCountryName = 'India';
-    } else if (tz.includes('Europe/London')) {
-      currentCurrency = 'GBP';
-      userCountryName = 'United Kingdom';
-    } else if (tz.includes('Europe/')) {
-      currentCurrency = 'EUR';
-      userCountryName = 'Europe';
-    } else if (tz.includes('Dubai') || tz.includes('Muscat')) {
-      currentCurrency = 'AED';
-      userCountryName = 'UAE';
-    } else {
-      currentCurrency = 'USD';
-      userCountryName = 'United States';
-    }
-  }
-
-  updateLocationBadge();
-}
-
-function updateLocationBadge() {
-  const config = currencyConfig[currentCurrency] || currencyConfig['USD'];
+function setUsdCurrencyBadge() {
   const flagEl = document.getElementById('userFlag');
   const codeEl = document.getElementById('userCurrCode');
   const badgeEl = document.getElementById('locationCurrencyBadge');
-
-  if (flagEl) flagEl.textContent = config.flag;
-  if (codeEl) codeEl.textContent = `${currentCurrency} (${config.symbol.trim()})`;
-  if (badgeEl) badgeEl.title = `Auto-detected location: ${userCountryName} (${currentCurrency})`;
-
-  const openModal = document.getElementById('collectionModal');
-  if (openModal && openModal.classList.contains('show')) {
-    const activeCategory = openModal.getAttribute('data-category') || 'rings';
-    openCollectionModal(activeCategory);
-  }
+  if (flagEl) flagEl.textContent = '🇺🇸';
+  if (codeEl) codeEl.textContent = 'USD ($)';
+  if (badgeEl) badgeEl.title = 'Global Currency: USD ($)';
 }
 
-function formatPrice(priceINR) {
-  const config = currencyConfig[currentCurrency] || currencyConfig['USD'];
-  const converted = Math.round(priceINR * config.rate);
-
-  if (currentCurrency === 'INR') {
-    return `₹${priceINR.toLocaleString('en-IN')}`;
-  }
-  return `${config.symbol}${converted.toLocaleString()} ${currentCurrency}`;
+function formatPrice(priceUSD) {
+  const num = typeof priceUSD === 'number' ? priceUSD : parseFloat(priceUSD) || 0;
+  return `$${num.toLocaleString('en-US')}`;
 }
 
+// Dynamic Category Counts
 function updateCategoryCounts() {
-  const ringCount = collectionData.rings.length;
-  const neckCount = collectionData.necklaces.length;
-  const earCount = collectionData.earrings.length;
-  const bracCount = collectionData.bracelets.length;
+  const counts = {
+    rings: (collectionData.rings || []).length,
+    necklaces: (collectionData.necklaces || []).length,
+    earrings: (collectionData.earrings || []).length,
+    bracelets: (collectionData.bracelets || []).length
+  };
 
-  const ringEl = document.getElementById('count-rings');
-  if (ringEl) ringEl.textContent = `${ringCount} Listed Designs | Solitaires & Halos`;
+  const elRings = document.getElementById('count-rings');
+  const elNeck = document.getElementById('count-necklaces');
+  const elEar = document.getElementById('count-earrings');
+  const elBrac = document.getElementById('count-bracelets');
 
-  const neckEl = document.getElementById('count-necklaces');
-  if (neckEl) neckEl.textContent = `${neckCount} Listed Designs | Chokers & Pendants`;
+  if (elRings) elRings.textContent = `${counts.rings} Listed Designs | Solitaires & Halos`;
+  if (elNeck) elNeck.textContent = `${counts.necklaces} Listed Designs | Chokers & Pendants`;
+  if (elEar) elEar.textContent = `${counts.earrings} Listed Designs | Studs & Drops`;
+  if (elBrac) elBrac.textContent = `${counts.bracelets} Listed Designs | Tennis & Bangles`;
 
-  const earEl = document.getElementById('count-earrings');
-  if (earEl) earEl.textContent = `${earCount} Listed Designs | Studs & Drops`;
-
-  const bracEl = document.getElementById('count-bracelets');
-  if (bracEl) bracEl.textContent = `${bracCount} Listed Designs | Tennis & Bangles`;
-
-  const totalItems = ringCount + neckCount + earCount + bracCount;
+  const totalItems = counts.rings + counts.necklaces + counts.earrings + counts.bracelets;
   const adminTotalEl = document.getElementById('fbKpiItems');
   if (adminTotalEl) adminTotalEl.textContent = totalItems;
 }
 
-// 1. Logo Morph Animation
+// 1. Logo Morph Animation for First-Time Visitors
 function initLogoTransition() {
   const logoContainer = document.getElementById('intro-logo-container');
   const navSlot = document.querySelector('.nav-logo-slot');
   const overlay = document.getElementById('intro-overlay');
 
   if (!logoContainer || !navSlot) return;
+
+  const isFirstVisit = !sessionStorage.getItem('sat_visited');
+
+  if (!isFirstVisit) {
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.classList.add('fade-out');
+    }
+    navSlot.appendChild(logoContainer);
+    logoContainer.classList.add('nav-landed');
+    return;
+  }
+
+  sessionStorage.setItem('sat_visited', 'true');
+  logoContainer.classList.add('intro-animating');
 
   setTimeout(() => {
     const logoRect = logoContainer.getBoundingClientRect();
@@ -253,10 +216,11 @@ function initLogoTransition() {
     setTimeout(() => {
       navSlot.appendChild(logoContainer);
       logoContainer.classList.add('nav-landed');
+      logoContainer.classList.remove('intro-animating');
       logoContainer.style.transform = '';
     }, 1200);
 
-  }, 1000);
+  }, 1400);
 }
 
 // 2. Navbar Scroll Shrink & Indicator Logic
@@ -275,126 +239,118 @@ function initNavbar() {
   });
 
   links.forEach(link => {
-    link.addEventListener('click', () => {
+    link.addEventListener('click', function(e) {
       links.forEach(l => l.classList.remove('active'));
-      link.classList.add('active');
-      updateNavIndicator();
+      this.classList.add('active');
+      moveIndicator(this);
     });
   });
 
-  function updateNavIndicator() {
-    const activeLink = document.querySelector('.nav-link.active');
-    if (activeLink && indicator) {
-      indicator.style.left = activeLink.offsetLeft + 'px';
-      indicator.style.width = activeLink.offsetWidth + 'px';
-    }
+  function moveIndicator(el) {
+    if (!indicator || !el) return;
+    const rect = el.getBoundingClientRect();
+    const parentRect = el.parentElement.getBoundingClientRect();
+    indicator.style.width = `${rect.width}px`;
+    indicator.style.left = `${rect.left - parentRect.left}px`;
+    indicator.style.opacity = '1';
   }
 
-  setTimeout(updateNavIndicator, 300);
+  function updateNavIndicator() {
+    const fromTop = window.scrollY + 100;
+    links.forEach(link => {
+      const section = document.querySelector(link.getAttribute('href'));
+      if (section) {
+        if (section.offsetTop <= fromTop && section.offsetTop + section.offsetHeight > fromTop) {
+          links.forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+          moveIndicator(link);
+        }
+      }
+    });
+  }
+
+  const activeLink = document.querySelector('.nav-link.active');
+  if (activeLink) {
+    setTimeout(() => moveIndicator(activeLink), 400);
+  }
 }
 
-// 3. Typewriter Effect Logic
+// 3. Typewriter Effect
 function initTypewriter() {
-  const line1Element = document.getElementById('typewriter-line1');
-  const line2Element = document.getElementById('typewriter-line2');
-  if (!line1Element || !line2Element) return;
+  const line1El = document.getElementById('typewriter-line1');
+  const line2El = document.getElementById('typewriter-line2');
+  if (!line1El || !line2El) return;
 
-  const phrasePairs = [
-    { l1: "SAT Jewel — Bespoke", l2: "Fine Jewelry & Gold" },
-    { l1: "Where Timeless Craft Meets", l2: "GIA Certified Perfection" },
-    { l1: "Rare Gemstones &", l2: "AI Diamond Intelligence" }
-  ];
+  const phrase1 = "Mastery in Every Cut,";
+  const phrase2 = "Elegance in Every Carat.";
+  let i = 0;
+  let j = 0;
 
-  let pairIndex = 0;
-  let charIndex = 0;
-  let isDeleting = false;
-  let isLine1 = true;
-
-  function type() {
-    const currentPair = phrasePairs[pairIndex];
-    
-    if (isLine1) {
-      if (!isDeleting) {
-        line1Element.textContent = currentPair.l1.substring(0, charIndex + 1);
-        charIndex++;
-        if (charIndex === currentPair.l1.length) {
-          isLine1 = false;
-          charIndex = 0;
-          setTimeout(type, 300);
-          return;
-        }
-      }
+  function typeLine1() {
+    if (i < phrase1.length) {
+      line1El.textContent += phrase1.charAt(i);
+      i++;
+      setTimeout(typeLine1, 45);
     } else {
-      if (!isDeleting) {
-        line2Element.textContent = currentPair.l2.substring(0, charIndex + 1);
-        charIndex++;
-        if (charIndex === currentPair.l2.length) {
-          isDeleting = true;
-          setTimeout(type, 2500);
-          return;
-        }
-      } else {
-        line2Element.textContent = currentPair.l2.substring(0, charIndex - 1);
-        charIndex--;
-        if (charIndex === 0) {
-          line1Element.textContent = "";
-          isDeleting = false;
-          isLine1 = true;
-          pairIndex = (pairIndex + 1) % phrasePairs.length;
-          setTimeout(type, 400);
-          return;
-        }
-      }
+      setTimeout(typeLine2, 250);
     }
-
-    const speed = isDeleting ? 40 : 80;
-    setTimeout(type, speed);
   }
 
-  type();
+  function typeLine2() {
+    if (j < phrase2.length) {
+      line2El.textContent += phrase2.charAt(j);
+      j++;
+      setTimeout(typeLine2, 55);
+    }
+  }
+
+  setTimeout(typeLine1, 1200);
 }
 
 // 4. Hero Background Slider
 function initHeroSlider() {
   const images = document.querySelectorAll('.hero-slider img');
   if (images.length === 0) return;
+  let currentIdx = 0;
 
-  let currentIndex = 0;
   setInterval(() => {
-    images[currentIndex].classList.remove('active');
-    currentIndex = (currentIndex + 1) % images.length;
-    images[currentIndex].classList.add('active');
-  }, 5000);
+    images[currentIdx].classList.remove('active');
+    currentIdx = (currentIdx + 1) % images.length;
+    images[currentIdx].classList.add('active');
+  }, 6000);
 }
 
-// 5. Scroll Counters Animation
+// 5. Animated Number Counters
 function initCounters() {
-  const statNumbers = document.querySelectorAll('.stat-num');
+  const counters = document.querySelectorAll('.stat-num');
   let animated = false;
 
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting && !animated) {
         animated = true;
-        statNumbers.forEach(stat => {
-          const target = parseInt(stat.getAttribute('data-target') || '0', 10);
+        counters.forEach(stat => {
+          const target = parseInt(stat.getAttribute('data-target'), 10) || 0;
           const prefix = stat.getAttribute('data-prefix') || '';
           const suffix = stat.getAttribute('data-suffix') || '';
-          
+          const duration = 2000;
+          const stepTime = 30;
+          const steps = duration / stepTime;
+          const increment = target / steps;
           let current = 0;
-          const step = Math.max(1, Math.ceil(target / 40));
+
           const timer = setInterval(() => {
-            current += step;
+            current += increment;
             if (current >= target) {
               current = target;
               clearInterval(timer);
             }
-            stat.innerHTML = `${prefix}${current.toLocaleString()}<span class="stat-unit">${suffix}</span>`;
-          }, 40);
+            stat.innerHTML = `${prefix}${Math.floor(current).toLocaleString()}<span class="stat-unit">${suffix}</span>`;
+          }, stepTime);
         });
       }
     });
-  }, { threshold: 0.5 });
+  }, { threshold: 0.4 });
 
   const statsSection = document.getElementById('stats');
   if (statsSection) observer.observe(statsSection);
@@ -414,7 +370,7 @@ function initScrollReveals() {
   reveals.forEach(el => observer.observe(el));
 }
 
-// 7. Collection Listing Modal Logic
+// 7. Collection Listing Modal Logic (USD Pricing)
 function openCollectionModal(category) {
   const items = collectionData[category] || collectionData['rings'];
   const modal = document.getElementById('collectionModal');
@@ -434,16 +390,16 @@ function openCollectionModal(category) {
   };
 
   title.textContent = categoryTitles[category] || "Jewelry Collection";
-  subtitle.textContent = `Displaying ${items.length} GIA-certified designs in ${currentCurrency}.`;
+  subtitle.textContent = `Displaying ${items.length} GIA-certified designs in USD ($).`;
 
   grid.innerHTML = items.map(p => `
     <div class="product-card">
       <img src="${p.img}" class="product-thumb" alt="${p.name}" />
       <div class="product-name">${p.name}</div>
       <div class="product-spec">${p.spec}</div>
-      <div class="product-price">${formatPrice(p.priceINR)}</div>
-      <button class="btn-product-inquire" onclick="openCheckoutModal('${p.name}', ${p.priceINR}, '${p.img}')">
-        <i class="fa-solid fa-credit-card"></i> Buy / Inquire Now
+      <div class="product-price">${formatPrice(p.priceUSD)}</div>
+      <button class="btn-product-inquire" onclick="openCheckoutModal('${p.name}', ${p.priceUSD}, '${p.img}')">
+        <i class="fa-solid fa-credit-card"></i> Instant Checkout (USD)
       </button>
     </div>
   `).join('');
@@ -456,20 +412,19 @@ function closeCollectionModal() {
   if (modal) modal.classList.remove('show');
 }
 
-// 8. Checkout & Payment Modal Logic
+// 8. Instant USD Checkout & Payment Modal Logic
 let activeCheckoutProduct = null;
 
-function openCheckoutModal(name, priceINR, img) {
-  activeCheckoutProduct = { name, priceINR, img };
+function openCheckoutModal(name, priceUSD, img) {
+  activeCheckoutProduct = { name, priceUSD, img };
   const modal = document.getElementById('checkoutModal');
   if (!modal) return;
 
   document.getElementById('checkoutItemTitle').textContent = name;
   document.getElementById('checkoutItemImg').src = img;
   
-  const formatted = formatPrice(priceINR);
-  document.getElementById('checkoutItemPriceINR').textContent = formatted;
-  document.getElementById('checkoutItemPriceUSD').textContent = `Detected Region: ${userCountryName} (${currentCurrency})`;
+  const formatted = formatPrice(priceUSD);
+  document.getElementById('checkoutItemPriceUSD').textContent = formatted;
 
   modal.classList.add('show');
 }
@@ -479,23 +434,10 @@ function closeCheckoutModal() {
   if (modal) modal.classList.remove('show');
 }
 
-function switchPaymentTab(tab) {
-  document.querySelectorAll('.pay-tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.payment-pane').forEach(p => p.classList.remove('active'));
-
-  if (tab === 'usd') {
-    document.getElementById('tab-usd-btn').classList.add('active');
-    document.getElementById('pane-usd').classList.add('active');
-  } else {
-    document.getElementById('tab-inr-btn').classList.add('active');
-    document.getElementById('pane-inr').classList.add('active');
-  }
-}
-
 function processPayment(method) {
   if (!activeCheckoutProduct) return;
-  const formatted = formatPrice(activeCheckoutProduct.priceINR);
-  alert(`Payment Initiated via ${method.toUpperCase()}!\nProduct: ${activeCheckoutProduct.name}\nAmount: ${formatted}\n\nThank you for choosing SAT Jewel. Your concierge will confirm your order.`);
+  const formatted = formatPrice(activeCheckoutProduct.priceUSD);
+  alert(`Payment Initiated via ${method.toUpperCase()} in USD!\nItem: ${activeCheckoutProduct.name}\nTotal Amount: ${formatted} USD\n\nThank you for choosing SAT Jewel. Your GIA certificate & insured order are being processed.`);
   closeCheckoutModal();
 }
 
@@ -595,19 +537,6 @@ function closeAdmOnMobile() {
   }
 }
 
-function toggleAdmNotif(e) {
-  if (e) e.stopPropagation();
-  const notif = document.getElementById('admNotif');
-  if (notif) notif.classList.toggle('show');
-}
-
-function admMarkAllRead() {
-  const badge = document.getElementById('admBellBadge');
-  if (badge) badge.style.display = 'none';
-  alert('All notifications marked as read.');
-}
-
-// Period Switcher for Financial Revenue Chart (Weekly / Monthly / Yearly)
 function changeRevPeriod(period, btn) {
   if (btn) {
     const parent = btn.parentElement;
@@ -619,18 +548,18 @@ function changeRevPeriod(period, btn) {
   const revSubEl = document.getElementById('fbRevSub');
 
   if (period === 'weekly') {
-    if (revEl) revEl.textContent = '₹28,50,000';
-    if (revSubEl) revSubEl.textContent = "This week's gross earnings";
+    if (revEl) revEl.textContent = '$35,000';
+    if (revSubEl) revSubEl.textContent = "This week's gross earnings (USD)";
   } else if (period === 'monthly') {
-    if (revEl) revEl.textContent = '₹1,14,000,000';
-    if (revSubEl) revSubEl.textContent = "This month's gross earnings";
+    if (revEl) revEl.textContent = '$140,000';
+    if (revSubEl) revSubEl.textContent = "This month's gross earnings (USD)";
   } else if (period === 'yearly') {
-    if (revEl) revEl.textContent = '₹13,68,000,000';
-    if (revSubEl) revSubEl.textContent = "Annual gross earnings";
+    if (revEl) revEl.textContent = '$1,680,000';
+    if (revSubEl) revSubEl.textContent = "Annual gross earnings (USD)";
   }
 }
 
-// Refresh FarmBridge Admin Catalog Data Table
+// Refresh FarmBridge Admin Catalog Data Table (USD)
 function refreshFbAdminCatalogTable() {
   const tbody = document.getElementById('fbAdminCatalogBody');
   if (!tbody) return;
@@ -641,13 +570,13 @@ function refreshFbAdminCatalogTable() {
   Object.keys(collectionData).forEach(cat => {
     collectionData[cat].forEach(item => {
       totalCount++;
-      const priceFormatted = formatPrice(item.priceINR);
+      const priceFormatted = formatPrice(item.priceUSD);
       html += `
         <tr>
           <td><img src="${item.img}" style="width:42px;height:42px;border-radius:8px;object-fit:cover;" /></td>
-          <td><strong>${item.name}</strong><br/><small style="color:var(--taupe-beige);">${item.spec}</small></td>
+          <td><strong>${item.name}</strong><br/><small style="color:#64748b;">${item.spec}</small></td>
           <td><span class="badge-cat">${cat.toUpperCase()}</span></td>
-          <td><strong style="color:var(--champagne-gold);">${priceFormatted}</strong></td>
+          <td><strong style="color:#b45309;">${priceFormatted}</strong></td>
           <td><span class="badge-stock">In Stock</span></td>
           <td>
             <button class="btn-table-delete" onclick="deleteAdminItem('${cat}', '${item.id}')">
@@ -688,16 +617,16 @@ function handleFbAdminSearch() {
   if (listDiv) {
     if (matches.length > 0) {
       listDiv.innerHTML = matches.map(m => `
-        <div style="padding:8px;border-bottom:1px solid var(--border-glass);display:flex;align-items:center;justify-content:space-between;">
+        <div style="padding:8px;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;">
           <div>
             <strong>${m.name}</strong> (${m.category.toUpperCase()})<br/>
-            <small style="color:var(--taupe-beige);">${m.spec}</small>
+            <small style="color:#64748b;">${m.spec}</small>
           </div>
-          <span style="color:var(--champagne-gold);font-weight:700;">${formatPrice(m.priceINR)}</span>
+          <span style="color:#b45309;font-weight:700;">${formatPrice(m.priceUSD)}</span>
         </div>
       `).join('');
     } else {
-      listDiv.innerHTML = `<div style="padding:12px;color:var(--taupe-beige);">No items matched "${query}".</div>`;
+      listDiv.innerHTML = `<div style="padding:12px;color:#64748b;">No items matched "${query}".</div>`;
     }
   }
 
@@ -710,7 +639,7 @@ function handleAddNewProduct(event) {
   const category = document.getElementById('adminProdCat').value;
   const name = document.getElementById('adminProdName').value;
   const spec = document.getElementById('adminProdSpec').value;
-  const priceINR = parseInt(document.getElementById('adminProdPriceINR').value, 10);
+  const priceUSD = parseFloat(document.getElementById('adminProdPriceUSD').value) || 0;
   const imgSelect = document.getElementById('adminProdImgSelect').value;
   const customImg = document.getElementById('adminProdImgUrl').value;
 
@@ -720,14 +649,14 @@ function handleAddNewProduct(event) {
     id: `item_${Date.now()}`,
     name: name,
     spec: spec,
-    priceINR: priceINR,
+    priceUSD: priceUSD,
     img: finalImg
   };
 
   collectionData[category].unshift(newItem);
   saveCatalog();
 
-  alert(`✨ Success! "${name}" published to ${category.toUpperCase()} collection.\nIt is now live on the public storefront!`);
+  alert(`✨ Success! "${name}" published to ${category.toUpperCase()} collection for ${formatPrice(priceUSD)} USD.\nLive on storefront & database!`);
 
   document.getElementById('adminAddProductForm').reset();
   showFbAdminPage('catalog');
@@ -744,16 +673,6 @@ function deleteAdminItem(category, id) {
     collectionData[category] = collectionData[category].filter(i => i.id !== id);
     saveCatalog();
     refreshFbAdminCatalogTable();
-  }
-}
-
-function resetCatalogToDefault() {
-  if (confirm('Reset catalog to default original items?')) {
-    localStorage.removeItem('sat_catalog');
-    collectionData = JSON.parse(JSON.stringify(defaultCollectionData));
-    saveCatalog();
-    refreshFbAdminCatalogTable();
-    alert('Catalog reset to default items!');
   }
 }
 

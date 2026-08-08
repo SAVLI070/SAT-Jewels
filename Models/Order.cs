@@ -11,11 +11,11 @@ namespace SAT1.Models
 
         public decimal Amount { get; set; }
 
-        public string Currency { get; set; } = "INR";
+        public string Currency { get; set; } = "USD";
 
-        public string CustomerRegion { get; set; } = "India";
+        public string CustomerRegion { get; set; } = "United States";
 
-        public string PaymentMethod { get; set; } = "Credit Card";
+        public string PaymentMethod { get; set; } = "Credit Card (Stripe USD)";
 
         public string Status { get; set; } = "Pending GIA Dispatch";
 

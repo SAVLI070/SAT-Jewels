@@ -57,9 +57,9 @@ namespace SAT1.Controllers
             {
                 totalItems,
                 totalOrders,
-                revenueWeekly = "₹28,50,000",
+                revenueWeekly = "$35,000",
                 showroomsCount = 24,
-                portfolioValue = "₹500 Cr+"
+                portfolioValue = "$60M+"
             });
         }
     }

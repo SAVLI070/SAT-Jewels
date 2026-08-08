@@ -70,9 +70,9 @@
     </div>
 
     <div class="nav-actions">
-      <!-- Auto-Detected Location & Currency Badge -->
-      <div class="location-currency-badge" id="locationCurrencyBadge" title="Auto-detected location currency">
-        <span id="userFlag">🇮🇳</span> <span id="userCurrCode">INR (₹)</span>
+      <!-- Global USD Currency Badge -->
+      <div class="location-currency-badge" id="locationCurrencyBadge" title="Global Currency: USD ($)">
+        <span id="userFlag">🇺🇸</span> <span id="userCurrCode">USD ($)</span>
       </div>
 
       <!-- Single Clean Contact Us Button -->
@@ -89,31 +89,51 @@
 
 <!-- Mobile Drawer Menu -->
 <div class="mobile-menu" id="mobileMenu">
-  <a href="#hero" class="mobile-nav-link" onclick="toggleMenu()">
-    <i class="fa-solid fa-house"></i>
-    <span>Home</span>
+  <a href="#hero" class="mobile-link" onclick="toggleMenu()">
+    <i class="fa-solid fa-house"></i> Home
   </a>
-  <a href="#collections" class="mobile-nav-link" onclick="toggleMenu()">
-    <i class="fa-solid fa-gem"></i>
-    <span>Collections</span>
+  <a href="#collections" class="mobile-link" onclick="toggleMenu()">
+    <i class="fa-solid fa-gem"></i> Best Sellers
   </a>
-  <a href="#how-it-works" class="mobile-nav-link" onclick="toggleMenu()">
-    <i class="fa-solid fa-hammer"></i>
-    <span>Craft Process</span>
+  <a href="#process" class="mobile-link" onclick="toggleMenu()">
+    <i class="fa-solid fa-wand-magic-sparkles"></i> Craft Process
   </a>
-  <a href="#ai-features" class="mobile-nav-link" onclick="toggleMenu()">
-    <i class="fa-solid fa-chart-line"></i>
-    <span>AI Valuer</span>
+  <a href="#ai-features" class="mobile-link" onclick="toggleMenu()">
+    <i class="fa-solid fa-chart-line"></i> AI Valuer
   </a>
-  <a href="#why" class="mobile-nav-link" onclick="toggleMenu()">
-    <i class="fa-solid fa-shield-halved"></i>
-    <span>Why SAT Jewel</span>
+  <a href="#why" class="mobile-link" onclick="toggleMenu()">
+    <i class="fa-solid fa-shield-halved"></i> Why SAT Jewel
   </a>
-  <a href="#cta" class="mobile-nav-link" onclick="toggleMenu()">
-    <i class="fa-solid fa-envelope"></i>
-    <span>Contact Us</span>
-  </a>
+  <div style="padding: 16px 24px; border-top: 1px solid var(--border-glass); margin-top: 10px;">
+    <a href="#cta" class="btn-primary" onclick="toggleMenu()" style="width: 100%; justify-content: center;">
+      <i class="fa-solid fa-envelope"></i> Contact Us
+    </a>
+  </div>
 </div>
+
+<!-- STATS BAND (Global USD Metrics) -->
+<section id="stats">
+  <div class="container">
+    <div class="stats-band reveal">
+      <div class="stat-item">
+        <div class="stat-num" data-target="15000" data-suffix="+">0</div>
+        <div class="stat-label">Unique Bespoke Designs</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-target="99" data-suffix="%">0</div>
+        <div class="stat-label">GIA Grade Accuracy</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-target="60" data-prefix="$" data-suffix="M+">0</div>
+        <div class="stat-label">Diamond Portfolio Value</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num" data-target="24" data-suffix="+">0</div>
+        <div class="stat-label">Global Boutiques</div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- Hero Section -->
 <section id="hero">
@@ -505,141 +525,89 @@
     <div class="cta-box reveal">
       <h2 class="cta-title">Begin Your SAT Jewel Journey</h2>
       <p class="cta-sub">Schedule a private consultation with our Master Gemologists or explore our live 3D Studio.</p>
-      <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-        <a href="#" class="btn-hero-primary" onclick="alert('Contact Request Received! Our concierge will connect with you immediately.')">
-          <i class="fa-solid fa-envelope"></i> Contact Us Now
+      <h2 class="cta-title">Acquire Your Masterpiece</h2>
+      <p class="cta-sub">Consult with our master gemologists for bespoke designs, rare solitaire acquisitions, and portfolio curation.</p>
+      <div class="cta-buttons">
+        <a href="mailto:concierge@satjewels.com" class="btn-primary" style="padding:14px 32px;font-size:16px;">
+          <i class="fa-solid fa-calendar-check"></i> Book Private Viewing
         </a>
-        <a href="#" class="btn-ghost" onclick="alert('Redirecting to 3D Configurator Studio...')">
-          <i class="fa-solid fa-cubes"></i> Open 3D Studio
+        <a href="tel:+18005557285" class="btn-secondary" style="padding:14px 32px;font-size:16px;">
+          <i class="fa-solid fa-phone"></i> +1 (800) 555-SATJ
         </a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- COLLECTION LISTING MODAL -->
+<!-- PRODUCTS / COLLECTION VIEW MODAL -->
 <div class="collection-modal" id="collectionModal">
   <div class="modal-content">
-    <button class="modal-close-btn" onclick="closeCollectionModal()">&times;</button>
+    <button class="modal-close" onclick="closeCollectionModal()">&times;</button>
     <div class="modal-header">
-      <h2 class="modal-category-title" id="modalTitle">Collection Listing</h2>
-      <p id="modalSubtitle" style="color: var(--cream-surface);">Explore multiple options and GIA-certified designs.</p>
-
-      <div class="modal-filters">
-        <button class="filter-chip active">All Cuts</button>
-        <button class="filter-chip">18K Gold</button>
-        <button class="filter-chip">Platinum 950</button>
-        <button class="filter-chip">Solitaires</button>
-        <button class="filter-chip">GIA VVS1</button>
-      </div>
+      <span class="section-badge badge-gold">Certified Collection</span>
+      <h2 class="modal-category-title" id="modalTitle">Jewelry Collection</h2>
+      <p class="modal-sub" id="modalSubtitle">Displaying GIA-certified designs in USD ($).</p>
     </div>
-
     <div class="product-grid" id="productGrid">
-      <!-- Products dynamically injected via script.js -->
+      <!-- Injected Dynamically by JavaScript in USD -->
     </div>
   </div>
 </div>
 
-<!-- CHECKOUT MODAL -->
+<!-- CHECKOUT / INQUIRY PAYMENT MODAL (USD ($) Exclusively) -->
 <div class="collection-modal" id="checkoutModal">
-  <div class="modal-content" style="max-width: 650px;">
-    <button class="modal-close-btn" onclick="closeCheckoutModal()">&times;</button>
-    
-    <div class="modal-header" style="margin-bottom: 16px;">
-      <span class="section-badge badge-gold"><i class="fa-solid fa-lock"></i> Secure Gateway</span>
+  <div class="modal-content" style="max-width:540px;">
+    <button class="modal-close" onclick="closeCheckoutModal()">&times;</button>
+    <div class="modal-header">
+      <span class="section-badge badge-gold">Global USD Checkout</span>
       <h2 class="modal-category-title" style="margin-top:8px;">Instant Checkout</h2>
     </div>
 
     <!-- Price Summary Card -->
     <div class="price-summary-box">
       <div style="display:flex; align-items:center; gap:12px;">
-        <img id="checkoutItemImg" src="" style="width:50px;height:50px;border-radius:8px;object-fit:cover;" />
+        <img id="checkoutItemImg" src="" style="width:52px;height:52px;border-radius:10px;object-fit:cover;" />
         <div>
           <div id="checkoutItemTitle" style="font-family:var(--font-serif);font-weight:700;color:#fff;"></div>
           <div style="font-size:12px;color:var(--taupe-beige);">GIA Certified & Fully Insured</div>
         </div>
       </div>
       <div style="text-align:right;">
-        <div id="checkoutItemPriceINR" style="font-family:var(--font-serif);font-size:18px;font-weight:700;color:var(--champagne-gold);"></div>
-        <div id="checkoutItemPriceUSD" style="font-size:12px;color:var(--terracotta-light);"></div>
+        <div id="checkoutItemPriceUSD" style="font-family:var(--font-serif);font-size:22px;font-weight:700;color:var(--champagne-gold);">$0</div>
+        <div style="font-size:11px;color:var(--terracotta-light);font-weight:600;">USD International Transaction</div>
       </div>
     </div>
 
-    <!-- Payment Currency Tabs -->
-    <div class="payment-tabs">
-      <button class="pay-tab-btn active" id="tab-usd-btn" onclick="switchPaymentTab('usd')">
-        <i class="fa-solid fa-earth-americas"></i> International Card / SWIFT
-      </button>
-      <button class="pay-tab-btn" id="tab-inr-btn" onclick="switchPaymentTab('inr')">
-        <i class="fa-solid fa-indian-rupee-sign"></i> India Local UPI / NetBanking
-      </button>
-    </div>
-
-    <!-- USD Payment Pane -->
-    <div class="payment-pane active" id="pane-usd">
-      <p style="font-size:13px;color:var(--taupe-beige);margin-bottom:12px;">Select International Payment Gateway:</p>
+    <!-- USD International Payment Rails -->
+    <div style="margin-top: 18px;">
+      <p style="font-size:13px;color:var(--taupe-beige);margin-bottom:12px;">Select Secure Payment Gateway (USD):</p>
       <div class="payment-methods-grid">
-        <div class="pay-card" onclick="processPayment('Credit / Debit Card')">
+        <div class="pay-card" onclick="processPayment('Credit / Debit Card (Stripe USD)')">
           <i class="fa-solid fa-credit-card"></i>
           <div>
             <div class="pay-title">Credit / Debit Card</div>
-            <div class="pay-sub">Stripe Gateway (Visa, Mastercard, Amex)</div>
+            <div class="pay-sub">Stripe (Visa, Mastercard, Amex)</div>
           </div>
         </div>
-        <div class="pay-card" onclick="processPayment('PayPal')">
+        <div class="pay-card" onclick="processPayment('PayPal USD')">
           <i class="fa-brands fa-paypal"></i>
           <div>
-            <div class="pay-title">PayPal International</div>
-            <div class="pay-sub">One-click express checkout</div>
+            <div class="pay-title">PayPal Global</div>
+            <div class="pay-sub">One-click secure USD checkout</div>
           </div>
         </div>
         <div class="pay-card" onclick="processPayment('Apple / Google Pay')">
           <i class="fa-brands fa-apple"></i>
           <div>
             <div class="pay-title">Apple / Google Pay</div>
-            <div class="pay-sub">Biometric instant payment</div>
+            <div class="pay-sub">Biometric instant USD payment</div>
           </div>
         </div>
-        <div class="pay-card" onclick="processPayment('Bank Wire Escrow')">
+        <div class="pay-card" onclick="processPayment('SWIFT Bank Wire Escrow')">
           <i class="fa-solid fa-building-columns"></i>
           <div>
             <div class="pay-title">Bank Wire Escrow</div>
             <div class="pay-sub">Direct SWIFT transfer for high-carats</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- INR Payment Pane -->
-    <div class="payment-pane" id="pane-inr">
-      <p style="font-size:13px;color:var(--taupe-beige);margin-bottom:12px;">Select India Payment Rail:</p>
-      <div class="payment-methods-grid">
-        <div class="pay-card" onclick="processPayment('Instant UPI (GPay/PhonePe)')">
-          <i class="fa-solid fa-mobile-screen"></i>
-          <div>
-            <div class="pay-title">Instant UPI</div>
-            <div class="pay-sub">Google Pay, PhonePe, Paytm, BHIM</div>
-          </div>
-        </div>
-        <div class="pay-card" onclick="processPayment('Indian NetBanking')">
-          <i class="fa-solid fa-building-columns"></i>
-          <div>
-            <div class="pay-title">Indian NetBanking</div>
-            <div class="pay-sub">HDFC, ICICI, SBI, Axis, Kotak</div>
-          </div>
-        </div>
-        <div class="pay-card" onclick="processPayment('Domestic Cards')">
-          <i class="fa-solid fa-credit-card"></i>
-          <div>
-            <div class="pay-title">Rupay / Domestic Cards</div>
-            <div class="pay-sub">Zero surcharge domestic gateways</div>
-          </div>
-        </div>
-        <div class="pay-card" onclick="processPayment('No-Cost EMI')">
-          <i class="fa-solid fa-calendar-days"></i>
-          <div>
-            <div class="pay-title">No-Cost EMI</div>
-            <div class="pay-sub">3 to 12 months flexible installments</div>
           </div>
         </div>
       </div>

@@ -16,7 +16,7 @@ namespace SAT1.Models
         public string Spec { get; set; } = string.Empty;
 
         [Required]
-        public decimal PriceINR { get; set; }
+        public decimal PriceUSD { get; set; }
 
         public string ImageUrl { get; set; } = string.Empty;
 
