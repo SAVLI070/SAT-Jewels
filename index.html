@@ -701,7 +701,7 @@
         <div id="loginErrorMsg" style="display:none;color:#f87171;font-size:12px;margin-bottom:14px;text-align:center;font-weight:600;"></div>
 
         <button type="submit" class="btn-admin-submit" style="width:100%;">
-          <i class="fa-solid fa-right-to-bracket"></i> Authenticate & Open FarmBridge Admin
+          <i class="fa-solid fa-right-to-bracket"></i> Authenticate & Open Admin Portal
         </button>
 
         <div style="margin-top:16px;text-align:center;font-size:11px;color:var(--taupe-beige);background:rgba(212,178,112,0.1);padding:8px;border-radius:8px;border:1px solid var(--border-gold-soft);">
@@ -711,14 +711,14 @@
     </div>
   </div>
 
-  <!-- FARMBRIDGE-STYLE FULL ADMIN DASHBOARD PORTAL OVERLAY -->
+  <!-- FARMBRIDGE-STYLE FULL ADMIN DASHBOARD PORTAL OVERLAY (CLEAN WHITE THEME) -->
   <div id="farmbridgeAdminPortal">
     <!-- Left Sidebar (`adm-sidebar`) -->
     <aside class="adm-sidebar" id="admSidebar">
       <div class="adm-sidebar-logo">
-        <div class="sat-logo-emblem" style="width:36px;height:36px;">
+        <div class="sat-logo-emblem" style="width:36px;height:36px;background:#0f172a;border-color:#b45309;">
           <svg class="sat-monogram-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" stroke="#d4b270" stroke-width="3" fill="none" />
+            <path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" stroke="#fbbf24" stroke-width="3" fill="none" />
           </svg>
         </div>
         <span class="adm-sidebar-name">SAT <span>Jewel</span></span>
@@ -771,7 +771,7 @@
             <i class="fa-solid fa-bell"></i>
             <span class="bell-badge" id="admBellBadge">2</span>
           </button>
-          <button class="btn-ghost" style="padding:6px 14px;font-size:11px;" onclick="closeFbAdminPortal()">
+          <button class="btn-close-portal" onclick="closeFbAdminPortal()">
             <i class="fa-solid fa-xmark"></i> Close Portal
           </button>
           <div class="adm-avatar">A</div>
@@ -785,14 +785,14 @@
           <!-- Elastic-Style Search Wrapper -->
           <div class="search-wrapper">
             <div class="search-box">
-              <i class="fa-solid fa-magnifying-glass" style="color:var(--champagne-gold);margin-right:8px;"></i>
+              <i class="fa-solid fa-magnifying-glass" style="color:#64748b;margin-right:8px;"></i>
               <input type="text" id="globalSearchInput" class="search-input" placeholder="Search catalog items, GIA certificates, orders, or gemstones..." oninput="handleFbAdminSearch()" />
               <button class="search-btn" onclick="handleFbAdminSearch()">Search</button>
             </div>
             <div id="globalSearchResults" class="search-results" style="display:none;margin-top:10px;">
               <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
                 <strong><i class="fa-solid fa-magnifying-glass"></i> Search Results</strong>
-                <button onclick="document.getElementById('globalSearchResults').style.display='none'" style="background:none;border:none;color:white;cursor:pointer;">&times;</button>
+                <button onclick="document.getElementById('globalSearchResults').style.display='none'" style="background:none;border:none;color:#0f172a;cursor:pointer;font-weight:700;">&times;</button>
               </div>
               <div id="searchResultsList"></div>
             </div>
@@ -862,7 +862,7 @@
               </div>
               <div style="height:120px;">
                 <svg viewBox="0 0 400 120" style="width:100%;height:100%;">
-                  <path d="M0,90 C50,70 100,85 150,45 C200,10 250,55 300,30 C350,10 400,20 400,20" fill="none" stroke="#d4b270" stroke-width="3" />
+                  <path d="M0,90 C50,70 100,85 150,45 C200,10 250,55 300,30 C350,10 400,20 400,20" fill="none" stroke="#0f172a" stroke-width="3" />
                 </svg>
               </div>
             </div>
@@ -880,7 +880,7 @@
               </div>
               <div style="height:120px;">
                 <svg viewBox="0 0 400 120" style="width:100%;height:100%;">
-                  <path d="M0,100 C60,40 120,70 180,30 C240,80 300,20 400,10" fill="none" stroke="#a26046" stroke-width="3" />
+                  <path d="M0,100 C60,40 120,70 180,30 C240,80 300,20 400,10" fill="none" stroke="#b45309" stroke-width="3" />
                 </svg>
               </div>
             </div>
@@ -890,13 +890,13 @@
         <!-- 2. Jewelry Catalog Management Section -->
         <section class="adm-page-section" id="admSec-catalog">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <h2 style="font-family:var(--font-serif);color:var(--champagne-gold);">Live Jewelry Catalog Table</h2>
-            <button class="btn-primary" onclick="showFbAdminPage('add')">
+            <h2 style="font-family:var(--font-serif);color:#0f172a;">Live Jewelry Catalog Table</h2>
+            <button class="btn-admin-submit" onclick="showFbAdminPage('add')">
               <i class="fa-solid fa-plus"></i> + Add New Item
             </button>
           </div>
 
-          <div class="table-responsive" style="background:rgba(10,20,16,0.6);border:1px solid var(--border-gold-soft);border-radius:var(--radius-lg);padding:16px;">
+          <div class="table-responsive" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-lg);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
             <table class="admin-table">
               <thead>
                 <tr>
@@ -917,8 +917,8 @@
 
         <!-- 3. Add New Item Section -->
         <section class="adm-page-section" id="admSec-add">
-          <div style="max-width:700px;background:rgba(10,20,16,0.6);border:1px solid var(--border-gold);border-radius:var(--radius-xl);padding:28px;">
-            <h2 style="font-family:var(--font-serif);color:var(--champagne-gold);margin-bottom:16px;">+ Publish New Item to Live Store</h2>
+          <div style="max-width:700px;background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-xl);padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+            <h2 style="font-family:var(--font-serif);color:#0f172a;margin-bottom:16px;">+ Publish New Item to Live Store</h2>
             <form id="adminAddProductForm" onsubmit="handleAddNewProduct(event)">
               <div class="admin-form-grid">
                 <div class="form-group">
@@ -973,14 +973,14 @@
 
         <!-- 4. Market Intelligence Section -->
         <section class="adm-page-section" id="admSec-market">
-          <div style="background:rgba(10,20,16,0.6);border:1px solid var(--border-gold);border-radius:var(--radius-xl);padding:28px;">
-            <h2 style="font-family:var(--font-serif);color:var(--champagne-gold);margin-bottom:12px;">RAPAPORT Market Intelligence</h2>
-            <p style="color:var(--taupe-beige);margin-bottom:20px;">Live diamond bourse tracking across Antwerp, Mumbai, Tel Aviv, and New York.</p>
-            <div class="crop-row">
+          <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-xl);padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+            <h2 style="font-family:var(--font-serif);color:#0f172a;margin-bottom:12px;">RAPAPORT Market Intelligence</h2>
+            <p style="color:#64748b;margin-bottom:20px;">Live diamond bourse tracking across Antwerp, Mumbai, Tel Aviv, and New York.</p>
+            <div class="crop-row" style="background:#f8fafc;border-color:#e2e8f0;">
               <span class="crop-emoji">💎</span>
-              <span class="crop-name">Solitaire 1.5 Carat (VVS1, E)</span>
+              <span class="crop-name" style="color:#0f172a;">Solitaire 1.5 Carat (VVS1, E)</span>
               <span class="crop-trend up"><i class="fa-solid fa-arrow-trend-up"></i>+6.4%</span>
-              <span class="crop-price">₹12,40,000</span>
+              <span class="crop-price" style="color:#b45309;">₹12,40,000</span>
             </div>
           </div>
         </section>
@@ -990,23 +990,23 @@
 
   <!-- NOTIFICATION DRAWER -->
   <div class="adm-notif" id="admNotif">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border-glass);padding-bottom:10px;">
-      <span style="font-family:var(--font-serif);font-weight:700;color:var(--champagne-gold);">Notifications</span>
-      <button onclick="toggleAdmNotif(event)" style="background:none;border:none;color:white;cursor:pointer;">&times;</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid #e2e8f0;padding-bottom:10px;">
+      <span style="font-family:var(--font-serif);font-weight:700;color:#0f172a;">Notifications</span>
+      <button onclick="toggleAdmNotif(event)" style="background:none;border:none;color:#0f172a;cursor:pointer;font-size:18px;">&times;</button>
     </div>
-    <div style="font-size:12px;color:var(--taupe-beige);margin-bottom:14px;">
+    <div style="font-size:12px;color:#64748b;margin-bottom:14px;">
       📩 2 Unread Admin Messages
     </div>
-    <div style="background:rgba(212,178,112,0.1);padding:12px;border-radius:8px;margin-bottom:10px;font-size:12px;border:1px solid var(--border-gold-soft);">
+    <div style="background:#f1f5f9;padding:12px;border-radius:8px;margin-bottom:10px;font-size:12px;border:1px solid #e2e8f0;color:#0f172a;">
       <strong>New Order Placed</strong><br/>
       Customer from USA purchased Royal Solitaire Diamond Ring.
     </div>
-    <div style="background:rgba(212,178,112,0.1);padding:12px;border-radius:8px;font-size:12px;border:1px solid var(--border-gold-soft);">
+    <div style="background:#f1f5f9;padding:12px;border-radius:8px;font-size:12px;border:1px solid #e2e8f0;color:#0f172a;">
       <strong>GIA Certificate Verified</strong><br/>
       Certificate #GIA-884920 confirmed by Mumbai Bourse.
     </div>
     <div style="margin-top:20px;text-align:center;">
-      <button class="btn-ghost" onclick="admMarkAllRead()">Mark All Read</button>
+      <button class="btn-admin-submit" style="padding:6px 16px;font-size:12px;" onclick="admMarkAllRead()">Mark All Read</button>
     </div>
   </div>
 
