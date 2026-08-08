@@ -589,9 +589,28 @@ function showFbAdminPage(pageName) {
   if (titleEl) titleEl.textContent = pageTitles[pageName] || "Admin Dashboard";
 }
 
-function toggleAdmDrawer() {
+function toggleAdmDrawer(e) {
+  if (e) e.stopPropagation();
   const sidebar = document.getElementById('admSidebar');
-  if (sidebar) sidebar.classList.toggle('collapsed');
+  const backdrop = document.getElementById('admBackdrop');
+
+  if (!sidebar) return;
+
+  if (window.innerWidth <= 900) {
+    sidebar.classList.toggle('open');
+    if (backdrop) backdrop.classList.toggle('show');
+  } else {
+    sidebar.classList.toggle('collapsed');
+  }
+}
+
+function closeAdmOnMobile() {
+  if (window.innerWidth <= 900) {
+    const sidebar = document.getElementById('admSidebar');
+    const backdrop = document.getElementById('admBackdrop');
+    if (sidebar) sidebar.classList.remove('open');
+    if (backdrop) backdrop.classList.remove('show');
+  }
 }
 
 function toggleAdmNotif(e) {

@@ -4,16 +4,16 @@
 */
 
 :root {
-  /* Color Palette — Transparent Glass over Dark Backdrop for Landing Page */
-  --emerald-dark: rgba(15, 34, 27, 0.65);
-  --emerald-base: rgba(24, 51, 41, 0.7);
-  --emerald-card: rgba(15, 30, 24, 0.55);
-  --emerald-solid: rgba(20, 42, 33, 0.75);
-  --emerald-light: rgba(44, 92, 74, 0.8);
+  /* Color Palette — Royal Sapphire Blue & Champagne Gold Luxury Theme */
+  --emerald-dark: rgba(10, 24, 48, 0.75);
+  --emerald-base: rgba(16, 38, 74, 0.75);
+  --emerald-card: rgba(10, 22, 44, 0.65);
+  --emerald-solid: rgba(14, 30, 60, 0.85);
+  --emerald-light: rgba(28, 64, 128, 0.8);
 
-  --terracotta: #a26046;
-  --terracotta-dark: #7b422e;
-  --terracotta-light: #c27d63;
+  --terracotta: #2563eb;
+  --terracotta-dark: #1d4ed8;
+  --terracotta-light: #60a5fa;
 
   --champagne-gold: #d4b270;
   --gold-400: #e2ca94;
@@ -24,24 +24,24 @@
   --cream-surface: #f3eee7;
   --cream-muted: #d8cebe;
 
-  --burgundy: #541b1c;
-  --taupe-beige: #c5b8a5;
-  --onyx: #0a0e0c;
+  --burgundy: #1e3a8a;
+  --taupe-beige: #b0c4de;
+  --onyx: #040914;
 
-  /* Surface System — Glassmorphism */
+  /* Surface System — Sapphire Blue Glassmorphism */
   --bg-dark: transparent;
   --bg-surface: transparent;
   --bg-card: var(--emerald-card);
   --bg-card-solid: var(--emerald-solid);
-  --bg-glass: rgba(10, 20, 16, 0.55);
-  --bg-glass-strong: rgba(10, 20, 16, 0.75);
+  --bg-glass: rgba(8, 18, 36, 0.65);
+  --bg-glass-strong: rgba(8, 18, 36, 0.85);
 
   /* Glass Borders & Shadows */
   --border-gold: rgba(212, 178, 112, 0.45);
   --border-gold-soft: rgba(212, 178, 112, 0.25);
-  --border-glass: rgba(255, 255, 255, 0.18);
+  --border-glass: rgba(96, 165, 250, 0.22);
 
-  --shadow-card: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(212, 178, 112, 0.1);
+  --shadow-card: 0 12px 36px rgba(0, 0, 0, 0.7), 0 0 20px rgba(37, 99, 235, 0.18);
   --shadow-gold-glow: 0 0 35px rgba(212, 178, 112, 0.35);
   --shadow-hero: 0 25px 80px rgba(0, 0, 0, 0.85);
 
@@ -78,7 +78,7 @@
 html {
   scroll-behavior: smooth;
   font-family: var(--font-body);
-  background-color: #060d0a;
+  background-color: #040a18;
   color: var(--text-primary);
   overflow-x: hidden;
 }
@@ -142,8 +142,8 @@ a {
 #intro-overlay {
   position: fixed;
   inset: 0;
-  background: #060d0a;
   z-index: 9999;
+  background: radial-gradient(circle at center, #0e2040 0%, #040a18 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -170,18 +170,49 @@ a {
   pointer-events: none;
 }
 
+#intro-logo-container.intro-animating .sat-logo-emblem {
+  animation: emblemPulseGlow 1.8s infinite alternate ease-in-out;
+}
+
+#intro-logo-container.intro-animating .official-sat-logo-img {
+  animation: logoPulseShimmer 1.4s ease-in-out infinite alternate;
+}
+
+@keyframes logoPulseShimmer {
+  0% {
+    transform: scale(0.92);
+    filter: drop-shadow(0 0 8px rgba(212, 178, 112, 0.4));
+  }
+  100% {
+    transform: scale(1.08);
+    filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.9));
+  }
+}
+
+@keyframes emblemPulseGlow {
+  0% {
+    box-shadow: 0 0 20px rgba(212, 178, 112, 0.3), 0 0 40px rgba(212, 178, 112, 0.1);
+    border-color: #d4b270;
+  }
+  100% {
+    box-shadow: 0 0 50px rgba(212, 178, 112, 0.9), 0 0 100px rgba(245, 158, 11, 0.5);
+    border-color: #f8f5f0;
+  }
+}
+
 .sat-logo-emblem {
-  width: 58px;
-  height: 58px;
-  background: rgba(20, 42, 33, 0.85);
-  border: 2px solid var(--champagne-gold);
-  border-radius: 12px;
+  width: 72px;
+  height: 72px;
+  background: radial-gradient(circle, rgba(20, 42, 80, 0.95) 0%, rgba(8, 18, 36, 0.98) 100%);
+  border: 2.5 solid var(--champagne-gold);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 30px rgba(212, 178, 112, 0.35);
+  box-shadow: 0 0 35px rgba(212, 178, 112, 0.4);
   position: relative;
   overflow: hidden;
+  transition: width 0.4s ease, height 0.4s ease, border-radius 0.4s ease;
 }
 
 .sat-logo-emblem::after {
@@ -189,12 +220,14 @@ a {
   position: absolute;
   inset: 3px;
   border: 1px solid rgba(212, 178, 112, 0.4);
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
-.sat-monogram-svg {
-  width: 32px;
-  height: 32px;
+.official-sat-logo-img {
+  width: 80%;
+  height: 80%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(212, 178, 112, 0.6));
 }
 
 .sat-logo-text-wrap {
@@ -204,11 +237,12 @@ a {
 
 .sat-logo-brand {
   font-family: var(--font-serif);
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--cream-ivory);
   letter-spacing: 0.08em;
   line-height: 1;
+  white-space: nowrap;
 }
 
 .sat-logo-brand span {
@@ -217,12 +251,13 @@ a {
 }
 
 .sat-logo-tagline {
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 600;
   letter-spacing: 0.25em;
   color: var(--terracotta-light);
   text-transform: uppercase;
-  margin-top: 4px;
+  margin-top: 3px;
+  white-space: nowrap;
 }
 
 #intro-logo-container.nav-landed {
@@ -238,15 +273,17 @@ a {
   width: 42px;
   height: 42px;
   border-radius: 10px;
+  animation: none;
 }
 
-#intro-logo-container.nav-landed .sat-monogram-svg {
-  width: 24px;
-  height: 24px;
+#intro-logo-container.nav-landed .official-sat-logo-img {
+  animation: none;
+  width: 78%;
+  height: 78%;
 }
 
 #intro-logo-container.nav-landed .sat-logo-brand {
-  font-size: 20px;
+  font-size: 19px;
 }
 
 #intro-logo-container.nav-landed .sat-logo-tagline {
@@ -2278,6 +2315,58 @@ a {
   transform: translate(0);
 }
 
+/* Mobile Backdrop & Admin Drawer */
+.adm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 10040;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.adm-backdrop.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.adm-sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 26px;
+  color: #64748b;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.adm-sidebar-close-btn:hover {
+  color: #0f172a;
+}
+
+.adm-menu-btn {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-md);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  margin-right: 12px;
+}
+
+.adm-menu-btn:hover {
+  background: #e2e8f0;
+}
+
 /* RESPONSIVE MEDIA QUERIES */
 @media (max-width: 1100px) {
   .collections-grid { grid-template-columns: repeat(2, 1fr); }
@@ -2297,6 +2386,72 @@ a {
   }
   .stat-item::after { display: none; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Admin Mobile Off-Canvas Drawer (Fixes 60% sidebar cover issue) */
+  .adm-menu-btn {
+    display: inline-flex;
+  }
+
+  .adm-sidebar-close-btn {
+    display: block;
+  }
+
+  .adm-sidebar {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 280px !important;
+    max-width: 82vw !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    z-index: 10050 !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 6px 0 30px rgba(0, 0, 0, 0.15) !important;
+  }
+
+  .adm-sidebar.open {
+    transform: translateX(0) !important;
+  }
+
+  .adm-main {
+    width: 100% !important;
+    min-width: 100% !important;
+    margin-left: 0 !important;
+  }
+
+  .adm-topbar {
+    padding: 12px 16px !important;
+  }
+
+  .adm-page-title {
+    font-size: 18px !important;
+  }
+
+  .adm-content {
+    padding: 16px 14px !important;
+  }
+
+  .kpi-strip {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 12px !important;
+  }
+
+  .kpi-card {
+    padding: 14px 16px !important;
+  }
+
+  .kpi-val {
+    font-size: 20px !important;
+  }
+
+  .chart-card {
+    padding: 16px 14px !important;
+  }
+
+  .admin-form-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 @media (max-width: 768px) {
@@ -2316,5 +2471,14 @@ a {
   .footer-grid {
     grid-template-columns: 1fr;
   }
-  .kpi-strip { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 520px) {
+  .kpi-strip {
+    grid-template-columns: 1fr !important;
+  }
+
+  .adm-page-title {
+    font-size: 16px !important;
+  }
 }
