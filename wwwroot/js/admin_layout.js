@@ -412,6 +412,24 @@ function closeCollectionModal() {
   if (modal) modal.classList.remove('show');
 }
 
+// Global Modal Backdrop Click Handler (Closes modal when clicking anywhere outside)
+function handleModalBackdropClick(event, modalId) {
+  if (event.target.id === modalId || event.target.classList.contains('collection-modal')) {
+    const modal = document.getElementById(modalId) || event.target;
+    if (modal) modal.classList.remove('show');
+  }
+}
+
+// Global Escape Key & Window Outside Click Listeners
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    ['collectionModal', 'checkoutModal', 'loginModal'].forEach(id => {
+      const modal = document.getElementById(id);
+      if (modal) modal.classList.remove('show');
+    });
+  }
+});
+
 // 8. Instant USD Checkout & Payment Modal Logic
 let activeCheckoutProduct = null;
 

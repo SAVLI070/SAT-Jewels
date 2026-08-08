@@ -511,9 +511,9 @@
 </section>
 
 <!-- PRODUCTS / COLLECTION VIEW MODAL -->
-<div class="collection-modal" id="collectionModal">
+<div class="collection-modal" id="collectionModal" onclick="handleModalBackdropClick(event, 'collectionModal')">
   <div class="modal-content">
-    <button class="modal-close" onclick="closeCollectionModal()">&times;</button>
+    <button class="modal-close-btn" onclick="closeCollectionModal()" aria-label="Close">&times;</button>
     <div class="modal-header">
       <span class="section-badge badge-gold">Certified Collection</span>
       <h2 class="modal-category-title" id="modalTitle">Jewelry Collection</h2>
@@ -526,9 +526,9 @@
 </div>
 
 <!-- CHECKOUT / INQUIRY PAYMENT MODAL (USD ($) Exclusively) -->
-<div class="collection-modal" id="checkoutModal">
+<div class="collection-modal" id="checkoutModal" onclick="handleModalBackdropClick(event, 'checkoutModal')">
   <div class="modal-content" style="max-width:540px;">
-    <button class="modal-close" onclick="closeCheckoutModal()">&times;</button>
+    <button class="modal-close-btn" onclick="closeCheckoutModal()" aria-label="Close">&times;</button>
     <div class="modal-header">
       <span class="section-badge badge-gold">Global USD Checkout</span>
       <h2 class="modal-category-title" style="margin-top:8px;">Instant Checkout</h2>
@@ -587,9 +587,9 @@
 </div>
 
 <!-- CLIENT PORTAL AUTHENTICATION LOGIN MODAL -->
-<div class="collection-modal" id="loginModal">
+<div class="collection-modal" id="loginModal" onclick="handleModalBackdropClick(event, 'loginModal')">
   <div class="modal-content" style="max-width: 440px;">
-    <button class="modal-close-btn" onclick="closeLoginModal()">&times;</button>
+    <button class="modal-close-btn" onclick="closeLoginModal()" aria-label="Close">&times;</button>
 
     <div class="modal-header" style="text-align:center;margin-bottom:20px;">
       <div class="sat-logo-emblem" style="margin: 0 auto 12px; width:52px; height:52px;">
