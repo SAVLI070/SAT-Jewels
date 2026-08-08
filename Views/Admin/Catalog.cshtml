@@ -1,0 +1,29 @@
+@{
+    ViewData["Title"] = "Jewelry Catalog Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+  <h2 style="font-family:var(--font-serif);color:#0f172a;">Live Database Catalog Table</h2>
+  <a href="/Admin/AddProduct" class="btn-admin-submit">
+    <i class="fa-solid fa-plus"></i> + Add New Item
+  </a>
+</div>
+
+<div class="table-responsive" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-lg);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Image</th>
+        <th>Item Title & Spec</th>
+        <th>Category</th>
+        <th>Detected Price</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody id="fbAdminCatalogBody">
+      <!-- Dynamically populated -->
+    </tbody>
+  </table>
+</div>

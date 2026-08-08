@@ -1,0 +1,65 @@
+{
+  "Files": [
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/assets/bracelet_card.jpg",
+      "PackagePath": "staticwebassets/assets/bracelet_card.jpg"
+    },
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/assets/earring_card.jpg",
+      "PackagePath": "staticwebassets/assets/earring_card.jpg"
+    },
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/assets/hero_1.jpg",
+      "PackagePath": "staticwebassets/assets/hero_1.jpg"
+    },
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/assets/hero_2.jpg",
+      "PackagePath": "staticwebassets/assets/hero_2.jpg"
+    },
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/assets/hero_3.jpg",
+      "PackagePath": "staticwebassets/assets/hero_3.jpg"
+    },
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/assets/necklace_1.jpg",
+      "PackagePath": "staticwebassets/assets/necklace_1.jpg"
+    },
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/assets/ring_1.jpg",
+      "PackagePath": "staticwebassets/assets/ring_1.jpg"
+    },
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/css/admin_layout.css",
+      "PackagePath": "staticwebassets/css/admin_layout.css"
+    },
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/css/style.css",
+      "PackagePath": "staticwebassets/css/style.css"
+    },
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/js/admin_layout.js",
+      "PackagePath": "staticwebassets/js/admin_layout.js"
+    },
+    {
+      "Id": "/Users/sahil/Desktop/SAT1/wwwroot/js/script.js",
+      "PackagePath": "staticwebassets/js/script.js"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.SAT1.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.SAT1.props",
+      "PackagePath": "build\\SAT1.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.SAT1.props",
+      "PackagePath": "buildMultiTargeting\\SAT1.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.SAT1.props",
+      "PackagePath": "buildTransitive\\SAT1.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

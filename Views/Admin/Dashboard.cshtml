@@ -1,0 +1,92 @@
+@{
+    ViewData["Title"] = "Dashboard Overview";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<!-- FarmBridge KPI Strip -->
+<div class="kpi-strip">
+  <div class="kpi-card kpi-accent">
+    <div class="kpi-top">
+      <div class="kpi-lbl">Total Revenue</div>
+      <div>💰</div>
+    </div>
+    <div class="kpi-val" id="fbRevVal">₹28,50,000</div>
+    <div class="kpi-sub" id="fbRevSub">This week's gross earnings</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-top">
+      <div class="kpi-lbl">Active Store Items</div>
+      <div>💎</div>
+    </div>
+    <div class="kpi-val" id="fbKpiItems">11</div>
+    <div class="kpi-sub">Live in Database (SQLite)</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-top">
+      <div class="kpi-lbl">Global Showrooms</div>
+      <div>🏛️</div>
+    </div>
+    <div class="kpi-val">24</div>
+    <div class="kpi-sub">Boutiques active</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-top">
+      <div class="kpi-lbl">Today's Orders</div>
+      <div>📦</div>
+    </div>
+    <div class="kpi-val">14</div>
+    <div class="kpi-sub">GIA Dispatch pending</div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-top">
+      <div class="kpi-lbl">Portfolio Value</div>
+      <div>📈</div>
+    </div>
+    <div class="kpi-val">₹500 Cr+</div>
+    <div class="kpi-sub">GIA Carat Vault</div>
+  </div>
+</div>
+
+<!-- Revenue & Order Volume Charts -->
+<div class="chart-row">
+  <div class="chart-card">
+    <div class="chart-head">
+      <div>
+        <div class="chart-title">💰 Revenue Analytics Trajectory</div>
+        <div class="chart-sub">Financial highlights & carat sales</div>
+      </div>
+      <div class="period-toggle">
+        <button class="btn-pd active">Week</button>
+        <button class="btn-pd">Month</button>
+        <button class="btn-pd">Year</button>
+      </div>
+    </div>
+    <div style="height:120px;">
+      <svg viewBox="0 0 400 120" style="width:100%;height:100%;">
+        <path d="M0,90 C50,70 100,85 150,45 C200,10 250,55 300,30 C350,10 400,20 400,20" fill="none" stroke="#0f172a" stroke-width="3" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-head">
+      <div>
+        <div class="chart-title">📦 Carat Order Volume</div>
+        <div class="chart-sub">Units dispatched & demand trends</div>
+      </div>
+      <div class="period-toggle">
+        <button class="btn-pd active">Week</button>
+        <button class="btn-pd">Month</button>
+      </div>
+    </div>
+    <div style="height:120px;">
+      <svg viewBox="0 0 400 120" style="width:100%;height:100%;">
+        <path d="M0,100 C60,40 120,70 180,30 C240,80 300,20 400,10" fill="none" stroke="#b45309" stroke-width="3" />
+      </svg>
+    </div>
+  </div>
+</div>

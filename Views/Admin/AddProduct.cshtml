@@ -1,0 +1,57 @@
+@{
+    ViewData["Title"] = "Publish New Collection Item";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div style="max-width:700px;background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-xl);padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+  <h2 style="font-family:var(--font-serif);color:#0f172a;margin-bottom:16px;">+ Publish New Item to Live Store & Database</h2>
+  <form id="adminAddProductForm" onsubmit="handleAddNewProduct(event)">
+    <div class="admin-form-grid">
+      <div class="form-group">
+        <label class="form-label">Collection Category *</label>
+        <select id="adminProdCat" class="form-select" required>
+          <option value="rings">Rings Collection</option>
+          <option value="necklaces">Necklaces Section</option>
+          <option value="earrings">Earrings Section</option>
+          <option value="bracelets">Bracelets Section</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Item Title *</label>
+        <input type="text" id="adminProdName" class="form-input" placeholder="e.g. Royal Solitaire Emerald Ring" required />
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Metal & Diamond Specifications *</label>
+        <input type="text" id="adminProdSpec" class="form-input" placeholder="e.g. 18K Yellow Gold | 2.0ct GIA VVS1 | Brilliant Cut" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Price in INR (₹) *</label>
+        <input type="number" id="adminProdPriceINR" class="form-input" placeholder="e.g. 185000" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Preset Image Asset</label>
+        <select id="adminProdImgSelect" class="form-select">
+          <option value="assets/ring_1.jpg">Solitaire Ring (assets/ring_1.jpg)</option>
+          <option value="assets/necklace_1.jpg">Imperial Necklace (assets/necklace_1.jpg)</option>
+          <option value="assets/earring_card.jpg">Chandelier Earrings (assets/earring_card.jpg)</option>
+          <option value="assets/bracelet_card.jpg">Tennis Bracelet (assets/bracelet_card.jpg)</option>
+        </select>
+      </div>
+
+      <div class="form-group full-width">
+        <label class="form-label">Or Custom Image URL (Optional)</label>
+        <input type="url" id="adminProdImgUrl" class="form-input" placeholder="https://example.com/custom-ring.jpg" />
+      </div>
+    </div>
+
+    <div style="margin-top:20px;text-align:right;">
+      <button type="submit" class="btn-admin-submit">
+        <i class="fa-solid fa-paper-plane"></i> Save to SQLite Database & Publish Live
+      </button>
+    </div>
+  </form>
+</div>
