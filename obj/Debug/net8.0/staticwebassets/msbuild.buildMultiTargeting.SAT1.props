@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="../build/SAT1.props" />
-</Project>
