@@ -230,13 +230,30 @@ function updateCategoryCounts() {
   if (adminTotalEl) adminTotalEl.textContent = totalItems;
 }
 
-// 1. Logo Morph Animation
+// 1. Logo Morph Animation for First-Time Visitors
 function initLogoTransition() {
   const logoContainer = document.getElementById('intro-logo-container');
   const navSlot = document.querySelector('.nav-logo-slot');
   const overlay = document.getElementById('intro-overlay');
 
   if (!logoContainer || !navSlot) return;
+
+  const isFirstVisit = !sessionStorage.getItem('sat_visited');
+
+  if (!isFirstVisit) {
+    // Immediate placement into navbar for repeat visits within session
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.classList.add('fade-out');
+    }
+    navSlot.appendChild(logoContainer);
+    logoContainer.classList.add('nav-landed');
+    return;
+  }
+
+  // Set session flag so intro only plays on first visit
+  sessionStorage.setItem('sat_visited', 'true');
+  logoContainer.classList.add('intro-animating');
 
   setTimeout(() => {
     const logoRect = logoContainer.getBoundingClientRect();
@@ -253,10 +270,11 @@ function initLogoTransition() {
     setTimeout(() => {
       navSlot.appendChild(logoContainer);
       logoContainer.classList.add('nav-landed');
+      logoContainer.classList.remove('intro-animating');
       logoContainer.style.transform = '';
     }, 1200);
 
-  }, 1000);
+  }, 1400);
 }
 
 // 2. Navbar Scroll Shrink & Indicator Logic

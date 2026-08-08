@@ -142,8 +142,8 @@ a {
 #intro-overlay {
   position: fixed;
   inset: 0;
-  background: #060d0a;
   z-index: 9999;
+  background: radial-gradient(circle at center, #0f1c16 0%, #060d0a 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -168,6 +168,48 @@ a {
   gap: 14px;
   transition: transform 1.2s cubic-bezier(0.65, 0, 0.35, 1), opacity 0.6s ease;
   pointer-events: none;
+}
+
+#intro-logo-container.intro-animating .sat-logo-emblem {
+  animation: emblemPulseGlow 1.8s infinite alternate ease-in-out;
+}
+
+#intro-logo-container.intro-animating .sat-monogram-svg path {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: drawMonogram 1.4s ease-out forwards;
+}
+
+#intro-logo-container.intro-animating .sat-logo-text-wrap {
+  animation: textFadeIn 1.2s ease-out forwards;
+}
+
+@keyframes drawMonogram {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes emblemPulseGlow {
+  0% {
+    box-shadow: 0 0 20px rgba(212, 178, 112, 0.3), 0 0 40px rgba(212, 178, 112, 0.1);
+    border-color: #d4b270;
+  }
+  100% {
+    box-shadow: 0 0 45px rgba(212, 178, 112, 0.8), 0 0 90px rgba(212, 178, 112, 0.4);
+    border-color: #f8f5f0;
+  }
+}
+
+@keyframes textFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .sat-logo-emblem {
@@ -238,6 +280,7 @@ a {
   width: 42px;
   height: 42px;
   border-radius: 10px;
+  animation: none;
 }
 
 #intro-logo-container.nav-landed .sat-monogram-svg {
