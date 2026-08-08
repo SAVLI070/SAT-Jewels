@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SAT Jewel | Fine Jewelry & AI Diamond Intelligence</title>
+  
+  <!-- Meta Tags -->
+  <meta name="description" content="SAT Jewel — Luxury Fine Jewelry featuring GIA-certified diamonds, AI-driven market pricing, and bespoke 3D studio craftsmanship." />
+  <meta name="keywords" content="SAT Jewel, Jewellery, Diamonds, GIA Certified, Fine Jewelry, Gold, Engagement Rings, AI Valuation, Luxury" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <!-- Intro Animation Overlay -->
+  <div id="intro-overlay"></div>
+
+  <!-- Centered Logo that animates to Top-Left Navbar on Load -->
+  <div id="intro-logo-container">
+    <div class="sat-logo-emblem">
+      <svg class="sat-monogram-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" stroke="#d4b270" stroke-width="3" fill="none" />
+        <path d="M50 20 L75 35 L75 65 L50 80 L25 65 L25 35 Z" stroke="#d4b270" stroke-width="1.5" fill="none" opacity="0.6" />
+        <path d="M35 40 C35 32, 65 32, 65 42 C65 52, 35 48, 35 58 C35 68, 65 68, 65 60" stroke="#f8f5f0" stroke-width="4" stroke-linecap="round" fill="none" />
+        <path d="M50 25 L50 75" stroke="#d4b270" stroke-width="2.5" stroke-linecap="round" />
+        <path d="M30 35 L70 35" stroke="#d4b270" stroke-width="2.5" stroke-linecap="round" />
+      </svg>
+    </div>
+    <div class="sat-logo-text-wrap">
+      <div class="sat-logo-brand">SAT <span>Jewel</span></div>
+      <div class="sat-logo-tagline">Fine Jewelry</div>
+    </div>
+  </div>
+
+  <!-- FULL PAGE BACKGROUND IMAGE SLIDER -->
+  <div class="hero-slider-bg">
+    <div class="hero-slider">
+      <img class="active" src="assets/hero_1.jpg" alt="Model wearing SAT Jewel diamond necklace and ring" loading="eager" />
+      <img src="assets/hero_2.jpg" alt="Macro shot of sparkling raw crystals and gold" loading="lazy" />
+      <img src="assets/hero_3.jpg" alt="Macro raw diamonds and emerald crystals" loading="lazy" />
+      <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=1920&q=80&fm=jpg" alt="Solitaire diamond ring" loading="lazy" />
+    </div>
+    <div class="hero-image-overlay"></div>
+  </div>
+
+  <!-- Animated Background Orbs -->
+  <div class="page-bg" aria-hidden="true">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+    <div class="bg-orb bg-orb-3"></div>
+    <div class="bg-orb bg-orb-4"></div>
+  </div>
+
+  <!-- Navbar — Single Horizontal Line -->
+  <nav class="navbar" id="navbar">
+    <div class="container nav-inner">
+      <!-- Target Slot where centered logo lands -->
+      <div class="nav-logo-slot"></div>
+
+      <!-- Navigation Bar Links -->
+      <div class="nav-links">
+        <div class="nav-indicator"></div>
+        <a href="#hero" class="nav-link active">
+          <i class="fa-solid fa-house"></i>
+          <span>Home</span>
+        </a>
+        <a href="#collections" class="nav-link">
+          <i class="fa-solid fa-gem"></i>
+          <span>Collections</span>
+        </a>
+        <a href="#how-it-works" class="nav-link">
+          <i class="fa-solid fa-hammer"></i>
+          <span>Craft Process</span>
+        </a>
+        <a href="#ai-features" class="nav-link">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>AI Valuer</span>
+        </a>
+        <a href="#why" class="nav-link">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Why SAT Jewel</span>
+        </a>
+      </div>
+
+      <div class="nav-actions">
+        <!-- Auto-Detected Location & Currency Badge -->
+        <div class="location-currency-badge" id="locationCurrencyBadge" title="Auto-detected location currency">
+          <span id="userFlag">🇮🇳</span> <span id="userCurrCode">INR (₹)</span>
+        </div>
+
+        <!-- Single Clean Contact Us Button -->
+        <a href="#cta" class="btn-primary">
+          <i class="fa-solid fa-envelope"></i> Contact Us
+        </a>
+
+        <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Drawer Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#hero" class="mobile-nav-link" onclick="toggleMenu()">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="#collections" class="mobile-nav-link" onclick="toggleMenu()">
+      <i class="fa-solid fa-gem"></i>
+      <span>Collections</span>
+    </a>
+    <a href="#how-it-works" class="mobile-nav-link" onclick="toggleMenu()">
+      <i class="fa-solid fa-hammer"></i>
+      <span>Craft Process</span>
+    </a>
+    <a href="#ai-features" class="mobile-nav-link" onclick="toggleMenu()">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>AI Valuer</span>
+    </a>
+    <a href="#why" class="mobile-nav-link" onclick="toggleMenu()">
+      <i class="fa-solid fa-shield-halved"></i>
+      <span>Why SAT Jewel</span>
+    </a>
+    <a href="#cta" class="mobile-nav-link" onclick="toggleMenu()">
+      <i class="fa-solid fa-envelope"></i>
+      <span>Contact Us</span>
+    </a>
+  </div>
+
+  <!-- Hero Section -->
+  <section id="hero">
+    <div class="container hero-content-container">
+      <div class="hero-eyebrow">
+        <span class="section-badge badge-gold">
+          <i class="fa-solid fa-certificate"></i>
+          <span>GIA Certified Fine Jewelry</span>
+        </span>
+      </div>
+
+      <h1 class="hero-h1">
+        <span id="typewriter-line1" class="typewriter-line"></span><br />
+        <span id="typewriter-line2" class="typewriter-line accent-gold"></span>
+        <span class="typewriter-cursor">|</span>
+      </h1>
+
+      <p class="hero-sub">
+        Redefining luxury jewelry with AI-driven diamond valuation, conflict-free GIA certified gems, and bespoke 3D studio craftsmanship.
+      </p>
+
+      <div class="hero-ctas">
+        <a href="#collections" class="btn-hero-primary">
+          <i class="fa-solid fa-gem"></i>
+          <span>Explore SAT Collections</span>
+        </a>
+      </div>
+
+      <div class="hero-trust">
+        <div class="trust-avatars">
+          <div class="trust-avatar trust-avatar-gold">SAT</div>
+          <div class="trust-avatar trust-avatar-emerald">GIA</div>
+          <div class="trust-avatar">IGI</div>
+        </div>
+        <div class="trust-text">
+          Over <strong>12,000+</strong> Certified Diamonds Delivered
+        </div>
+        <div class="trust-divider"></div>
+        <div class="trust-item">
+          <i class="fa-solid fa-shield-check"></i>
+          <span>100% Conflict Free</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator">
+      <div class="mouse">
+        <div class="wheel"></div>
+      </div>
+      <span class="scroll-text">SCROLL TO EXPLORE</span>
+    </div>
+  </section>
+
+  <!-- Stats Band Section -->
+  <section id="stats">
+    <div class="container">
+      <div class="stats-band reveal">
+        <div class="stat-item">
+          <div class="stat-num" data-target="15000" data-suffix="+">0</div>
+          <div class="stat-label">Unique Bespoke Designs</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="99" data-suffix="%">0</div>
+          <div class="stat-label">GIA Grade Accuracy</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="500" data-prefix="₹" data-suffix="Cr+">0</div>
+          <div class="stat-label">Diamond Portfolio Value</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-num" data-target="24" data-suffix="+">0</div>
+          <div class="stat-label">Global Boutiques</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MOST SELLING COLLECTIONS SHOWCASE -->
+  <section id="collections">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-badge badge-gold">Best Sellers</span>
+        <h2 class="section-title">Most Selling Collections</h2>
+        <p class="section-sub">Click any category below to view our full catalog of GIA-certified rings, necklaces, earrings, and bracelets.</p>
+      </div>
+
+      <div class="collections-grid">
+        <!-- 1. Rings Section -->
+        <div class="collection-card reveal" onclick="openCollectionModal('rings')">
+          <div class="collection-img-wrap">
+            <img src="assets/ring_1.jpg" alt="Rings Collection" />
+            <span class="collection-card-badge">Top Selling</span>
+          </div>
+          <div class="collection-body">
+            <div class="collection-title">Rings Collection</div>
+            <div class="collection-count" id="count-rings">4 Listed Designs | Solitaires & Halos</div>
+            <div class="btn-explore-collection">
+              Explore Rings Listing <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Necklaces Section -->
+        <div class="collection-card reveal" style="transition-delay:0.1s" onclick="openCollectionModal('necklaces')">
+          <div class="collection-img-wrap">
+            <img src="assets/necklace_1.jpg" alt="Necklaces Collection" />
+            <span class="collection-card-badge">Popular</span>
+          </div>
+          <div class="collection-body">
+            <div class="collection-title">Necklaces Section</div>
+            <div class="collection-count" id="count-necklaces">3 Listed Designs | Chokers & Pendants</div>
+            <div class="btn-explore-collection">
+              Explore Necklaces Listing <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Earrings Section -->
+        <div class="collection-card reveal" style="transition-delay:0.2s" onclick="openCollectionModal('earrings')">
+          <div class="collection-img-wrap">
+            <img src="assets/earring_card.jpg" alt="Earrings Collection" />
+            <span class="collection-card-badge">Trending</span>
+          </div>
+          <div class="collection-body">
+            <div class="collection-title">Earrings Section</div>
+            <div class="collection-count" id="count-earrings">2 Listed Designs | Studs & Drops</div>
+            <div class="btn-explore-collection">
+              Explore Earrings Listing <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Bracelets Section -->
+        <div class="collection-card reveal" style="transition-delay:0.3s" onclick="openCollectionModal('bracelets')">
+          <div class="collection-img-wrap">
+            <img src="assets/bracelet_card.jpg" alt="Bracelets Collection" />
+            <span class="collection-card-badge">Featured</span>
+          </div>
+          <div class="collection-body">
+            <div class="collection-title">Bracelets Section</div>
+            <div class="collection-count" id="count-bracelets">2 Listed Designs | Tennis & Bangles</div>
+            <div class="btn-explore-collection">
+              Explore Bracelets Listing <i class="fa-solid fa-arrow-right"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works (Bespoke Crafting Process) -->
+  <section id="how-it-works">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-badge badge-terracotta">Master Craftsmanship</span>
+        <h2 class="section-title">Four Steps from Mine to Masterpiece</h2>
+        <p class="section-sub">Every gemstone is hand-selected, GIA verified, 3D modeled, and meticulously set by SAT Jewel master artisans.</p>
+      </div>
+
+      <div style="position:relative;">
+        <div class="how-connector"></div>
+        <div class="how-grid">
+          <div class="how-step reveal" style="transition-delay:0.1s">
+            <div class="how-step-num">
+              <i class="fa-solid fa-magnifying-glass-location how-step-icon"></i>
+            </div>
+            <div class="how-step-title">1. Discover & Select</div>
+            <div class="how-step-desc">Browse GIA-certified diamonds & rare colored gemstones with real-time AI valuation and RAPAPORT price tracking.</div>
+            <span class="how-step-badge">Step 1</span>
+          </div>
+
+          <div class="how-step reveal" style="transition-delay:0.2s">
+            <div class="how-step-num">
+              <i class="fa-solid fa-cube how-step-icon"></i>
+            </div>
+            <div class="how-step-title">2. 3D Custom Fitting</div>
+            <div class="how-step-desc">Customize your metal alloy (18K Gold, Platinum), diamond cut, and setting in our interactive 3D studio.</div>
+            <span class="how-step-badge">Step 2</span>
+          </div>
+
+          <div class="how-step reveal" style="transition-delay:0.3s">
+            <div class="how-step-num">
+              <i class="fa-solid fa-hammer how-step-icon"></i>
+            </div>
+            <div class="how-step-title">3. Artisan Handcrafting</div>
+            <div class="how-step-desc">Master jewelers forge, set, and polish your unique piece with traditional techniques and microscopic precision.</div>
+            <span class="how-step-badge">Step 3</span>
+          </div>
+
+          <div class="how-step reveal" style="transition-delay:0.4s">
+            <div class="how-step-num">
+              <i class="fa-solid fa-shield-heart how-step-icon"></i>
+            </div>
+            <div class="how-step-title">4. Insured Vault Delivery</div>
+            <div class="how-step-desc">Dispatched in tamper-proof security cases with digital blockchain provenance certificates and full transit insurance.</div>
+            <span class="how-step-badge">Step 4</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI Diamond Intelligence Section -->
+  <section id="ai-features">
+    <div class="container">
+      <div class="ai-grid">
+        <!-- Visual Mock Dashboard -->
+        <div class="ai-visual reveal-left">
+          <div class="ai-dashboard-mock">
+            <div class="ai-dash-header">
+              <div class="ai-dash-title">
+                <i class="fa-solid fa-robot"></i> RAPAPORT Live Carat Index
+              </div>
+              <div class="ai-dash-live">
+                <div class="status-dot"></div>
+                <span>Live Market Stream</span>
+              </div>
+            </div>
+
+            <!-- Sparkline Chart SVG -->
+            <div class="ai-chart-area">
+              <svg class="chart-svg" viewBox="0 0 400 130" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#d4b270" stop-opacity="0.4" />
+                    <stop offset="100%" stop-color="#d4b270" stop-opacity="0" />
+                  </linearGradient>
+                </defs>
+                <path d="M0,100 C30,85 60,65 100,55 C130,48 160,75 200,50 C240,25 270,18 310,30 C340,40 370,25 400,15" fill="none" stroke="#d4b270" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M0,100 C30,85 60,65 100,55 C130,48 160,75 200,50 C240,25 270,18 310,30 C340,40 370,25 400,15 L400,130 L0,130 Z" fill="url(#chartGrad)" />
+                <circle cx="200" cy="50" r="5" fill="#d4b270" stroke="white" stroke-width="2" />
+                <circle cx="310" cy="30" r="5" fill="#d4b270" stroke="white" stroke-width="2" />
+                <circle cx="400" cy="15" r="5" fill="#e2ca94" stroke="white" stroke-width="2" />
+              </svg>
+            </div>
+
+            <!-- Gemstone Ticker List -->
+            <div class="ai-crop-list">
+              <div class="crop-row">
+                <span class="crop-emoji">💎</span>
+                <span class="crop-name">Solitaire 1.5 Carat (VVS1, E)</span>
+                <span class="crop-trend up"><i class="fa-solid fa-arrow-trend-up"></i>+6.4%</span>
+                <span class="crop-price">₹12,40,000</span>
+              </div>
+              <div class="crop-row">
+                <span class="crop-emoji">🔷</span>
+                <span class="crop-name">Sapphire Royal Blue 2.0ct</span>
+                <span class="crop-trend up"><i class="fa-solid fa-arrow-trend-up"></i>+4.2%</span>
+                <span class="crop-price">₹8,50,000</span>
+              </div>
+              <div class="crop-row">
+                <span class="crop-emoji">🟢</span>
+                <span class="crop-name">Emerald Colombian 1.8ct</span>
+                <span class="crop-trend down"><i class="fa-solid fa-arrow-trend-down"></i>-1.2%</span>
+                <span class="crop-price">₹6,80,000</span>
+              </div>
+              <div class="crop-row">
+                <span class="crop-emoji">✨</span>
+                <span class="crop-name">Oval Diamond 2.2ct (IF, D)</span>
+                <span class="crop-trend up"><i class="fa-solid fa-arrow-trend-up"></i>+8.1%</span>
+                <span class="crop-price">₹22,10,000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Content Column -->
+        <div class="ai-content reveal-right">
+          <span class="section-badge badge-gold">AI Diamond Intelligence</span>
+          <h2 class="section-title" style="text-align:left;margin:12px 0 14px;">Precision Gemological Analytics</h2>
+          <p class="section-sub" style="text-align:left;max-width:100%;">Eliminating market opacity with machine-learning algorithms trained on over 500,000 GIA diamond auctions.</p>
+
+          <div class="ai-features-list">
+            <div class="ai-feat-item">
+              <div class="ai-feat-icon">
+                <i class="fa-solid fa-chart-pie"></i>
+              </div>
+              <div>
+                <div class="ai-feat-title">AI Diamond Market Price Predictor</div>
+                <div class="ai-feat-desc">Analyses market trends across international bourses to calculate fair carat pricing and future value trajectory.</div>
+              </div>
+            </div>
+
+            <div class="ai-feat-item">
+              <div class="ai-feat-icon">
+                <i class="fa-solid fa-sliders"></i>
+              </div>
+              <div>
+                <div class="ai-feat-title">Dynamic Custom Quote Estimator</div>
+                <div class="ai-feat-desc">Instant live quotes based on real-time gold spot prices, platinum weight, and setting complexity.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us Grid -->
+  <section id="why">
+    <div class="container">
+      <div class="section-header reveal">
+        <span class="section-badge badge-terracotta">The SAT Standard</span>
+        <h2 class="section-title">Why Choose SAT Jewel?</h2>
+        <p class="section-sub">Built upon a century of gemstone heritage and modern ethical transparency.</p>
+      </div>
+
+      <div class="why-grid">
+        <div class="why-card reveal" style="transition-delay:0.05s">
+          <div class="why-icon-wrap">
+            <i class="fa-solid fa-hand-holding-hand"></i>
+          </div>
+          <div class="why-title">100% Conflict Free</div>
+          <div class="why-desc">Ethically sourced directly from Kimberley Process compliant mines with full digital origin tracking.</div>
+          <div class="why-highlight">Kimberley Verified</div>
+        </div>
+
+        <div class="why-card reveal" style="transition-delay:0.1s">
+          <div class="why-icon-wrap">
+            <i class="fa-solid fa-award"></i>
+          </div>
+          <div class="why-title">GIA Triple Excellent</div>
+          <div class="why-desc">Only top 1% of diamonds evaluated for Cut, Polish, and Symmetry are selected for our fine jewelry collections.</div>
+          <div class="why-highlight">Top 1% Quality</div>
+        </div>
+
+        <div class="why-card reveal" style="transition-delay:0.15s">
+          <div class="why-icon-wrap">
+            <i class="fa-solid fa-infinity"></i>
+          </div>
+          <div class="why-title">Lifetime Warranty</div>
+          <div class="why-desc">Complimentary annual claw tightening, ultrasonic polishing, and size adjustments for life.</div>
+          <div class="why-highlight">Lifetime Care</div>
+        </div>
+
+        <div class="why-card reveal" style="transition-delay:0.2s">
+          <div class="why-icon-wrap">
+            <i class="fa-solid fa-coins"></i>
+          </div>
+          <div class="why-title">Direct Mine-To-Market</div>
+          <div class="why-desc">Eliminating middleman markups to offer unmatched value for high-carat certified gemstones.</div>
+          <div class="why-highlight">Unmatched Value</div>
+        </div>
+
+        <div class="why-card reveal" style="transition-delay:0.25s">
+          <div class="why-icon-wrap">
+            <i class="fa-solid fa-link"></i>
+          </div>
+          <div class="why-title">Blockchain Provenance</div>
+          <div class="why-desc">Immutable digital passport securing your diamond's grading report, ownership transfer, and origin.</div>
+          <div class="why-highlight">Digital Passport</div>
+        </div>
+
+        <div class="why-card reveal" style="transition-delay:0.3s">
+          <div class="why-icon-wrap">
+            <i class="fa-solid fa-building-columns"></i>
+          </div>
+          <div class="why-title">Private Showroom Access</div>
+          <div class="why-desc">VIP appointments in our Geneva, London, Paris, and Mumbai private showrooms with expert gemologists.</div>
+          <div class="why-highlight">VIP Showrooms</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Craftsmanship Tech Stack Band -->
+  <section id="tech">
+    <div class="container">
+      <div class="tech-band reveal">
+        <div>
+          <div class="tech-intro-title">Enterprise Craft Specs</div>
+          <div class="tech-intro-sub">Standards of perfection powering our 3D Studio & Diamond Exchange.</div>
+        </div>
+        <div class="tech-stack-grid">
+          <div class="tech-pill"><span class="tech-pill-icon"><i class="fa-solid fa-certificate"></i></span> GIA & IGI Certified</div>
+          <div class="tech-pill"><span class="tech-pill-icon"><i class="fa-solid fa-crown"></i></span> 18K Solid Gold & Platinum 950</div>
+          <div class="tech-pill"><span class="tech-pill-icon"><i class="fa-solid fa-cube"></i></span> Real-time WebGL 3D Configurator</div>
+          <div class="tech-pill"><span class="tech-pill-icon"><i class="fa-solid fa-shield"></i></span> Blockchain Digital Passport</div>
+          <div class="tech-pill"><span class="tech-pill-icon"><i class="fa-solid fa-truck-fast"></i></span> Malca-Amit Armed Transit</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section id="cta">
+    <div class="container">
+      <div class="cta-box reveal">
+        <h2 class="cta-title">Begin Your SAT Jewel Journey</h2>
+        <p class="cta-sub">Schedule a private consultation with our Master Gemologists or explore our live 3D Studio.</p>
+        <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
+          <a href="#" class="btn-hero-primary" onclick="alert('Contact Request Received! Our concierge will connect with you immediately.')">
+            <i class="fa-solid fa-envelope"></i> Contact Us Now
+          </a>
+          <a href="#" class="btn-ghost" onclick="alert('Redirecting to 3D Configurator Studio...')">
+            <i class="fa-solid fa-cubes"></i> Open 3D Studio
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COLLECTION LISTING MODAL -->
+  <div class="collection-modal" id="collectionModal">
+    <div class="modal-content">
+      <button class="modal-close-btn" onclick="closeCollectionModal()">&times;</button>
+      <div class="modal-header">
+        <h2 class="modal-category-title" id="modalTitle">Collection Listing</h2>
+        <p id="modalSubtitle" style="color: var(--cream-surface);">Explore multiple options and GIA-certified designs.</p>
+
+        <div class="modal-filters">
+          <button class="filter-chip active">All Cuts</button>
+          <button class="filter-chip">18K Gold</button>
+          <button class="filter-chip">Platinum 950</button>
+          <button class="filter-chip">Solitaires</button>
+          <button class="filter-chip">GIA VVS1</button>
+        </div>
+      </div>
+
+      <div class="product-grid" id="productGrid">
+        <!-- Products dynamically injected via script.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MODAL -->
+  <div class="collection-modal" id="checkoutModal">
+    <div class="modal-content" style="max-width: 650px;">
+      <button class="modal-close-btn" onclick="closeCheckoutModal()">&times;</button>
+      
+      <div class="modal-header" style="margin-bottom: 16px;">
+        <span class="section-badge badge-gold"><i class="fa-solid fa-lock"></i> Secure Gateway</span>
+        <h2 class="modal-category-title" style="margin-top:8px;">Instant Checkout</h2>
+      </div>
+
+      <!-- Price Summary Card -->
+      <div class="price-summary-box">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img id="checkoutItemImg" src="" style="width:50px;height:50px;border-radius:8px;object-fit:cover;" />
+          <div>
+            <div id="checkoutItemTitle" style="font-family:var(--font-serif);font-weight:700;color:#fff;"></div>
+            <div style="font-size:12px;color:var(--taupe-beige);">GIA Certified & Fully Insured</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div id="checkoutItemPriceINR" style="font-family:var(--font-serif);font-size:18px;font-weight:700;color:var(--champagne-gold);"></div>
+          <div id="checkoutItemPriceUSD" style="font-size:12px;color:var(--terracotta-light);"></div>
+        </div>
+      </div>
+
+      <!-- Payment Currency Tabs -->
+      <div class="payment-tabs">
+        <button class="pay-tab-btn active" id="tab-usd-btn" onclick="switchPaymentTab('usd')">
+          <i class="fa-solid fa-earth-americas"></i> International Card / SWIFT
+        </button>
+        <button class="pay-tab-btn" id="tab-inr-btn" onclick="switchPaymentTab('inr')">
+          <i class="fa-solid fa-indian-rupee-sign"></i> India Local UPI / NetBanking
+        </button>
+      </div>
+
+      <!-- USD Payment Pane -->
+      <div class="payment-pane active" id="pane-usd">
+        <p style="font-size:13px;color:var(--taupe-beige);margin-bottom:12px;">Select International Payment Gateway:</p>
+        <div class="payment-methods-grid">
+          <div class="pay-card" onclick="processPayment('Credit / Debit Card')">
+            <i class="fa-solid fa-credit-card"></i>
+            <div>
+              <div class="pay-title">Credit / Debit Card</div>
+              <div class="pay-sub">Stripe Gateway (Visa, Mastercard, Amex)</div>
+            </div>
+          </div>
+          <div class="pay-card" onclick="processPayment('PayPal')">
+            <i class="fa-brands fa-paypal"></i>
+            <div>
+              <div class="pay-title">PayPal International</div>
+              <div class="pay-sub">One-click express checkout</div>
+            </div>
+          </div>
+          <div class="pay-card" onclick="processPayment('Apple / Google Pay')">
+            <i class="fa-brands fa-apple"></i>
+            <div>
+              <div class="pay-title">Apple / Google Pay</div>
+              <div class="pay-sub">Biometric instant payment</div>
+            </div>
+          </div>
+          <div class="pay-card" onclick="processPayment('Bank Wire Escrow')">
+            <i class="fa-solid fa-building-columns"></i>
+            <div>
+              <div class="pay-title">Bank Wire Escrow</div>
+              <div class="pay-sub">Direct SWIFT transfer for high-carats</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INR Payment Pane -->
+      <div class="payment-pane" id="pane-inr">
+        <p style="font-size:13px;color:var(--taupe-beige);margin-bottom:12px;">Select India Payment Rail:</p>
+        <div class="payment-methods-grid">
+          <div class="pay-card" onclick="processPayment('Instant UPI (GPay/PhonePe)')">
+            <i class="fa-solid fa-mobile-screen"></i>
+            <div>
+              <div class="pay-title">Instant UPI</div>
+              <div class="pay-sub">Google Pay, PhonePe, Paytm, BHIM</div>
+            </div>
+          </div>
+          <div class="pay-card" onclick="processPayment('Indian NetBanking')">
+            <i class="fa-solid fa-building-columns"></i>
+            <div>
+              <div class="pay-title">Indian NetBanking</div>
+              <div class="pay-sub">HDFC, ICICI, SBI, Axis, Kotak</div>
+            </div>
+          </div>
+          <div class="pay-card" onclick="processPayment('Domestic Cards')">
+            <i class="fa-solid fa-credit-card"></i>
+            <div>
+              <div class="pay-title">Rupay / Domestic Cards</div>
+              <div class="pay-sub">Zero surcharge domestic gateways</div>
+            </div>
+          </div>
+          <div class="pay-card" onclick="processPayment('No-Cost EMI')">
+            <i class="fa-solid fa-calendar-days"></i>
+            <div>
+              <div class="pay-title">No-Cost EMI</div>
+              <div class="pay-sub">3 to 12 months flexible installments</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLIENT PORTAL AUTHENTICATION LOGIN MODAL -->
+  <div class="collection-modal" id="loginModal">
+    <div class="modal-content" style="max-width: 440px;">
+      <button class="modal-close-btn" onclick="closeLoginModal()">&times;</button>
+
+      <div class="modal-header" style="text-align:center;margin-bottom:20px;">
+        <div class="sat-logo-emblem" style="margin: 0 auto 12px; width:52px; height:52px;">
+          <svg class="sat-monogram-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" stroke="#d4b270" stroke-width="3" fill="none" />
+            <path d="M35 40 C35 32, 65 32, 65 42 C65 52, 35 48, 35 58 C35 68, 65 68, 65 60" stroke="#f8f5f0" stroke-width="4" stroke-linecap="round" fill="none" />
+          </svg>
+        </div>
+        <h2 class="modal-category-title" style="font-size:24px;margin-bottom:6px;">Client Portal Access</h2>
+        <p style="font-size:13px;color:var(--taupe-beige);">Enter client administrator credentials to access the FarmBridge Admin Portal.</p>
+      </div>
+
+      <form id="adminLoginForm" onsubmit="handleAdminLogin(event)">
+        <div class="form-group" style="margin-bottom:14px;">
+          <label class="form-label">Username / Admin Email *</label>
+          <input type="text" id="loginUser" class="form-input" placeholder="admin" required />
+        </div>
+
+        <div class="form-group" style="margin-bottom:18px;">
+          <label class="form-label">Password *</label>
+          <input type="password" id="loginPass" class="form-input" placeholder="••••••••" required />
+        </div>
+
+        <div id="loginErrorMsg" style="display:none;color:#f87171;font-size:12px;margin-bottom:14px;text-align:center;font-weight:600;"></div>
+
+        <button type="submit" class="btn-admin-submit" style="width:100%;">
+          <i class="fa-solid fa-right-to-bracket"></i> Authenticate & Open FarmBridge Admin
+        </button>
+
+        <div style="margin-top:16px;text-align:center;font-size:11px;color:var(--taupe-beige);background:rgba(212,178,112,0.1);padding:8px;border-radius:8px;border:1px solid var(--border-gold-soft);">
+          Demo Credentials: <strong>admin</strong> | Password: <strong>admin123</strong>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FARMBRIDGE-STYLE FULL ADMIN DASHBOARD PORTAL OVERLAY -->
+  <div id="farmbridgeAdminPortal">
+    <!-- Left Sidebar (`adm-sidebar`) -->
+    <aside class="adm-sidebar" id="admSidebar">
+      <div class="adm-sidebar-logo">
+        <div class="sat-logo-emblem" style="width:36px;height:36px;">
+          <svg class="sat-monogram-svg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 10 L85 30 L85 70 L50 90 L15 70 L15 30 Z" stroke="#d4b270" stroke-width="3" fill="none" />
+          </svg>
+        </div>
+        <span class="adm-sidebar-name">SAT <span>Jewel</span></span>
+      </div>
+      <div class="adm-role-badge">Admin</div>
+
+      <ul class="adm-nav">
+        <li>
+          <a class="adm-nav-link active" id="admNav-overview" onclick="showFbAdminPage('overview')">
+            <i class="fa-solid fa-chart-pie"></i> <span>Overview</span>
+          </a>
+        </li>
+        <li>
+          <a class="adm-nav-link" id="admNav-catalog" onclick="showFbAdminPage('catalog')">
+            <i class="fa-solid fa-gem"></i> <span>Jewelry Catalog</span>
+          </a>
+        </li>
+        <li>
+          <a class="adm-nav-link" id="admNav-add" onclick="showFbAdminPage('add')">
+            <i class="fa-solid fa-circle-plus"></i> <span>Add New Item</span>
+          </a>
+        </li>
+        <li>
+          <a class="adm-nav-link" id="admNav-market" onclick="showFbAdminPage('market')">
+            <i class="fa-solid fa-chart-line"></i> <span>Market Intelligence</span>
+          </a>
+        </li>
+      </ul>
+
+      <div class="adm-sidebar-foot">
+        <a onclick="logout()" class="adm-nav-link adm-logout">
+          <i class="fa-solid fa-right-from-bracket"></i> <span>Logout</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area (`adm-main`) -->
+    <div class="adm-main">
+      <!-- Topbar (`adm-topbar`) -->
+      <header class="adm-topbar">
+        <div class="adm-topbar-left">
+          <button class="adm-menu-btn" onclick="toggleAdmDrawer()" title="Toggle Drawer">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <h1 class="adm-page-title" id="admPageTitle">Dashboard Overview</h1>
+        </div>
+
+        <div class="adm-topbar-right">
+          <button class="bell-button" onclick="toggleAdmNotif(event)">
+            <i class="fa-solid fa-bell"></i>
+            <span class="bell-badge" id="admBellBadge">2</span>
+          </button>
+          <button class="btn-ghost" style="padding:6px 14px;font-size:11px;" onclick="closeFbAdminPortal()">
+            <i class="fa-solid fa-xmark"></i> Close Portal
+          </button>
+          <div class="adm-avatar">A</div>
+        </div>
+      </header>
+
+      <!-- Page Section Container (`adm-content`) -->
+      <main class="adm-content">
+        <!-- 1. Overview Section -->
+        <section class="adm-page-section active" id="admSec-overview">
+          <!-- Elastic-Style Search Wrapper -->
+          <div class="search-wrapper">
+            <div class="search-box">
+              <i class="fa-solid fa-magnifying-glass" style="color:var(--champagne-gold);margin-right:8px;"></i>
+              <input type="text" id="globalSearchInput" class="search-input" placeholder="Search catalog items, GIA certificates, orders, or gemstones..." oninput="handleFbAdminSearch()" />
+              <button class="search-btn" onclick="handleFbAdminSearch()">Search</button>
+            </div>
+            <div id="globalSearchResults" class="search-results" style="display:none;margin-top:10px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+                <strong><i class="fa-solid fa-magnifying-glass"></i> Search Results</strong>
+                <button onclick="document.getElementById('globalSearchResults').style.display='none'" style="background:none;border:none;color:white;cursor:pointer;">&times;</button>
+              </div>
+              <div id="searchResultsList"></div>
+            </div>
+          </div>
+
+          <!-- FarmBridge KPI Strip -->
+          <div class="kpi-strip">
+            <div class="kpi-card kpi-accent">
+              <div class="kpi-top">
+                <div class="kpi-lbl">Total Revenue</div>
+                <div>💰</div>
+              </div>
+              <div class="kpi-val" id="fbRevVal">₹28,50,000</div>
+              <div class="kpi-sub" id="fbRevSub">This week's gross earnings</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <div class="kpi-lbl">Active Store Items</div>
+                <div>💎</div>
+              </div>
+              <div class="kpi-val" id="fbKpiItems">11</div>
+              <div class="kpi-sub">Live on storefront</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <div class="kpi-lbl">Global Showrooms</div>
+                <div>🏛️</div>
+              </div>
+              <div class="kpi-val">24</div>
+              <div class="kpi-sub">Boutiques active</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <div class="kpi-lbl">Today's Orders</div>
+                <div>📦</div>
+              </div>
+              <div class="kpi-val">14</div>
+              <div class="kpi-sub">GIA Dispatch pending</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-top">
+                <div class="kpi-lbl">Portfolio Value</div>
+                <div>📈</div>
+              </div>
+              <div class="kpi-val">₹500 Cr+</div>
+              <div class="kpi-sub">GIA Carat Vault</div>
+            </div>
+          </div>
+
+          <!-- Revenue & Order Volume Charts -->
+          <div class="chart-row">
+            <div class="chart-card">
+              <div class="chart-head">
+                <div>
+                  <div class="chart-title">💰 Revenue Analytics Trajectory</div>
+                  <div class="chart-sub">Financial highlights & carat sales</div>
+                </div>
+                <div class="period-toggle">
+                  <button class="btn-pd active" onclick="changeRevPeriod('weekly', this)">Week</button>
+                  <button class="btn-pd" onclick="changeRevPeriod('monthly', this)">Month</button>
+                  <button class="btn-pd" onclick="changeRevPeriod('yearly', this)">Year</button>
+                </div>
+              </div>
+              <div style="height:120px;">
+                <svg viewBox="0 0 400 120" style="width:100%;height:100%;">
+                  <path d="M0,90 C50,70 100,85 150,45 C200,10 250,55 300,30 C350,10 400,20 400,20" fill="none" stroke="#d4b270" stroke-width="3" />
+                </svg>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-head">
+                <div>
+                  <div class="chart-title">📦 Carat Order Volume</div>
+                  <div class="chart-sub">Units dispatched & demand trends</div>
+                </div>
+                <div class="period-toggle">
+                  <button class="btn-pd active">Week</button>
+                  <button class="btn-pd">Month</button>
+                </div>
+              </div>
+              <div style="height:120px;">
+                <svg viewBox="0 0 400 120" style="width:100%;height:100%;">
+                  <path d="M0,100 C60,40 120,70 180,30 C240,80 300,20 400,10" fill="none" stroke="#a26046" stroke-width="3" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Jewelry Catalog Management Section -->
+        <section class="adm-page-section" id="admSec-catalog">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <h2 style="font-family:var(--font-serif);color:var(--champagne-gold);">Live Jewelry Catalog Table</h2>
+            <button class="btn-primary" onclick="showFbAdminPage('add')">
+              <i class="fa-solid fa-plus"></i> + Add New Item
+            </button>
+          </div>
+
+          <div class="table-responsive" style="background:rgba(10,20,16,0.6);border:1px solid var(--border-gold-soft);border-radius:var(--radius-lg);padding:16px;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Item Title & Spec</th>
+                  <th>Category</th>
+                  <th>Detected Price</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="fbAdminCatalogBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 3. Add New Item Section -->
+        <section class="adm-page-section" id="admSec-add">
+          <div style="max-width:700px;background:rgba(10,20,16,0.6);border:1px solid var(--border-gold);border-radius:var(--radius-xl);padding:28px;">
+            <h2 style="font-family:var(--font-serif);color:var(--champagne-gold);margin-bottom:16px;">+ Publish New Item to Live Store</h2>
+            <form id="adminAddProductForm" onsubmit="handleAddNewProduct(event)">
+              <div class="admin-form-grid">
+                <div class="form-group">
+                  <label class="form-label">Collection Category *</label>
+                  <select id="adminProdCat" class="form-select" required>
+                    <option value="rings">Rings Collection</option>
+                    <option value="necklaces">Necklaces Section</option>
+                    <option value="earrings">Earrings Section</option>
+                    <option value="bracelets">Bracelets Section</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Item Title *</label>
+                  <input type="text" id="adminProdName" class="form-input" placeholder="e.g. Royal Solitaire Emerald Ring" required />
+                </div>
+
+                <div class="form-group full-width">
+                  <label class="form-label">Metal & Diamond Specifications *</label>
+                  <input type="text" id="adminProdSpec" class="form-input" placeholder="e.g. 18K Yellow Gold | 2.0ct GIA VVS1 | Brilliant Cut" required />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Price in INR (₹) *</label>
+                  <input type="number" id="adminProdPriceINR" class="form-input" placeholder="e.g. 185000" required />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Preset Image Asset</label>
+                  <select id="adminProdImgSelect" class="form-select">
+                    <option value="assets/ring_1.jpg">Solitaire Ring (assets/ring_1.jpg)</option>
+                    <option value="assets/necklace_1.jpg">Imperial Necklace (assets/necklace_1.jpg)</option>
+                    <option value="assets/earring_card.jpg">Chandelier Earrings (assets/earring_card.jpg)</option>
+                    <option value="assets/bracelet_card.jpg">Tennis Bracelet (assets/bracelet_card.jpg)</option>
+                  </select>
+                </div>
+
+                <div class="form-group full-width">
+                  <label class="form-label">Or Custom Image URL (Optional)</label>
+                  <input type="url" id="adminProdImgUrl" class="form-input" placeholder="https://example.com/custom-ring.jpg" />
+                </div>
+              </div>
+
+              <div style="margin-top:20px;text-align:right;">
+                <button type="submit" class="btn-admin-submit">
+                  <i class="fa-solid fa-paper-plane"></i> Publish Item Live to User Store
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- 4. Market Intelligence Section -->
+        <section class="adm-page-section" id="admSec-market">
+          <div style="background:rgba(10,20,16,0.6);border:1px solid var(--border-gold);border-radius:var(--radius-xl);padding:28px;">
+            <h2 style="font-family:var(--font-serif);color:var(--champagne-gold);margin-bottom:12px;">RAPAPORT Market Intelligence</h2>
+            <p style="color:var(--taupe-beige);margin-bottom:20px;">Live diamond bourse tracking across Antwerp, Mumbai, Tel Aviv, and New York.</p>
+            <div class="crop-row">
+              <span class="crop-emoji">💎</span>
+              <span class="crop-name">Solitaire 1.5 Carat (VVS1, E)</span>
+              <span class="crop-trend up"><i class="fa-solid fa-arrow-trend-up"></i>+6.4%</span>
+              <span class="crop-price">₹12,40,000</span>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- NOTIFICATION DRAWER -->
+  <div class="adm-notif" id="admNotif">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;border-bottom:1px solid var(--border-glass);padding-bottom:10px;">
+      <span style="font-family:var(--font-serif);font-weight:700;color:var(--champagne-gold);">Notifications</span>
+      <button onclick="toggleAdmNotif(event)" style="background:none;border:none;color:white;cursor:pointer;">&times;</button>
+    </div>
+    <div style="font-size:12px;color:var(--taupe-beige);margin-bottom:14px;">
+      📩 2 Unread Admin Messages
+    </div>
+    <div style="background:rgba(212,178,112,0.1);padding:12px;border-radius:8px;margin-bottom:10px;font-size:12px;border:1px solid var(--border-gold-soft);">
+      <strong>New Order Placed</strong><br/>
+      Customer from USA purchased Royal Solitaire Diamond Ring.
+    </div>
+    <div style="background:rgba(212,178,112,0.1);padding:12px;border-radius:8px;font-size:12px;border:1px solid var(--border-gold-soft);">
+      <strong>GIA Certificate Verified</strong><br/>
+      Certificate #GIA-884920 confirmed by Mumbai Bourse.
+    </div>
+    <div style="margin-top:20px;text-align:center;">
+      <button class="btn-ghost" onclick="admMarkAllRead()">Mark All Read</button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="sat-logo-text-wrap">
+            <div class="sat-logo-brand">SAT <span>Jewel</span></div>
+            <div class="sat-logo-tagline">Fine Jewelry</div>
+          </div>
+          <p>SAT Jewel represents the pinnacle of luxury jewelry design, ethical diamond sourcing, and cutting-edge 3D craftsmanship.</p>
+          
+          <!-- Admin Client Portal Link right after SAT Jewel Description -->
+          <a href="#" class="admin-footer-link" onclick="openClientPortalLogin(event)">
+            <i class="fa-solid fa-user-shield"></i> Admin
+          </a>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Fine Collections</div>
+          <div class="footer-links">
+            <a href="#" onclick="openCollectionModal('rings')">Rings Collection</a>
+            <a href="#" onclick="openCollectionModal('necklaces')">Necklaces & Pendants</a>
+            <a href="#" onclick="openCollectionModal('earrings')">Earrings Collection</a>
+            <a href="#" onclick="openCollectionModal('bracelets')">Bracelets & Bangles</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Services & AI</div>
+          <div class="footer-links">
+            <a href="#">AI Diamond Valuation</a>
+            <a href="#">3D Configurator Studio</a>
+            <a href="#">GIA Certificate Check</a>
+          </div>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Global Showrooms</div>
+          <div class="footer-links">
+            <a href="#">Geneva — Rue du Rhône</a>
+            <a href="#">London — Bond Street</a>
+            <a href="#">Paris — Place Vendôme</a>
+            <a href="#">Mumbai — BKC Financial Centre</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 SAT Jewel Fine Jewelry Inc. All rights reserved. Kimberley Process Compliant.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script -->
+  <script src="script.js"></script>
+</body>
+
+</html>
