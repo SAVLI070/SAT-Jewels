@@ -438,13 +438,13 @@ function openCollectionModal(category) {
   subtitle.textContent = `Displaying ${items.length} GIA-certified designs in USD ($).`;
 
   grid.innerHTML = items.map(p => `
-    <div class="product-card">
+    <div class="product-card" onclick="window.location.href='/Product/Details/${p.id}'" style="cursor:pointer;">
       <img src="${p.img}" class="product-thumb" alt="${p.name}" />
       <div class="product-name">${p.name}</div>
       <div class="product-spec">${p.spec}</div>
       <div class="product-price">${formatPrice(p.priceUSD)}</div>
-      <button class="btn-product-inquire" onclick="openCheckoutModal('${p.name}', ${p.priceUSD}, '${p.img}')">
-        <i class="fa-solid fa-credit-card"></i> Instant Checkout (USD)
+      <button class="btn-product-buy" onclick="event.stopPropagation(); window.location.href='/Product/Details/${p.id}'">
+        <i class="fa-solid fa-bag-shopping"></i> Buy Now
       </button>
     </div>
   `).join('');

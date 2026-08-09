@@ -1622,6 +1622,30 @@ a {
   margin-bottom: 14px;
 }
 
+.btn-product-buy {
+  width: 100%;
+  padding: 10px 0;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
+  color: #060d0a;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 16px rgba(212, 178, 112, 0.35);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-product-buy:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(212, 178, 112, 0.6);
+  background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
+}
+
 .btn-product-inquire {
   width: 100%;
   padding: 8px 0;
