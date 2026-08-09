@@ -125,8 +125,24 @@ using (var scope = app.Services.CreateScope())
                 new CatalogItem { Id = "ring_2", Name = "Halo Cushion Cut Engagement Ring", CategoryId = "rings", Spec = "Platinum 950 | 2.0ct Halo Setting | IF Clarity", PriceUSD = 2900, ImageUrl = "assets/ring_angle.png", GalleryImages = "assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png" },
                 new CatalogItem { Id = "neck_1", Name = "Imperial Diamond Floral Pendant", CategoryId = "necklaces", Spec = "18K Yellow Gold | Marquise & Pear Cut Diamonds", PriceUSD = 4200, ImageUrl = "assets/necklace_1.jpg", GalleryImages = "assets/necklace_1.jpg,assets/ring_clarity.png,assets/ring_model.png" },
                 new CatalogItem { Id = "ear_1", Name = "Chandelier Diamond Drop Earrings", CategoryId = "earrings", Spec = "18K Gold | 2.2ct Triple Drop Diamonds", PriceUSD = 2500, ImageUrl = "assets/earring_card.jpg", GalleryImages = "assets/earring_card.jpg,assets/ring_clarity.png,assets/ring_model.png" },
-                new CatalogItem { Id = "brac_1", Name = "Classic Diamond Tennis Bracelet", CategoryId = "bracelets", Spec = "Platinum 950 | 5.0ct Total Weight | Round Cut", PriceUSD = 4700, ImageUrl = "assets/bracelet_card.jpg", GalleryImages = "assets/bracelet_card.jpg,assets/ring_clarity.png,assets/ring_model.png" }
+                new CatalogItem { Id = "brac_1", Name = "Classic Diamond Tennis Bracelet", CategoryId = "bracelets", Spec = "Platinum 950 | 5.0ct Total Weight | Round Cut", PriceUSD = 4700, ImageUrl = "assets/bracelet_card.jpg", GalleryImages = "assets/bracelet_card.jpg,assets/ring_whitegold.png,assets/ring_clarity.png,assets/ring_model.png" }
             );
+            db.SaveChanges();
+        }
+
+        // Seed Admin User Credentials into Database (admin@satjewel.com / admin123)
+        if (!db.Users.Any(u => u.Email == "admin@satjewel.com" || u.Role == "Admin"))
+        {
+            db.Users.Add(new User
+            {
+                Id = "admin_seed_1",
+                FullName = "SAT Administrator",
+                Email = "admin@satjewel.com",
+                Phone = "1234567890",
+                Password = "admin123",
+                Role = "Admin",
+                CreatedAt = DateTime.UtcNow
+            });
             db.SaveChanges();
         }
     }

@@ -5,6 +5,18 @@ using SAT1.Models;
 
 namespace SAT1.BAL
 {
+    public class CategoryAdminDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Badge { get; set; } = string.Empty;
+        public string Subtitle { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+        public int DisplayOrder { get; set; }
+        public bool IsActive { get; set; }
+        public int ItemCount { get; set; }
+    }
+
     public class CatalogBal
     {
         private readonly SatJewelDbContext _context;
@@ -14,7 +26,6 @@ namespace SAT1.BAL
             _context = context;
         }
 
-        // OWASP A03: Input Sanitization Helper
         private string Sanitize(string? input)
         {
             if (string.IsNullOrWhiteSpace(input)) return string.Empty;
@@ -29,7 +40,7 @@ namespace SAT1.BAL
                 .ToListAsync();
         }
 
-        public async Task<List<object>> GetAdminCategoriesAsync()
+        public async Task<List<CategoryAdminDto>> GetAdminCategoriesAsync()
         {
             var categories = await _context.Categories
                 .OrderBy(c => c.DisplayOrder)
@@ -37,20 +48,20 @@ namespace SAT1.BAL
 
             var items = await _context.CatalogItems.ToListAsync();
 
-            var result = new List<object>();
+            var result = new List<CategoryAdminDto>();
             foreach (var c in categories)
             {
                 var count = items.Count(i => i.CategoryId.Equals(c.Id, StringComparison.OrdinalIgnoreCase));
-                result.Add(new
+                result.Add(new CategoryAdminDto
                 {
-                    id = c.Id,
-                    name = c.Name,
-                    badge = c.Badge,
-                    subtitle = c.Subtitle,
-                    imageUrl = c.ImageUrl,
-                    displayOrder = c.DisplayOrder,
-                    isActive = c.IsActive,
-                    itemCount = count
+                    Id = c.Id,
+                    Name = c.Name,
+                    Badge = c.Badge,
+                    Subtitle = c.Subtitle,
+                    ImageUrl = c.ImageUrl,
+                    DisplayOrder = c.DisplayOrder,
+                    IsActive = c.IsActive,
+                    ItemCount = count
                 });
             }
 
@@ -144,8 +155,6 @@ namespace SAT1.BAL
             return true;
         }
 
-        // OWASP A01 & A04: Authoritative Server-Side Price Calculation & Verification
-        // Prevents price tampering by calculating the price exclusively from PostgreSQL database values
         public async Task<(bool isValid, decimal serverValidatedPrice, string itemName, string errorMessage)> CalculateServerValidatedPriceAsync(string itemId, string? selectedMetal, string? selectedCarat)
         {
             var item = await GetCatalogItemByIdAsync(itemId);
@@ -167,7 +176,6 @@ namespace SAT1.BAL
         {
             if (string.IsNullOrWhiteSpace(optionText)) return 0;
 
-            // Look for patterns like (+150), (-100), (+0), (+1200)
             var match = Regex.Match(optionText, @"\(([\+\-]\d+)\)");
             if (match.Success && decimal.TryParse(match.Groups[1].Value, out decimal delta))
             {
