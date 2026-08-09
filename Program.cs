@@ -92,13 +92,13 @@ using (var scope = app.Services.CreateScope())
 
         db.Database.ExecuteSqlRaw(createTablesSql);
 
-        // Update existing Neon PostgreSQL catalog items with multi-angle gallery image paths
+        // Update existing Neon PostgreSQL catalog items with multi-angle gallery image paths & unguessable IDs
         var updateGallerySql = @"
-            UPDATE ""CatalogItems"" SET ""ImageUrl"" = 'assets/ring_main.png', ""GalleryImages"" = 'assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'ring_1';
-            UPDATE ""CatalogItems"" SET ""ImageUrl"" = 'assets/ring_angle.png', ""GalleryImages"" = 'assets/ring_angle.png,assets/ring_whitegold.png,assets/ring_rosegold.png,assets/ring_model.png' WHERE ""Id"" = 'ring_2';
-            UPDATE ""CatalogItems"" SET ""ImageUrl"" = 'assets/necklace_main.png', ""GalleryImages"" = 'assets/necklace_main.png,assets/necklace_detail.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'neck_1';
-            UPDATE ""CatalogItems"" SET ""ImageUrl"" = 'assets/earring_main.png', ""GalleryImages"" = 'assets/earring_main.png,assets/necklace_detail.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'ear_1';
-            UPDATE ""CatalogItems"" SET ""ImageUrl"" = 'assets/bracelet_main.png', ""GalleryImages"" = 'assets/bracelet_main.png,assets/ring_whitegold.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'brac_1';
+            UPDATE ""CatalogItems"" SET ""Id"" = 'sat-prod-8f3a9b2c1d4e', ""ImageUrl"" = 'assets/ring_main.png', ""GalleryImages"" = 'assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'ring_1';
+            UPDATE ""CatalogItems"" SET ""Id"" = 'sat-prod-7c9e6679425a', ""ImageUrl"" = 'assets/ring_angle.png', ""GalleryImages"" = 'assets/ring_angle.png,assets/ring_whitegold.png,assets/ring_rosegold.png,assets/ring_model.png' WHERE ""Id"" = 'ring_2';
+            UPDATE ""CatalogItems"" SET ""Id"" = 'sat-prod-4b2a9f1c8e3d', ""ImageUrl"" = 'assets/necklace_main.png', ""GalleryImages"" = 'assets/necklace_main.png,assets/necklace_detail.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'neck_1';
+            UPDATE ""CatalogItems"" SET ""Id"" = 'sat-prod-3f8d2b1a9c4e', ""ImageUrl"" = 'assets/earring_main.png', ""GalleryImages"" = 'assets/earring_main.png,assets/necklace_detail.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'ear_1';
+            UPDATE ""CatalogItems"" SET ""Id"" = 'sat-prod-9e4a2c1b8f3d', ""ImageUrl"" = 'assets/bracelet_main.png', ""GalleryImages"" = 'assets/bracelet_main.png,assets/ring_whitegold.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'brac_1';
         ";
 
         try {
@@ -117,15 +117,15 @@ using (var scope = app.Services.CreateScope())
             db.SaveChanges();
         }
 
-        // Seed initial items if empty
+        // Seed initial items if empty (OWASP A01: Cryptographically Unguessable Product IDs)
         if (!db.CatalogItems.Any())
         {
             db.CatalogItems.AddRange(
-                new CatalogItem { Id = "ring_1", Name = "Royal Solitaire Diamond Ring", CategoryId = "rings", Spec = "18K Gold | 1.5ct GIA VVS1, E Color | Brilliant Cut", PriceUSD = 2200, ImageUrl = "assets/ring_main.png", GalleryImages = "assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png" },
-                new CatalogItem { Id = "ring_2", Name = "Halo Cushion Cut Engagement Ring", CategoryId = "rings", Spec = "Platinum 950 | 2.0ct Halo Setting | IF Clarity", PriceUSD = 2900, ImageUrl = "assets/ring_angle.png", GalleryImages = "assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png" },
-                new CatalogItem { Id = "neck_1", Name = "Imperial Diamond Floral Pendant", CategoryId = "necklaces", Spec = "18K Yellow Gold | Marquise & Pear Cut Diamonds", PriceUSD = 4200, ImageUrl = "assets/necklace_1.jpg", GalleryImages = "assets/necklace_1.jpg,assets/ring_clarity.png,assets/ring_model.png" },
-                new CatalogItem { Id = "ear_1", Name = "Chandelier Diamond Drop Earrings", CategoryId = "earrings", Spec = "18K Gold | 2.2ct Triple Drop Diamonds", PriceUSD = 2500, ImageUrl = "assets/earring_card.jpg", GalleryImages = "assets/earring_card.jpg,assets/ring_clarity.png,assets/ring_model.png" },
-                new CatalogItem { Id = "brac_1", Name = "Classic Diamond Tennis Bracelet", CategoryId = "bracelets", Spec = "Platinum 950 | 5.0ct Total Weight | Round Cut", PriceUSD = 4700, ImageUrl = "assets/bracelet_card.jpg", GalleryImages = "assets/bracelet_card.jpg,assets/ring_whitegold.png,assets/ring_clarity.png,assets/ring_model.png" }
+                new CatalogItem { Id = "sat-prod-8f3a9b2c1d4e", Name = "Royal Solitaire Diamond Ring", CategoryId = "rings", Spec = "18K Gold | 1.5ct GIA VVS1, E Color | Brilliant Cut", PriceUSD = 2200, ImageUrl = "assets/ring_main.png", GalleryImages = "assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png" },
+                new CatalogItem { Id = "sat-prod-7c9e6679425a", Name = "Halo Cushion Cut Engagement Ring", CategoryId = "rings", Spec = "Platinum 950 | 2.0ct Halo Setting | IF Clarity", PriceUSD = 2900, ImageUrl = "assets/ring_angle.png", GalleryImages = "assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png" },
+                new CatalogItem { Id = "sat-prod-4b2a9f1c8e3d", Name = "Imperial Diamond Floral Pendant", CategoryId = "necklaces", Spec = "18K Yellow Gold | Marquise & Pear Cut Diamonds", PriceUSD = 4200, ImageUrl = "assets/necklace_1.jpg", GalleryImages = "assets/necklace_1.jpg,assets/ring_clarity.png,assets/ring_model.png" },
+                new CatalogItem { Id = "sat-prod-3f8d2b1a9c4e", Name = "Chandelier Diamond Drop Earrings", CategoryId = "earrings", Spec = "18K Gold | 2.2ct Triple Drop Diamonds", PriceUSD = 2500, ImageUrl = "assets/earring_card.jpg", GalleryImages = "assets/earring_card.jpg,assets/ring_clarity.png,assets/ring_model.png" },
+                new CatalogItem { Id = "sat-prod-9e4a2c1b8f3d", Name = "Classic Diamond Tennis Bracelet", CategoryId = "bracelets", Spec = "Platinum 950 | 5.0ct Total Weight | Round Cut", PriceUSD = 4700, ImageUrl = "assets/bracelet_card.jpg", GalleryImages = "assets/bracelet_card.jpg,assets/ring_whitegold.png,assets/ring_clarity.png,assets/ring_model.png" }
             );
             db.SaveChanges();
         }

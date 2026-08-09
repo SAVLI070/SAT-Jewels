@@ -16,28 +16,37 @@ namespace SAT1.Controllers
         }
 
         // GET: /Product/Details/{id}
+        // OWASP A01: Strict Access Control & Hidden Category Guard
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Details(string id)
         {
-            if (string.IsNullOrEmpty(id)) return RedirectToAction("Index", "Home");
-
-            // Query Neon PostgreSQL DB for product
-            var product = await _context.CatalogItems.FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
-
-            if (product == null)
+            if (string.IsNullOrWhiteSpace(id))
             {
-                // Fallback search for first available item
-                product = await _context.CatalogItems.FirstOrDefaultAsync();
+                return RedirectToAction("Index", "Home");
             }
 
-            if (product == null) return RedirectToAction("Index", "Home");
+            // 1. Query active catalog item by ID (Strict check, NO fallback to prevent ID enumeration)
+            var product = await _context.CatalogItems.FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
+            if (product == null)
+            {
+                // OWASP A01 Protection: Return 404 NotFound if product ID is invalid or disabled
+                return NotFound();
+            }
 
-            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == product.CategoryId);
-            ViewBag.CategoryName = category?.Name ?? "Haute Joaillerie";
-            ViewBag.CategoryBadge = category?.Badge ?? "GIA Certified";
+            // 2. Query parent category and verify it is ACTIVE
+            // If the category is hidden/disabled by Admin, access to any item in that category via URL is strictly blocked!
+            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == product.CategoryId && c.IsActive);
+            if (category == null)
+            {
+                // Parent category is hidden or disabled by Admin -> Return 404 NotFound
+                return NotFound();
+            }
 
-            // Related items from same category
+            ViewBag.CategoryName = category.Name;
+            ViewBag.CategoryBadge = category.Badge;
+
+            // 3. Related active items from the SAME active category only
             var relatedItems = await _context.CatalogItems
                 .Where(i => i.CategoryId == product.CategoryId && i.Id != product.Id && i.IsActive)
                 .OrderBy(i => i.CreatedAt)
