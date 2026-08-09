@@ -5,6 +5,16 @@
     var related = ViewBag.RelatedItems as List<SAT1.Models.CatalogItem> ?? new List<SAT1.Models.CatalogItem>();
     var categoryName = ViewBag.CategoryName as string ?? "Haute Joaillerie";
     var categoryBadge = ViewBag.CategoryBadge as string ?? "GIA Certified";
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+
+    string FixImg(string? path) {
+        if (string.IsNullOrWhiteSpace(path)) return "/assets/ring_1.jpg";
+        if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
+        if (path.StartsWith("~/")) return path.Substring(1);
+        if (!path.StartsWith("/")) return "/" + path;
+        return path;
+    }
+    var mainImage = FixImg(Model.ImageUrl);
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -383,13 +393,20 @@
       </a>
 
       <div class="nav-actions">
-        <button class="btn-auth-nav" onclick="openCartDrawer()" id="cartBtnNav">
-          <i class="fa-solid fa-bag-shopping"></i> Shopping Cart (<span id="navCartCount">0</span>)
-        </button>
-
-        <a href="/Account/SignIn" class="btn-auth-nav">
-          <i class="fa-regular fa-user"></i> Sign In
+        <a href="/Product/Cart" class="btn-auth-nav" id="cartBtnNav">
+          <i class="fa-solid fa-bag-shopping"></i> Shopping Cart ( <span id="navCartCount">0</span> )
         </a>
+
+        @if (isAuthenticated)
+        {
+          <span style="font-size:13px;color:var(--champagne-gold);font-weight:600;"><i class="fa-solid fa-user-check"></i> VIP Client</span>
+        }
+        else
+        {
+          <a href="/Account/SignIn" class="btn-auth-nav">
+            <i class="fa-regular fa-user"></i> Sign In
+          </a>
+        }
 
         <a href="/#cta" class="btn-primary">
           <i class="fa-solid fa-envelope"></i> Contact Us
@@ -413,15 +430,15 @@
       <!-- LEFT: Image Gallery -->
       <div class="pd-gallery-card">
         <div class="pd-main-img-wrap">
-          <img id="mainProductPhoto" src="~/@Model.ImageUrl" alt="@Model.Name" />
+          <img id="mainProductPhoto" src="@mainImage" alt="@Model.Name" />
           <div class="pd-gia-seal">
             <i class="fa-solid fa-shield-halved"></i> GIA Certified VVS1
           </div>
         </div>
 
         <div class="pd-thumb-grid">
-          <div class="pd-thumb active" onclick="switchProductPhoto(this, '~/@Model.ImageUrl')">
-            <img src="~/@Model.ImageUrl" alt="Main View" />
+          <div class="pd-thumb active" onclick="switchProductPhoto(this, '@mainImage')">
+            <img src="@mainImage" alt="Main View" />
           </div>
           <div class="pd-thumb" onclick="switchProductPhoto(this, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80')">
             <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80" alt="Angle Macro" />
@@ -521,6 +538,7 @@
   </div>
 
   <script>
+    const isUserLoggedIn = @(isAuthenticated ? "true" : "false");
     const basePriceUSD = @Model.PriceUSD;
     let selectedMetalExtra = 0;
     let selectedCaratExtra = 0;
@@ -574,6 +592,14 @@
     }
 
     function addToCartCurrentProduct() {
+      // 1. Check if user is signed in
+      if (!isUserLoggedIn) {
+        if (confirm("🔒 Sign In Required!\n\nYou must be signed in to add items to your bespoke shopping cart.\n\nWould you like to Sign In now?")) {
+          window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+        }
+        return;
+      }
+
       const engraving = document.getElementById('engravingText').value.trim();
       const finalPriceUSD = basePriceUSD + selectedMetalExtra + selectedCaratExtra;
 
@@ -581,7 +607,7 @@
         id: '@Model.Id',
         name: '@Model.Name',
         priceUSD: finalPriceUSD,
-        img: '~/@Model.ImageUrl',
+        img: '@mainImage',
         metal: selectedMetal,
         carat: selectedCarat,
         engraving: engraving,
@@ -589,14 +615,16 @@
       };
 
       const cart = getCartItems();
-      const existingIdx = cart.findIndex(c => c.id === cartItem.id && c.metal === cartItem.metal && c.carat === cartItem.carat && c.engraving === cartItem.engraving);
 
-      if (existingIdx > -1) {
-        cart[existingIdx].quantity += 1;
-      } else {
-        cart.push(cartItem);
+      // 2. Check if item already exists in cart (Only 1 item can be added per product page)
+      const existingItem = cart.find(c => c.id === cartItem.id);
+      if (existingItem) {
+        alert(`ℹ️ "${cartItem.name}" is already in your Shopping Cart!\n\nYou can adjust quantities or remove items from your Shopping Cart page.`);
+        window.location.href = '/Product/Cart';
+        return;
       }
 
+      cart.push(cartItem);
       saveCartItems(cart);
 
       // Show Toast Notification
@@ -607,8 +635,15 @@
     }
 
     function instantBuyCurrentProduct() {
+      if (!isUserLoggedIn) {
+        if (confirm("🔒 Sign In Required!\n\nYou must be signed in to purchase items.\n\nWould you like to Sign In now?")) {
+          window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+        }
+        return;
+      }
+
       addToCartCurrentProduct();
-      alert(`Payment Checkout Initiated in USD ($)!\n\nItem: @Model.Name\nMetal: ${selectedMetal}\nCarat: ${selectedCarat}\nPrice: $${(basePriceUSD + selectedMetalExtra + selectedCaratExtra).toLocaleString()} USD\n\nThank you! Redirecting to secure Stripe USD Payment Gateway.`);
+      window.location.href = '/Product/Cart';
     }
 
     document.addEventListener('DOMContentLoaded', () => {
