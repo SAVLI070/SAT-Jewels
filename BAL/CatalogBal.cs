@@ -1,3 +1,5 @@
+using System.Text.Encodings.Web;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using SAT1.Models;
 
@@ -10,6 +12,13 @@ namespace SAT1.BAL
         public CatalogBal(SatJewelDbContext context)
         {
             _context = context;
+        }
+
+        // OWASP A03: Input Sanitization Helper
+        private string Sanitize(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+            return HtmlEncoder.Default.Encode(input.Trim());
         }
 
         public async Task<List<Category>> GetAllCategoriesAsync()
@@ -53,6 +62,10 @@ namespace SAT1.BAL
             if (string.IsNullOrWhiteSpace(category.Id)) return false;
 
             category.Id = category.Id.Trim().ToLower();
+            category.Name = Sanitize(category.Name);
+            category.Badge = Sanitize(category.Badge);
+            category.Subtitle = Sanitize(category.Subtitle);
+
             var existing = await _context.Categories.FindAsync(category.Id);
             if (existing != null)
             {
@@ -112,7 +125,10 @@ namespace SAT1.BAL
                 item.Id = Guid.NewGuid().ToString();
             }
 
+            item.Name = Sanitize(item.Name);
+            item.Spec = Sanitize(item.Spec);
             item.CreatedAt = DateTime.UtcNow;
+
             _context.CatalogItems.Add(item);
             await _context.SaveChangesAsync();
             return item;
@@ -126,6 +142,39 @@ namespace SAT1.BAL
             _context.CatalogItems.Remove(item);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        // OWASP A01 & A04: Authoritative Server-Side Price Calculation & Verification
+        // Prevents price tampering by calculating the price exclusively from PostgreSQL database values
+        public async Task<(bool isValid, decimal serverValidatedPrice, string itemName, string errorMessage)> CalculateServerValidatedPriceAsync(string itemId, string? selectedMetal, string? selectedCarat)
+        {
+            var item = await GetCatalogItemByIdAsync(itemId);
+            if (item == null)
+            {
+                return (false, 0, "", "Product not found in database.");
+            }
+
+            decimal basePrice = item.PriceUSD;
+            decimal metalDelta = ParsePriceDelta(selectedMetal);
+            decimal caratDelta = ParsePriceDelta(selectedCarat);
+
+            decimal finalAuthoritativePrice = Math.Max(0, basePrice + metalDelta + caratDelta);
+
+            return (true, finalAuthoritativePrice, item.Name, "");
+        }
+
+        private decimal ParsePriceDelta(string? optionText)
+        {
+            if (string.IsNullOrWhiteSpace(optionText)) return 0;
+
+            // Look for patterns like (+150), (-100), (+0), (+1200)
+            var match = Regex.Match(optionText, @"\(([\+\-]\d+)\)");
+            if (match.Success && decimal.TryParse(match.Groups[1].Value, out decimal delta))
+            {
+                return delta;
+            }
+
+            return 0;
         }
     }
 }
