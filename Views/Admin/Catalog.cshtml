@@ -25,6 +25,18 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
+  @@media (max-width: 768px) {
+    .cat-section-header {
+      flex-direction: column !important;
+      align-items: flex-start !important;
+      gap: 12px !important;
+    }
+    .btn-add-section-item {
+      width: 100% !important;
+      justify-content: center !important;
+    }
+  }
+
   .cat-section-title {
     font-family: var(--font-serif);
     font-size: 22px;

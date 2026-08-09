@@ -2482,7 +2482,7 @@ a {
   background: #e2e8f0;
 }
 
-/* RESPONSIVE MEDIA QUERIES */
+/* RESPONSIVE MEDIA QUERIES & MOBILE FIXES */
 @media (max-width: 1100px) {
   .collections-grid { grid-template-columns: repeat(2, 1fr); }
   .product-grid { grid-template-columns: repeat(2, 1fr); }
@@ -2502,9 +2502,22 @@ a {
   .stat-item::after { display: none; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
 
-  /* Admin Mobile Off-Canvas Drawer (Fixes 60% sidebar cover issue) */
+  /* Admin Mobile Topbar & Off-Canvas Drawer Fixes */
+  .adm-collapse-btn {
+    display: none !important;
+  }
+
   .adm-menu-btn {
-    display: inline-flex;
+    display: inline-flex !important;
+    background: rgba(212, 178, 112, 0.15) !important;
+    border: 1px solid rgba(212, 178, 112, 0.4) !important;
+    color: #fbbf24 !important;
+    border-radius: 10px !important;
+    width: 38px !important;
+    height: 38px !important;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px !important;
   }
 
   .adm-sidebar-close-btn {
@@ -2522,7 +2535,8 @@ a {
     z-index: 10050 !important;
     transform: translateX(-100%) !important;
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
-    box-shadow: 6px 0 30px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 6px 0 35px rgba(0, 0, 0, 0.7) !important;
+    background: rgba(10, 20, 36, 0.96) !important;
   }
 
   .adm-sidebar.open {
@@ -2536,15 +2550,57 @@ a {
   }
 
   .adm-topbar {
-    padding: 12px 16px !important;
+    padding: 10px 14px !important;
+    justify-content: space-between !important;
+  }
+
+  .adm-topbar-right span,
+  .adm-topbar-right a {
+    display: none !important;
+  }
+
+  .adm-topbar-right {
+    gap: 6px !important;
   }
 
   .adm-page-title {
-    font-size: 18px !important;
+    font-size: 15px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 170px !important;
   }
 
   .adm-content {
-    padding: 16px 14px !important;
+    padding: 16px 12px !important;
+  }
+
+  .cat-card-panel,
+  .dash-stat-card,
+  .dash-action-card,
+  .cat-section-card {
+    padding: 18px 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    margin-top: 10px !important;
+    border-radius: 12px !important;
+  }
+
+  .admin-table th {
+    padding: 10px 12px !important;
+    font-size: 11px !important;
+    white-space: nowrap !important;
+  }
+
+  .admin-table td {
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
   }
 
   .kpi-strip {
@@ -2594,6 +2650,7 @@ a {
   }
 
   .adm-page-title {
-    font-size: 16px !important;
+    font-size: 14px !important;
+    max-width: 140px !important;
   }
 }

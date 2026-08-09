@@ -212,6 +212,18 @@
     color: #ffffff !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     font-size: 13px;
+  .cat-main-grid {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  @@media (max-width: 992px) {
+    .cat-main-grid {
+      grid-template-columns: 1fr !important;
+      gap: 20px !important;
+    }
   }
 </style>
 
@@ -224,7 +236,7 @@
     </div>
   </div>
 
-  <div style="display:grid;grid-template-columns:380px 1fr;gap:28px;align-items:start;">
+  <div class="cat-main-grid">
     <!-- LEFT: Form Box ("Add New Category") -->
     <div class="cat-card-panel">
       <h3 style="font-family:var(--font-serif);color:#ffffff;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;">

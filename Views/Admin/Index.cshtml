@@ -11,6 +11,20 @@
     margin-bottom: 32px;
   }
 
+  @@media (max-width: 900px) {
+    .dash-stat-grid {
+      grid-template-columns: repeat(2, 1fr) !important;
+      gap: 12px !important;
+      margin-bottom: 20px !important;
+    }
+  }
+
+  @@media (max-width: 520px) {
+    .dash-stat-grid {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
   .dash-stat-card {
     background: rgba(8, 17, 34, 0.85);
     backdrop-filter: blur(20px);
@@ -58,6 +72,13 @@
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 24px;
+  }
+
+  @@media (max-width: 900px) {
+    .dash-action-grid {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+    }
   }
 
   .dash-action-card {
