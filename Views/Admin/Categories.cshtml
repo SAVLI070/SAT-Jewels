@@ -6,8 +6,10 @@
 <style>
   /* Category Management Page Luxury Admin Styling */
   .cat-card-panel {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
     border-radius: var(--radius-xl);
     padding: 28px;
     box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
@@ -29,7 +31,7 @@
     width: 100%;
     box-sizing: border-box;
     padding: 12px 16px;
-    background: #f8fafc;
+    background: #ffffff;
     border: 1px solid #cbd5e1;
     border-radius: var(--radius-md);
     color: #0f172a;
@@ -43,6 +45,39 @@
     background: #ffffff;
     border-color: #b45309;
     box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15);
+  }
+
+  /* Category Image Upload Dropzone */
+  .cat-upload-dropzone {
+    border: 2px dashed #cbd5e1;
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .cat-upload-dropzone:hover {
+    border-color: #b45309;
+    background: #fffbeb;
+  }
+
+  .cat-preview-box {
+    width: 100%;
+    height: 120px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    margin-top: 10px;
+    border: 1px solid #cbd5e1;
+    display: none;
+  }
+
+  .cat-preview-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
   .cat-btn-submit {
@@ -195,9 +230,25 @@
           <input type="text" id="adminCatSub" class="cat-form-input" placeholder="e.g. Diamond & Sapphire Medallions" required />
         </div>
 
+        <!-- CATEGORY COVER IMAGE FILE UPLOAD ZONE -->
         <div class="cat-form-group">
-          <label class="cat-form-label">Category Card Image URL *</label>
-          <input type="text" id="adminCatImg" class="cat-form-input" placeholder="assets/necklace_main.png or https://..." required />
+          <label class="cat-form-label">Category Cover Image File Upload *</label>
+          <div class="cat-upload-dropzone" onclick="document.getElementById('adminCatFileInput').click()">
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#b45309;margin-bottom:6px;"></i>
+            <div style="font-weight:700;color:#0f172a;font-size:13px;">Click to Upload Cover Image</div>
+            <div style="font-size:11px;color:#64748b;">PNG, JPG, WebP (Max 10MB)</div>
+            <input type="file" id="adminCatFileInput" accept="image/*" style="display:none;" onchange="previewCatUploadFile(this)" />
+          </div>
+
+          <div class="cat-preview-box" id="catPreviewBox">
+            <img id="catPreviewImg" src="" alt="Category Preview" />
+          </div>
+        </div>
+
+        <!-- PRESET / CUSTOM URL FALLBACK -->
+        <div class="cat-form-group">
+          <label class="cat-form-label">Or Preset Image Asset / Custom URL (Fallback)</label>
+          <input type="text" id="adminCatImg" class="cat-form-input" placeholder="assets/necklace_main.png or custom URL" />
         </div>
 
         <div class="cat-form-group">
@@ -205,7 +256,7 @@
           <input type="number" id="adminCatOrder" class="cat-form-input" value="5" min="1" />
         </div>
 
-        <button type="submit" class="cat-btn-submit">
+        <button type="submit" class="cat-btn-submit" id="btnSaveCategory">
           <i class="fa-solid fa-cloud-arrow-up"></i> Save Category to Neon DB
         </button>
       </form>
@@ -239,6 +290,8 @@
 </div>
 
 <script>
+  let selectedCategoryFile = null;
+
   function fixImgUrl(path) {
     if (!path) return '/assets/ring_main.png';
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
@@ -250,6 +303,22 @@
   document.addEventListener('DOMContentLoaded', () => {
     loadAdminCategoriesTable();
   });
+
+  function previewCatUploadFile(input) {
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size exceeds 10 MB limit.');
+        input.value = '';
+        return;
+      }
+      selectedCategoryFile = file;
+      const previewBox = document.getElementById('catPreviewBox');
+      const previewImg = document.getElementById('catPreviewImg');
+      previewImg.src = URL.createObjectURL(file);
+      previewBox.style.display = 'block';
+    }
+  }
 
   async function loadAdminCategoriesTable() {
     try {
@@ -323,12 +392,40 @@
     const name = document.getElementById('adminCatName').value.trim();
     const badge = document.getElementById('adminCatBadge').value;
     const subtitle = document.getElementById('adminCatSub').value.trim();
-    const imageUrl = document.getElementById('adminCatImg').value.trim();
+    const customImgUrl = document.getElementById('adminCatImg').value.trim();
     const displayOrder = parseInt(document.getElementById('adminCatOrder').value, 10) || 1;
+    const submitBtn = document.getElementById('btnSaveCategory');
 
-    const payload = { id, name, badge, subtitle, imageUrl, displayOrder, isActive: true };
+    let finalImageUrl = customImgUrl || 'assets/necklace_main.png';
+
+    // Step 1: Upload category cover file if selected
+    if (selectedCategoryFile) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading Image...';
+
+      const formData = new FormData();
+      formData.append('files', selectedCategoryFile);
+
+      try {
+        const uploadRes = await fetch('/api/catalogapi/upload-images', {
+          method: 'POST',
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success && uploadData.urls && uploadData.urls.length > 0) {
+          finalImageUrl = uploadData.urls[0];
+        }
+      } catch (err) {
+        console.error('Error uploading category image:', err);
+      }
+    }
+
+    const payload = { id, name, badge, subtitle, imageUrl: finalImageUrl, displayOrder, isActive: true };
 
     try {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Neon DB...';
+
       const res = await fetch('/api/catalogapi/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -338,6 +435,8 @@
       if (data.success) {
         alert(`✨ ${data.message}`);
         document.getElementById('addCategoryForm').reset();
+        document.getElementById('catPreviewBox').style.display = 'none';
+        selectedCategoryFile = null;
         loadAdminCategoriesTable();
       } else {
         alert('Failed to save category. Check your inputs.');
@@ -345,6 +444,9 @@
     } catch (err) {
       console.error('Error saving category:', err);
       alert('Error connecting to Neon PostgreSQL database.');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Category to Neon DB';
     }
   }
 
