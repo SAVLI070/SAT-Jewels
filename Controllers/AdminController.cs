@@ -1,24 +1,21 @@
-using System.Security.Claims;
 using Microsoft.AspNetCore.Mvc;
+using SAT1.BAL;
 
 namespace SAT1.Controllers
 {
     [Route("admin")]
     public class AdminController : Controller
     {
-        private bool CheckAdminAccess()
+        private readonly AdminBal _adminBal;
+
+        public AdminController(AdminBal adminBal)
         {
-            if (User.Identity?.IsAuthenticated != true) return false;
-            
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value?.ToLower() ?? "";
-            
-            if (userRole == "Admin" || userEmail.Contains("admin") || User.Identity.Name == "SAT Administrator")
-            {
-                return true;
-            }
-            
-            return false;
+            _adminBal = adminBal;
+        }
+
+        private bool CheckAccess()
+        {
+            return _adminBal.CheckAdminAccess(User);
         }
 
         [HttpGet("")]
@@ -26,7 +23,7 @@ namespace SAT1.Controllers
         [HttpGet("dashboard")]
         public IActionResult Index()
         {
-            if (!CheckAdminAccess())
+            if (!CheckAccess())
             {
                 return RedirectToAction("SignIn", "Account", new { returnUrl = "/admin", adminRequired = "true" });
             }
@@ -37,7 +34,7 @@ namespace SAT1.Controllers
         [HttpGet("categories")]
         public IActionResult Categories()
         {
-            if (!CheckAdminAccess())
+            if (!CheckAccess())
             {
                 return RedirectToAction("SignIn", "Account", new { returnUrl = "/admin/categories", adminRequired = "true" });
             }
@@ -48,7 +45,7 @@ namespace SAT1.Controllers
         [HttpGet("catalog")]
         public IActionResult Catalog()
         {
-            if (!CheckAdminAccess())
+            if (!CheckAccess())
             {
                 return RedirectToAction("SignIn", "Account", new { returnUrl = "/admin/catalog", adminRequired = "true" });
             }
@@ -59,7 +56,7 @@ namespace SAT1.Controllers
         [HttpGet("addproduct")]
         public IActionResult AddProduct()
         {
-            if (!CheckAdminAccess())
+            if (!CheckAccess())
             {
                 return RedirectToAction("SignIn", "Account", new { returnUrl = "/admin/addproduct", adminRequired = "true" });
             }

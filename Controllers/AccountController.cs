@@ -2,18 +2,18 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using SAT1.BAL;
 using SAT1.Models;
 
 namespace SAT1.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly SatJewelDbContext _context;
+        private readonly AuthBal _authBal;
 
-        public AccountController(SatJewelDbContext context)
+        public AccountController(AuthBal authBal)
         {
-            _context = context;
+            _authBal = authBal;
         }
 
         [HttpGet]
@@ -52,31 +52,12 @@ namespace SAT1.Controllers
                 return View("Auth");
             }
 
-            var trimmedEmail = email.Trim().ToLower();
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == trimmedEmail);
-
-            // Allow fallback login for demo admin credentials (admin / admin or admin123)
-            if (user == null && (trimmedEmail == "admin" || trimmedEmail == "admin@satjewels.com" || trimmedEmail == "admin@satjewel.com") && (password == "admin" || password == "admin123" || password == "sat2026"))
-            {
-                user = new User
-                {
-                    Id = "user_admin",
-                    FullName = "SAT Administrator",
-                    Email = "admin@satjewel.com",
-                    Role = "Admin"
-                };
-            }
-
-            if (user == null || (user.Password != password && user.Password != "admin" && password != "admin123" && password != "admin"))
+            var user = await _authBal.ValidateUserCredentialsAsync(email, password);
+            if (user == null)
             {
                 ViewBag.ErrorMessage = "Invalid credentials. Please verify your email and password.";
                 ViewData["InitialMode"] = "signin";
                 return View("Auth");
-            }
-
-            if (trimmedEmail.Contains("admin"))
-            {
-                user.Role = "Admin";
             }
 
             var claims = new List<Claim>
@@ -126,30 +107,13 @@ namespace SAT1.Controllers
                 return View("Auth");
             }
 
-            var trimmedEmail = email.Trim().ToLower();
-            var existing = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == trimmedEmail);
-            if (existing != null)
+            var user = await _authBal.RegisterNewUserAsync(fullName, email, phone, password, confirmPassword, returnUrl);
+            if (user == null)
             {
-                ViewBag.ErrorMessage = "An account with this email address already exists.";
+                ViewBag.ErrorMessage = "An account with this email address already exists or signup failed.";
                 ViewData["InitialMode"] = "signup";
                 return View("Auth");
             }
-
-            var role = (trimmedEmail.Contains("admin") || (returnUrl?.ToLower().Contains("admin") == true)) ? "Admin" : "Client";
-
-            var user = new User
-            {
-                Id = Guid.NewGuid().ToString(),
-                FullName = fullName.Trim(),
-                Email = trimmedEmail,
-                Phone = phone?.Trim(),
-                Password = password,
-                Role = role,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
 
             var claims = new List<Claim>
             {

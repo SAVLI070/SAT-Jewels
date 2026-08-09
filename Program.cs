@@ -12,6 +12,11 @@ builder.Services.AddDbContext<SatJewelDbContext>(options =>
 // Add Controllers and Views
 builder.Services.AddControllersWithViews();
 
+// Register BAL (Business Access Layer) Helpers matching FarmBridge Architecture
+builder.Services.AddScoped<SAT1.BAL.CatalogBal>();
+builder.Services.AddScoped<SAT1.BAL.AdminBal>();
+builder.Services.AddScoped<SAT1.BAL.AuthBal>();
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
