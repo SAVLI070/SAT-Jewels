@@ -3,12 +3,86 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div style="max-width:700px;background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-xl);padding:28px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-  <h2 style="font-family:var(--font-serif);color:#0f172a;margin-bottom:16px;">+ Publish New Item to Live Store & Database</h2>
+<style>
+  .add-prod-panel {
+    max-width: 760px;
+    margin: 0 auto;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-xl);
+    padding: 36px;
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.04);
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 6px;
+  }
+
+  .form-input, .form-select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-md);
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    transition: all 0.25s ease;
+  }
+
+  .form-input:focus, .form-select:focus {
+    background: #ffffff;
+    border-color: #b45309;
+    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15);
+  }
+
+  .btn-submit-item {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border: none;
+    border-radius: var(--radius-full);
+    color: #fbbf24;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 16px rgba(15, 23, 42, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .btn-submit-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(15, 23, 42, 0.3);
+  }
+</style>
+
+<div class="add-prod-panel">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid #f1f5f9;">
+    <div style="width:44px;height:44px;border-radius:10px;background:#fef3c7;color:#b45309;display:flex;align-items:center;justify-content:center;font-size:20px;">
+      <i class="fa-solid fa-gem"></i>
+    </div>
+    <div>
+      <h2 style="font-family:var(--font-serif);color:#0f172a;margin:0 0 4px;font-size:22px;">+ Publish New Item to Live Store</h2>
+      <p style="color:#64748b;font-size:13px;margin:0;">Item will immediately be active and available for luxury buyers on the storefront.</p>
+    </div>
+  </div>
+
   <form id="adminAddProductForm" onsubmit="handleAddNewProduct(event)">
-    <div class="admin-form-grid">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
       <div class="form-group">
-        <label class="form-label">Collection Category *</label>
+        <label class="form-label">Target Collection Category *</label>
         <select id="adminProdCat" class="form-select" required>
           <option value="rings">Rings Collection</option>
           <option value="necklaces">Necklaces Section</option>
@@ -18,40 +92,99 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Item Title *</label>
+        <label class="form-label">Item Title / Name *</label>
         <input type="text" id="adminProdName" class="form-input" placeholder="e.g. Royal Solitaire Emerald Ring" required />
-      </div>
-
-      <div class="form-group full-width">
-        <label class="form-label">Metal & Diamond Specifications *</label>
-        <input type="text" id="adminProdSpec" class="form-input" placeholder="e.g. 18K Yellow Gold | 2.0ct GIA VVS1 | Brilliant Cut" required />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Price in USD ($) *</label>
-        <input type="number" id="adminProdPriceUSD" class="form-input" placeholder="e.g. 2200" required />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Preset Image Asset</label>
-        <select id="adminProdImgSelect" class="form-select">
-          <option value="assets/ring_1.jpg">Solitaire Ring (assets/ring_1.jpg)</option>
-          <option value="assets/necklace_1.jpg">Imperial Necklace (assets/necklace_1.jpg)</option>
-          <option value="assets/earring_card.jpg">Chandelier Earrings (assets/earring_card.jpg)</option>
-          <option value="assets/bracelet_card.jpg">Tennis Bracelet (assets/bracelet_card.jpg)</option>
-        </select>
-      </div>
-
-      <div class="form-group full-width">
-        <label class="form-label">Or Custom Image URL (Optional)</label>
-        <input type="url" id="adminProdImgUrl" class="form-input" placeholder="https://example.com/custom-ring.jpg" />
       </div>
     </div>
 
-    <div style="margin-top:20px;text-align:right;">
-      <button type="submit" class="btn-admin-submit">
-        <i class="fa-solid fa-paper-plane"></i> Save to SQLite Database & Publish Live
+    <div class="form-group">
+      <label class="form-label">Metal & Diamond Specifications *</label>
+      <input type="text" id="adminProdSpec" class="form-input" placeholder="e.g. 18K Yellow Gold | 2.0ct GIA VVS1 | Brilliant Cut" required />
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="form-group">
+        <label class="form-label">Price in USD ($) *</label>
+        <input type="number" id="adminProdPriceUSD" class="form-input" placeholder="e.g. 2200" min="1" required />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Preset High-Res Image Asset</label>
+        <select id="adminProdImgSelect" class="form-select">
+          <option value="assets/ring_main.png">Royal Solitaire Ring (assets/ring_main.png)</option>
+          <option value="assets/ring_angle.png">Halo Cushion Ring (assets/ring_angle.png)</option>
+          <option value="assets/necklace_main.png">Imperial Diamond Necklace (assets/necklace_main.png)</option>
+          <option value="assets/necklace_detail.png">Floral Diamond Detail (assets/necklace_detail.png)</option>
+          <option value="assets/earring_main.png">Chandelier Earrings (assets/earring_main.png)</option>
+          <option value="assets/bracelet_main.png">Tennis Bracelet (assets/bracelet_main.png)</option>
+          <option value="assets/ring_whitegold.png">Platinum White Gold (assets/ring_whitegold.png)</option>
+          <option value="assets/ring_rosegold.png">Rose Gold Solitaire (assets/ring_rosegold.png)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Or Custom Image URL (Optional)</label>
+      <input type="url" id="adminProdImgUrl" class="form-input" placeholder="https://example.com/custom-ring.jpg" />
+    </div>
+
+    <div style="margin-top:28px;text-align:right;">
+      <button type="submit" class="btn-submit-item">
+        <i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live
       </button>
     </div>
   </form>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Auto-select category if passed in query string parameter ?categoryId=rings
+    const urlParams = new URLSearchParams(window.location.search);
+    const catParam = urlParams.get('categoryId');
+    if (catParam) {
+      const catSelect = document.getElementById('adminProdCat');
+      if (catSelect) catSelect.value = catParam.toLowerCase();
+    }
+  });
+
+  async function handleAddNewProduct(e) {
+    e.preventDefault();
+
+    const categoryId = document.getElementById('adminProdCat').value;
+    const name = document.getElementById('adminProdName').value.trim();
+    const spec = document.getElementById('adminProdSpec').value.trim();
+    const priceUSD = parseFloat(document.getElementById('adminProdPriceUSD').value) || 0;
+    
+    const customUrl = document.getElementById('adminProdImgUrl').value.trim();
+    const selectedPreset = document.getElementById('adminProdImgSelect').value;
+    const imageUrl = customUrl || selectedPreset;
+
+    const payload = {
+      categoryId,
+      name,
+      spec,
+      priceUSD,
+      imageUrl,
+      galleryImages: `${imageUrl},assets/ring_clarity.png,assets/ring_model.png`,
+      isActive: true
+    };
+
+    try {
+      const res = await fetch('/api/catalogapi/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success || res.ok) {
+        alert(`✨ Success! Item "${name}" saved to Neon DB.`);
+        window.location.href = '/Admin/Catalog';
+      } else {
+        alert('Failed to publish product item.');
+      }
+    } catch (err) {
+      console.error('Error publishing product:', err);
+      alert('Network error publishing item.');
+    }
+  }
+</script>

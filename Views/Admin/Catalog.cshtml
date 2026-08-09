@@ -3,27 +3,215 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
-<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-  <h2 style="font-family:var(--font-serif);color:#0f172a;">Live Database Catalog Table</h2>
-  <a href="/Admin/AddProduct" class="btn-admin-submit">
-    <i class="fa-solid fa-plus"></i> + Add New Item
-  </a>
+<style>
+  .cat-section-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+  }
+
+  .cat-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 16px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .cat-section-title {
+    font-family: var(--font-serif);
+    font-size: 22px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cat-section-sub {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0;
+  }
+
+  .btn-add-section-item {
+    padding: 10px 18px;
+    background: #fef3c7;
+    border: 1px solid #fde68a;
+    border-radius: var(--radius-full);
+    color: #92400e;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.25s ease;
+  }
+
+  .btn-add-section-item:hover {
+    background: #0f172a;
+    color: #fbbf24;
+    border-color: #0f172a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+  }
+
+  .cat-item-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid #e2e8f0;
+  }
+</style>
+
+<div style="max-width:1160px;margin:0 auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+    <div>
+      <h1 style="font-family:var(--font-serif);color:#0f172a;margin:0 0 6px;font-size:28px;">Live Jewelry Catalog Sections</h1>
+      <p style="color:#64748b;font-size:14px;margin:0;">Products grouped by collection category. Add new items directly to any specific section.</p>
+    </div>
+    <a href="/Admin/AddProduct" class="btn-admin-submit" style="padding:12px 24px;border-radius:var(--radius-full);background:#0f172a;color:#fbbf24;font-weight:700;text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+      <i class="fa-solid fa-plus"></i> + Add New Item (General)
+    </a>
+  </div>
+
+  <div id="catalogSectionsContainer">
+    <!-- Grouped Sections Injected by JavaScript -->
+  </div>
 </div>
 
-<div class="table-responsive" style="background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-lg);padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
-  <table class="admin-table">
-    <thead>
-      <tr>
-        <th>Image</th>
-        <th>Item Title & Spec</th>
-        <th>Category</th>
-        <th>Price (USD)</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="fbAdminCatalogBody">
-      <!-- Dynamically populated -->
-    </tbody>
-  </table>
-</div>
+<script>
+  function fixImgUrl(path) {
+    if (!path) return '/assets/ring_main.png';
+    if (path.startsWith('http://') || path.startsWith('https://')) return path;
+    if (path.startsWith('~/')) return '/' + path.substring(2);
+    if (!path.startsWith('/')) return '/' + path;
+    return path;
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadGroupedCatalog();
+  });
+
+  async function loadGroupedCatalog() {
+    const container = document.getElementById('catalogSectionsContainer');
+    if (!container) return;
+
+    try {
+      // Fetch categories & items from API
+      const [catRes, itemRes] = await Promise.all([
+        fetch('/api/catalogapi/admin-categories'),
+        fetch('/api/catalogapi/items')
+      ]);
+
+      const categories = await catRes.json();
+      const allItems = await itemRes.json();
+
+      if (!categories || categories.length === 0) {
+        container.innerHTML = '<div style="background:#fff;padding:32px;border-radius:16px;text-align:center;color:#94a3b8;">No categories found in database.</div>';
+        return;
+      }
+
+      const iconMap = {
+        rings: 'fa-gem',
+        necklaces: 'fa-ring',
+        earrings: 'fa-sparkles',
+        bracelets: 'fa-wand-magic-sparkles'
+      };
+
+      container.innerHTML = categories.map(cat => {
+        const catItems = allItems.filter(i => i.categoryId === cat.Id || i.categoryId === cat.id);
+        const icon = iconMap[cat.id] || 'fa-gem';
+
+        let tableHtml = '';
+        if (catItems.length === 0) {
+          tableHtml = `
+            <div style="padding:24px;text-align:center;color:#94a3b8;font-size:14px;background:#f8fafc;border-radius:12px;">
+              No jewelry items currently in this section. Click <strong>+ Add Item to ${cat.name}</strong> to add one.
+            </div>
+          `;
+        } else {
+          tableHtml = `
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Image</th>
+                    <th>Item Title & Spec</th>
+                    <th>Price (USD)</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${catItems.map(item => `
+                    <tr>
+                      <td>
+                        <img src="${fixImgUrl(item.imageUrl)}" class="cat-item-img" onerror="this.src='/assets/ring_main.png'" alt="${item.name}" />
+                      </td>
+                      <td>
+                        <strong style="color:#0f172a;font-size:14px;">${item.name}</strong><br/>
+                        <small style="color:#64748b;font-size:12px;">${item.spec}</small>
+                      </td>
+                      <td><strong style="color:#b45309;font-size:15px;">$${item.priceUSD.toLocaleString()} USD</strong></td>
+                      <td><span class="status-tag-active">Active Live</span></td>
+                      <td>
+                        <button class="btn-table-delete" onclick="deleteCatalogItem('${item.id}', '${item.name}')">
+                          <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+
+        return `
+          <div class="cat-section-card">
+            <div class="cat-section-header">
+              <div>
+                <h3 class="cat-section-title">
+                  <i class="fa-solid ${icon}" style="color:#b45309;"></i> ${cat.name}
+                  <span class="badge-cat" style="font-size:11px;margin-left:8px;">${cat.badge}</span>
+                </h3>
+                <p class="cat-section-sub">${cat.subtitle} — <strong>${catItems.length} active items</strong></p>
+              </div>
+              <a href="/Admin/AddProduct?categoryId=${cat.id}" class="btn-add-section-item">
+                <i class="fa-solid fa-plus"></i> + Add Item to ${cat.name}
+              </a>
+            </div>
+            ${tableHtml}
+          </div>
+        `;
+      }).join('');
+    } catch (err) {
+      console.error('Error loading grouped catalog:', err);
+      container.innerHTML = '<div style="background:#fff;padding:32px;border-radius:16px;text-align:center;color:#ef4444;">Failed to load catalog data from database.</div>';
+    }
+  }
+
+  async function deleteCatalogItem(id, name) {
+    if (!confirm(`Are you sure you want to delete item "${name}" from database?`)) return;
+
+    try {
+      const res = await fetch(`/api/catalogapi/items/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
+        alert(`Deleted: ${data.message}`);
+        loadGroupedCatalog();
+      }
+    } catch (err) {
+      console.error('Error deleting catalog item:', err);
+    }
+  }
+</script>
