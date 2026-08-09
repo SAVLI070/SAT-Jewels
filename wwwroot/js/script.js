@@ -155,11 +155,14 @@ async function initDynamicStorefront() {
   try {
     const res = await fetch('/api/catalogapi/full-store');
     if (!res.ok) return;
-    const storeData = await res.json();
+    const rawStoreData = await res.json();
 
-    if (!storeData || storeData.length === 0) return;
+    if (!rawStoreData || rawStoreData.length === 0) return;
 
-    storeData.forEach(cat => {
+    // Filter ONLY active categories (IsActive == true)
+    const activeCategories = rawStoreData.filter(c => c.isActive !== false);
+
+    activeCategories.forEach(cat => {
       collectionData[cat.id] = (cat.products || []).map(p => ({
         id: p.id,
         name: p.name,
@@ -172,7 +175,7 @@ async function initDynamicStorefront() {
     const grid = document.getElementById('mainCategoryGrid');
     if (!grid) return;
 
-    grid.innerHTML = storeData.map((c, idx) => `
+    grid.innerHTML = activeCategories.map((c, idx) => `
       <div class="collection-card reveal" style="transition-delay:${idx * 0.1}s" onclick="openCollectionModal('${c.id}')">
         <div class="collection-img-wrap">
           <img src="${c.imageUrl}" alt="${c.name}" />

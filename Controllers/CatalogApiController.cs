@@ -24,14 +24,29 @@ namespace SAT1.Controllers
             return userRole == "Admin" || userEmail.Contains("admin") || User.Identity.Name == "SAT Administrator";
         }
 
-        // 1. GET ALL ACTIVE CATEGORIES (Dynamic Main Landing Page Grid)
+        // 1. GET ALL ACTIVE CATEGORIES (Dynamic Main Landing Page Grid - ONLY IsActive == true)
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategories()
         {
             try
             {
-                var categoryData = await _catalogBal.GetAdminCategoriesAsync();
+                var categoryData = await _catalogBal.GetPublicCategoriesAsync();
                 return Ok(categoryData);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        // 1F. GET FULL STOREFRONT DATA FOR LANDING PAGE GRID (ONLY IsActive == true)
+        [HttpGet("full-store")]
+        public async Task<IActionResult> GetFullStore()
+        {
+            try
+            {
+                var storeData = await _catalogBal.GetFullStoreAsync();
+                return Ok(storeData);
             }
             catch (Exception ex)
             {
@@ -165,7 +180,6 @@ namespace SAT1.Controllers
         }
 
         // OWASP A01 & A04: SERVER-SIDE AUTHORITATIVE PRICE VALIDATION
-        // Hackers cannot tamper with prices because the server recalculates the true price from the database
         [HttpPost("validate-cart-price")]
         public async Task<IActionResult> ValidateCartPrice([FromBody] PriceCheckRequest req)
         {
@@ -192,7 +206,7 @@ namespace SAT1.Controllers
             });
         }
 
-        // OWASP A08: SECURE MULTI-IMAGE FILE UPLOAD (Strict MIME, Extension & Signature Checks)
+        // OWASP A08: SECURE MULTI-IMAGE FILE UPLOAD
         [HttpPost("upload-images")]
         public async Task<IActionResult> UploadImages([FromForm] List<IFormFile> files)
         {
@@ -243,7 +257,6 @@ namespace SAT1.Controllers
                     return BadRequest(new { success = false, message = $"Security Alert: Invalid MIME type '{file.ContentType}'." });
                 }
 
-                // File Signature Check (Magic Bytes) to block disguised scripts/executables
                 using (var stream = file.OpenReadStream())
                 {
                     byte[] header = new byte[8];
@@ -251,7 +264,7 @@ namespace SAT1.Controllers
 
                     bool isPng = header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47;
                     bool isJpeg = header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
-                    bool isWebp = header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46; // RIFF
+                    bool isWebp = header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46;
 
                     if (!isPng && !isJpeg && !isWebp)
                     {

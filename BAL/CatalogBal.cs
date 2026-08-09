@@ -17,6 +17,18 @@ namespace SAT1.BAL
         public int ItemCount { get; set; }
     }
 
+    public class PublicCategoryStoreDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Badge { get; set; } = string.Empty;
+        public string Subtitle { get; set; } = string.Empty;
+        public string ImageUrl { get; set; } = string.Empty;
+        public int DisplayOrder { get; set; }
+        public bool IsActive { get; set; }
+        public List<CatalogItem> Products { get; set; } = new List<CatalogItem>();
+    }
+
     public class CatalogBal
     {
         private readonly SatJewelDbContext _context;
@@ -32,14 +44,67 @@ namespace SAT1.BAL
             return HtmlEncoder.Default.Encode(input.Trim());
         }
 
-        public async Task<List<Category>> GetAllCategoriesAsync()
+        // PUBLIC STOREFRONT CATEGORIES: Returns ONLY categories where IsActive == true
+        public async Task<List<CategoryAdminDto>> GetPublicCategoriesAsync()
         {
-            return await _context.Categories
+            var categories = await _context.Categories
                 .Where(c => c.IsActive)
                 .OrderBy(c => c.DisplayOrder)
                 .ToListAsync();
+
+            var items = await _context.CatalogItems.Where(i => i.IsActive).ToListAsync();
+
+            var result = new List<CategoryAdminDto>();
+            foreach (var c in categories)
+            {
+                var count = items.Count(i => i.CategoryId.Equals(c.Id, StringComparison.OrdinalIgnoreCase));
+                result.Add(new CategoryAdminDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Badge = c.Badge,
+                    Subtitle = c.Subtitle,
+                    ImageUrl = c.ImageUrl,
+                    DisplayOrder = c.DisplayOrder,
+                    IsActive = c.IsActive,
+                    ItemCount = count
+                });
+            }
+
+            return result;
         }
 
+        // PUBLIC FULL STORE DATA: Returns ONLY categories where IsActive == true
+        public async Task<List<PublicCategoryStoreDto>> GetFullStoreAsync()
+        {
+            var categories = await _context.Categories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.DisplayOrder)
+                .ToListAsync();
+
+            var items = await _context.CatalogItems.Where(i => i.IsActive).ToListAsync();
+
+            var result = new List<PublicCategoryStoreDto>();
+            foreach (var c in categories)
+            {
+                var catProducts = items.Where(i => i.CategoryId.Equals(c.Id, StringComparison.OrdinalIgnoreCase)).ToList();
+                result.Add(new PublicCategoryStoreDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    Badge = c.Badge,
+                    Subtitle = c.Subtitle,
+                    ImageUrl = c.ImageUrl,
+                    DisplayOrder = c.DisplayOrder,
+                    IsActive = c.IsActive,
+                    Products = catProducts
+                });
+            }
+
+            return result;
+        }
+
+        // ADMIN CATEGORIES: Returns ALL categories (Active + Hidden)
         public async Task<List<CategoryAdminDto>> GetAdminCategoriesAsync()
         {
             var categories = await _context.Categories
