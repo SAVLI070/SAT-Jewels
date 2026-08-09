@@ -35,6 +35,18 @@
             "/assets/ring_model.png"
         };
     }
+
+    // Parse Metal Options from Database per item (default 10 gold choices)
+    var metalString = string.IsNullOrWhiteSpace(Model.MetalOptions)
+        ? "18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|22K Yellow Gold (+150)|24K Pure Gold (+400)|Platinum 950 (+350)|14K Yellow Gold (-100)|14K White Gold (-100)|10K Solid Gold (-200)|Rose Platinum (+500)"
+        : Model.MetalOptions;
+    var metalList = metalString.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+
+    // Parse Diamond Carat Options from Database per item
+    var caratString = string.IsNullOrWhiteSpace(Model.CaratOptions)
+        ? "0.5ct GIA (-800)|0.75ct GIA (-500)|1.0ct GIA (-400)|1.25ct GIA (-200)|1.5ct GIA (+0)|1.75ct GIA (+400)|2.0ct GIA (+750)|2.5ct GIA (+1200)|3.0ct GIA (+2000)|5.0ct Solitaire (+5000)"
+        : Model.CaratOptions;
+    var caratList = caratString.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -67,7 +79,7 @@
       box-sizing: border-box;
     }
 
-    /* Breadcrumbs */
+    /* Breadcrumbs Navigation */
     .pd-breadcrumb {
       display: flex;
       align-items: center;
@@ -256,7 +268,7 @@
       font-weight: 600;
     }
 
-    /* Customization Controls (Strict Radio-style selection) */
+    /* Customization Controls (Dynamic Database Dropdowns) */
     .pd-custom-section {
       margin-bottom: 20px;
     }
@@ -271,32 +283,35 @@
       margin-bottom: 8px;
     }
 
-    .pd-opt-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .pd-opt-btn {
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: var(--radius-md);
+    .pd-custom-select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 16px;
+      background: rgba(10, 20, 38, 0.95);
+      border: 1px solid rgba(212, 178, 112, 0.4);
+      border-radius: var(--radius-lg);
       color: #ffffff;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
+      outline: none;
       cursor: pointer;
-      text-align: center;
-      transition: all 0.25s ease;
-      user-select: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23d4b270' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
-    .pd-opt-btn.active {
-      background: rgba(212, 178, 112, 0.2) !important;
-      border-color: var(--champagne-gold) !important;
-      color: var(--champagne-gold) !important;
-      box-shadow: 0 0 14px rgba(212, 178, 112, 0.4) !important;
-      font-weight: 700;
+    .pd-custom-select:focus {
+      border-color: var(--champagne-gold);
+      box-shadow: 0 0 16px rgba(212, 178, 112, 0.5);
+    }
+
+    .pd-custom-select option {
+      background: #081122;
+      color: #ffffff;
+      padding: 10px;
     }
 
     .pd-engrave-input {
@@ -370,7 +385,7 @@
       background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
     }
 
-    /* CUSTOM BESPOKE LUXURY MODAL DIALOG (Replaces native browser popup) */
+    /* CUSTOM BESPOKE LUXURY MODAL DIALOG */
     .sat-modal-overlay {
       position: fixed;
       top: 0;
@@ -538,11 +553,11 @@
   </nav>
 
   <div class="pd-container">
-    <!-- Breadcrumb Navigation -->
+    <!-- Breadcrumb Navigation (Keeps user in Category Collection View) -->
     <div class="pd-breadcrumb">
       <a href="/"><i class="fa-solid fa-house"></i> Home</a>
       <span>/</span>
-      <a href="/#collections">@categoryName</a>
+      <a href="/?openCategory=@Model.CategoryId#collections"><i class="fa-solid fa-gem"></i> @categoryName</a>
       <span>/</span>
       <span style="color:#ffffff;font-weight:600;">@Model.Name</span>
     </div>
@@ -600,29 +615,44 @@
           <div class="pd-price-note">USD International Transaction</div>
         </div>
 
-        <!-- Customization Controls (Strict Radio-style selection) -->
-        <div class="pd-custom-section" id="metalSection">
+        <!-- DYNAMIC DATABASE DROPDOWN: Precious Metal Options -->
+        <div class="pd-custom-section">
           <div class="pd-custom-label">
-            <span>Choose Precious Metal Purity:</span>
-            <span id="selectedMetalText" style="color:#ffffff;">18K Yellow Gold</span>
+            <span><i class="fa-solid fa-gem"></i> Choose Precious Metal Purity:</span>
+            <span id="selectedMetalText" style="color:var(--champagne-gold);font-weight:700;">18K Yellow Gold</span>
           </div>
-          <div class="pd-opt-grid">
-            <div class="pd-opt-btn active" onclick="selectMetal(this, '18K Yellow Gold', 0)">18K Yellow Gold</div>
-            <div class="pd-opt-btn" onclick="selectMetal(this, '18K White Gold', 0)">18K White Gold</div>
-            <div class="pd-opt-btn" onclick="selectMetal(this, 'Platinum 950', 350)">Platinum 950 (+$350)</div>
-          </div>
+          <select class="pd-custom-select" id="metalDropdown" onchange="onMetalDropdownChange(this)">
+            @foreach (var opt in metalList)
+            {
+              var parts = opt.Split('(');
+              var name = parts[0].Trim();
+              var costStr = parts.Length > 1 ? parts[1].Replace(")", "").Trim() : "+0";
+              int cost = 0;
+              int.TryParse(costStr, out cost);
+              var displayLabel = name + (cost > 0 ? $" (+${cost} USD)" : (cost < 0 ? $" (-${Math.Abs(cost)} USD)" : " (Standard)"));
+              <option value="@cost" data-name="@name">@displayLabel</option>
+            }
+          </select>
         </div>
 
-        <div class="pd-custom-section" id="caratSection">
+        <!-- DYNAMIC DATABASE DROPDOWN: Diamond Carat Options -->
+        <div class="pd-custom-section">
           <div class="pd-custom-label">
-            <span>Diamond Carat Weight:</span>
-            <span id="selectedCaratText" style="color:#ffffff;">1.5ct (GIA Standard)</span>
+            <span><i class="fa-solid fa-diamond"></i> Diamond Carat Weight:</span>
+            <span id="selectedCaratText" style="color:var(--champagne-gold);font-weight:700;">1.5ct GIA</span>
           </div>
-          <div class="pd-opt-grid">
-            <div class="pd-opt-btn" onclick="selectCarat(this, '1.0ct GIA', -400)">1.0 Carat (-$400)</div>
-            <div class="pd-opt-btn active" onclick="selectCarat(this, '1.5ct GIA', 0)">1.5 Carat (Std)</div>
-            <div class="pd-opt-btn" onclick="selectCarat(this, '2.0ct GIA', 750)">2.0 Carat (+$750)</div>
-          </div>
+          <select class="pd-custom-select" id="caratDropdown" onchange="onCaratDropdownChange(this)">
+            @foreach (var opt in caratList)
+            {
+              var parts = opt.Split('(');
+              var name = parts[0].Trim();
+              var costStr = parts.Length > 1 ? parts[1].Replace(")", "").Trim() : "+0";
+              int cost = 0;
+              int.TryParse(costStr, out cost);
+              var displayLabel = name + (cost > 0 ? $" (+${cost} USD)" : (cost < 0 ? $" (-${Math.Abs(cost)} USD)" : " (Standard)"));
+              <option value="@cost" data-name="@name">@displayLabel</option>
+            }
+          </select>
         </div>
 
         <div class="pd-custom-section">
@@ -646,7 +676,7 @@
     </div>
   </div>
 
-  <!-- BESPOKE LUXURY MODAL DIALOG (Replaces unstyled browser alert/confirm popup) -->
+  <!-- BESPOKE LUXURY MODAL DIALOG -->
   <div class="sat-modal-overlay" id="satLuxuryModal">
     <div class="sat-modal-card">
       <div class="sat-modal-icon" id="satModalIcon">
@@ -683,25 +713,19 @@
       document.getElementById('displayProductPriceUSD').textContent = `$${totalPrice.toLocaleString()}`;
     }
 
-    // STRICT RADIO-STYLE TOGGLE: Deselect all other options in Metal section
-    function selectMetal(btn, metalName, extraCost) {
-      const section = document.getElementById('metalSection');
-      section.querySelectorAll('.pd-opt-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedMetal = metalName;
-      selectedMetalExtra = extraCost;
-      document.getElementById('selectedMetalText').textContent = metalName;
+    function onMetalDropdownChange(selectEl) {
+      const selectedOpt = selectEl.options[selectEl.selectedIndex];
+      selectedMetalExtra = parseInt(selectEl.value) || 0;
+      selectedMetal = selectedOpt.getAttribute('data-name') || selectedOpt.text;
+      document.getElementById('selectedMetalText').textContent = selectedMetal;
       updateCalculatedPrice();
     }
 
-    // STRICT RADIO-STYLE TOGGLE: Deselect all other options in Carat section
-    function selectCarat(btn, caratName, extraCost) {
-      const section = document.getElementById('caratSection');
-      section.querySelectorAll('.pd-opt-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedCarat = caratName;
-      selectedCaratExtra = extraCost;
-      document.getElementById('selectedCaratText').textContent = caratName;
+    function onCaratDropdownChange(selectEl) {
+      const selectedOpt = selectEl.options[selectEl.selectedIndex];
+      selectedCaratExtra = parseInt(selectEl.value) || 0;
+      selectedCarat = selectedOpt.getAttribute('data-name') || selectedOpt.text;
+      document.getElementById('selectedCaratText').textContent = selectedCarat;
       updateCalculatedPrice();
     }
 
@@ -759,7 +783,6 @@
     }
 
     function addToCartCurrentProduct() {
-      // 1. Check if user is signed in
       if (!isUserLoggedIn) {
         showSatModal({
           title: 'Sign In Required',
@@ -790,7 +813,6 @@
 
       const cart = getCartItems();
 
-      // 2. Check if item already exists in cart (Only 1 item can be added per product page)
       const existingItem = cart.find(c => c.id === cartItem.id);
       if (existingItem) {
         showSatModal({
@@ -836,6 +858,13 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      // Initialize selected metal & carat from dropdowns
+      const mSelect = document.getElementById('metalDropdown');
+      if (mSelect) onMetalDropdownChange(mSelect);
+
+      const cSelect = document.getElementById('caratDropdown');
+      if (cSelect) onCaratDropdownChange(cSelect);
+
       updateCartBadge();
     });
   </script>

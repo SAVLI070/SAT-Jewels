@@ -139,6 +139,15 @@ document.addEventListener('DOMContentLoaded', () => {
   refreshFbAdminCatalogTable();
   setUsdCurrencyBadge();
   initDynamicStorefront();
+
+  // Check query parameter to auto-open category modal (e.g., from Breadcrumb clicks)
+  const urlParams = new URLSearchParams(window.location.search);
+  const catToOpen = urlParams.get('openCategory');
+  if (catToOpen) {
+    setTimeout(() => {
+      openCollectionModal(catToOpen);
+    }, 400);
+  }
 });
 
 // Fetch dynamic categories and products from Neon PostgreSQL DB for landing page grid

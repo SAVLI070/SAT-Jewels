@@ -28,7 +28,7 @@ using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<SatJewelDbContext>();
         
-        // Execute DDL Raw SQL to guarantee tables exist in Neon PostgreSQL
+        // Execute DDL Raw SQL to guarantee tables and columns exist in Neon PostgreSQL
         var createTablesSql = @"
             CREATE TABLE IF NOT EXISTS ""Categories"" (
                 ""Id"" text NOT NULL,
@@ -50,12 +50,16 @@ using (var scope = app.Services.CreateScope())
                 ""PriceUSD"" numeric NOT NULL DEFAULT 0.0,
                 ""ImageUrl"" text NOT NULL DEFAULT '',
                 ""GalleryImages"" text NOT NULL DEFAULT '',
+                ""MetalOptions"" text NOT NULL DEFAULT '18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|22K Yellow Gold (+150)|24K Pure Gold (+400)|Platinum 950 (+350)|14K Yellow Gold (-100)|14K White Gold (-100)|10K Solid Gold (-200)|Rose Platinum (+500)',
+                ""CaratOptions"" text NOT NULL DEFAULT '0.5ct GIA (-800)|0.75ct GIA (-500)|1.0ct GIA (-400)|1.25ct GIA (-200)|1.5ct GIA (+0)|1.75ct GIA (+400)|2.0ct GIA (+750)|2.5ct GIA (+1200)|3.0ct GIA (+2000)|5.0ct Solitaire (+5000)',
                 ""IsActive"" boolean NOT NULL DEFAULT true,
                 ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_CatalogItems"" PRIMARY KEY (""Id"")
             );
 
             ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""GalleryImages"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""MetalOptions"" text NOT NULL DEFAULT '18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|22K Yellow Gold (+150)|24K Pure Gold (+400)|Platinum 950 (+350)|14K Yellow Gold (-100)|14K White Gold (-100)|10K Solid Gold (-200)|Rose Platinum (+500)';
+            ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""CaratOptions"" text NOT NULL DEFAULT '0.5ct GIA (-800)|0.75ct GIA (-500)|1.0ct GIA (-400)|1.25ct GIA (-200)|1.5ct GIA (+0)|1.75ct GIA (+400)|2.0ct GIA (+750)|2.5ct GIA (+1200)|3.0ct GIA (+2000)|5.0ct Solitaire (+5000)';
 
             CREATE TABLE IF NOT EXISTS ""Users"" (
                 ""Id"" text NOT NULL,
