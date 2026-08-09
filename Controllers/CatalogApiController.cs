@@ -177,6 +177,59 @@ namespace SAT1.Controllers
             return Ok(new { success = true, message = "Jewelry item saved to Neon PostgreSQL DB!", item });
         }
 
+        // 7. UPLOAD PRODUCT IMAGES FROM ADMIN PANEL (Max 10 images per item, max 10MB per image)
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        [HttpPost("upload-images")]
+        [RequestSizeLimit(110 * 1024 * 1024)] // 110 MB total payload limit
+        public async Task<IActionResult> UploadImages([FromForm] List<IFormFile> files)
+        {
+            if (files == null || files.Count == 0)
+            {
+                return BadRequest(new { message = "No files uploaded" });
+            }
+
+            if (files.Count > 10)
+            {
+                return BadRequest(new { message = "Maximum 10 images allowed per item." });
+            }
+
+            var uploadedUrls = new List<string>();
+            var uploadsDir = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+            if (!Directory.Exists(uploadsDir))
+            {
+                Directory.CreateDirectory(uploadsDir);
+            }
+
+            const long maxSingleFileSize = 10 * 1024 * 1024; // 10 MB per image limit
+
+            foreach (var file in files)
+            {
+                if (file.Length > maxSingleFileSize)
+                {
+                    return BadRequest(new { message = $"File '{file.FileName}' exceeds 10 MB limit." });
+                }
+
+                var fileExt = Path.GetExtension(file.FileName).ToLower();
+                var allowedExts = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+                if (!allowedExts.Contains(fileExt))
+                {
+                    return BadRequest(new { message = $"File '{file.FileName}' has unsupported format." });
+                }
+
+                var uniqueFileName = $"item_{Guid.NewGuid().ToString("N").Substring(0, 10)}{fileExt}";
+                var filePath = Path.Combine(uploadsDir, uniqueFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                uploadedUrls.Add($"/uploads/{uniqueFileName}");
+            }
+
+            return Ok(new { success = true, urls = uploadedUrls });
+        }
+
         // 6. DELETE / REMOVE PRODUCT ITEM
         [HttpDelete("items/{id}")]
         public async Task<IActionResult> DeleteCatalogItem(string id)

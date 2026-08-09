@@ -17,17 +17,51 @@
   <link rel="stylesheet" href="~/css/admin_layout.css" />
   <link rel="stylesheet" href="~/css/style.css" />
 
+  <!-- Blocking Script to prevent sidebar reload flash -->
+  <script>
+    (function() {
+      try {
+        if (localStorage.getItem('sat_admin_sidebar_collapsed') === 'true') {
+          document.documentElement.classList.add('sidebar-is-collapsed');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <style>
-    /* Collapsible Sidebar Smooth Transitions */
-    .adm-sidebar {
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease !important;
+    /* Transparent Glassmorphism Layout (FarmBridge Glass Reference) */
+    body {
+      background: radial-gradient(circle at 50% 10%, #f1f5f9 0%, #e2e8f0 100%) !important;
     }
 
+    .adm-sidebar {
+      background: rgba(255, 255, 255, 0.75) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      border-right: 1px solid rgba(226, 232, 240, 0.8) !important;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease !important;
+      box-shadow: 4px 0 24px rgba(15, 23, 42, 0.03) !important;
+    }
+
+    .adm-topbar {
+      background: rgba(255, 255, 255, 0.75) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+      border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03) !important;
+    }
+
+    /* Collapsed Sidebar Instant Pre-render & Dynamic Classes */
+    html.sidebar-is-collapsed .adm-sidebar,
     .adm-sidebar.collapsed {
       width: 72px !important;
       padding: 24px 10px !important;
     }
 
+    html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-name,
+    html.sidebar-is-collapsed .adm-sidebar .adm-role-badge,
+    html.sidebar-is-collapsed .adm-sidebar .adm-nav-link span,
+    html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-foot span,
     .adm-sidebar.collapsed .adm-sidebar-name,
     .adm-sidebar.collapsed .adm-role-badge,
     .adm-sidebar.collapsed .adm-nav-link span,
@@ -35,29 +69,31 @@
       display: none !important;
     }
 
+    html.sidebar-is-collapsed .adm-sidebar .adm-nav-link,
     .adm-sidebar.collapsed .adm-nav-link {
       justify-content: center;
       padding: 12px;
     }
 
+    html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-logo,
     .adm-sidebar.collapsed .adm-sidebar-logo {
       justify-content: center;
     }
 
     .adm-collapse-btn {
       background: rgba(15, 23, 42, 0.06);
-      border: 1px solid #e2e8f0;
+      border: 1px solid #cbd5e1;
       color: #334155;
       width: 36px;
       height: 36px;
-      border-radius: 8px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       font-size: 14px;
       transition: all 0.2s ease;
-      margin-right: 12px;
+      margin-right: 14px;
     }
 
     .adm-collapse-btn:hover {
@@ -104,11 +140,6 @@
             <i class="fa-solid fa-gem"></i> <span>Jewelry Catalog</span>
           </a>
         </li>
-        <li>
-          <a href="/Admin/AddProduct" class="adm-nav-link @(Context.Request.Path.Value?.ToLower().Contains("addproduct") == true ? "active" : "")" onclick="closeAdmOnMobile()">
-            <i class="fa-solid fa-circle-plus"></i> <span>Add New Item</span>
-          </a>
-        </li>
       </ul>
 
       <div class="adm-sidebar-foot">
@@ -122,7 +153,7 @@
     <div class="adm-main">
       <header class="adm-topbar">
         <div class="adm-topbar-left" style="display:flex;align-items:center;">
-          <!-- Sidebar Collapse/Expand Toggle Button (Task 3) -->
+          <!-- Sidebar Collapse/Expand Toggle Button -->
           <button class="adm-collapse-btn" id="sidebarCollapseToggleBtn" onclick="toggleSidebarCollapse()" title="Collapse / Expand Sidebar">
             <i class="fa-solid fa-bars-staggered" id="sidebarCollapseIcon"></i>
           </button>
@@ -144,11 +175,36 @@
 
   <script src="~/js/script.js"></script>
   <script>
+    // Ensure document state is synced on DOM load
+    document.addEventListener('DOMContentLoaded', () => {
+      const sidebar = document.getElementById('admSidebar');
+      const isCollapsed = localStorage.getItem('sat_admin_sidebar_collapsed') === 'true';
+      if (sidebar) {
+        if (isCollapsed) {
+          sidebar.classList.add('collapsed');
+          document.documentElement.classList.add('sidebar-is-collapsed');
+        } else {
+          sidebar.classList.remove('collapsed');
+          document.documentElement.classList.remove('sidebar-is-collapsed');
+        }
+      }
+      const icon = document.getElementById('sidebarCollapseIcon');
+      if (icon) {
+        icon.className = isCollapsed ? 'fa-solid fa-indent' : 'fa-solid fa-bars-staggered';
+      }
+    });
+
     function toggleSidebarCollapse() {
       const sidebar = document.getElementById('admSidebar');
       if (!sidebar) return;
-      sidebar.classList.toggle('collapsed');
-      const isCollapsed = sidebar.classList.contains('collapsed');
+      
+      const isCollapsed = sidebar.classList.toggle('collapsed');
+      if (isCollapsed) {
+        document.documentElement.classList.add('sidebar-is-collapsed');
+      } else {
+        document.documentElement.classList.remove('sidebar-is-collapsed');
+      }
+      
       localStorage.setItem('sat_admin_sidebar_collapsed', isCollapsed ? 'true' : 'false');
       
       const icon = document.getElementById('sidebarCollapseIcon');
@@ -156,16 +212,6 @@
         icon.className = isCollapsed ? 'fa-solid fa-indent' : 'fa-solid fa-bars-staggered';
       }
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const isCollapsed = localStorage.getItem('sat_admin_sidebar_collapsed') === 'true';
-      const sidebar = document.getElementById('admSidebar');
-      if (sidebar && isCollapsed) {
-        sidebar.classList.add('collapsed');
-        const icon = document.getElementById('sidebarCollapseIcon');
-        if (icon) icon.className = 'fa-solid fa-indent';
-      }
-    });
   </script>
   @RenderSection("Scripts", required: false)
 </body>

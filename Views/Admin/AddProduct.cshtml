@@ -5,17 +5,19 @@
 
 <style>
   .add-prod-panel {
-    max-width: 760px;
+    max-width: 840px;
     margin: 0 auto;
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(226, 232, 240, 0.8);
     border-radius: var(--radius-xl);
     padding: 36px;
-    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
   }
 
   .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 22px;
   }
 
   .form-label {
@@ -30,7 +32,7 @@
     width: 100%;
     box-sizing: border-box;
     padding: 12px 16px;
-    background: #f8fafc;
+    background: #ffffff;
     border: 1px solid #cbd5e1;
     border-radius: var(--radius-md);
     color: #0f172a;
@@ -41,13 +43,57 @@
   }
 
   .form-input:focus, .form-select:focus {
-    background: #ffffff;
     border-color: #b45309;
     box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15);
   }
 
+  /* Upload Dropzone Box */
+  .upload-dropzone {
+    border: 2px dashed #cbd5e1;
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    text-align: center;
+    background: #f8fafc;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+
+  .upload-dropzone:hover, .upload-dropzone.dragover {
+    border-color: #b45309;
+    background: #fffbeb;
+  }
+
+  .upload-icon {
+    font-size: 32px;
+    color: #b45309;
+    margin-bottom: 10px;
+  }
+
+  .upload-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .upload-preview-card {
+    height: 90px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  }
+
+  .upload-preview-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
   .btn-submit-item {
-    padding: 14px 28px;
+    padding: 14px 32px;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
     border: none;
     border-radius: var(--radius-full);
@@ -69,12 +115,12 @@
 </style>
 
 <div class="add-prod-panel">
-  <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid #f1f5f9;">
-    <div style="width:44px;height:44px;border-radius:10px;background:#fef3c7;color:#b45309;display:flex;align-items:center;justify-content:center;font-size:20px;">
+  <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #f1f5f9;">
+    <div style="width:48px;height:48px;border-radius:12px;background:#fef3c7;border:1px solid #fde68a;color:#b45309;display:flex;align-items:center;justify-content:center;font-size:22px;">
       <i class="fa-solid fa-gem"></i>
     </div>
     <div>
-      <h2 style="font-family:var(--font-serif);color:#0f172a;margin:0 0 4px;font-size:22px;">+ Publish New Item to Live Store</h2>
+      <h2 style="font-family:var(--font-serif);color:#0f172a;margin:0 0 4px;font-size:24px;">+ Publish New Item to Live Store</h2>
       <p style="color:#64748b;font-size:13px;margin:0;">Item will immediately be active and available for luxury buyers on the storefront.</p>
     </div>
   </div>
@@ -102,34 +148,44 @@
       <input type="text" id="adminProdSpec" class="form-input" placeholder="e.g. 18K Yellow Gold | 2.0ct GIA VVS1 | Brilliant Cut" required />
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-      <div class="form-group">
-        <label class="form-label">Price in USD ($) *</label>
-        <input type="number" id="adminProdPriceUSD" class="form-input" placeholder="e.g. 2200" min="1" required />
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Preset High-Res Image Asset</label>
-        <select id="adminProdImgSelect" class="form-select">
-          <option value="assets/ring_main.png">Royal Solitaire Ring (assets/ring_main.png)</option>
-          <option value="assets/ring_angle.png">Halo Cushion Ring (assets/ring_angle.png)</option>
-          <option value="assets/necklace_main.png">Imperial Diamond Necklace (assets/necklace_main.png)</option>
-          <option value="assets/necklace_detail.png">Floral Diamond Detail (assets/necklace_detail.png)</option>
-          <option value="assets/earring_main.png">Chandelier Earrings (assets/earring_main.png)</option>
-          <option value="assets/bracelet_main.png">Tennis Bracelet (assets/bracelet_main.png)</option>
-          <option value="assets/ring_whitegold.png">Platinum White Gold (assets/ring_whitegold.png)</option>
-          <option value="assets/ring_rosegold.png">Rose Gold Solitaire (assets/ring_rosegold.png)</option>
-        </select>
-      </div>
-    </div>
-
     <div class="form-group">
-      <label class="form-label">Or Custom Image URL (Optional)</label>
-      <input type="url" id="adminProdImgUrl" class="form-input" placeholder="https://example.com/custom-ring.jpg" />
+      <label class="form-label">Price in USD ($) *</label>
+      <input type="number" id="adminProdPriceUSD" class="form-input" placeholder="e.g. 2200" min="1" required />
     </div>
 
-    <div style="margin-top:28px;text-align:right;">
-      <button type="submit" class="btn-submit-item">
+    <!-- MULTI-IMAGE UPLOAD ZONE (Max 10 images, max 10MB per image) -->
+    <div class="form-group">
+      <label class="form-label">Upload High-Res Product Photos (Max 10 Images, 10MB per file) *</label>
+      
+      <div class="upload-dropzone" onclick="document.getElementById('adminUploadFiles').click()">
+        <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+        <div style="font-weight:700;color:#0f172a;font-size:15px;margin-bottom:4px;">Click or Drag & Drop Product Images</div>
+        <div style="font-size:12px;color:#64748b;">Upload up to 10 photos per item (max 10MB per file, max 100MB total). First image will be main thumbnail.</div>
+        <input type="file" id="adminUploadFiles" multiple accept="image/*" style="display:none;" onchange="previewUploadFiles(this)" />
+      </div>
+
+      <div id="uploadStatusText" style="font-size:12px;font-weight:600;color:#b45309;margin-top:8px;"></div>
+      <div class="upload-preview-grid" id="uploadPreviewGrid"></div>
+    </div>
+
+    <!-- PRESET ASSETS FALLBACK -->
+    <div class="form-group">
+      <label class="form-label">Or Choose Preset AI Studio Image Asset (Optional Fallback)</label>
+      <select id="adminProdImgSelect" class="form-select">
+        <option value="">-- None (Use Uploaded Images Above) --</option>
+        <option value="assets/ring_main.png">Royal Solitaire Ring (assets/ring_main.png)</option>
+        <option value="assets/ring_angle.png">Halo Cushion Ring (assets/ring_angle.png)</option>
+        <option value="assets/necklace_main.png">Imperial Diamond Necklace (assets/necklace_main.png)</option>
+        <option value="assets/necklace_detail.png">Floral Diamond Detail (assets/necklace_detail.png)</option>
+        <option value="assets/earring_main.png">Chandelier Earrings (assets/earring_main.png)</option>
+        <option value="assets/bracelet_main.png">Tennis Bracelet (assets/bracelet_main.png)</option>
+        <option value="assets/ring_whitegold.png">Platinum White Gold (assets/ring_whitegold.png)</option>
+        <option value="assets/ring_rosegold.png">Rose Gold Solitaire (assets/ring_rosegold.png)</option>
+      </select>
+    </div>
+
+    <div style="margin-top:32px;text-align:right;">
+      <button type="submit" class="btn-submit-item" id="btnSubmitItem">
         <i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live
       </button>
     </div>
@@ -137,6 +193,8 @@
 </div>
 
 <script>
+  let selectedFiles = [];
+
   document.addEventListener('DOMContentLoaded', () => {
     // Auto-select category if passed in query string parameter ?categoryId=rings
     const urlParams = new URLSearchParams(window.location.search);
@@ -147,6 +205,40 @@
     }
   });
 
+  function previewUploadFiles(input) {
+    const files = Array.from(input.files);
+    const statusText = document.getElementById('uploadStatusText');
+    const previewGrid = document.getElementById('uploadPreviewGrid');
+
+    if (files.length > 10) {
+      alert('Maximum 10 images allowed per item.');
+      input.value = '';
+      return;
+    }
+
+    const maxFileSize = 10 * 1024 * 1024; // 10MB
+    for (let f of files) {
+      if (f.size > maxFileSize) {
+        alert(`File "${f.name}" exceeds the 10 MB limit. Please select smaller files.`);
+        input.value = '';
+        return;
+      }
+    }
+
+    selectedFiles = files;
+    const totalMB = (files.reduce((sum, f) => sum + f.size, 0) / (1024 * 1024)).toFixed(1);
+    statusText.textContent = `Selected ${files.length} image(s) — Total Payload Size: ${totalMB} MB`;
+
+    previewGrid.innerHTML = files.map((file, i) => {
+      const src = URL.createObjectURL(file);
+      return `
+        <div class="upload-preview-card" title="${file.name}">
+          <img src="${src}" alt="Preview ${i + 1}" />
+        </div>
+      `;
+    }).join('');
+  }
+
   async function handleAddNewProduct(e) {
     e.preventDefault();
 
@@ -154,37 +246,91 @@
     const name = document.getElementById('adminProdName').value.trim();
     const spec = document.getElementById('adminProdSpec').value.trim();
     const priceUSD = parseFloat(document.getElementById('adminProdPriceUSD').value) || 0;
-    
-    const customUrl = document.getElementById('adminProdImgUrl').value.trim();
     const selectedPreset = document.getElementById('adminProdImgSelect').value;
-    const imageUrl = customUrl || selectedPreset;
+    const submitBtn = document.getElementById('btnSubmitItem');
+
+    let uploadedUrls = [];
+
+    // Step 1: Upload Files if selected
+    if (selectedFiles && selectedFiles.length > 0) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading Product Images...';
+
+      const formData = new FormData();
+      selectedFiles.forEach(f => formData.append('files', f));
+
+      try {
+        const uploadRes = await fetch('/api/catalogapi/upload-images', {
+          method: 'POST',
+          body: formData
+        });
+
+        const uploadData = await uploadRes.json();
+        if (uploadData.success && uploadData.urls) {
+          uploadedUrls = uploadData.urls;
+        } else {
+          alert(`Image Upload Error: ${uploadData.message || 'Failed to upload images'}`);
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live';
+          return;
+        }
+      } catch (err) {
+        console.error('Error uploading images:', err);
+        alert('Network error uploading images.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live';
+        return;
+      }
+    }
+
+    // Step 2: Determine final main image and gallery images
+    let mainImageUrl = '';
+    let galleryImages = '';
+
+    if (uploadedUrls.length > 0) {
+      mainImageUrl = uploadedUrls[0];
+      galleryImages = uploadedUrls.join(',');
+    } else if (selectedPreset) {
+      mainImageUrl = selectedPreset;
+      galleryImages = `${selectedPreset},assets/ring_clarity.png,assets/ring_model.png`;
+    } else {
+      mainImageUrl = 'assets/ring_main.png';
+      galleryImages = 'assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png';
+    }
 
     const payload = {
       categoryId,
       name,
       spec,
       priceUSD,
-      imageUrl,
-      galleryImages: `${imageUrl},assets/ring_clarity.png,assets/ring_model.png`,
+      imageUrl: mainImageUrl,
+      galleryImages: galleryImages,
       isActive: true
     };
 
     try {
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Database...';
+
       const res = await fetch('/api/catalogapi/items', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
+
       const data = await res.json();
       if (data.success || res.ok) {
-        alert(`✨ Success! Item "${name}" saved to Neon DB.`);
+        alert(`✨ Success! Product "${name}" published with ${uploadedUrls.length || 1} image(s).`);
         window.location.href = '/Admin/Catalog';
       } else {
         alert('Failed to publish product item.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live';
       }
     } catch (err) {
       console.error('Error publishing product:', err);
       alert('Network error publishing item.');
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live';
     }
   }
 </script>
