@@ -1,5 +1,8 @@
 @{
     ViewData["Title"] = "Fine Jewelry & AI Diamond Intelligence";
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var userName = User.Identity?.Name ?? "Client";
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
 }
 
 <!-- Intro Animation Overlay with Golden Pulse Halo -->
@@ -70,12 +73,8 @@
     </div>
 
     <div class="nav-actions">
-      <!-- Sign In Button (Left of Contact Us) -->
-      <a href="/Account/SignIn" class="btn-auth-nav" id="navSignInBtn">
-        <i class="fa-regular fa-user"></i> Sign In
-      </a>
+      <partial name="_AuthNav" />
 
-      <!-- Single Clean Contact Us Button -->
       <a href="#cta" class="btn-primary">
         <i class="fa-solid fa-envelope"></i> Contact Us
       </a>
@@ -105,9 +104,34 @@
     <i class="fa-solid fa-shield-halved"></i> Why SAT Jewel
   </a>
   <div style="padding: 16px 24px; border-top: 1px solid var(--border-glass); margin-top: 10px; display:flex; flex-direction:column; gap:10px;">
-    <a href="/Account/SignIn" class="btn-auth-nav" style="width: 100%; justify-content: center; text-align:center; box-sizing:border-box;">
-      <i class="fa-regular fa-user"></i> Sign In / Sign Up
-    </a>
+    @if (isAuthenticated)
+    {
+      <a href="/Account/MyAccount" class="btn-auth-nav" style="width: 100%; justify-content: center; text-align:center; box-sizing:border-box;">
+        <i class="fa-regular fa-user"></i> My Account
+      </a>
+      <a href="/Account/Orders" class="btn-auth-nav" style="width: 100%; justify-content: center; text-align:center; box-sizing:border-box;">
+        <i class="fa-solid fa-box"></i> My Orders
+      </a>
+      <a href="/Product/Cart" class="btn-auth-nav" style="width: 100%; justify-content: center; text-align:center; box-sizing:border-box;">
+        <i class="fa-solid fa-bag-shopping"></i> Cart
+      </a>
+      @if (string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase))
+      {
+        <a href="/admin" class="btn-auth-nav" style="width: 100%; justify-content: center; text-align:center; box-sizing:border-box;">Admin Portal</a>
+      }
+      <a href="/Account/Logout" class="btn-auth-nav" style="width: 100%; justify-content: center; text-align:center; box-sizing:border-box;">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </a>
+    }
+    else
+    {
+      <a href="/Account/SignIn?returnUrl=/" class="btn-auth-nav" style="width: 100%; justify-content: center; text-align:center; box-sizing:border-box;">
+        <i class="fa-regular fa-user"></i> Sign In / Sign Up
+      </a>
+      <a href="/Product/Cart" class="btn-auth-nav" style="width: 100%; justify-content: center; text-align:center; box-sizing:border-box;">
+        <i class="fa-solid fa-bag-shopping"></i> Cart
+      </a>
+    }
     <a href="#cta" class="btn-primary" onclick="toggleMenu()" style="width: 100%; justify-content: center;">
       <i class="fa-solid fa-envelope"></i> Contact Us
     </a>
@@ -135,9 +159,9 @@
     </p>
 
     <div class="hero-ctas">
-      <a href="#collections" class="btn-hero-primary">
-        <i class="fa-solid fa-gem"></i>
-        <span>Explore SAT Collections</span>
+      <a href="/Account/SignIn?returnUrl=/Product" class="btn-hero-primary">
+        <i class="fa-solid fa-right-to-bracket"></i>
+        <span>Sign In to Shop Collections</span>
       </a>
     </div>
 
@@ -558,36 +582,22 @@
       </div>
     </div>
 
-    <!-- USD International Payment Rails -->
+    <!-- Secure Stripe Checkout -->
     <div style="margin-top: 18px;">
-      <p style="font-size:13px;color:var(--taupe-beige);margin-bottom:12px;">Select Secure Payment Gateway (USD):</p>
+      <p style="font-size:13px;color:var(--taupe-beige);margin-bottom:12px;">Secure payment is processed via Stripe Checkout (USD).</p>
       <div class="payment-methods-grid">
-        <div class="pay-card" onclick="processPayment('Credit / Debit Card (Stripe USD)')">
+        <div class="pay-card" onclick="processPayment('stripe')">
           <i class="fa-solid fa-credit-card"></i>
           <div>
-            <div class="pay-title">Credit / Debit Card</div>
-            <div class="pay-sub">Stripe (Visa, Mastercard, Amex)</div>
+            <div class="pay-title">Pay with Stripe</div>
+            <div class="pay-sub">Cards & wallets via Stripe Checkout</div>
           </div>
         </div>
-        <div class="pay-card" onclick="processPayment('PayPal USD')">
-          <i class="fa-brands fa-paypal"></i>
+        <div class="pay-card" onclick="window.location.href='/Product/Cart'">
+          <i class="fa-solid fa-bag-shopping"></i>
           <div>
-            <div class="pay-title">PayPal Global</div>
-            <div class="pay-sub">One-click secure USD checkout</div>
-          </div>
-        </div>
-        <div class="pay-card" onclick="processPayment('Apple / Google Pay')">
-          <i class="fa-brands fa-apple"></i>
-          <div>
-            <div class="pay-title">Apple / Google Pay</div>
-            <div class="pay-sub">Biometric instant USD payment</div>
-          </div>
-        </div>
-        <div class="pay-card" onclick="processPayment('SWIFT Bank Wire Escrow')">
-          <i class="fa-solid fa-building-columns"></i>
-          <div>
-            <div class="pay-title">Bank Wire Escrow</div>
-            <div class="pay-sub">Direct SWIFT transfer for high-carats</div>
+            <div class="pay-title">Open Shopping Cart</div>
+            <div class="pay-sub">Review items, then checkout securely</div>
           </div>
         </div>
       </div>

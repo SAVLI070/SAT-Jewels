@@ -1,0 +1,110 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "My Account — SAT Jewel";
+    var fullName = ViewBag.FullName as string ?? "Client";
+    var email = ViewBag.Email as string ?? "";
+    var role = ViewBag.Role as string ?? "Client";
+    var recentOrders = ViewBag.RecentOrders as List<SAT1.Models.Order> ?? new List<SAT1.Models.Order>();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="~/css/style.css" />
+  <style>
+    body { background: var(--onyx, #040a18); color: var(--cream-ivory); font-family: var(--font-sans); margin: 0; min-height: 100vh; }
+    .acct-wrap { max-width: 960px; margin: 100px auto 60px; padding: 0 24px; }
+    .acct-title { font-family: var(--font-serif); font-size: 32px; margin: 0 0 8px; }
+    .acct-sub { color: var(--taupe-beige); font-size: 14px; margin-bottom: 28px; }
+    .acct-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 24px; }
+    @@media (max-width: 800px) { .acct-grid { grid-template-columns: 1fr; } }
+    .acct-card {
+      background: rgba(8, 17, 34, 0.88);
+      border: 1px solid var(--border-gold);
+      border-radius: 18px;
+      padding: 24px;
+    }
+    .acct-card h2 { font-family: var(--font-serif); font-size: 20px; margin: 0 0 16px; }
+    .acct-row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 14px; }
+    .acct-row:last-child { border-bottom: none; }
+    .acct-label { color: var(--taupe-beige); }
+    .acct-value { color: #fff; font-weight: 600; text-align: right; }
+    .order-line { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .order-line:last-child { border-bottom: none; }
+    .order-id { font-size: 12px; color: var(--champagne-gold); }
+    .order-meta { font-size: 13px; color: var(--taupe-beige); margin-top: 4px; }
+    .acct-links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .acct-links a { padding: 10px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+    .link-gold { background: var(--btn-gold, #d4b270); color: #060d0a; }
+    .link-ghost { border: 1px solid var(--border-gold); color: var(--cream-ivory); }
+  </style>
+</head>
+<body>
+  <nav class="navbar scrolled">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo-slot" style="text-decoration:none;">
+        <div class="sat-logo-emblem" style="width:36px;height:36px;">
+          <img src="~/assets/sat_emblem_clean.png" class="official-sat-logo-img" alt="SAT Emblem" />
+        </div>
+        <div class="sat-logo-text-wrap" style="margin-left:10px;">
+          <div class="sat-logo-brand" style="font-size:18px;">SAT <span>Jewel</span></div>
+          <div class="sat-logo-tagline" style="font-size:8px;">My Account</div>
+        </div>
+      </a>
+      <div class="nav-actions">
+        <partial name="_AuthNav" />
+      </div>
+    </div>
+  </nav>
+
+  <div class="acct-wrap">
+    <h1 class="acct-title">My Account</h1>
+    <p class="acct-sub">Manage your SAT Jewel profile, orders, and vault checkout — like your personal jewelry account hub.</p>
+
+    <div class="acct-grid">
+      <div class="acct-card">
+        <h2>Profile</h2>
+        <div class="acct-row"><span class="acct-label">Name</span><span class="acct-value">@fullName</span></div>
+        <div class="acct-row"><span class="acct-label">Email</span><span class="acct-value">@email</span></div>
+        <div class="acct-row"><span class="acct-label">Membership</span><span class="acct-value">@role</span></div>
+        <div class="acct-links">
+          <a class="link-gold" href="/Product">Go to Shop</a>
+          <a class="link-ghost" href="/Product/Cart">Go to Cart</a>
+          <a class="link-ghost" href="/Account/Logout">Logout</a>
+        </div>
+      </div>
+
+      <div class="acct-card">
+        <h2>Recent Orders</h2>
+        @if (recentOrders.Count == 0)
+        {
+          <p style="color:var(--taupe-beige);font-size:14px;">No orders yet. Explore collections and checkout when ready.</p>
+          <div class="acct-links">
+            <a class="link-gold" href="/Product">Shop Collections</a>
+          </div>
+        }
+        else
+        {
+          @foreach (var o in recentOrders)
+          {
+            <div class="order-line">
+              <div class="order-id">#@o.OrderId</div>
+              <div style="font-weight:700;margin-top:4px;">@o.ItemName</div>
+              <div class="order-meta">$@o.Amount.ToString("N2") @o.Currency · @o.Status · @o.CreatedAt.ToLocalTime().ToString("dd MMM yyyy")</div>
+            </div>
+          }
+          <div class="acct-links">
+            <a class="link-ghost" href="/Account/Orders">View all orders</a>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</body>
+</html>

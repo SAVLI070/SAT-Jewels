@@ -1,0 +1,87 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "Payment Successful — SAT Jewel";
+    var orderId = ViewBag.OrderId as string ?? "";
+    var amount = ViewBag.AmountTotal as decimal? ?? 0m;
+    var email = ViewBag.CustomerEmail as string ?? "";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="~/css/style.css" />
+  <style>
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--onyx, #040a18);
+      color: var(--cream-ivory);
+      font-family: var(--font-sans);
+      padding: 24px;
+    }
+    .pay-result {
+      max-width: 520px;
+      width: 100%;
+      background: var(--bg-glass-strong);
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-2xl, 24px);
+      padding: 40px 32px;
+      text-align: center;
+      box-shadow: var(--shadow-card);
+    }
+    .pay-result i { font-size: 48px; color: var(--champagne-gold); margin-bottom: 16px; }
+    .pay-result h1 {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      margin: 0 0 10px;
+      color: #fff;
+    }
+    .pay-result p { color: var(--taupe-beige); font-size: 14px; margin: 0 0 12px; }
+    .meta { font-size: 13px; color: var(--champagne-gold); margin-top: 18px; }
+    .actions { margin-top: 28px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .actions a {
+      padding: 12px 22px;
+      border-radius: var(--radius-full);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .btn-gold { background: #d4b270; color: #060d0a; }
+    .btn-ghost { border: 1px solid var(--border-gold); color: var(--cream-ivory); }
+  </style>
+</head>
+<body>
+  <div class="pay-result">
+    <i class="fa-solid fa-circle-check"></i>
+    <h1>Payment Successful</h1>
+    <p>Thank you for your SAT Jewel order. Your GIA dossier and insured dispatch are being prepared.</p>
+    @if (amount > 0)
+    {
+      <div class="meta">Paid: $@amount.ToString("N2") USD</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(orderId))
+    {
+      <div class="meta">Order ID: @orderId</div>
+    }
+    @if (!string.IsNullOrWhiteSpace(email))
+    {
+      <div class="meta">Receipt: @email</div>
+    }
+    <div class="actions">
+      <a class="btn-gold" href="/">Return Home</a>
+      <a class="btn-ghost" href="/#collections">Continue Shopping</a>
+    </div>
+  </div>
+  <script>
+    try { localStorage.removeItem('sat_shopping_cart_usd'); } catch (e) { }
+  </script>
+</body>
+</html>

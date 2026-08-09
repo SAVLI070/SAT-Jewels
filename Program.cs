@@ -17,6 +17,9 @@ builder.Services.AddScoped<SAT1.BAL.CatalogBal>();
 builder.Services.AddScoped<SAT1.BAL.AdminBal>();
 builder.Services.AddScoped<SAT1.BAL.AuthBal>();
 
+// Stripe API key (Checkout Sessions + webhooks)
+Stripe.StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -84,10 +87,21 @@ using (var scope = app.Services.CreateScope())
                 ""Currency"" text NOT NULL DEFAULT 'USD',
                 ""CustomerRegion"" text NOT NULL DEFAULT 'Global',
                 ""PaymentMethod"" text NOT NULL DEFAULT 'Stripe USD',
-                ""Status"" text NOT NULL DEFAULT 'Processing',
+                ""Status"" text NOT NULL DEFAULT 'Pending',
                 ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                ""UserId"" text NOT NULL DEFAULT '',
+                ""CustomerEmail"" text NOT NULL DEFAULT '',
+                ""StripeSessionId"" text NOT NULL DEFAULT '',
+                ""StripePaymentIntentId"" text NOT NULL DEFAULT '',
+                ""ItemsJson"" text NOT NULL DEFAULT '[]',
                 CONSTRAINT ""PK_Orders"" PRIMARY KEY (""OrderId"")
             );
+
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""UserId"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""CustomerEmail"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""StripeSessionId"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""StripePaymentIntentId"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ItemsJson"" text NOT NULL DEFAULT '[]';
         ";
 
         db.Database.ExecuteSqlRaw(createTablesSql);

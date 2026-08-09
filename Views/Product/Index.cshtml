@@ -1,0 +1,242 @@
+@model List<SAT1.Models.CatalogItem>
+@{
+    Layout = null;
+    ViewData["Title"] = "Shop Collections — SAT Jewel";
+    var categories = ViewBag.Categories as List<SAT1.Models.Category> ?? new List<SAT1.Models.Category>();
+    var activeCategory = ViewBag.ActiveCategory as string ?? "all";
+    var productCount = ViewBag.ProductCount as int? ?? Model?.Count ?? 0;
+    var userName = User.Identity?.Name ?? "Client";
+
+    string FixImg(string? path)
+    {
+        if (string.IsNullOrWhiteSpace(path)) return "/assets/ring_main.png";
+        if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
+        if (path.StartsWith("~/")) return path.Substring(1);
+        if (!path.StartsWith("/")) return "/" + path;
+        return path;
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="~/css/style.css" />
+  <style>
+    body {
+      background: var(--onyx, #040a18);
+      color: var(--cream-ivory);
+      font-family: var(--font-sans);
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    .shop-wrap {
+      max-width: 1200px;
+      margin: 100px auto 60px;
+      padding: 0 24px;
+    }
+
+    .shop-header {
+      margin-bottom: 28px;
+    }
+
+    .shop-eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--champagne-gold);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .shop-title {
+      font-family: var(--font-serif);
+      font-size: clamp(28px, 4vw, 40px);
+      margin: 0 0 8px;
+      color: #fff;
+    }
+
+    .shop-sub {
+      color: var(--taupe-beige);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    .shop-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 28px 0 24px;
+    }
+
+    .shop-filter {
+      padding: 9px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--border-gold-soft);
+      background: rgba(8, 16, 34, 0.7);
+      color: var(--cream-ivory);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+
+    .shop-filter:hover,
+    .shop-filter.active {
+      background: var(--champagne-gold);
+      color: #060d0a;
+      border-color: var(--champagne-gold);
+    }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 22px;
+    }
+
+    .shop-card {
+      background: rgba(8, 17, 34, 0.88);
+      border: 1px solid rgba(212, 178, 112, 0.28);
+      border-radius: 18px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .shop-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--border-gold);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .shop-card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      background: #0a1426;
+    }
+
+    .shop-card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .shop-card-name {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .shop-card-spec {
+      font-size: 12px;
+      color: var(--taupe-beige);
+      margin-bottom: 12px;
+      line-height: 1.4;
+      flex: 1;
+    }
+
+    .shop-card-price {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--champagne-gold);
+      margin-bottom: 12px;
+    }
+
+    .shop-card-btn {
+      width: 100%;
+      padding: 10px 0;
+      border: none;
+      border-radius: 999px;
+      background: var(--btn-gold, #d4b270);
+      color: #060d0a;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .shop-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--taupe-beige);
+      border: 1px dashed rgba(212, 178, 112, 0.3);
+      border-radius: 18px;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar scrolled">
+    <div class="container nav-inner">
+      <a href="/Product" class="nav-logo-slot" style="text-decoration:none;">
+        <div class="sat-logo-emblem" style="width:36px;height:36px;">
+          <img src="~/assets/sat_emblem_clean.png" class="official-sat-logo-img" alt="SAT Emblem" />
+        </div>
+        <div class="sat-logo-text-wrap" style="margin-left:10px;">
+          <div class="sat-logo-brand" style="font-size:18px;">SAT <span>Jewel</span></div>
+          <div class="sat-logo-tagline" style="font-size:8px;">Shop Vault</div>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <partial name="_AuthNav" />
+      </div>
+    </div>
+  </nav>
+
+  <div class="shop-wrap">
+    <div class="shop-header">
+      <div class="shop-eyebrow">Welcome back, @userName</div>
+      <h1 class="shop-title">Shop Collections</h1>
+      <p class="shop-sub">@productCount GIA-certified pieces available in USD. Select a collection to refine your vault.</p>
+    </div>
+
+    <div class="shop-filters">
+      <a class="shop-filter @(activeCategory == "all" ? "active" : "")" href="/Product">All</a>
+      @foreach (var cat in categories)
+      {
+        <a class="shop-filter @(activeCategory == cat.Id ? "active" : "")" href="/Product?category=@cat.Id">@cat.Name</a>
+      }
+    </div>
+
+    @if (Model == null || Model.Count == 0)
+    {
+      <div class="shop-empty">
+        <i class="fa-solid fa-gem" style="font-size:36px;color:var(--champagne-gold);margin-bottom:12px;"></i>
+        <div>No products in this collection right now.</div>
+      </div>
+    }
+    else
+    {
+      <div class="shop-grid">
+        @foreach (var p in Model)
+        {
+          var href = $"/Product/Details/{p.Id}";
+          <div class="shop-card" onclick="window.location.href='@href'">
+            <img src="@FixImg(p.ImageUrl)" alt="@p.Name" />
+            <div class="shop-card-body">
+              <div class="shop-card-name">@p.Name</div>
+              <div class="shop-card-spec">@p.Spec</div>
+              <div class="shop-card-price">$@p.PriceUSD.ToString("N0") USD</div>
+              <button type="button" class="shop-card-btn" onclick="event.stopPropagation(); window.location.href='@href'">
+                <i class="fa-solid fa-bag-shopping"></i> View & Buy
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</body>
+</html>

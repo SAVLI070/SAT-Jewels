@@ -23,7 +23,7 @@
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background: radial-gradient(circle at 50% 30%, #0c1833 0%, #030712 100%);
+      background: var(--onyx, #040a18);
       font-family: var(--font-sans);
       color: var(--cream-ivory);
       display: flex;
@@ -118,7 +118,7 @@
       width: 56px;
       height: 56px;
       margin: 0 auto 10px;
-      background: radial-gradient(circle, #0f1e36 0%, #081120 100%);
+      background: #0a1426;
       border: 1.5px solid #b45309;
       border-radius: 14px;
       display: flex;
@@ -222,7 +222,7 @@
       padding: 12px 0;
       border: none;
       border-radius: var(--radius-full);
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
+      background: #d4b270;
       color: #060d0a;
       font-size: 14px;
       font-weight: 700;
@@ -238,7 +238,7 @@
     .btn-auth-submit:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 28px rgba(212, 178, 112, 0.6);
-      background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
+      background: #e2ca94;
     }
 
     .auth-divider {
@@ -307,8 +307,11 @@
     }
 
     .overlay {
-      background: linear-gradient(135deg, rgba(8, 17, 34, 0.88) 0%, rgba(3, 7, 18, 0.92) 100%),
-                  url('/assets/hero_crystals_macro_1786187419288.png') center/cover no-repeat;
+      background-color: rgba(8, 17, 34, 0.9);
+      background-image: url('/assets/hero_crystals_macro_1786187419288.png');
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
       background-blend-mode: overlay;
       color: #ffffff;
       position: relative;
@@ -360,7 +363,7 @@
       width: 64px;
       height: 64px;
       margin-bottom: 16px;
-      background: radial-gradient(circle, #0f1e36 0%, #081120 100%);
+      background: #0a1426;
       border: 1.5px solid #b45309;
       border-radius: 16px;
       display: flex;
@@ -504,6 +507,10 @@
       <!-- 1. SIGN IN FORM PANE (Left Position by default) -->
       <div class="form-container sign-in-container">
         <form method="post" action="/Account/HandleSignIn">
+          @if (!string.IsNullOrEmpty(returnUrl))
+          {
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+          }
           <div class="auth-brand-head">
             <div class="auth-logo-badge">
               <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
@@ -573,6 +580,10 @@
       <!-- 2. SIGN UP FORM PANE (Right Position when active) -->
       <div class="form-container sign-up-container">
         <form method="post" action="/Account/HandleSignUp">
+          @if (!string.IsNullOrEmpty(returnUrl))
+          {
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
+          }
           <div class="auth-brand-head">
             <div class="auth-logo-badge">
               <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />

@@ -6,6 +6,7 @@
     var categoryName = ViewBag.CategoryName as string ?? "Haute Joaillerie";
     var categoryBadge = ViewBag.CategoryBadge as string ?? "GIA Certified";
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var userName = User.Identity?.Name ?? "Client";
 
     string FixImg(string? path) {
         if (string.IsNullOrWhiteSpace(path)) return "/assets/ring_main.png";
@@ -64,7 +65,7 @@
 
   <style>
     body {
-      background: radial-gradient(circle at 50% 20%, #0a1426 0%, #030712 100%);
+      background: var(--onyx, #040a18);
       color: var(--cream-ivory);
       font-family: var(--font-sans);
       margin: 0;
@@ -365,7 +366,7 @@
     .btn-buy-now {
       padding: 14px 0;
       border-radius: var(--radius-full);
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
+      background: #d4b270;
       border: none;
       color: #060d0a;
       font-size: 14px;
@@ -382,7 +383,7 @@
     .btn-buy-now:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 25px rgba(212, 178, 112, 0.6);
-      background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
+      background: #e2ca94;
     }
 
     /* CUSTOM BESPOKE LUXURY MODAL DIALOG */
@@ -410,7 +411,7 @@
     }
 
     .sat-modal-card {
-      background: linear-gradient(145deg, rgba(10, 20, 38, 0.95), rgba(6, 13, 26, 0.98));
+      background: rgba(8, 16, 34, 0.96);
       border: 1px solid var(--border-gold);
       border-radius: var(--radius-2xl);
       padding: 32px;
@@ -476,7 +477,7 @@
       flex: 1;
       padding: 12px;
       border-radius: var(--radius-full);
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
+      background: #d4b270;
       border: none;
       color: #060d0a;
       font-size: 13px;
@@ -530,20 +531,10 @@
       </a>
 
       <div class="nav-actions">
-        <a href="/Product/Cart" class="btn-auth-nav" id="cartBtnNav">
-          <i class="fa-solid fa-bag-shopping"></i> Shopping Cart ( <span id="navCartCount">0</span> )
-        </a>
-
-        @if (isAuthenticated)
-        {
-          <span style="font-size:13px;color:var(--champagne-gold);font-weight:600;"><i class="fa-solid fa-user-check"></i> VIP Client</span>
+        @{
+          ViewData["ShowCartLink"] = true;
         }
-        else
-        {
-          <a href="/Account/SignIn" class="btn-auth-nav">
-            <i class="fa-regular fa-user"></i> Sign In
-          </a>
-        }
+        <partial name="_AuthNav" />
 
         <a href="/#cta" class="btn-primary">
           <i class="fa-solid fa-envelope"></i> Contact Us
@@ -795,29 +786,23 @@
       if (countEl) countEl.textContent = items.reduce((sum, i) => sum + i.quantity, 0);
     }
 
-    function addToCartCurrentProduct() {
-      if (!isUserLoggedIn) {
-        showSatModal({
-          title: 'Sign In Required',
-          message: 'You must be signed in to add items to your bespoke luxury shopping cart vault.',
-          icon: '<i class="fa-solid fa-user-lock"></i>',
-          confirmText: 'Sign In Now',
-          showCancel: true,
-          onConfirm: () => {
-            window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
-          }
-        });
-        return;
-      }
+    function sameCartLine(a, b) {
+      return a.id === b.id
+        && (a.metal || '') === (b.metal || '')
+        && (a.carat || '') === (b.carat || '')
+        && (a.engraving || '') === (b.engraving || '');
+    }
 
+    function addToCartCurrentProduct() {
+      // Guest-friendly cart (GIVA/Palmonas style): browse & add freely; login required at checkout
       const engraving = document.getElementById('engravingText').value.trim();
       const finalPriceUSD = basePriceUSD + selectedMetalExtra + selectedCaratExtra;
 
       const cartItem = {
-        id: '@Model.Id',
-        name: '@Model.Name',
+        id: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Id)),
+        name: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Name)),
         priceUSD: finalPriceUSD,
-        img: '@galleryList[0]',
+        img: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(galleryList.Count > 0 ? galleryList[0] : Model.ImageUrl)),
         metal: selectedMetal,
         carat: selectedCarat,
         engraving: engraving,
@@ -825,49 +810,33 @@
       };
 
       const cart = getCartItems();
+      const existingItem = cart.find(c => sameCartLine(c, cartItem));
 
-      const existingItem = cart.find(c => c.id === cartItem.id);
       if (existingItem) {
-        showSatModal({
-          title: 'Item Already in Vault Cart',
-          message: `"${cartItem.name}" is already in your Shopping Cart. You can adjust quantities or remove items from your Shopping Cart page.`,
-          icon: '<i class="fa-solid fa-bag-shopping"></i>',
-          confirmText: 'View Shopping Cart',
-          showCancel: true,
-          onConfirm: () => {
-            window.location.href = '/Product/Cart';
-          }
-        });
-        return;
+        existingItem.quantity = (existingItem.quantity || 1) + 1;
+        existingItem.priceUSD = cartItem.priceUSD;
+        saveCartItems(cart);
+        const toast = document.getElementById('cartToastAlert');
+        document.getElementById('cartToastSubtitle').textContent = `"${cartItem.name}" quantity updated in cart.`;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3500);
+        return true;
       }
 
       cart.push(cartItem);
       saveCartItems(cart);
 
-      // Show Toast Notification
       const toast = document.getElementById('cartToastAlert');
       document.getElementById('cartToastSubtitle').textContent = `"${cartItem.name}" (${cartItem.metal}) added to cart.`;
       toast.classList.add('show');
       setTimeout(() => toast.classList.remove('show'), 3500);
+      return true;
     }
 
     function instantBuyCurrentProduct() {
-      if (!isUserLoggedIn) {
-        showSatModal({
-          title: 'Sign In Required',
-          message: 'You must be signed in to purchase items from our vault.',
-          icon: '<i class="fa-solid fa-user-lock"></i>',
-          confirmText: 'Sign In Now',
-          showCancel: true,
-          onConfirm: () => {
-            window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
-          }
-        });
-        return;
+      if (addToCartCurrentProduct()) {
+        window.location.href = '/Product/Cart';
       }
-
-      addToCartCurrentProduct();
-      window.location.href = '/Product/Cart';
     }
 
     document.addEventListener('DOMContentLoaded', () => {

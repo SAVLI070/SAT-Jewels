@@ -17,8 +17,18 @@ namespace SAT1.Models
 
         public string PaymentMethod { get; set; } = "Credit Card (Stripe USD)";
 
-        public string Status { get; set; } = "Pending GIA Dispatch";
+        public string Status { get; set; } = "Pending";
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public string UserId { get; set; } = string.Empty;
+
+        public string CustomerEmail { get; set; } = string.Empty;
+
+        public string StripeSessionId { get; set; } = string.Empty;
+
+        public string StripePaymentIntentId { get; set; } = string.Empty;
+
+        public string ItemsJson { get; set; } = "[]";
     }
 }

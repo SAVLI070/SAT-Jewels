@@ -394,10 +394,8 @@ function closeCheckoutModal() {
 }
 
 function processPayment(method) {
-  if (!activeCheckoutProduct) return;
-  const formatted = formatPrice(activeCheckoutProduct.priceUSD);
-  alert(`Payment Initiated via ${method.toUpperCase()} in USD!\nItem: ${activeCheckoutProduct.name}\nTotal Amount: ${formatted} USD\n\nThank you for choosing SAT Jewel. Your GIA certificate & insured order are being processed.`);
   closeCheckoutModal();
+  window.location.href = '/Product/Cart';
 }
 
 // 9. CLIENT PORTAL AUTHENTICATION & LOGIN MODAL

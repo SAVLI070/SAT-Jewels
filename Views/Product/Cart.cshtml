@@ -20,7 +20,7 @@
 
   <style>
     body {
-      background: radial-gradient(circle at 50% 20%, #0a1426 0%, #030712 100%);
+      background: var(--onyx, #040a18);
       color: var(--cream-ivory);
       font-family: var(--font-sans);
       margin: 0;
@@ -207,7 +207,7 @@
       width: 100%;
       padding: 14px 0;
       border-radius: var(--radius-full);
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
+      background: #d4b270;
       border: none;
       color: #060d0a;
       font-size: 15px;
@@ -225,7 +225,7 @@
     .btn-checkout-cart:hover {
       transform: translateY(-2px);
       box-shadow: 0 6px 28px rgba(212, 178, 112, 0.6);
-      background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
+      background: #e2ca94;
     }
 
     .empty-cart-box {
@@ -256,16 +256,8 @@
       </a>
 
       <div class="nav-actions">
-        @if (isAuthenticated)
-        {
-          <span style="font-size:13px;color:var(--champagne-gold);font-weight:600;"><i class="fa-solid fa-user-check"></i> Welcome, @userName</span>
-        }
-        else
-        {
-          <a href="/Account/SignIn" class="btn-auth-nav">
-            <i class="fa-regular fa-user"></i> Sign In
-          </a>
-        }
+        @{ ViewData["ShowCartLink"] = false; }
+        <partial name="_AuthNav" />
 
         <a href="/#cta" class="btn-primary">
           <i class="fa-solid fa-envelope"></i> Contact Us
@@ -282,12 +274,12 @@
 
     @if (!isAuthenticated)
     {
-      <div style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);border-radius:12px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:10px;color:#fca5a5;">
-          <i class="fa-solid fa-lock"></i>
-          <span>You must be signed in to fill and checkout your shopping cart vault.</span>
+      <div style="background:rgba(212,178,112,0.12);border:1px solid rgba(212,178,112,0.35);border-radius:12px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:10px;color:var(--champagne-gold);">
+          <i class="fa-solid fa-user-lock"></i>
+          <span>You can review your cart as a guest. Sign in to complete secure Stripe checkout.</span>
         </div>
-        <a href="/Account/SignIn?returnUrl=/Product/Cart" class="btn-auth-nav" style="background:var(--champagne-gold);color:#060d0a;">Sign In Now</a>
+        <a href="/Account/SignIn?returnUrl=/Product/Cart" class="btn-auth-nav" style="background:var(--champagne-gold);color:#060d0a;">Sign In to Checkout</a>
       </div>
     }
 
@@ -338,13 +330,26 @@
     const isUserLoggedIn = @(isAuthenticated ? "true" : "false");
 
     function getCartItems() {
-      const saved = localStorage.getItem('sat_shopping_cart_usd');
-      return saved ? JSON.parse(saved) : [];
+      try {
+        const saved = localStorage.getItem('sat_shopping_cart_usd');
+        return saved ? JSON.parse(saved) : [];
+      } catch {
+        return [];
+      }
     }
 
     function saveCartItems(items) {
       localStorage.setItem('sat_shopping_cart_usd', JSON.stringify(items));
       renderCartView();
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function fixImagePath(path) {
@@ -377,28 +382,35 @@
       let subtotal = 0;
 
       container.innerHTML = items.map((item, index) => {
-        const itemTotal = item.priceUSD * item.quantity;
+        const qty = Number(item.quantity) || 1;
+        const itemTotal = (Number(item.priceUSD) || 0) * qty;
         subtotal += itemTotal;
-        const imgSrc = fixImagePath(item.img);
+        const imgSrc = escapeHtml(fixImagePath(item.img));
+        const name = escapeHtml(item.name);
+        const metal = escapeHtml(item.metal || '18K Gold');
+        const carat = escapeHtml(item.carat || '1.5ct GIA');
+        const engraving = item.engraving
+          ? `| Engraving: "<em>${escapeHtml(item.engraving)}</em>"`
+          : '';
 
         return `
           <div class="cart-item-row">
-            <img src="${imgSrc}" class="cart-item-img" alt="${item.name}" />
+            <img src="${imgSrc}" class="cart-item-img" alt="${name}" />
             <div>
-              <div class="cart-item-name">${item.name}</div>
+              <div class="cart-item-name">${name}</div>
               <div class="cart-item-meta">
-                ${item.metal || '18K Gold'} | ${item.carat || '1.5ct GIA'}
-                ${item.engraving ? `| Engraving: "<em>${item.engraving}</em>"` : ''}
+                ${metal} | ${carat}
+                ${engraving}
               </div>
             </div>
             <div class="cart-qty-wrap">
-              <button class="cart-qty-btn" onclick="updateQty(${index}, -1)">-</button>
-              <span class="cart-qty-val">${item.quantity}</span>
-              <button class="cart-qty-btn" onclick="updateQty(${index}, 1)">+</button>
+              <button type="button" class="cart-qty-btn" onclick="updateQty(${index}, -1)">-</button>
+              <span class="cart-qty-val">${qty}</span>
+              <button type="button" class="cart-qty-btn" onclick="updateQty(${index}, 1)">+</button>
             </div>
             <div style="display:flex;align-items:center;gap:12px;">
               <div class="cart-item-price">$${itemTotal.toLocaleString()} USD</div>
-              <button class="btn-cart-remove" onclick="removeItem(${index})" title="Remove item">
+              <button type="button" class="btn-cart-remove" onclick="removeItem(${index})" title="Remove item">
                 <i class="fa-solid fa-trash"></i>
               </button>
             </div>
@@ -413,7 +425,7 @@
     function updateQty(index, change) {
       const items = getCartItems();
       if (items[index]) {
-        items[index].quantity += change;
+        items[index].quantity = (Number(items[index].quantity) || 1) + change;
         if (items[index].quantity <= 0) {
           items.splice(index, 1);
         }
@@ -429,9 +441,9 @@
       }
     }
 
-    function proceedCartCheckout() {
+    async function proceedCartCheckout() {
       if (!isUserLoggedIn) {
-        if (confirm("🔒 Sign In Required!\n\nYou must be signed in to checkout your shopping cart.\n\nWould you like to Sign In now?")) {
+        if (confirm("Sign In Required!\n\nYou must be signed in to checkout your shopping cart.\n\nWould you like to Sign In now?")) {
           window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
         }
         return;
@@ -443,14 +455,61 @@
         return;
       }
 
-      const total = items.reduce((sum, i) => sum + (i.priceUSD * i.quantity), 0);
-      alert(`✨ Payment Checkout Initiated in USD ($)!\n\nTotal Items: ${items.length}\nTotal Amount: $${total.toLocaleString()} USD\n\nThank you! Your GIA certificate & insured order are being processed via Stripe USD.`);
-      localStorage.removeItem('sat_shopping_cart_usd');
-      renderCartView();
+      const btn = document.querySelector('.btn-checkout-cart');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connecting to Stripe…';
+      }
+
+      try {
+        const payload = {
+          items: items.map(i => ({
+            id: i.id,
+            metal: i.metal || '',
+            carat: i.carat || '',
+            engraving: i.engraving || '',
+            quantity: Number(i.quantity) || 1
+          }))
+        };
+
+        const res = await fetch('/Payment/CreateCheckoutSession', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'RequestVerificationToken': ''
+          },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 401) {
+          if (confirm((data.message || 'Sign in required.') + '\n\nGo to Sign In?')) {
+            window.location.href = data.loginUrl || '/Account/SignIn?returnUrl=/Product/Cart';
+          }
+          return;
+        }
+        if (!res.ok || !data.success || !data.url) {
+          throw new Error(data.message || 'Unable to start Stripe checkout.');
+        }
+
+        window.location.href = data.url;
+      } catch (err) {
+        alert(err.message || 'Checkout failed. Please try again.');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> Proceed to USD Checkout';
+        }
+      }
     }
 
     document.addEventListener('DOMContentLoaded', () => {
       renderCartView();
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('cleared') === '1') {
+        localStorage.removeItem('sat_shopping_cart_usd');
+        renderCartView();
+        history.replaceState({}, '', '/Product/Cart');
+      }
     });
   </script>
 </body>

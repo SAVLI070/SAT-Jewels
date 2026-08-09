@@ -15,8 +15,48 @@ namespace SAT1.Controllers
             _context = context;
         }
 
+        // GET: /Product — dedicated shop page (logged-in clients only)
+        [HttpGet]
+        public async Task<IActionResult> Index(string? category = null)
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                // Not logged in → marketing landing
+                return RedirectToAction("Index", "Home");
+            }
+
+            var categories = await _context.Categories
+                .Where(c => c.IsActive)
+                .OrderBy(c => c.DisplayOrder)
+                .ToListAsync();
+
+            var productsQuery = _context.CatalogItems.Where(p => p.IsActive);
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                var catExists = categories.Any(c => c.Id == category);
+                if (catExists)
+                {
+                    productsQuery = productsQuery.Where(p => p.CategoryId == category);
+                }
+                else
+                {
+                    category = null;
+                }
+            }
+
+            var products = await productsQuery
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.Categories = categories;
+            ViewBag.ActiveCategory = category ?? "all";
+            ViewBag.ProductCount = products.Count;
+
+            return View(products);
+        }
+
         // GET: /Product/Details/{id}
-        // OWASP A01: Strict Access Control & Hidden Category Guard
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Details(string id)
@@ -27,7 +67,6 @@ namespace SAT1.Controllers
                 return View("RestrictedAccess");
             }
 
-            // 1. Query active catalog item by ID (Strict check, NO fallback to prevent ID enumeration)
             var product = await _context.CatalogItems.FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
             if (product == null)
             {
@@ -35,8 +74,6 @@ namespace SAT1.Controllers
                 return View("RestrictedAccess");
             }
 
-            // 2. Query parent category and verify it is ACTIVE
-            // If the category is hidden/disabled by Admin, access to any item in that category via URL is strictly blocked!
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == product.CategoryId && c.IsActive);
             if (category == null)
             {
@@ -47,7 +84,6 @@ namespace SAT1.Controllers
             ViewBag.CategoryName = category.Name;
             ViewBag.CategoryBadge = category.Badge;
 
-            // 3. Related active items from the SAME active category only
             var relatedItems = await _context.CatalogItems
                 .Where(i => i.CategoryId == product.CategoryId && i.Id != product.Id && i.IsActive)
                 .OrderBy(i => i.CreatedAt)

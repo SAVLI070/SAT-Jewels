@@ -134,8 +134,7 @@ a {
 .hero-image-overlay {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at center, rgba(6, 13, 10, 0.25) 0%, rgba(6, 13, 10, 0.75) 100%),
-              linear-gradient(to bottom, rgba(6, 13, 10, 0.45) 0%, rgba(6, 13, 10, 0.65) 100%);
+  background: rgba(4, 10, 24, 0.62);
 }
 
 /* INTRO ANIMATION OVERLAY & CENTERED LOGO TRANSITION */
@@ -143,7 +142,7 @@ a {
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: radial-gradient(circle at center, #0a1630 0%, #030814 100%);
+  background: #040a18;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -204,12 +203,7 @@ a {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 35%,
-    rgba(255, 255, 255, 0.45) 50%,
-    transparent 65%
-  );
+  background: rgba(255, 255, 255, 0.18);
   animation: shimmerSweep 2.2s infinite ease-in-out;
   pointer-events: none;
   z-index: 2;
@@ -245,7 +239,7 @@ a {
 .sat-logo-emblem {
   width: 78px;
   height: 78px;
-  background: radial-gradient(circle, #0b1a38 0%, #030814 100%);
+  background: #0a1426;
   border: 2px solid #d4b270;
   border-radius: 18px;
   display: flex;
@@ -355,7 +349,7 @@ a {
 .bg-orb-1 {
   width: 650px;
   height: 650px;
-  background: radial-gradient(circle, var(--champagne-gold) 0%, transparent 70%);
+  background: rgba(212, 178, 112, 0.14);
   top: -150px;
   left: -150px;
   animation: drift1 20s ease-in-out infinite;
@@ -364,7 +358,7 @@ a {
 .bg-orb-2 {
   width: 550px;
   height: 550px;
-  background: radial-gradient(circle, var(--terracotta) 0%, transparent 70%);
+  background: rgba(59, 91, 156, 0.12);
   top: 35%;
   right: -120px;
   animation: drift2 24s ease-in-out infinite;
@@ -373,7 +367,7 @@ a {
 .bg-orb-3 {
   width: 450px;
   height: 450px;
-  background: radial-gradient(circle, var(--champagne-gold) 0%, transparent 70%);
+  background: rgba(212, 178, 112, 0.14);
   bottom: 15%;
   left: 5%;
   animation: drift3 18s ease-in-out infinite;
@@ -382,7 +376,7 @@ a {
 .bg-orb-4 {
   width: 350px;
   height: 350px;
-  background: radial-gradient(circle, var(--burgundy) 0%, transparent 70%);
+  background: rgba(26, 47, 92, 0.16);
   bottom: -80px;
   right: 20%;
   animation: drift4 22s ease-in-out infinite;
@@ -500,7 +494,7 @@ a {
   bottom: 5px;
   left: 5px;
   width: 0;
-  background: linear-gradient(135deg, rgba(212, 178, 112, 0.35) 0%, rgba(162, 96, 70, 0.3) 100%);
+  background: rgba(212, 178, 112, 0.28);
   border: 1px solid var(--border-gold);
   border-radius: var(--radius-full);
   transition: all 0.35s var(--ease-spring);
@@ -597,7 +591,7 @@ a {
 .btn-primary {
   padding: 10px 24px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--champagne-gold) 0%, var(--terracotta) 100%);
+  background: var(--champagne-gold);
   color: #060d0a;
   font-size: 13px;
   font-weight: 700;
@@ -701,7 +695,7 @@ a {
 }
 
 .typewriter-line.accent-gold {
-  background: linear-gradient(135deg, var(--champagne-gold) 0%, var(--terracotta-light) 50%, var(--gold-300) 100%);
+  background: none;
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -740,7 +734,7 @@ a {
 .btn-hero-primary {
   padding: 16px 36px;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--champagne-gold) 0%, var(--terracotta) 100%);
+  background: var(--champagne-gold);
   color: #060d0a;
   font-size: 15px;
   font-weight: 700;
@@ -1073,7 +1067,7 @@ a {
   left: 10%;
   right: 10%;
   height: 2px;
-  background: linear-gradient(90deg, transparent 0%, var(--champagne-gold) 50%, transparent 100%);
+  background: rgba(212, 178, 112, 0.35);
   opacity: 0.3;
   z-index: 0;
 }
@@ -1110,7 +1104,7 @@ a {
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(212, 178, 112, 0.2) 0%, rgba(24, 51, 41, 0.8) 100%);
+  background: rgba(10, 22, 48, 0.85);
   border: 1px solid var(--champagne-gold);
   display: flex;
   align-items: center;
@@ -1441,7 +1435,7 @@ a {
 }
 
 .cta-box {
-  background: linear-gradient(135deg, rgba(162, 96, 70, 0.3) 0%, rgba(10, 20, 16, 0.85) 100%);
+  background: rgba(10, 20, 40, 0.88);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border-gold);
   border-radius: var(--radius-xl);
@@ -1626,7 +1620,7 @@ a {
   width: 100%;
   padding: 10px 0;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
+  background: #d4b270;
   color: #060d0a;
   font-size: 13px;
   font-weight: 700;
@@ -1643,14 +1637,14 @@ a {
 .btn-product-buy:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 24px rgba(212, 178, 112, 0.6);
-  background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
+  background: #e2ca94;
 }
 
 .btn-product-inquire {
   width: 100%;
   padding: 8px 0;
   border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--champagne-gold) 0%, var(--terracotta) 100%);
+  background: var(--champagne-gold);
   color: #060d0a;
   font-size: 12px;
   font-weight: 700;
