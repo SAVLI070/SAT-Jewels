@@ -20,6 +20,8 @@ namespace SAT1.Models
 
         public string ImageUrl { get; set; } = string.Empty;
 
+        public string GalleryImages { get; set; } = string.Empty; // Comma-separated multi-angle photo URLs
+
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

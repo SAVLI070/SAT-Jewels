@@ -8,13 +8,33 @@
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
 
     string FixImg(string? path) {
-        if (string.IsNullOrWhiteSpace(path)) return "/assets/ring_1.jpg";
+        if (string.IsNullOrWhiteSpace(path)) return "/assets/ring_main.png";
         if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
         if (path.StartsWith("~/")) return path.Substring(1);
         if (!path.StartsWith("/")) return "/" + path;
         return path;
     }
+
     var mainImage = FixImg(Model.ImageUrl);
+
+    // Resolve gallery photos from database
+    List<string> galleryList = new List<string>();
+    if (!string.IsNullOrWhiteSpace(Model.GalleryImages))
+    {
+        galleryList = Model.GalleryImages.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => FixImg(s.Trim()))
+            .ToList();
+    }
+
+    if (galleryList.Count == 0)
+    {
+        galleryList = new List<string> {
+            mainImage,
+            "/assets/ring_angle.png",
+            "/assets/ring_clarity.png",
+            "/assets/ring_model.png"
+        };
+    }
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -236,7 +256,7 @@
       font-weight: 600;
     }
 
-    /* Customization Controls */
+    /* Customization Controls (Strict Radio-style selection) */
     .pd-custom-section {
       margin-bottom: 20px;
     }
@@ -268,13 +288,15 @@
       cursor: pointer;
       text-align: center;
       transition: all 0.25s ease;
+      user-select: none;
     }
 
-    .pd-opt-btn.active, .pd-opt-btn:hover {
-      background: rgba(212, 178, 112, 0.15);
-      border-color: var(--champagne-gold);
-      color: var(--champagne-gold);
-      box-shadow: 0 0 10px rgba(212, 178, 112, 0.3);
+    .pd-opt-btn.active {
+      background: rgba(212, 178, 112, 0.2) !important;
+      border-color: var(--champagne-gold) !important;
+      color: var(--champagne-gold) !important;
+      box-shadow: 0 0 14px rgba(212, 178, 112, 0.4) !important;
+      font-weight: 700;
     }
 
     .pd-engrave-input {
@@ -346,6 +368,106 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 25px rgba(212, 178, 112, 0.6);
       background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
+    }
+
+    /* CUSTOM BESPOKE LUXURY MODAL DIALOG (Replaces native browser popup) */
+    .sat-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(3, 7, 18, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .sat-modal-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .sat-modal-card {
+      background: linear-gradient(145deg, rgba(10, 20, 38, 0.95), rgba(6, 13, 26, 0.98));
+      border: 1px solid var(--border-gold);
+      border-radius: var(--radius-2xl);
+      padding: 32px;
+      max-width: 440px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 178, 112, 0.25);
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+
+    .sat-modal-overlay.show .sat-modal-card {
+      transform: scale(1);
+    }
+
+    .sat-modal-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: rgba(212, 178, 112, 0.12);
+      border: 1px solid var(--border-gold);
+      color: var(--champagne-gold);
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .sat-modal-title {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0 0 10px;
+    }
+
+    .sat-modal-msg {
+      font-size: 14px;
+      color: var(--taupe-beige);
+      line-height: 1.5;
+      margin-bottom: 24px;
+    }
+
+    .sat-modal-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn-sat-cancel {
+      flex: 1;
+      padding: 12px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--cream-ivory);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-sat-confirm {
+      flex: 1;
+      padding: 12px;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
+      border: none;
+      color: #060d0a;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(212, 178, 112, 0.3);
     }
 
     /* Cart Toast Alert */
@@ -427,28 +549,24 @@
 
     <!-- Product Details Main Grid -->
     <div class="pd-grid">
-      <!-- LEFT: Image Gallery -->
+      <!-- LEFT: Multi-Image Gallery -->
       <div class="pd-gallery-card">
         <div class="pd-main-img-wrap">
-          <img id="mainProductPhoto" src="@mainImage" alt="@Model.Name" />
+          <img id="mainProductPhoto" src="@galleryList[0]" alt="@Model.Name" />
           <div class="pd-gia-seal">
             <i class="fa-solid fa-shield-halved"></i> GIA Certified VVS1
           </div>
         </div>
 
         <div class="pd-thumb-grid">
-          <div class="pd-thumb active" onclick="switchProductPhoto(this, '@mainImage')">
-            <img src="@mainImage" alt="Main View" />
-          </div>
-          <div class="pd-thumb" onclick="switchProductPhoto(this, 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80')">
-            <img src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80" alt="Angle Macro" />
-          </div>
-          <div class="pd-thumb" onclick="switchProductPhoto(this, 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=800&q=80')">
-            <img src="https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=800&q=80" alt="Clarity View" />
-          </div>
-          <div class="pd-thumb" onclick="switchProductPhoto(this, 'https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=800&q=80')">
-            <img src="https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=800&q=80" alt="Hand Model" />
-          </div>
+          @for (int i = 0; i < galleryList.Count && i < 4; i++)
+          {
+            var imgUrl = galleryList[i];
+            var activeClass = i == 0 ? "active" : "";
+            <div class="pd-thumb @activeClass" onclick="switchProductPhoto(this, '@imgUrl')">
+              <img src="@imgUrl" alt="Gallery Photo @(i + 1)" />
+            </div>
+          }
         </div>
 
         <div class="pd-trust-bar">
@@ -482,8 +600,8 @@
           <div class="pd-price-note">USD International Transaction</div>
         </div>
 
-        <!-- Customization Options -->
-        <div class="pd-custom-section">
+        <!-- Customization Controls (Strict Radio-style selection) -->
+        <div class="pd-custom-section" id="metalSection">
           <div class="pd-custom-label">
             <span>Choose Precious Metal Purity:</span>
             <span id="selectedMetalText" style="color:#ffffff;">18K Yellow Gold</span>
@@ -495,7 +613,7 @@
           </div>
         </div>
 
-        <div class="pd-custom-section">
+        <div class="pd-custom-section" id="caratSection">
           <div class="pd-custom-label">
             <span>Diamond Carat Weight:</span>
             <span id="selectedCaratText" style="color:#ffffff;">1.5ct (GIA Standard)</span>
@@ -528,6 +646,21 @@
     </div>
   </div>
 
+  <!-- BESPOKE LUXURY MODAL DIALOG (Replaces unstyled browser alert/confirm popup) -->
+  <div class="sat-modal-overlay" id="satLuxuryModal">
+    <div class="sat-modal-card">
+      <div class="sat-modal-icon" id="satModalIcon">
+        <i class="fa-solid fa-user-lock"></i>
+      </div>
+      <h3 class="sat-modal-title" id="satModalTitle">Sign In Required</h3>
+      <p class="sat-modal-msg" id="satModalMsg">You must be signed in to add items to your bespoke shopping cart vault.</p>
+      <div class="sat-modal-actions">
+        <button class="btn-sat-cancel" id="satModalCancelBtn" onclick="closeSatModal()">Cancel</button>
+        <button class="btn-sat-confirm" id="satModalConfirmBtn">Sign In Now</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Cart Notification Toast -->
   <div class="cart-toast" id="cartToastAlert">
     <i class="fa-solid fa-circle-check" style="color:var(--champagne-gold);font-size:20px;"></i>
@@ -550,8 +683,10 @@
       document.getElementById('displayProductPriceUSD').textContent = `$${totalPrice.toLocaleString()}`;
     }
 
+    // STRICT RADIO-STYLE TOGGLE: Deselect all other options in Metal section
     function selectMetal(btn, metalName, extraCost) {
-      document.querySelectorAll('.pd-custom-section:nth-of-type(1) .pd-opt-btn').forEach(b => b.classList.remove('active'));
+      const section = document.getElementById('metalSection');
+      section.querySelectorAll('.pd-opt-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       selectedMetal = metalName;
       selectedMetalExtra = extraCost;
@@ -559,8 +694,10 @@
       updateCalculatedPrice();
     }
 
+    // STRICT RADIO-STYLE TOGGLE: Deselect all other options in Carat section
     function selectCarat(btn, caratName, extraCost) {
-      document.querySelectorAll('.pd-custom-section:nth-of-type(2) .pd-opt-btn').forEach(b => b.classList.remove('active'));
+      const section = document.getElementById('caratSection');
+      section.querySelectorAll('.pd-opt-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       selectedCarat = caratName;
       selectedCaratExtra = extraCost;
@@ -572,6 +709,36 @@
       document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
       thumb.classList.add('active');
       document.getElementById('mainProductPhoto').src = imgUrl;
+    }
+
+    // BESPOKE MODAL POPUP LOGIC
+    function showSatModal(options) {
+      const modal = document.getElementById('satLuxuryModal');
+      document.getElementById('satModalTitle').textContent = options.title || 'Notification';
+      document.getElementById('satModalMsg').textContent = options.message || '';
+      document.getElementById('satModalIcon').innerHTML = options.icon || '<i class="fa-solid fa-circle-info"></i>';
+
+      const confirmBtn = document.getElementById('satModalConfirmBtn');
+      confirmBtn.textContent = options.confirmText || 'OK';
+
+      confirmBtn.onclick = () => {
+        closeSatModal();
+        if (options.onConfirm) options.onConfirm();
+      };
+
+      const cancelBtn = document.getElementById('satModalCancelBtn');
+      if (options.showCancel === false) {
+        cancelBtn.style.display = 'none';
+      } else {
+        cancelBtn.style.display = 'block';
+      }
+
+      modal.classList.add('show');
+    }
+
+    function closeSatModal() {
+      const modal = document.getElementById('satLuxuryModal');
+      modal.classList.remove('show');
     }
 
     // SHOPPING CART SYSTEM
@@ -594,9 +761,16 @@
     function addToCartCurrentProduct() {
       // 1. Check if user is signed in
       if (!isUserLoggedIn) {
-        if (confirm("🔒 Sign In Required!\n\nYou must be signed in to add items to your bespoke shopping cart.\n\nWould you like to Sign In now?")) {
-          window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
-        }
+        showSatModal({
+          title: 'Sign In Required',
+          message: 'You must be signed in to add items to your bespoke luxury shopping cart vault.',
+          icon: '<i class="fa-solid fa-user-lock"></i>',
+          confirmText: 'Sign In Now',
+          showCancel: true,
+          onConfirm: () => {
+            window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+          }
+        });
         return;
       }
 
@@ -607,7 +781,7 @@
         id: '@Model.Id',
         name: '@Model.Name',
         priceUSD: finalPriceUSD,
-        img: '@mainImage',
+        img: '@galleryList[0]',
         metal: selectedMetal,
         carat: selectedCarat,
         engraving: engraving,
@@ -619,8 +793,16 @@
       // 2. Check if item already exists in cart (Only 1 item can be added per product page)
       const existingItem = cart.find(c => c.id === cartItem.id);
       if (existingItem) {
-        alert(`ℹ️ "${cartItem.name}" is already in your Shopping Cart!\n\nYou can adjust quantities or remove items from your Shopping Cart page.`);
-        window.location.href = '/Product/Cart';
+        showSatModal({
+          title: 'Item Already in Vault Cart',
+          message: `"${cartItem.name}" is already in your Shopping Cart. You can adjust quantities or remove items from your Shopping Cart page.`,
+          icon: '<i class="fa-solid fa-bag-shopping"></i>',
+          confirmText: 'View Shopping Cart',
+          showCancel: true,
+          onConfirm: () => {
+            window.location.href = '/Product/Cart';
+          }
+        });
         return;
       }
 
@@ -636,9 +818,16 @@
 
     function instantBuyCurrentProduct() {
       if (!isUserLoggedIn) {
-        if (confirm("🔒 Sign In Required!\n\nYou must be signed in to purchase items.\n\nWould you like to Sign In now?")) {
-          window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
-        }
+        showSatModal({
+          title: 'Sign In Required',
+          message: 'You must be signed in to purchase items from our vault.',
+          icon: '<i class="fa-solid fa-user-lock"></i>',
+          confirmText: 'Sign In Now',
+          showCancel: true,
+          onConfirm: () => {
+            window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+          }
+        });
         return;
       }
 

@@ -86,7 +86,8 @@ namespace SAT1.Models
                     CategoryId = "rings",
                     Spec = "18K Gold | 1.5ct GIA VVS1, E Color | Brilliant Cut",
                     PriceUSD = 2200,
-                    ImageUrl = "assets/ring_1.jpg"
+                    ImageUrl = "assets/ring_main.png",
+                    GalleryImages = "assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png"
                 },
                 new CatalogItem
                 {
@@ -95,7 +96,8 @@ namespace SAT1.Models
                     CategoryId = "rings",
                     Spec = "Platinum 950 | 2.0ct Halo Setting | IF Clarity",
                     PriceUSD = 2900,
-                    ImageUrl = "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80"
+                    ImageUrl = "assets/ring_angle.png",
+                    GalleryImages = "assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png"
                 },
                 new CatalogItem
                 {
@@ -104,7 +106,8 @@ namespace SAT1.Models
                     CategoryId = "necklaces",
                     Spec = "18K Yellow Gold | Marquise & Pear Cut Diamonds",
                     PriceUSD = 4200,
-                    ImageUrl = "assets/necklace_1.jpg"
+                    ImageUrl = "assets/necklace_1.jpg",
+                    GalleryImages = "assets/necklace_1.jpg,assets/ring_clarity.png,assets/ring_model.png"
                 },
                 new CatalogItem
                 {
@@ -113,7 +116,8 @@ namespace SAT1.Models
                     CategoryId = "earrings",
                     Spec = "18K Gold | 2.2ct Triple Drop Diamonds",
                     PriceUSD = 2500,
-                    ImageUrl = "assets/earring_card.jpg"
+                    ImageUrl = "assets/earring_card.jpg",
+                    GalleryImages = "assets/earring_card.jpg,assets/ring_clarity.png,assets/ring_model.png"
                 },
                 new CatalogItem
                 {
@@ -122,7 +126,8 @@ namespace SAT1.Models
                     CategoryId = "bracelets",
                     Spec = "Platinum 950 | 5.0ct Total Weight | Round Cut",
                     PriceUSD = 4700,
-                    ImageUrl = "assets/bracelet_card.jpg"
+                    ImageUrl = "assets/bracelet_card.jpg",
+                    GalleryImages = "assets/bracelet_card.jpg,assets/ring_clarity.png,assets/ring_model.png"
                 }
             );
         }

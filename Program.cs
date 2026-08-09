@@ -49,10 +49,13 @@ using (var scope = app.Services.CreateScope())
                 ""Spec"" text NOT NULL DEFAULT '',
                 ""PriceUSD"" numeric NOT NULL DEFAULT 0.0,
                 ""ImageUrl"" text NOT NULL DEFAULT '',
+                ""GalleryImages"" text NOT NULL DEFAULT '',
                 ""IsActive"" boolean NOT NULL DEFAULT true,
                 ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_CatalogItems"" PRIMARY KEY (""Id"")
             );
+
+            ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""GalleryImages"" text NOT NULL DEFAULT '';
 
             CREATE TABLE IF NOT EXISTS ""Users"" (
                 ""Id"" text NOT NULL,
