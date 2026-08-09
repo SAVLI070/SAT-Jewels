@@ -29,31 +29,46 @@
   </script>
 
   <style>
-    /* Dark Luxury Glassmorphism Theme (Matches Landing Page Navigation Bar) */
-    body {
-      background: radial-gradient(circle at 50% 20%, #0a1426 0%, #030712 100%) !important;
-      color: var(--cream-ivory) !important;
+    /* Premium High-Contrast Dark Luxury Admin Theme */
+    html, body {
+      background: #050b14 !important;
+      background-image: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%) !important;
+      background-attachment: fixed !important;
+      color: #f8fafc !important;
       font-family: var(--font-sans);
       margin: 0;
       padding: 0;
       min-height: 100vh;
     }
 
+    #farmbridgeAdminPortal {
+      background: transparent !important;
+      min-height: 100vh;
+    }
+
     .adm-sidebar {
-      background: rgba(8, 17, 34, 0.88) !important;
+      background: rgba(13, 27, 42, 0.95) !important;
       backdrop-filter: blur(20px) !important;
       -webkit-backdrop-filter: blur(20px) !important;
       border-right: 1px solid rgba(212, 178, 112, 0.3) !important;
       transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease !important;
-      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5) !important;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.6) !important;
     }
 
     .adm-topbar {
-      background: rgba(8, 17, 34, 0.88) !important;
+      background: rgba(13, 27, 42, 0.95) !important;
       backdrop-filter: blur(20px) !important;
       -webkit-backdrop-filter: blur(20px) !important;
       border-bottom: 1px solid rgba(212, 178, 112, 0.3) !important;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    .adm-main {
+      background: transparent !important;
+    }
+
+    .adm-content {
+      background: transparent !important;
     }
 
     .adm-page-title {
@@ -71,19 +86,23 @@
     }
 
     .adm-sidebar-name span {
-      color: var(--champagne-gold) !important;
+      color: #fbbf24 !important;
     }
 
     .adm-role-badge {
-      background: rgba(212, 178, 112, 0.15) !important;
-      border: 1px solid var(--border-gold) !important;
-      color: var(--champagne-gold) !important;
+      background: rgba(212, 178, 112, 0.18) !important;
+      border: 1px solid #d4b270 !important;
+      color: #fbbf24 !important;
       font-weight: 700;
     }
 
     .adm-nav-link {
-      color: var(--taupe-beige) !important;
+      color: #cbd5e1 !important;
+      font-size: 14px !important;
+      font-weight: 600 !important;
       transition: all 0.25s ease !important;
+      border-radius: 12px !important;
+      padding: 12px 16px !important;
     }
 
     .adm-nav-link:hover {
@@ -92,21 +111,21 @@
     }
 
     .adm-nav-link.active {
-      background: rgba(212, 178, 112, 0.2) !important;
-      border: 1px solid var(--champagne-gold) !important;
-      color: var(--champagne-gold) !important;
-      box-shadow: 0 0 14px rgba(212, 178, 112, 0.3) !important;
+      background: linear-gradient(135deg, rgba(212, 178, 112, 0.25) 0%, rgba(180, 83, 9, 0.25) 100%) !important;
+      border: 1px solid #d4b270 !important;
+      color: #fbbf24 !important;
+      box-shadow: 0 4px 18px rgba(212, 178, 112, 0.25) !important;
       font-weight: 700 !important;
     }
 
     .adm-nav-link.active i {
-      color: var(--champagne-gold) !important;
+      color: #fbbf24 !important;
     }
 
     .adm-avatar {
       background: rgba(212, 178, 112, 0.2) !important;
-      border: 1px solid var(--border-gold) !important;
-      color: var(--champagne-gold) !important;
+      border: 1px solid #d4b270 !important;
+      color: #fbbf24 !important;
       font-weight: 700;
     }
 
@@ -140,9 +159,9 @@
     }
 
     .adm-collapse-btn {
-      background: rgba(212, 178, 112, 0.12);
-      border: 1px solid rgba(212, 178, 112, 0.35);
-      color: var(--champagne-gold);
+      background: rgba(212, 178, 112, 0.15);
+      border: 1px solid rgba(212, 178, 112, 0.4);
+      color: #fbbf24;
       width: 36px;
       height: 36px;
       border-radius: 10px;
@@ -156,9 +175,9 @@
     }
 
     .adm-collapse-btn:hover {
-      background: var(--champagne-gold);
+      background: #fbbf24;
       color: #060d0a;
-      box-shadow: 0 0 14px rgba(212, 178, 112, 0.5);
+      box-shadow: 0 0 14px rgba(251, 191, 36, 0.5);
     }
   </style>
 </head>
@@ -202,7 +221,7 @@
       </ul>
 
       <div class="adm-sidebar-foot">
-        <a href="/" class="adm-nav-link adm-logout" style="color:var(--terracotta-light) !important;">
+        <a href="/" class="adm-nav-link adm-logout" style="color:#fca5a5 !important;">
           <i class="fa-solid fa-right-from-bracket"></i> <span>Exit to Storefront</span>
         </a>
       </div>
@@ -222,8 +241,8 @@
           <h1 class="adm-page-title" style="margin:0;">@title</h1>
         </div>
         <div class="adm-topbar-right" style="display:flex;align-items:center;gap:12px;">
-          <span style="font-size:12px;color:var(--champagne-gold);font-weight:600;"><i class="fa-solid fa-user-shield"></i> VIP Admin</span>
-          <a href="/Account/Logout" style="font-size:12px;color:var(--taupe-beige);text-decoration:none;font-weight:600;"><i class="fa-solid fa-sign-out"></i> Logout</a>
+          <span style="font-size:12px;color:#fbbf24;font-weight:600;"><i class="fa-solid fa-user-shield"></i> VIP Admin</span>
+          <a href="/Account/Logout" style="font-size:12px;color:#cbd5e1;text-decoration:none;font-weight:600;"><i class="fa-solid fa-sign-out"></i> Logout</a>
           <div class="adm-avatar">A</div>
         </div>
       </header>
