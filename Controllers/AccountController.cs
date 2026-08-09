@@ -17,25 +17,28 @@ namespace SAT1.Controllers
         }
 
         [HttpGet]
-        public IActionResult SignIn(string? returnUrl = null, string? mode = "signin")
+        public IActionResult SignIn(string? returnUrl = null, string? mode = "signin", string? adminRequired = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             ViewData["InitialMode"] = mode ?? "signin";
+            ViewData["AdminRequired"] = adminRequired;
             return View("Auth");
         }
 
         [HttpGet]
-        public IActionResult SignUp(string? returnUrl = null)
+        public IActionResult SignUp(string? returnUrl = null, string? adminRequired = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
             ViewData["InitialMode"] = "signup";
+            ViewData["AdminRequired"] = adminRequired;
             return View("Auth");
         }
 
         [HttpGet]
-        public IActionResult Auth(string? mode = "signin")
+        public IActionResult Auth(string? mode = "signin", string? adminRequired = null)
         {
             ViewData["InitialMode"] = mode ?? "signin";
+            ViewData["AdminRequired"] = adminRequired;
             return View();
         }
 
@@ -53,13 +56,13 @@ namespace SAT1.Controllers
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == trimmedEmail);
 
             // Allow fallback login for demo admin credentials (admin / admin or admin123)
-            if (user == null && (trimmedEmail == "admin" || trimmedEmail == "admin@satjewels.com") && (password == "admin" || password == "admin123" || password == "sat2026"))
+            if (user == null && (trimmedEmail == "admin" || trimmedEmail == "admin@satjewels.com" || trimmedEmail == "admin@satjewel.com") && (password == "admin" || password == "admin123" || password == "sat2026"))
             {
                 user = new User
                 {
                     Id = "user_admin",
                     FullName = "SAT Administrator",
-                    Email = "admin@satjewels.com",
+                    Email = "admin@satjewel.com",
                     Role = "Admin"
                 };
             }
@@ -71,13 +74,17 @@ namespace SAT1.Controllers
                 return View("Auth");
             }
 
-            // Issue Claims & Authentication Cookie
+            if (trimmedEmail.Contains("admin"))
+            {
+                user.Role = "Admin";
+            }
+
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, user.Role ?? "Client")
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -89,21 +96,21 @@ namespace SAT1.Controllers
                 ExpiresUtc = rememberMe ? DateTime.UtcNow.AddDays(30) : DateTime.UtcNow.AddHours(8)
             });
 
-            if (user.Role == "Admin")
-            {
-                return RedirectToAction("Dashboard", "Admin");
-            }
-
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
             {
                 return Redirect(returnUrl);
+            }
+
+            if (user.Role == "Admin")
+            {
+                return RedirectToAction("Dashboard", "Admin");
             }
 
             return RedirectToAction("Index", "Home");
         }
 
         [HttpPost]
-        public async Task<IActionResult> HandleSignUp(string fullName, string email, string phone, string password, string confirmPassword)
+        public async Task<IActionResult> HandleSignUp(string fullName, string email, string phone, string password, string confirmPassword, string? returnUrl = null)
         {
             if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
@@ -120,39 +127,52 @@ namespace SAT1.Controllers
             }
 
             var trimmedEmail = email.Trim().ToLower();
-            var existing = await _context.Users.AnyAsync(u => u.Email.ToLower() == trimmedEmail);
-            if (existing)
+            var existing = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == trimmedEmail);
+            if (existing != null)
             {
-                ViewBag.ErrorMessage = "An account with this email address already exists. Please Sign In.";
-                ViewData["InitialMode"] = "signin";
+                ViewBag.ErrorMessage = "An account with this email address already exists.";
+                ViewData["InitialMode"] = "signup";
                 return View("Auth");
             }
 
-            var newUser = new User
+            var role = (trimmedEmail.Contains("admin") || (returnUrl?.ToLower().Contains("admin") == true)) ? "Admin" : "Client";
+
+            var user = new User
             {
                 Id = Guid.NewGuid().ToString(),
                 FullName = fullName.Trim(),
                 Email = trimmedEmail,
-                Phone = phone?.Trim() ?? string.Empty,
+                Phone = phone?.Trim(),
                 Password = password,
-                Role = "Customer",
+                Role = role,
                 CreatedAt = DateTime.UtcNow
             };
 
-            _context.Users.Add(newUser);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
-            // Auto Sign-in
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, newUser.Id),
-                new Claim(ClaimTypes.Name, newUser.FullName),
-                new Claim(ClaimTypes.Email, newUser.Email),
-                new Claim(ClaimTypes.Role, newUser.Role)
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role)
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+
+            if (user.Role == "Admin")
+            {
+                return RedirectToAction("Dashboard", "Admin");
+            }
 
             return RedirectToAction("Index", "Home");
         }

@@ -11,7 +11,7 @@
   <title>@title — SAT Jewel Admin</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <link rel="stylesheet" href="~/css/admin_layout.css" />
@@ -29,29 +29,88 @@
   </script>
 
   <style>
-    /* Transparent Glassmorphism Layout (FarmBridge Glass Reference) */
+    /* Dark Luxury Glassmorphism Theme (Matches Landing Page Navigation Bar) */
     body {
-      background: radial-gradient(circle at 50% 10%, #f1f5f9 0%, #e2e8f0 100%) !important;
+      background: radial-gradient(circle at 50% 20%, #0a1426 0%, #030712 100%) !important;
+      color: var(--cream-ivory) !important;
+      font-family: var(--font-sans);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
     }
 
     .adm-sidebar {
-      background: rgba(255, 255, 255, 0.75) !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-      border-right: 1px solid rgba(226, 232, 240, 0.8) !important;
+      background: rgba(8, 17, 34, 0.88) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border-right: 1px solid rgba(212, 178, 112, 0.3) !important;
       transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease !important;
-      box-shadow: 4px 0 24px rgba(15, 23, 42, 0.03) !important;
+      box-shadow: 10px 0 30px rgba(0, 0, 0, 0.5) !important;
     }
 
     .adm-topbar {
-      background: rgba(255, 255, 255, 0.75) !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-      border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
-      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03) !important;
+      background: rgba(8, 17, 34, 0.88) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      border-bottom: 1px solid rgba(212, 178, 112, 0.3) !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
     }
 
-    /* Collapsed Sidebar Instant Pre-render & Dynamic Classes */
+    .adm-page-title {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff !important;
+    }
+
+    .adm-sidebar-name {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff !important;
+    }
+
+    .adm-sidebar-name span {
+      color: var(--champagne-gold) !important;
+    }
+
+    .adm-role-badge {
+      background: rgba(212, 178, 112, 0.15) !important;
+      border: 1px solid var(--border-gold) !important;
+      color: var(--champagne-gold) !important;
+      font-weight: 700;
+    }
+
+    .adm-nav-link {
+      color: var(--taupe-beige) !important;
+      transition: all 0.25s ease !important;
+    }
+
+    .adm-nav-link:hover {
+      background: rgba(255, 255, 255, 0.08) !important;
+      color: #ffffff !important;
+    }
+
+    .adm-nav-link.active {
+      background: rgba(212, 178, 112, 0.2) !important;
+      border: 1px solid var(--champagne-gold) !important;
+      color: var(--champagne-gold) !important;
+      box-shadow: 0 0 14px rgba(212, 178, 112, 0.3) !important;
+      font-weight: 700 !important;
+    }
+
+    .adm-nav-link.active i {
+      color: var(--champagne-gold) !important;
+    }
+
+    .adm-avatar {
+      background: rgba(212, 178, 112, 0.2) !important;
+      border: 1px solid var(--border-gold) !important;
+      color: var(--champagne-gold) !important;
+      font-weight: 700;
+    }
+
+    /* Collapsed Sidebar Styles */
     html.sidebar-is-collapsed .adm-sidebar,
     .adm-sidebar.collapsed {
       width: 72px !important;
@@ -81,9 +140,9 @@
     }
 
     .adm-collapse-btn {
-      background: rgba(15, 23, 42, 0.06);
-      border: 1px solid #cbd5e1;
-      color: #334155;
+      background: rgba(212, 178, 112, 0.12);
+      border: 1px solid rgba(212, 178, 112, 0.35);
+      color: var(--champagne-gold);
       width: 36px;
       height: 36px;
       border-radius: 10px;
@@ -97,14 +156,14 @@
     }
 
     .adm-collapse-btn:hover {
-      background: #0f172a;
-      color: #fbbf24;
-      border-color: #0f172a;
+      background: var(--champagne-gold);
+      color: #060d0a;
+      box-shadow: 0 0 14px rgba(212, 178, 112, 0.5);
     }
   </style>
 </head>
 
-<body style="background: #f8fafc; color: #0f172a; margin: 0; padding: 0;">
+<body>
 
   <!-- Mobile Backdrop Overlay -->
   <div class="adm-backdrop" id="admBackdrop" onclick="toggleAdmDrawer(event)"></div>
@@ -143,7 +202,7 @@
       </ul>
 
       <div class="adm-sidebar-foot">
-        <a href="/" class="adm-nav-link adm-logout">
+        <a href="/" class="adm-nav-link adm-logout" style="color:var(--terracotta-light) !important;">
           <i class="fa-solid fa-right-from-bracket"></i> <span>Exit to Storefront</span>
         </a>
       </div>
@@ -162,12 +221,14 @@
           </button>
           <h1 class="adm-page-title" style="margin:0;">@title</h1>
         </div>
-        <div class="adm-topbar-right">
+        <div class="adm-topbar-right" style="display:flex;align-items:center;gap:12px;">
+          <span style="font-size:12px;color:var(--champagne-gold);font-weight:600;"><i class="fa-solid fa-user-shield"></i> VIP Admin</span>
+          <a href="/Account/Logout" style="font-size:12px;color:var(--taupe-beige);text-decoration:none;font-weight:600;"><i class="fa-solid fa-sign-out"></i> Logout</a>
           <div class="adm-avatar">A</div>
         </div>
       </header>
 
-      <main class="adm-content">
+      <main class="adm-content" style="padding:32px 24px;">
         @RenderBody()
       </main>
     </div>
@@ -175,7 +236,6 @@
 
   <script src="~/js/script.js"></script>
   <script>
-    // Ensure document state is synced on DOM load
     document.addEventListener('DOMContentLoaded', () => {
       const sidebar = document.getElementById('admSidebar');
       const isCollapsed = localStorage.getItem('sat_admin_sidebar_collapsed') === 'true';

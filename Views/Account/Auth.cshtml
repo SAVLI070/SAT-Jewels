@@ -514,6 +514,14 @@
             <p class="auth-sub">Access your bespoke GIA vault & order tracking</p>
           </div>
 
+          @if (ViewData["AdminRequired"]?.ToString() == "true" || (returnUrl?.ToLower().Contains("admin") == true))
+          {
+            <div style="background: rgba(212, 178, 112, 0.15); border: 1px solid var(--champagne-gold); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: var(--champagne-gold); text-align: left;">
+              <i class="fa-solid fa-shield-halved"></i> <strong>Admin Credential Sign In Required</strong><br/>
+              <span style="color:var(--taupe-beige);">Please sign in or sign up with admin credentials to access the Admin Portal.<br/>Demo Credentials: <strong>admin@satjewel.com</strong> / <strong>admin123</strong></span>
+            </div>
+          }
+
           @if (!string.IsNullOrEmpty(error) && initialMode == "signin")
           {
             <div class="auth-alert-error">

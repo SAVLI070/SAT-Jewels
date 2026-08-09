@@ -4,15 +4,16 @@
 }
 
 <style>
-  /* Category Management Page Luxury Admin Styling */
+  /* Dark Luxury Glassmorphism Panel (Matches Landing Page Theme) */
   .cat-card-panel {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(226, 232, 240, 0.8);
+    background: rgba(8, 17, 34, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(212, 178, 112, 0.3);
     border-radius: var(--radius-xl);
     padding: 28px;
-    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    color: #ffffff;
   }
 
   .cat-form-group {
@@ -23,7 +24,7 @@
     display: block;
     font-size: 13px;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--champagne-gold);
     margin-bottom: 6px;
   }
 
@@ -31,10 +32,10 @@
     width: 100%;
     box-sizing: border-box;
     padding: 12px 16px;
-    background: #ffffff;
-    border: 1px solid #cbd5e1;
+    background: rgba(10, 20, 38, 0.95);
+    border: 1px solid rgba(212, 178, 112, 0.4);
     border-radius: var(--radius-md);
-    color: #0f172a;
+    color: #ffffff;
     font-size: 14px;
     font-weight: 500;
     outline: none;
@@ -42,26 +43,29 @@
   }
 
   .cat-form-input:focus {
-    background: #ffffff;
-    border-color: #b45309;
-    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15);
+    border-color: var(--champagne-gold);
+    box-shadow: 0 0 16px rgba(212, 178, 112, 0.4);
+  }
+
+  .cat-form-input option {
+    background: #081122;
+    color: #ffffff;
   }
 
   /* Category Image Upload Dropzone */
   .cat-upload-dropzone {
-    border: 2px dashed #cbd5e1;
+    border: 2px dashed rgba(212, 178, 112, 0.4);
     border-radius: var(--radius-lg);
-    padding: 20px;
+    padding: 22px;
     text-align: center;
-    background: #f8fafc;
+    background: rgba(10, 20, 38, 0.6);
     cursor: pointer;
     transition: all 0.3s ease;
-    position: relative;
   }
 
   .cat-upload-dropzone:hover {
-    border-color: #b45309;
-    background: #fffbeb;
+    border-color: var(--champagne-gold);
+    background: rgba(212, 178, 112, 0.12);
   }
 
   .cat-preview-box {
@@ -70,7 +74,7 @@
     border-radius: var(--radius-md);
     overflow: hidden;
     margin-top: 10px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--border-gold);
     display: none;
   }
 
@@ -83,10 +87,10 @@
   .cat-btn-submit {
     width: 100%;
     padding: 14px 20px;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
     border: none;
     border-radius: var(--radius-full);
-    color: #fbbf24;
+    color: #060d0a;
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
@@ -94,14 +98,14 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.2);
+    box-shadow: 0 4px 20px rgba(212, 178, 112, 0.35);
     transition: all 0.3s ease;
   }
 
   .cat-btn-submit:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.3);
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    box-shadow: 0 6px 25px rgba(212, 178, 112, 0.6);
+    background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
   }
 
   /* Table Toggle Switch Styling */
@@ -131,7 +135,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #cbd5e1;
+    background-color: rgba(255, 255, 255, 0.2);
     transition: .3s;
     border-radius: 24px;
   }
@@ -146,7 +150,7 @@
     background-color: white;
     transition: .3s;
     border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
   }
 
   input:checked + .cat-slider {
@@ -162,8 +166,9 @@
     font-weight: 700;
     padding: 4px 10px;
     border-radius: 12px;
-    background: #dcfce7;
-    color: #15803d;
+    background: rgba(16, 185, 129, 0.2);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #34d399;
   }
 
   .status-tag-hidden {
@@ -171,8 +176,8 @@
     font-weight: 700;
     padding: 4px 10px;
     border-radius: 12px;
-    background: #f1f5f9;
-    color: #64748b;
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--taupe-beige);
   }
 
   .cat-table-img {
@@ -180,8 +185,33 @@
     height: 52px;
     border-radius: 10px;
     object-fit: cover;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    border: 1px solid var(--border-gold-soft);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  }
+
+  /* Dark Luxury Admin Table Override */
+  .admin-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .admin-table th {
+    background: rgba(10, 20, 38, 0.95) !important;
+    color: var(--champagne-gold) !important;
+    font-weight: 700;
+    padding: 14px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid rgba(212, 178, 112, 0.3) !important;
+  }
+
+  .admin-table td {
+    padding: 14px;
+    color: #ffffff !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    font-size: 13px;
   }
 </style>
 
@@ -189,23 +219,23 @@
   <!-- Header Title Banner -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
     <div>
-      <h1 style="font-family:var(--font-serif);color:#0f172a;margin:0 0 6px;font-size:28px;">Dynamic Jewelry Categories</h1>
-      <p style="color:#64748b;font-size:14px;margin:0;">Add, hide, or show collection categories. Toggling visibility instantly reflects on the public storefront landing page without data loss.</p>
+      <h1 style="font-family:var(--font-serif);color:#ffffff;margin:0 0 6px;font-size:28px;">Dynamic Jewelry Categories</h1>
+      <p style="color:var(--taupe-beige);font-size:14px;margin:0;">Add, hide, or show collection categories. Toggling visibility instantly reflects on the public storefront landing page without data loss.</p>
     </div>
   </div>
 
   <div style="display:grid;grid-template-columns:380px 1fr;gap:28px;align-items:start;">
     <!-- LEFT: Form Box ("Add New Category") -->
     <div class="cat-card-panel">
-      <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;">
-        <i class="fa-solid fa-circle-plus" style="color:#b45309;"></i> Add New Category
+      <h3 style="font-family:var(--font-serif);color:#ffffff;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-circle-plus" style="color:var(--champagne-gold);"></i> Add New Category
       </h3>
       
       <form id="addCategoryForm" onsubmit="handleAddNewCategory(event)">
         <div class="cat-form-group">
           <label class="cat-form-label">Category Unique Key / Code *</label>
           <input type="text" id="adminCatId" class="cat-form-input" placeholder="e.g. pendants, anklets" required />
-          <small style="color:#94a3b8;font-size:11px;margin-top:4px;display:block;">Lowercase identifier (e.g. rings, necklaces)</small>
+          <small style="color:var(--taupe-beige);font-size:11px;margin-top:4px;display:block;">Lowercase identifier (e.g. rings, necklaces)</small>
         </div>
 
         <div class="cat-form-group">
@@ -234,9 +264,9 @@
         <div class="cat-form-group">
           <label class="cat-form-label">Category Cover Image File Upload *</label>
           <div class="cat-upload-dropzone" onclick="document.getElementById('adminCatFileInput').click()">
-            <i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#b45309;margin-bottom:6px;"></i>
-            <div style="font-weight:700;color:#0f172a;font-size:13px;">Click to Upload Cover Image</div>
-            <div style="font-size:11px;color:#64748b;">PNG, JPG, WebP (Max 10MB)</div>
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:var(--champagne-gold);margin-bottom:6px;"></i>
+            <div style="font-weight:700;color:#ffffff;font-size:13px;">Click to Upload Cover Image</div>
+            <div style="font-size:11px;color:var(--taupe-beige);">PNG, JPG, WebP (Max 10MB)</div>
             <input type="file" id="adminCatFileInput" accept="image/*" style="display:none;" onchange="previewCatUploadFile(this)" />
           </div>
 
@@ -264,8 +294,8 @@
 
     <!-- RIGHT: Active Storefront Categories Table Grid -->
     <div class="cat-card-panel">
-      <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;">
-        <i class="fa-solid fa-layer-group" style="color:#b45309;"></i> Active Storefront Categories
+      <h3 style="font-family:var(--font-serif);color:#ffffff;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-layer-group" style="color:var(--champagne-gold);"></i> Active Storefront Categories
       </h3>
       
       <div class="table-responsive">
@@ -328,7 +358,7 @@
       if (!tbody) return;
 
       if (!categories || categories.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#94a3b8;">No categories found in database.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--taupe-beige);">No categories found in database.</td></tr>';
         return;
       }
 
@@ -340,11 +370,11 @@
               <img src="${cleanImg}" class="cat-table-img" onerror="this.src='/assets/ring_main.png'" alt="${c.name}" />
             </td>
             <td>
-              <strong style="color:#0f172a;font-size:14px;">${c.name}</strong><br/>
-              <small style="color:#64748b;font-size:11px;">ID: ${c.id}</small>
+              <strong style="color:#ffffff;font-size:14px;">${c.name}</strong><br/>
+              <small style="color:var(--taupe-beige);font-size:11px;">ID: ${c.id}</small>
             </td>
             <td><span class="badge-cat">${c.badge}</span></td>
-            <td><strong style="color:#b45309;font-size:14px;">${c.itemCount} items</strong></td>
+            <td><strong style="color:var(--champagne-gold);font-size:14px;">${c.itemCount} items</strong></td>
             <td>
               <div class="cat-toggle-wrap">
                 <label class="cat-switch" title="Toggle visibility on landing page">
@@ -398,7 +428,6 @@
 
     let finalImageUrl = customImgUrl || 'assets/necklace_main.png';
 
-    // Step 1: Upload category cover file if selected
     if (selectedCategoryFile) {
       submitBtn.disabled = true;
       submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading Image...';
