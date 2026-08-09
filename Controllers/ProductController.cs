@@ -40,6 +40,7 @@ namespace SAT1.Controllers
             // Related items from same category
             var relatedItems = await _context.CatalogItems
                 .Where(i => i.CategoryId == product.CategoryId && i.Id != product.Id && i.IsActive)
+                .OrderBy(i => i.CreatedAt)
                 .Take(3)
                 .ToListAsync();
 
