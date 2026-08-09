@@ -17,11 +17,11 @@
   <link rel="stylesheet" href="~/css/admin_layout.css" />
   <link rel="stylesheet" href="~/css/style.css" />
 
-  <!-- Blocking Script to prevent sidebar reload flash -->
+  <!-- Blocking Script to prevent sidebar reload flash on Desktop only -->
   <script>
     (function() {
       try {
-        if (localStorage.getItem('sat_admin_sidebar_collapsed') === 'true') {
+        if (window.innerWidth > 900 && localStorage.getItem('sat_admin_sidebar_collapsed') === 'true') {
           document.documentElement.classList.add('sidebar-is-collapsed');
         }
       } catch (e) {}
@@ -106,6 +106,9 @@
       border-radius: 12px !important;
       padding: 12px 16px !important;
       position: relative !important;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .adm-nav-link:hover {
@@ -132,75 +135,124 @@
       font-weight: 700;
     }
 
-    /* Collapsed Sidebar Styles */
-    html.sidebar-is-collapsed .adm-sidebar,
-    .adm-sidebar.collapsed {
-      width: 72px !important;
-      padding: 24px 10px !important;
+    /* DESKTOP-ONLY COLLAPSED SIDEBAR RULES (width > 900px) */
+    @@media (min-width: 901px) {
+      html.sidebar-is-collapsed .adm-sidebar,
+      .adm-sidebar.collapsed {
+        width: 72px !important;
+        padding: 24px 10px !important;
+      }
+
+      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-name,
+      html.sidebar-is-collapsed .adm-sidebar .adm-role-badge,
+      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link span,
+      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-foot span,
+      .adm-sidebar.collapsed .adm-sidebar-name,
+      .adm-sidebar.collapsed .adm-role-badge,
+      .adm-sidebar.collapsed .adm-nav-link span,
+      .adm-sidebar.collapsed .adm-sidebar-foot span {
+        display: none !important;
+      }
+
+      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link,
+      .adm-sidebar.collapsed .adm-nav-link {
+        justify-content: center !important;
+        padding: 12px !important;
+      }
+
+      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-logo,
+      .adm-sidebar.collapsed .adm-sidebar-logo {
+        justify-content: center !important;
+      }
+
+      /* Floating Tooltip ONLY when Sidebar is Collapsed on DESKTOP */
+      @@keyframes fadeInTooltip {
+        from { opacity: 0; transform: translateY(-50%) translateX(-6px); }
+        to { opacity: 1; transform: translateY(-50%) translateX(0); }
+      }
+
+      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link:hover::after,
+      .adm-sidebar.collapsed .adm-nav-link:hover::after {
+        content: attr(data-tooltip);
+        position: absolute;
+        left: calc(100% + 14px);
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(8, 16, 32, 0.95);
+        border: 1px solid #d4b270;
+        border-radius: 8px;
+        color: #fbbf24;
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.7), 0 0 14px rgba(212, 178, 112, 0.35);
+        pointer-events: none;
+        z-index: 999999;
+        animation: fadeInTooltip 0.2s ease-out forwards;
+      }
+
+      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link:hover::before,
+      .adm-sidebar.collapsed .adm-nav-link:hover::before {
+        content: "";
+        position: absolute;
+        left: calc(100% + 6px);
+        top: 50%;
+        transform: translateY(-50%);
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent #d4b270 transparent transparent;
+        pointer-events: none;
+        z-index: 999999;
+        animation: fadeInTooltip 0.2s ease-out forwards;
+      }
     }
 
-    html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-name,
-    html.sidebar-is-collapsed .adm-sidebar .adm-role-badge,
-    html.sidebar-is-collapsed .adm-sidebar .adm-nav-link span,
-    html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-foot span,
-    .adm-sidebar.collapsed .adm-sidebar-name,
-    .adm-sidebar.collapsed .adm-role-badge,
-    .adm-sidebar.collapsed .adm-nav-link span,
-    .adm-sidebar.collapsed .adm-sidebar-foot span {
-      display: none !important;
-    }
+    /* MOBILE-ONLY SIDEBAR OVERRIDES (width <= 900px) */
+    @@media (max-width: 900px) {
+      html.sidebar-is-collapsed .adm-sidebar,
+      .adm-sidebar.collapsed,
+      .adm-sidebar {
+        width: 280px !important;
+        max-width: 82vw !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        z-index: 10050 !important;
+        transform: translateX(-100%) !important;
+        padding: 24px 16px !important;
+        background: rgba(10, 20, 36, 0.96) !important;
+      }
 
-    html.sidebar-is-collapsed .adm-sidebar .adm-nav-link,
-    .adm-sidebar.collapsed .adm-nav-link {
-      justify-content: center;
-      padding: 12px;
-    }
+      html.sidebar-is-collapsed .adm-sidebar.open,
+      .adm-sidebar.collapsed.open,
+      .adm-sidebar.open {
+        transform: translateX(0) !important;
+      }
 
-    html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-logo,
-    .adm-sidebar.collapsed .adm-sidebar-logo {
-      justify-content: center;
-    }
+      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-name,
+      html.sidebar-is-collapsed .adm-sidebar .adm-role-badge,
+      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link span,
+      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-foot span,
+      .adm-sidebar.collapsed .adm-sidebar-name,
+      .adm-sidebar.collapsed .adm-role-badge,
+      .adm-sidebar.collapsed .adm-nav-link span,
+      .adm-sidebar.collapsed .adm-sidebar-foot span {
+        display: inline-block !important;
+      }
 
-    /* Floating Tooltip ONLY when Sidebar is Collapsed */
-    @@keyframes fadeInTooltip {
-      from { opacity: 0; transform: translateY(-50%) translateX(-6px); }
-      to { opacity: 1; transform: translateY(-50%) translateX(0); }
-    }
+      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link,
+      .adm-sidebar.collapsed .adm-nav-link {
+        justify-content: flex-start !important;
+        padding: 12px 16px !important;
+      }
 
-    html.sidebar-is-collapsed .adm-sidebar .adm-nav-link:hover::after,
-    .adm-sidebar.collapsed .adm-nav-link:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      left: calc(100% + 14px);
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(8, 16, 32, 0.95);
-      border: 1px solid #d4b270;
-      border-radius: 8px;
-      color: #fbbf24;
-      padding: 6px 14px;
-      font-size: 12px;
-      font-weight: 700;
-      white-space: nowrap;
-      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.7), 0 0 14px rgba(212, 178, 112, 0.35);
-      pointer-events: none;
-      z-index: 999999;
-      animation: fadeInTooltip 0.2s ease-out forwards;
-    }
-
-    html.sidebar-is-collapsed .adm-sidebar .adm-nav-link:hover::before,
-    .adm-sidebar.collapsed .adm-nav-link:hover::before {
-      content: "";
-      position: absolute;
-      left: calc(100% + 6px);
-      top: 50%;
-      transform: translateY(-50%);
-      border-width: 5px;
-      border-style: solid;
-      border-color: transparent #d4b270 transparent transparent;
-      pointer-events: none;
-      z-index: 999999;
-      animation: fadeInTooltip 0.2s ease-out forwards;
+      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-logo,
+      .adm-sidebar.collapsed .adm-sidebar-logo {
+        justify-content: flex-start !important;
+      }
     }
 
     .adm-collapse-btn {
@@ -276,7 +328,7 @@
     <div class="adm-main">
       <header class="adm-topbar">
         <div class="adm-topbar-left" style="display:flex;align-items:center;">
-          <!-- Sidebar Collapse/Expand Toggle Button -->
+          <!-- Sidebar Collapse/Expand Toggle Button (Desktop only) -->
           <button class="adm-collapse-btn" id="sidebarCollapseToggleBtn" onclick="toggleSidebarCollapse()" title="Collapse / Expand Sidebar">
             <i class="fa-solid fa-bars-staggered" id="sidebarCollapseIcon"></i>
           </button>
@@ -302,7 +354,7 @@
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const sidebar = document.getElementById('admSidebar');
-      const isCollapsed = localStorage.getItem('sat_admin_sidebar_collapsed') === 'true';
+      const isCollapsed = window.innerWidth > 900 && localStorage.getItem('sat_admin_sidebar_collapsed') === 'true';
       if (sidebar) {
         if (isCollapsed) {
           sidebar.classList.add('collapsed');
@@ -319,6 +371,7 @@
     });
 
     function toggleSidebarCollapse() {
+      if (window.innerWidth <= 900) return; // Desktop only toggle
       const sidebar = document.getElementById('admSidebar');
       if (!sidebar) return;
       
