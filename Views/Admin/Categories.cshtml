@@ -3,11 +3,85 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+<style>
+  /* Toggle Switch styling for storefront category visibility */
+  .cat-toggle-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+
+  .cat-switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 24px;
+  }
+
+  .cat-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .cat-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 24px;
+  }
+
+  .cat-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+
+  input:checked + .cat-slider {
+    background-color: #10b981;
+  }
+
+  input:checked + .cat-slider:before {
+    transform: translateX(20px);
+  }
+
+  .status-tag-active {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  .status-tag-hidden {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    color: #64748b;
+  }
+</style>
+
 <div style="max-width:1100px;margin:0 auto;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
     <div>
-      <h2 style="font-family:var(--font-serif);color:#0f172a;margin:0;">Dynamic Jewelry Categories</h2>
-      <p style="font-size:13px;color:#64748b;margin:4px 0 0;">Add, edit, or remove collection categories. Changes immediately reflect on the public storefront landing page ("Most Selling Collections").</p>
+      <h1 style="font-family:var(--font-serif);color:#0f172a;margin:0 0 6px;font-size:28px;">Dynamic Jewelry Categories</h1>
+      <p style="color:#64748b;font-size:14px;margin:0;">Add, hide, or show collection categories. Toggling visibility instantly reflects on the public storefront landing page without data loss.</p>
     </div>
   </div>
 
@@ -15,51 +89,53 @@
     <!-- Left: Add New Category Form -->
     <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-xl);padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
       <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:16px;font-size:18px;">+ Add New Category</h3>
-      <form id="adminAddCategoryForm" onsubmit="handleAddNewCategory(event)">
-        <div class="form-group">
-          <label class="form-label">Category Unique Key / Code *</label>
-          <input type="text" id="adminCatId" class="form-input" placeholder="e.g. pendants, anklets" required />
-          <small style="font-size:11px;color:#94a3b8;">Lowercase identifier (e.g. rings, necklaces)</small>
+      
+      <form id="addCategoryForm" onsubmit="handleAddNewCategory(event)">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:4px;">Category Unique Key / Code *</label>
+          <input type="text" id="adminCatId" class="adm-input" placeholder="e.g. pendants, anklets" required />
+          <small style="color:#94a3b8;font-size:11px;">Lowercase identifier (e.g. rings, necklaces)</small>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Category Title *</label>
-          <input type="text" id="adminCatName" class="form-input" placeholder="e.g. Royal Pendants Collection" required />
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:4px;">Category Title *</label>
+          <input type="text" id="adminCatName" class="adm-input" placeholder="e.g. Royal Pendants Collection" required />
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Badge Tag</label>
-          <select id="adminCatBadge" class="form-select">
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:4px;">Badge Tag</label>
+          <select id="adminCatBadge" class="adm-input">
             <option value="Top Selling">Top Selling</option>
             <option value="Popular" selected>Popular</option>
             <option value="Trending">Trending</option>
             <option value="Featured">Featured</option>
             <option value="New Arrival">New Arrival</option>
+            <option value="GIA Certified">GIA Certified</option>
           </select>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Subtitle Description *</label>
-          <input type="text" id="adminCatSub" class="form-input" placeholder="e.g. Diamond & Sapphire Medallions" required />
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:4px;">Subtitle Description *</label>
+          <input type="text" id="adminCatSub" class="adm-input" placeholder="e.g. Diamond & Sapphire Medallions" required />
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Category Card Image URL *</label>
-          <input type="text" id="adminCatImg" class="form-input" placeholder="assets/necklace_1.jpg or https://..." required />
+        <div style="margin-bottom:14px;">
+          <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:4px;">Category Card Image URL *</label>
+          <input type="text" id="adminCatImg" class="adm-input" placeholder="assets/necklace_1.jpg or https://..." required />
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Display Sequence Order</label>
-          <input type="number" id="adminCatOrder" class="form-input" value="5" min="1" />
+        <div style="margin-bottom:20px;">
+          <label style="display:block;font-size:12px;font-weight:700;color:#334155;margin-bottom:4px;">Display Sequence Order</label>
+          <input type="number" id="adminCatOrder" class="adm-input" value="5" min="1" />
         </div>
 
-        <button type="submit" class="btn-admin-submit" style="width:100%;margin-top:12px;">
+        <button type="submit" class="btn-adm-submit" style="width:100%;">
           <i class="fa-solid fa-cloud-arrow-up"></i> Save Category to Neon DB
         </button>
       </form>
     </div>
 
-    <!-- Right: Live Categories List -->
+    <!-- Right: Live Categories List with Hide/Show Toggle Switch -->
     <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-xl);padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
       <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:16px;font-size:18px;">Active Storefront Categories</h3>
       
@@ -70,8 +146,8 @@
               <th>Image</th>
               <th>Category Title</th>
               <th>Badge Tag</th>
-              <th>Subtitle</th>
               <th>Item Count</th>
+              <th>Storefront Visibility Toggle</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -91,23 +167,33 @@
 
   async function loadAdminCategoriesTable() {
     try {
-      const res = await fetch('/api/catalogapi/categories');
+      const res = await fetch('/api/catalogapi/admin-categories');
       const categories = await res.json();
       const tbody = document.getElementById('adminCategoriesTableBody');
       if (!tbody) return;
 
       if (!categories || categories.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">No active categories found in database.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">No categories found in database.</td></tr>';
         return;
       }
 
       tbody.innerHTML = categories.map(c => `
         <tr>
-          <td><img src="${c.imageUrl}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;" /></td>
+          <td><img src="${c.imageUrl}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;" /></td>
           <td><strong>${c.name}</strong><br/><small style="color:#64748b;">ID: ${c.id}</small></td>
           <td><span class="badge-cat">${c.badge}</span></td>
-          <td><small style="color:#475569;">${c.subtitle}</small></td>
           <td><strong style="color:#b45309;">${c.itemCount} items</strong></td>
+          <td>
+            <div class="cat-toggle-wrap">
+              <label class="cat-switch" title="Toggle visibility on landing page">
+                <input type="checkbox" ${c.isActive ? 'checked' : ''} onchange="toggleCategoryVisibility('${c.id}', this.checked)" />
+                <span class="cat-slider"></span>
+              </label>
+              <span class="${c.isActive ? 'status-tag-active' : 'status-tag-hidden'}">
+                ${c.isActive ? 'Visible' : 'Hidden'}
+              </span>
+            </div>
+          </td>
           <td>
             <button class="btn-table-delete" onclick="deleteCategoryFromDb('${c.id}', '${c.name}')">
               <i class="fa-solid fa-trash"></i> Delete
@@ -117,6 +203,23 @@
       `).join('');
     } catch (err) {
       console.error('Error loading categories:', err);
+    }
+  }
+
+  async function toggleCategoryVisibility(id, active) {
+    try {
+      const res = await fetch(`/api/catalogapi/categories/${id}/toggle-visibility?active=${active}`, {
+        method: 'POST'
+      });
+      const data = await res.json();
+      if (data.success) {
+        loadAdminCategoriesTable();
+      } else {
+        alert('Failed to update category visibility.');
+      }
+    } catch (err) {
+      console.error('Error toggling visibility:', err);
+      alert('Network error while toggling category visibility.');
     }
   }
 
@@ -138,34 +241,31 @@
         body: JSON.stringify(payload)
       });
       const data = await res.json();
-
-      if (res.ok) {
-        alert(`✨ ${data.message || 'Category saved successfully!'}`);
-        document.getElementById('adminAddCategoryForm').reset();
+      if (data.success) {
+        alert(`✨ ${data.message}`);
+        document.getElementById('addCategoryForm').reset();
         loadAdminCategoriesTable();
       } else {
-        alert(`❌ Error: ${data.message || 'Failed to save category.'}`);
+        alert('Failed to save category. Check your inputs.');
       }
     } catch (err) {
-      console.error('Failed to post category:', err);
-      alert('❌ Failed to save category to Neon PostgreSQL database.');
+      console.error('Error saving category:', err);
+      alert('Error connecting to Neon PostgreSQL database.');
     }
   }
 
   async function deleteCategoryFromDb(id, name) {
-    if (!confirm(`Are you sure you want to remove "${name}" category from the live storefront?`)) return;
+    if (!confirm(`Are you sure you want to delete category "${name}" from Neon PostgreSQL DB?`)) return;
 
     try {
       const res = await fetch(`/api/catalogapi/categories/${id}`, { method: 'DELETE' });
       const data = await res.json();
-      if (res.ok) {
-        alert(`✨ Category "${name}" removed from storefront!`);
+      if (data.success) {
+        alert(`Deleted: ${data.message}`);
         loadAdminCategoriesTable();
-      } else {
-        alert(`❌ ${data.message || 'Failed to delete category.'}`);
       }
     } catch (err) {
-      console.error('Failed to delete category:', err);
+      console.error('Error deleting category:', err);
     }
   }
 </script>

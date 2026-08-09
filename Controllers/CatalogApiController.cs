@@ -39,6 +39,7 @@ namespace SAT1.Controllers
                         cat.Subtitle,
                         cat.ImageUrl,
                         cat.DisplayOrder,
+                        cat.IsActive,
                         ItemCount = itemCount
                     });
                 }
@@ -49,6 +50,57 @@ namespace SAT1.Controllers
             {
                 return StatusCode(500, new { error = ex.Message, inner = ex.InnerException?.Message, stack = ex.StackTrace });
             }
+        }
+
+        // 1B. GET ALL CATEGORIES FOR ADMIN PANEL (Active + Hidden)
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        [HttpGet("admin-categories")]
+        public async Task<IActionResult> GetAdminCategories()
+        {
+            try
+            {
+                var categories = await _context.Categories
+                    .OrderBy(c => c.DisplayOrder)
+                    .ToListAsync();
+
+                var categoryData = new List<object>();
+
+                foreach (var cat in categories)
+                {
+                    var itemCount = await _context.CatalogItems.CountAsync(i => i.CategoryId == cat.Id && i.IsActive);
+                    categoryData.Add(new
+                    {
+                        cat.Id,
+                        cat.Name,
+                        cat.Badge,
+                        cat.Subtitle,
+                        cat.ImageUrl,
+                        cat.DisplayOrder,
+                        cat.IsActive,
+                        ItemCount = itemCount
+                    });
+                }
+
+                return Ok(categoryData);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        // 1C. TOGGLE CATEGORY VISIBILITY (Hide / Show on Landing Page without Deleting)
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        [HttpPost("categories/{id}/toggle-visibility")]
+        public async Task<IActionResult> ToggleCategoryVisibility(string id, [FromQuery] bool active)
+        {
+            var category = await _context.Categories.FindAsync(id);
+            if (category == null) return NotFound(new { message = "Category not found" });
+
+            category.IsActive = active;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { success = true, message = $"Category '{category.Name}' visibility updated to {(active ? "Visible" : "Hidden")}", isActive = active });
         }
 
         // 2. ADD NEW CATEGORY FROM ADMIN PANEL

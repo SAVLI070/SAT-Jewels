@@ -719,6 +719,19 @@
       selectedMetal = selectedOpt.getAttribute('data-name') || selectedOpt.text;
       document.getElementById('selectedMetalText').textContent = selectedMetal;
       updateCalculatedPrice();
+
+      // Dynamic Image Swap based on Precious Metal Selection (Task 2)
+      const mainPhoto = document.getElementById('mainProductPhoto');
+      if (mainPhoto) {
+        const metalLower = selectedMetal.toLowerCase();
+        if (metalLower.includes('white gold') || metalLower.includes('platinum')) {
+          mainPhoto.src = '/assets/ring_whitegold.png';
+        } else if (metalLower.includes('rose')) {
+          mainPhoto.src = '/assets/ring_rosegold.png';
+        } else {
+          mainPhoto.src = '@galleryList[0]';
+        }
+      }
     }
 
     function onCaratDropdownChange(selectEl) {

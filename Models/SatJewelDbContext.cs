@@ -97,7 +97,7 @@ namespace SAT1.Models
                     Spec = "Platinum 950 | 2.0ct Halo Setting | IF Clarity",
                     PriceUSD = 2900,
                     ImageUrl = "assets/ring_angle.png",
-                    GalleryImages = "assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png"
+                    GalleryImages = "assets/ring_angle.png,assets/ring_whitegold.png,assets/ring_rosegold.png,assets/ring_model.png"
                 },
                 new CatalogItem
                 {
@@ -106,8 +106,8 @@ namespace SAT1.Models
                     CategoryId = "necklaces",
                     Spec = "18K Yellow Gold | Marquise & Pear Cut Diamonds",
                     PriceUSD = 4200,
-                    ImageUrl = "assets/necklace_1.jpg",
-                    GalleryImages = "assets/necklace_1.jpg,assets/ring_clarity.png,assets/ring_model.png"
+                    ImageUrl = "assets/necklace_main.png",
+                    GalleryImages = "assets/necklace_main.png,assets/necklace_detail.png,assets/ring_clarity.png,assets/ring_model.png"
                 },
                 new CatalogItem
                 {
@@ -116,8 +116,8 @@ namespace SAT1.Models
                     CategoryId = "earrings",
                     Spec = "18K Gold | 2.2ct Triple Drop Diamonds",
                     PriceUSD = 2500,
-                    ImageUrl = "assets/earring_card.jpg",
-                    GalleryImages = "assets/earring_card.jpg,assets/ring_clarity.png,assets/ring_model.png"
+                    ImageUrl = "assets/earring_main.png",
+                    GalleryImages = "assets/earring_main.png,assets/necklace_detail.png,assets/ring_clarity.png,assets/ring_model.png"
                 },
                 new CatalogItem
                 {
@@ -126,8 +126,8 @@ namespace SAT1.Models
                     CategoryId = "bracelets",
                     Spec = "Platinum 950 | 5.0ct Total Weight | Round Cut",
                     PriceUSD = 4700,
-                    ImageUrl = "assets/bracelet_card.jpg",
-                    GalleryImages = "assets/bracelet_card.jpg,assets/ring_clarity.png,assets/ring_model.png"
+                    ImageUrl = "assets/bracelet_main.png",
+                    GalleryImages = "assets/bracelet_main.png,assets/ring_whitegold.png,assets/ring_clarity.png,assets/ring_model.png"
                 }
             );
         }

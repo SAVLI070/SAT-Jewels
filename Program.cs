@@ -89,19 +89,11 @@ using (var scope = app.Services.CreateScope())
 
         // Update existing Neon PostgreSQL catalog items with multi-angle gallery image paths
         var updateGallerySql = @"
-            UPDATE ""CatalogItems""
-            SET ""ImageUrl"" = 'assets/ring_main.png',
-                ""GalleryImages"" = 'assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png'
-            WHERE ""Id"" = 'ring_1';
-
-            UPDATE ""CatalogItems""
-            SET ""ImageUrl"" = 'assets/ring_angle.png',
-                ""GalleryImages"" = 'assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png'
-            WHERE ""Id"" = 'ring_2';
-
-            UPDATE ""CatalogItems""
-            SET ""GalleryImages"" = ""ImageUrl"" || ',assets/ring_clarity.png,assets/ring_model.png'
-            WHERE ""GalleryImages"" IS NULL OR ""GalleryImages"" = '';
+            UPDATE ""CatalogItems"" SET ""ImageUrl"" = 'assets/ring_main.png', ""GalleryImages"" = 'assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'ring_1';
+            UPDATE ""CatalogItems"" SET ""ImageUrl"" = 'assets/ring_angle.png', ""GalleryImages"" = 'assets/ring_angle.png,assets/ring_whitegold.png,assets/ring_rosegold.png,assets/ring_model.png' WHERE ""Id"" = 'ring_2';
+            UPDATE ""CatalogItems"" SET ""ImageUrl"" = 'assets/necklace_main.png', ""GalleryImages"" = 'assets/necklace_main.png,assets/necklace_detail.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'neck_1';
+            UPDATE ""CatalogItems"" SET ""ImageUrl"" = 'assets/earring_main.png', ""GalleryImages"" = 'assets/earring_main.png,assets/necklace_detail.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'ear_1';
+            UPDATE ""CatalogItems"" SET ""ImageUrl"" = 'assets/bracelet_main.png', ""GalleryImages"" = 'assets/bracelet_main.png,assets/ring_whitegold.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'brac_1';
         ";
 
         try {
