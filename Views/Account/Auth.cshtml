@@ -10,7 +10,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign In & Sign Up — SAT Jewel</title>
+  <title>Sign In & Sign Up — SAT Jewel Sanctuary</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -39,45 +39,85 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.18;
+      opacity: 0.22;
       background: url('/assets/sat_jewels_shop_bg.jpg') center/cover no-repeat;
-      filter: blur(8px);
+      filter: blur(10px);
     }
 
-    .auth-wrapper {
+    .auth-page-container {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 480px;
+      max-width: 960px;
       padding: 24px 20px;
       box-sizing: border-box;
     }
 
-    .auth-card {
-      background: rgba(8, 17, 34, 0.82);
+    /* SLIDING SPLIT AUTH CONTAINER */
+    .auth-sliding-box {
+      background: rgba(8, 17, 34, 0.88);
       backdrop-filter: blur(28px);
       -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(212, 178, 112, 0.28);
-      border-radius: var(--radius-2xl);
-      padding: 36px 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(212, 178, 112, 0.12);
-      animation: authCardFadeIn 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      border: 1px solid rgba(212, 178, 112, 0.35);
+      border-radius: 28px;
+      box-shadow: 0 25px 75px rgba(0, 0, 0, 0.75), 0 0 50px rgba(212, 178, 112, 0.18);
+      position: relative;
+      overflow: hidden;
+      width: 100%;
+      min-height: 640px;
     }
 
-    @@keyframes authCardFadeIn {
-      from { opacity: 0; transform: translateY(20px) scale(0.98); }
-      to { opacity: 1; transform: translateY(0) scale(1); }
+    .form-container {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      transition: all 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+      padding: 44px 40px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .sign-in-container {
+      left: 0;
+      width: 50%;
+      z-index: 2;
+    }
+
+    .sign-up-container {
+      left: 0;
+      width: 50%;
+      opacity: 0;
+      z-index: 1;
+    }
+
+    /* WHEN SIGN UP ACTIVE: FORM SLIDES TO RIGHT (translateX 100%) */
+    .auth-sliding-box.right-panel-active .sign-in-container {
+      transform: translateX(100%);
+      opacity: 0;
+      z-index: 1;
+    }
+
+    .auth-sliding-box.right-panel-active .sign-up-container {
+      transform: translateX(100%);
+      opacity: 1;
+      z-index: 5;
+      animation: showPane 0.6s;
+    }
+
+    @@keyframes showPane {
+      0%, 49.99% { opacity: 0; z-index: 1; }
+      50%, 100% { opacity: 1; z-index: 5; }
     }
 
     .auth-brand-head {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     .auth-logo-badge {
-      width: 60px;
-      height: 60px;
-      margin: 0 auto 12px;
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 10px;
       background: radial-gradient(circle, #0f1e36 0%, #081120 100%);
       border: 1.5px solid #b45309;
       border-radius: 14px;
@@ -88,14 +128,14 @@
     }
 
     .auth-logo-badge img {
-      width: 80%;
-      height: 80%;
+      width: 76%;
+      height: 76%;
       object-fit: contain;
     }
 
     .auth-title {
       font-family: var(--font-serif);
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 700;
       color: var(--cream-ivory);
       margin: 0 0 4px;
@@ -107,57 +147,13 @@
     }
 
     .auth-sub {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--taupe-beige);
       margin: 0;
     }
 
-    /* Auth Switcher Tabs */
-    .auth-tabs {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius-full);
-      padding: 4px;
-      margin-bottom: 24px;
-    }
-
-    .auth-tab-btn {
-      padding: 10px 0;
-      border: none;
-      background: transparent;
-      color: var(--taupe-beige);
-      font-family: var(--font-sans);
-      font-size: 14px;
-      font-weight: 700;
-      border-radius: var(--radius-full);
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .auth-tab-btn.active {
-      background: var(--champagne-gold);
-      color: #060d0a;
-      box-shadow: 0 4px 14px rgba(212, 178, 112, 0.4);
-    }
-
-    .auth-form-pane {
-      display: none;
-    }
-
-    .auth-form-pane.active {
-      display: block;
-      animation: tabFadeIn 0.35s ease forwards;
-    }
-
-    @@keyframes tabFadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
     .auth-input-group {
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
 
     .auth-label {
@@ -165,7 +161,7 @@
       font-size: 12px;
       font-weight: 700;
       color: var(--champagne-gold);
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       letter-spacing: 0.02em;
     }
 
@@ -186,12 +182,12 @@
     .auth-input {
       width: 100%;
       box-sizing: border-box;
-      padding: 12px 14px 12px 40px;
+      padding: 11px 14px 11px 40px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: var(--radius-md);
       color: #ffffff;
-      font-size: 14px;
+      font-size: 13px;
       outline: none;
       transition: all 0.25s ease;
     }
@@ -208,7 +204,7 @@
       justify-content: space-between;
       font-size: 12px;
       color: var(--taupe-beige);
-      margin-bottom: 20px;
+      margin-bottom: 18px;
     }
 
     .auth-row-between a {
@@ -223,12 +219,12 @@
 
     .btn-auth-submit {
       width: 100%;
-      padding: 13px 0;
+      padding: 12px 0;
       border: none;
       border-radius: var(--radius-full);
       background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
       color: #060d0a;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -248,7 +244,7 @@
     .auth-divider {
       display: flex;
       align-items: center;
-      margin: 22px 0 18px;
+      margin: 18px 0 14px;
       color: #64748b;
       font-size: 11px;
       text-transform: uppercase;
@@ -263,13 +259,13 @@
     }
 
     .auth-divider span {
-      padding: 0 12px;
+      padding: 0 10px;
     }
 
     .auth-social-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
+      gap: 10px;
     }
 
     .btn-social {
@@ -277,12 +273,12 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 10px;
+      padding: 9px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius-md);
       color: #ffffff;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
@@ -294,9 +290,152 @@
       border-color: rgba(255, 255, 255, 0.25);
     }
 
+    /* OVERLAY SLIDING BANNER CONTAINER */
+    .overlay-container {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 50%;
+      height: 100%;
+      overflow: hidden;
+      transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+      z-index: 100;
+    }
+
+    .auth-sliding-box.right-panel-active .overlay-container {
+      transform: translateX(-100%);
+    }
+
+    .overlay {
+      background: linear-gradient(135deg, rgba(8, 17, 34, 0.88) 0%, rgba(3, 7, 18, 0.92) 100%),
+                  url('/assets/hero_crystals_macro_1786187419288.png') center/cover no-repeat;
+      background-blend-mode: overlay;
+      color: #ffffff;
+      position: relative;
+      left: -100%;
+      height: 100%;
+      width: 200%;
+      transform: translateX(0);
+      transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+    }
+
+    .auth-sliding-box.right-panel-active .overlay {
+      transform: translateX(50%);
+    }
+
+    .overlay-panel {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 0 40px;
+      text-align: center;
+      top: 0;
+      height: 100%;
+      width: 50%;
+      transform: translateX(0);
+      transition: transform 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+      box-sizing: border-box;
+    }
+
+    .overlay-left {
+      transform: translateX(-20%);
+    }
+
+    .auth-sliding-box.right-panel-active .overlay-left {
+      transform: translateX(0);
+    }
+
+    .overlay-right {
+      right: 0;
+      transform: translateX(0);
+    }
+
+    .auth-sliding-box.right-panel-active .overlay-right {
+      transform: translateX(20%);
+    }
+
+    .overlay-badge {
+      width: 64px;
+      height: 64px;
+      margin-bottom: 16px;
+      background: radial-gradient(circle, #0f1e36 0%, #081120 100%);
+      border: 1.5px solid #b45309;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 30px rgba(212, 178, 112, 0.45);
+    }
+
+    .overlay-badge img {
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
+    }
+
+    .overlay-title {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0 0 10px;
+    }
+
+    .overlay-title span {
+      color: var(--champagne-gold);
+      font-style: italic;
+    }
+
+    .overlay-desc {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--taupe-beige);
+      margin: 0 0 24px;
+      max-width: 320px;
+    }
+
+    .btn-ghost-gold-overlay {
+      padding: 12px 28px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--champagne-gold);
+      color: var(--champagne-gold);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 20px rgba(212, 178, 112, 0.25);
+    }
+
+    .btn-ghost-gold-overlay:hover {
+      background: var(--champagne-gold);
+      color: #060d0a;
+      box-shadow: 0 6px 28px rgba(212, 178, 112, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .auth-alert-error {
+      background: rgba(220, 38, 38, 0.15);
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      color: #fca5a5;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
     .auth-foot-back {
       text-align: center;
-      margin-top: 24px;
+      margin-top: 20px;
     }
 
     .auth-foot-back a {
@@ -313,17 +452,44 @@
       color: var(--champagne-gold);
     }
 
-    .auth-alert-error {
-      background: rgba(220, 38, 38, 0.15);
-      border: 1px solid rgba(248, 113, 113, 0.35);
-      color: #fca5a5;
-      padding: 10px 14px;
-      border-radius: var(--radius-md);
-      font-size: 13px;
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    /* RESPONSIVE LAYOUT FOR MOBILE SCREENS */
+    @@media (max-width: 768px) {
+      .auth-sliding-box {
+        min-height: auto;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .form-container, .sign-in-container, .sign-up-container {
+        position: relative;
+        width: 100% !important;
+        left: 0 !important;
+        transform: none !important;
+        opacity: 1 !important;
+        padding: 32px 24px;
+      }
+
+      .sign-up-container {
+        display: none;
+      }
+
+      .auth-sliding-box.right-panel-active .sign-in-container {
+        display: none;
+      }
+
+      .auth-sliding-box.right-panel-active .sign-up-container {
+        display: block;
+      }
+
+      .overlay-container {
+        display: none;
+      }
+
+      .mobile-auth-switch {
+        display: flex;
+        justify-content: center;
+        margin-top: 16px;
+      }
     }
   </style>
 </head>
@@ -331,41 +497,30 @@
 <body>
   <div class="auth-bg-slider"></div>
 
-  <div class="auth-wrapper">
-    <div class="auth-card">
-      <!-- Logo Header -->
-      <div class="auth-brand-head">
-        <a href="/" style="text-decoration:none;">
-          <div class="auth-logo-badge">
-            <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
-          </div>
-          <h1 class="auth-title">SAT <span>Jewel</span></h1>
-          <p class="auth-sub">Client Sanctuary & Bespoke Portal</p>
-        </a>
-      </div>
+  <div class="auth-page-container">
+    <!-- SLIDING BOX -->
+    <div class="auth-sliding-box @(initialMode == "signup" ? "right-panel-active" : "")" id="authSlidingBox">
 
-      @if (!string.IsNullOrEmpty(error))
-      {
-        <div class="auth-alert-error">
-          <i class="fa-solid fa-triangle-exclamation"></i>
-          <span>@error</span>
-        </div>
-      }
-
-      <!-- Tab Switchers: Sign In vs Sign Up -->
-      <div class="auth-tabs">
-        <button type="button" class="auth-tab-btn @(initialMode == "signin" ? "active" : "")" id="tabSignInBtn" onclick="switchAuthTab('signin')">
-          Sign In
-        </button>
-        <button type="button" class="auth-tab-btn @(initialMode == "signup" ? "active" : "")" id="tabSignUpBtn" onclick="switchAuthTab('signup')">
-          Sign Up
-        </button>
-      </div>
-
-      <!-- 1. SIGN IN FORM -->
-      <div class="auth-form-pane @(initialMode == "signin" ? "active" : "")" id="paneSignIn">
+      <!-- 1. SIGN IN FORM PANE (Left Position by default) -->
+      <div class="form-container sign-in-container">
         <form method="post" action="/Account/HandleSignIn">
           <input type="hidden" name="returnUrl" value="@returnUrl" />
+
+          <div class="auth-brand-head">
+            <div class="auth-logo-badge">
+              <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
+            </div>
+            <h1 class="auth-title">Sign In to <span>SAT Jewel</span></h1>
+            <p class="auth-sub">Access your bespoke GIA vault & order tracking</p>
+          </div>
+
+          @if (!string.IsNullOrEmpty(error) && initialMode == "signin")
+          {
+            <div class="auth-alert-error">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>@error</span>
+            </div>
+          }
 
           <div class="auth-input-group">
             <label class="auth-label">Email or Username</label>
@@ -408,11 +563,34 @@
             <i class="fa-brands fa-apple"></i> Apple ID
           </button>
         </div>
+
+        <!-- Mobile Switcher Link -->
+        <div class="mobile-auth-switch" style="text-align:center;margin-top:16px;">
+          <a href="javascript:void(0)" onclick="toggleAuthMode('signup')" style="color:var(--champagne-gold);font-size:13px;text-decoration:none;">
+            Don't have an account? <strong>Sign Up Here</strong>
+          </a>
+        </div>
       </div>
 
-      <!-- 2. SIGN UP FORM -->
-      <div class="auth-form-pane @(initialMode == "signup" ? "active" : "")" id="paneSignUp">
+      <!-- 2. SIGN UP FORM PANE (Right Position when active) -->
+      <div class="form-container sign-up-container">
         <form method="post" action="/Account/HandleSignUp">
+          <div class="auth-brand-head">
+            <div class="auth-logo-badge">
+              <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
+            </div>
+            <h1 class="auth-title">Create <span>Account</span></h1>
+            <p class="auth-sub">Join SAT Jewel Bespoke VIP Sanctuary</p>
+          </div>
+
+          @if (!string.IsNullOrEmpty(error) && initialMode == "signup")
+          {
+            <div class="auth-alert-error">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>@error</span>
+            </div>
+          }
+
           <div class="auth-input-group">
             <label class="auth-label">Full Name *</label>
             <div class="auth-input-wrap">
@@ -448,20 +626,53 @@
           <div class="auth-input-group">
             <label class="auth-label">Confirm Password *</label>
             <div class="auth-input-wrap">
-              <i class="fa-solid fa-shield-check"></i>
+              <i class="fa-solid fa-shield-halved"></i>
               <input type="password" name="confirmPassword" class="auth-input" placeholder="Repeat password" required />
             </div>
           </div>
 
-          <div style="font-size:12px;color:var(--taupe-beige);margin-bottom:18px;line-height:1.5;">
-            By signing up, you agree to SAT Jewel's GIA Authenticity Guidelines and Privacy Policy.
-          </div>
-
-          <button type="submit" class="btn-auth-submit">
+          <button type="submit" class="btn-auth-submit" style="margin-top:10px;">
             <i class="fa-solid fa-sparkles"></i> Create VIP Account
           </button>
         </form>
+
+        <!-- Mobile Switcher Link -->
+        <div class="mobile-auth-switch" style="text-align:center;margin-top:16px;">
+          <a href="javascript:void(0)" onclick="toggleAuthMode('signin')" style="color:var(--champagne-gold);font-size:13px;text-decoration:none;">
+            Already have an account? <strong>Sign In Here</strong>
+          </a>
+        </div>
       </div>
+
+      <!-- 3. SLIDING OVERLAY CONTAINER WITH LUXURY EMBLEM & WELCOME MESSAGES -->
+      <div class="overlay-container">
+        <div class="overlay">
+          <!-- Left Overlay (Shown when Sign Up form is on Right side) -->
+          <div class="overlay-panel overlay-left">
+            <div class="overlay-badge">
+              <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
+            </div>
+            <h1 class="overlay-title">Already a <span>Client?</span></h1>
+            <p class="overlay-desc">Sign in to manage your high-carat orders, inspect GIA diamond certificates, and access private bespoke auctions.</p>
+            <button class="btn-ghost-gold-overlay" onclick="toggleAuthMode('signin')">
+              <i class="fa-solid fa-right-to-bracket"></i> Sign In to Account
+            </button>
+          </div>
+
+          <!-- Right Overlay (Shown when Sign In form is on Left side) -->
+          <div class="overlay-panel overlay-right">
+            <div class="overlay-badge">
+              <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
+            </div>
+            <h1 class="overlay-title">New to <span>SAT Jewel?</span></h1>
+            <p class="overlay-desc">Create your VIP account to explore bespoke diamond crafting, AI portfolio valuation, and exclusive concierge access.</p>
+            <button class="btn-ghost-gold-overlay" onclick="toggleAuthMode('signup')">
+              <i class="fa-solid fa-user-plus"></i> Create Account (Sign Up)
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Back to Storefront Link -->
@@ -473,22 +684,16 @@
   </div>
 
   <script>
-    function switchAuthTab(tab) {
-      const tabIn = document.getElementById('tabSignInBtn');
-      const tabUp = document.getElementById('tabSignUpBtn');
-      const paneIn = document.getElementById('paneSignIn');
-      const paneUp = document.getElementById('paneSignUp');
+    function toggleAuthMode(mode) {
+      const box = document.getElementById('authSlidingBox');
+      if (!box) return;
 
-      if (tab === 'signin') {
-        tabIn.classList.add('active');
-        tabUp.classList.remove('active');
-        paneIn.classList.add('active');
-        paneUp.classList.remove('active');
+      if (mode === 'signup') {
+        box.classList.add('right-panel-active');
+        history.replaceState(null, '', '/Account/SignUp');
       } else {
-        tabUp.classList.add('active');
-        tabIn.classList.remove('active');
-        paneUp.classList.add('active');
-        paneIn.classList.remove('active');
+        box.classList.remove('right-panel-active');
+        history.replaceState(null, '', '/Account/SignIn');
       }
     }
   </script>
