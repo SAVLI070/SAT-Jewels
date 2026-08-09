@@ -17,33 +17,28 @@ namespace SAT1.Controllers
         }
 
         [HttpGet]
-        public IActionResult SignIn(string? returnUrl = null, string? mode = "signin", string? adminRequired = null)
+        public IActionResult SignIn()
         {
-            ViewData["ReturnUrl"] = returnUrl;
-            ViewData["InitialMode"] = mode ?? "signin";
-            ViewData["AdminRequired"] = adminRequired;
+            ViewData["InitialMode"] = "signin";
             return View("Auth");
         }
 
         [HttpGet]
-        public IActionResult SignUp(string? returnUrl = null, string? adminRequired = null)
+        public IActionResult SignUp()
         {
-            ViewData["ReturnUrl"] = returnUrl;
             ViewData["InitialMode"] = "signup";
-            ViewData["AdminRequired"] = adminRequired;
             return View("Auth");
         }
 
         [HttpGet]
-        public IActionResult Auth(string? mode = "signin", string? adminRequired = null)
+        public IActionResult Auth(string? mode = "signin")
         {
             ViewData["InitialMode"] = mode ?? "signin";
-            ViewData["AdminRequired"] = adminRequired;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> HandleSignIn(string email, string password, bool rememberMe = false, string? returnUrl = null)
+        public async Task<IActionResult> HandleSignIn(string email, string password, bool rememberMe = false)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
@@ -77,21 +72,16 @@ namespace SAT1.Controllers
                 ExpiresUtc = rememberMe ? DateTime.UtcNow.AddDays(30) : DateTime.UtcNow.AddHours(8)
             });
 
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-
             if (user.Role == "Admin")
             {
-                return RedirectToAction("Dashboard", "Admin");
+                return Redirect("/admin");
             }
 
-            return RedirectToAction("Index", "Home");
+            return Redirect("/");
         }
 
         [HttpPost]
-        public async Task<IActionResult> HandleSignUp(string fullName, string email, string phone, string password, string confirmPassword, string? returnUrl = null)
+        public async Task<IActionResult> HandleSignUp(string fullName, string email, string phone, string password, string confirmPassword)
         {
             if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
@@ -107,10 +97,10 @@ namespace SAT1.Controllers
                 return View("Auth");
             }
 
-            var user = await _authBal.RegisterNewUserAsync(fullName, email, phone, password, confirmPassword, returnUrl);
+            var user = await _authBal.RegisterNewUserAsync(fullName, email, phone, password, confirmPassword);
             if (user == null)
             {
-                ViewBag.ErrorMessage = "An account with this email address already exists or signup failed.";
+                ViewBag.ErrorMessage = "An account with this email address already exists. Please Sign In.";
                 ViewData["InitialMode"] = "signup";
                 return View("Auth");
             }
@@ -120,7 +110,7 @@ namespace SAT1.Controllers
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.FullName),
                 new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, user.Role)
+                new Claim(ClaimTypes.Role, "Client")
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -128,24 +118,14 @@ namespace SAT1.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-
-            if (user.Role == "Admin")
-            {
-                return RedirectToAction("Dashboard", "Admin");
-            }
-
-            return RedirectToAction("Index", "Home");
+            return Redirect("/");
         }
 
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            return RedirectToAction("Index", "Home");
+            return Redirect("/");
         }
     }
 }

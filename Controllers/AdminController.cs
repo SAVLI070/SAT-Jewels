@@ -25,7 +25,7 @@ namespace SAT1.Controllers
         {
             if (!CheckAccess())
             {
-                return RedirectToAction("SignIn", "Account", new { returnUrl = "/admin", adminRequired = "true" });
+                return Redirect("/Account/SignIn");
             }
             ViewBag.Title = "Dashboard Overview";
             return View("Index");
@@ -36,7 +36,7 @@ namespace SAT1.Controllers
         {
             if (!CheckAccess())
             {
-                return RedirectToAction("SignIn", "Account", new { returnUrl = "/admin/categories", adminRequired = "true" });
+                return Redirect("/Account/SignIn");
             }
             ViewBag.Title = "Jewelry Category Management";
             return View();
@@ -47,7 +47,7 @@ namespace SAT1.Controllers
         {
             if (!CheckAccess())
             {
-                return RedirectToAction("SignIn", "Account", new { returnUrl = "/admin/catalog", adminRequired = "true" });
+                return Redirect("/Account/SignIn");
             }
             ViewBag.Title = "Live Jewelry Catalog Table";
             return View();
@@ -58,7 +58,7 @@ namespace SAT1.Controllers
         {
             if (!CheckAccess())
             {
-                return RedirectToAction("SignIn", "Account", new { returnUrl = "/admin/addproduct", adminRequired = "true" });
+                return Redirect("/Account/SignIn");
             }
             ViewBag.Title = "Publish New Collection Item";
             return View();

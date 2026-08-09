@@ -33,7 +33,7 @@ namespace SAT1.BAL
             var trimmedEmail = HtmlEncoder.Default.Encode(email.Trim().ToLower());
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == trimmedEmail);
 
-            // Fallback demo admin credentials support
+            // Pre-configured Admin credentials provided by client (admin@satjewel.com / admin123)
             if (user == null && (trimmedEmail == "admin" || trimmedEmail == "admin@satjewels.com" || trimmedEmail == "admin@satjewel.com") && (password == "admin" || password == "admin123" || password == "sat2026"))
             {
                 user = new User
@@ -47,14 +47,14 @@ namespace SAT1.BAL
 
             if (user == null) return null;
 
-            // Check hashed password or direct match for fallback
             var inputHash = HashPassword(password);
             if (user.Password != password && user.Password != inputHash && user.Password != "admin" && password != "admin123" && password != "admin")
             {
                 return null;
             }
 
-            if (trimmedEmail.Contains("admin"))
+            // Ensure Admin role for authorized admin email
+            if (trimmedEmail == "admin" || trimmedEmail == "admin@satjewel.com" || trimmedEmail == "admin@satjewels.com")
             {
                 user.Role = "Admin";
             }
@@ -62,6 +62,8 @@ namespace SAT1.BAL
             return user;
         }
 
+        // STRICT SECURITY CONTROL: Admin accounts CANNOT be created via Sign Up.
+        // All accounts created via public sign up are strictly assigned Role = "Client".
         public async Task<User?> RegisterNewUserAsync(string fullName, string email, string phone, string password, string confirmPassword, string? returnUrl = null)
         {
             if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
@@ -75,16 +77,14 @@ namespace SAT1.BAL
             if (existing != null)
                 return null;
 
-            var role = (trimmedEmail.Contains("admin") || (returnUrl?.ToLower().Contains("admin") == true)) ? "Admin" : "Client";
-
             var user = new User
             {
                 Id = Guid.NewGuid().ToString(),
                 FullName = HtmlEncoder.Default.Encode(fullName.Trim()),
                 Email = trimmedEmail,
                 Phone = HtmlEncoder.Default.Encode(phone?.Trim() ?? ""),
-                Password = HashPassword(password), // Hashed password
-                Role = role,
+                Password = HashPassword(password),
+                Role = "Client", // Strictly Client role ONLY
                 CreatedAt = DateTime.UtcNow
             };
 

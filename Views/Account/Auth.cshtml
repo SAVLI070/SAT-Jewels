@@ -504,8 +504,6 @@
       <!-- 1. SIGN IN FORM PANE (Left Position by default) -->
       <div class="form-container sign-in-container">
         <form method="post" action="/Account/HandleSignIn">
-          <input type="hidden" name="returnUrl" value="@returnUrl" />
-
           <div class="auth-brand-head">
             <div class="auth-logo-badge">
               <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
@@ -513,14 +511,6 @@
             <h1 class="auth-title">Sign In to <span>SAT Jewel</span></h1>
             <p class="auth-sub">Access your bespoke GIA vault & order tracking</p>
           </div>
-
-          @if (ViewData["AdminRequired"]?.ToString() == "true" || (returnUrl?.ToLower().Contains("admin") == true))
-          {
-            <div style="background: rgba(212, 178, 112, 0.15); border: 1px solid var(--champagne-gold); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 16px; font-size: 12px; color: var(--champagne-gold); text-align: left;">
-              <i class="fa-solid fa-shield-halved"></i> <strong>Admin Credential Sign In Required</strong><br/>
-              <span style="color:var(--taupe-beige);">Please sign in or sign up with admin credentials to access the Admin Portal.<br/>Demo Credentials: <strong>admin@satjewel.com</strong> / <strong>admin123</strong></span>
-            </div>
-          }
 
           @if (!string.IsNullOrEmpty(error) && initialMode == "signin")
           {
