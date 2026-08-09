@@ -8,124 +8,8 @@ const currentCurrency = 'USD';
 const currencyConfig = { symbol: '$', name: 'US Dollar', flag: '🇺🇸' };
 let isAdminLoggedIn = false;
 
-// Default Catalog Data in USD ($)
-const defaultCollectionData = {
-  rings: [
-    {
-      id: "ring_1",
-      name: "Royal Solitaire Diamond Ring",
-      spec: "18K Gold | 1.5ct GIA VVS1, E Color | Brilliant Cut",
-      priceUSD: 2200,
-      img: "assets/ring_1.jpg",
-      tags: ["Solitaire", "18K Gold", "GIA VVS1"]
-    },
-    {
-      id: "ring_2",
-      name: "Halo Cushion Cut Engagement Ring",
-      spec: "Platinum 950 | 2.0ct Halo Diamond Setting | IF Clarity",
-      priceUSD: 2900,
-      img: "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80",
-      tags: ["Platinum 950", "Halo", "2.0ct"]
-    },
-    {
-      id: "ring_3",
-      name: "Emerald Cut Vintage Gold Band",
-      spec: "18K Yellow Gold | 1.8ct Emerald Cut Diamond",
-      priceUSD: 2350,
-      img: "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=800&q=80",
-      tags: ["18K Gold", "Emerald Cut", "Vintage"]
-    },
-    {
-      id: "ring_4",
-      name: "Pavé Diamond Eternity Ring",
-      spec: "18K White Gold | 1.2ct Continuous Micro-Pavé",
-      priceUSD: 1450,
-      img: "https://images.unsplash.com/photo-1602751584552-8ba73aad10e1?w=800&q=80",
-      tags: ["18K Gold", "Pavé", "Eternity"]
-    }
-  ],
-  necklaces: [
-    {
-      id: "neck_1",
-      name: "Imperial Diamond Floral Pendant",
-      spec: "18K Yellow Gold | Marquise & Pear Cut Diamonds | 3.5ct",
-      priceUSD: 4200,
-      img: "assets/necklace_1.jpg",
-      tags: ["18K Gold", "Pendant", "Marquise"]
-    },
-    {
-      id: "neck_2",
-      name: "Rivière Diamond Solitaire Choker",
-      spec: "Platinum 950 | Graduated Round Diamonds | 5.0ct Total",
-      priceUSD: 6250,
-      img: "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80",
-      tags: ["Platinum 950", "Choker", "5.0ct"]
-    },
-    {
-      id: "neck_3",
-      name: "Celestial Sapphire & Diamond Lariat",
-      spec: "18K White Gold | Royal Blue Sapphire 2.5ct + Diamonds",
-      priceUSD: 2000,
-      img: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80",
-      tags: ["Sapphire", "18K Gold", "Lariat"]
-    }
-  ],
-  earrings: [
-    {
-      id: "ear_1",
-      name: "Chandelier Diamond Drop Earrings",
-      spec: "18K Gold | 2.2ct Triple Drop Cascading Diamonds",
-      priceUSD: 2500,
-      img: "assets/earring_card.jpg",
-      tags: ["18K Gold", "Drops", "Chandelier"]
-    },
-    {
-      id: "ear_2",
-      name: "Classic Solitaire Diamond Studs",
-      spec: "Platinum 950 | 1.0ct Each (2.0ct Total) | GIA Ideal Cut",
-      priceUSD: 3150,
-      img: "https://images.unsplash.com/photo-1630019852942-f89202989a59?w=800&q=80",
-      tags: ["Platinum 950", "Studs", "GIA Ideal"]
-    }
-  ],
-  bracelets: [
-    {
-      id: "brac_1",
-      name: "Classic Diamond Tennis Bracelet",
-      spec: "Platinum 950 | 5.0ct Total Weight | Round Brilliant Diamonds",
-      priceUSD: 4700,
-      img: "assets/bracelet_card.jpg",
-      tags: ["Platinum 950", "Tennis", "5.0ct"]
-    },
-    {
-      id: "brac_2",
-      name: "Heritage 18K Gold Diamond Bangle",
-      spec: "18K Solid Yellow Gold | 2.8ct Channel Set Diamonds",
-      priceUSD: 3450,
-      img: "https://images.unsplash.com/photo-1611591475155-4286fa2c2e74?w=800&q=80",
-      tags: ["18K Gold", "Bangle", "Channel Set"]
-    }
-  ]
-};
-
-let collectionData = loadCatalog();
-
-function loadCatalog() {
-  const saved = localStorage.getItem('sat_catalog_usd');
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch (e) {
-      console.error('Error parsing saved catalog:', e);
-    }
-  }
-  return JSON.parse(JSON.stringify(defaultCollectionData));
-}
-
-function saveCatalog() {
-  localStorage.setItem('sat_catalog_usd', JSON.stringify(collectionData));
-  updateCategoryCounts();
-}
+// Dynamic Catalog Data Structure (Populated 100% dynamically from Neon PostgreSQL Database via API)
+let collectionData = {};
 
 // DOM Ready Handler
 document.addEventListener('DOMContentLoaded', () => {
@@ -749,11 +633,7 @@ async function handleAddNewProduct(event) {
     }
   } catch (err) {
     console.error('Post item error:', err);
-    if (!collectionData[categoryId]) collectionData[categoryId] = [];
-    collectionData[categoryId].unshift({ id: newItem.id, name, spec, priceUSD, img: finalImg });
-    saveCatalog();
-    refreshFbAdminCatalogTable();
-    alert(`✨ Saved: "${name}" published!`);
+    alert(`❌ Server Connection Error: Failed to publish item.`);
   }
 }
 
@@ -763,10 +643,6 @@ async function deleteAdminItem(category, id) {
   try {
     const res = await fetch(`/api/catalogapi/items/${id}`, { method: 'DELETE' });
     if (res.ok) {
-      if (collectionData[category]) {
-        collectionData[category] = collectionData[category].filter(i => i.id !== id);
-      }
-      saveCatalog();
       await initDynamicStorefront();
       refreshFbAdminCatalogTable();
     }
