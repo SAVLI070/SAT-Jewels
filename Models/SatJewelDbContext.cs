@@ -6,6 +6,7 @@ namespace SAT1.Models
     {
         public SatJewelDbContext(DbContextOptions<SatJewelDbContext> options) : base(options) { }
 
+        public DbSet<Category> Categories { get; set; } = null!;
         public DbSet<CatalogItem> CatalogItems { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
@@ -14,7 +15,7 @@ namespace SAT1.Models
         {
             base.OnModelCreating(modelBuilder);
 
-            // Seed Admin & Sample Customer
+            // Seed Admin & Sample VIP Customer
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
@@ -36,22 +37,71 @@ namespace SAT1.Models
                 }
             );
 
+            // Seed Jewelry Categories shown on Main Landing Page
+            modelBuilder.Entity<Category>().HasData(
+                new Category
+                {
+                    Id = "rings",
+                    Name = "Rings Collection",
+                    Badge = "Top Selling",
+                    Subtitle = "Solitaires & Halos",
+                    ImageUrl = "assets/ring_1.jpg",
+                    DisplayOrder = 1
+                },
+                new Category
+                {
+                    Id = "necklaces",
+                    Name = "Necklaces Section",
+                    Badge = "Popular",
+                    Subtitle = "Chokers & Pendants",
+                    ImageUrl = "assets/necklace_1.jpg",
+                    DisplayOrder = 2
+                },
+                new Category
+                {
+                    Id = "earrings",
+                    Name = "Earrings Section",
+                    Badge = "Trending",
+                    Subtitle = "Studs & Drops",
+                    ImageUrl = "assets/earring_card.jpg",
+                    DisplayOrder = 3
+                },
+                new Category
+                {
+                    Id = "bracelets",
+                    Name = "Bracelets Section",
+                    Badge = "Featured",
+                    Subtitle = "Tennis & Bangles",
+                    ImageUrl = "assets/bracelet_card.jpg",
+                    DisplayOrder = 4
+                }
+            );
+
             // Seed initial store items in USD
             modelBuilder.Entity<CatalogItem>().HasData(
                 new CatalogItem
                 {
                     Id = "ring_1",
                     Name = "Royal Solitaire Diamond Ring",
-                    Category = "rings",
+                    CategoryId = "rings",
                     Spec = "18K Gold | 1.5ct GIA VVS1, E Color | Brilliant Cut",
                     PriceUSD = 2200,
                     ImageUrl = "assets/ring_1.jpg"
                 },
                 new CatalogItem
                 {
+                    Id = "ring_2",
+                    Name = "Halo Cushion Cut Engagement Ring",
+                    CategoryId = "rings",
+                    Spec = "Platinum 950 | 2.0ct Halo Setting | IF Clarity",
+                    PriceUSD = 2900,
+                    ImageUrl = "https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80"
+                },
+                new CatalogItem
+                {
                     Id = "neck_1",
                     Name = "Imperial Diamond Floral Pendant",
-                    Category = "necklaces",
+                    CategoryId = "necklaces",
                     Spec = "18K Yellow Gold | Marquise & Pear Cut Diamonds",
                     PriceUSD = 4200,
                     ImageUrl = "assets/necklace_1.jpg"
@@ -60,7 +110,7 @@ namespace SAT1.Models
                 {
                     Id = "ear_1",
                     Name = "Chandelier Diamond Drop Earrings",
-                    Category = "earrings",
+                    CategoryId = "earrings",
                     Spec = "18K Gold | 2.2ct Triple Drop Diamonds",
                     PriceUSD = 2500,
                     ImageUrl = "assets/earring_card.jpg"
@@ -69,7 +119,7 @@ namespace SAT1.Models
                 {
                     Id = "brac_1",
                     Name = "Classic Diamond Tennis Bracelet",
-                    Category = "bracelets",
+                    CategoryId = "bracelets",
                     Spec = "Platinum 950 | 5.0ct Total Weight | Round Cut",
                     PriceUSD = 4700,
                     ImageUrl = "assets/bracelet_card.jpg"

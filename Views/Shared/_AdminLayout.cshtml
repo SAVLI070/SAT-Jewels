@@ -45,6 +45,11 @@
           </a>
         </li>
         <li>
+          <a href="/Admin/Categories" class="adm-nav-link @(Context.Request.Path.Value?.ToLower().Contains("categories") == true ? "active" : "")" onclick="closeAdmOnMobile()">
+            <i class="fa-solid fa-layer-group"></i> <span>Manage Categories</span>
+          </a>
+        </li>
+        <li>
           <a href="/Admin/Catalog" class="adm-nav-link @(Context.Request.Path.Value?.ToLower().Contains("catalog") == true ? "active" : "")" onclick="closeAdmOnMobile()">
             <i class="fa-solid fa-gem"></i> <span>Jewelry Catalog</span>
           </a>

@@ -10,6 +10,12 @@ namespace SAT1.Controllers
             return View();
         }
 
+        public IActionResult Categories()
+        {
+            ViewBag.Title = "Jewelry Category Management";
+            return View();
+        }
+
         public IActionResult Catalog()
         {
             ViewBag.Title = "Live Jewelry Catalog Table";

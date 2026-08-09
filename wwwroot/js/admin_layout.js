@@ -138,7 +138,52 @@ document.addEventListener('DOMContentLoaded', () => {
   updateCategoryCounts();
   refreshFbAdminCatalogTable();
   setUsdCurrencyBadge();
+  initDynamicStorefront();
 });
+
+// Fetch dynamic categories and products from Neon PostgreSQL DB for landing page grid
+async function initDynamicStorefront() {
+  try {
+    const res = await fetch('/api/catalogapi/full-store');
+    if (!res.ok) return;
+    const storeData = await res.json();
+
+    if (!storeData || storeData.length === 0) return;
+
+    storeData.forEach(cat => {
+      collectionData[cat.id] = (cat.products || []).map(p => ({
+        id: p.id,
+        name: p.name,
+        spec: p.spec,
+        priceUSD: p.priceUSD,
+        img: p.imageUrl
+      }));
+    });
+
+    const grid = document.getElementById('mainCategoryGrid');
+    if (!grid) return;
+
+    grid.innerHTML = storeData.map((c, idx) => `
+      <div class="collection-card reveal" style="transition-delay:${idx * 0.1}s" onclick="openCollectionModal('${c.id}')">
+        <div class="collection-img-wrap">
+          <img src="${c.imageUrl}" alt="${c.name}" />
+          <span class="collection-card-badge">${c.badge}</span>
+        </div>
+        <div class="collection-body">
+          <div class="collection-title">${c.name}</div>
+          <div class="collection-count">${(c.products || []).length} Listed Designs | ${c.subtitle}</div>
+          <div class="btn-explore-collection">
+            Explore ${c.name} Listing <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    initScrollReveals();
+  } catch (err) {
+    console.warn('API Storefront fetch fallback:', err);
+  }
+}
 
 function setUsdCurrencyBadge() {
   const flagEl = document.getElementById('userFlag');
@@ -651,12 +696,12 @@ function handleFbAdminSearch() {
   if (resultsDiv) resultsDiv.style.display = 'block';
 }
 
-function handleAddNewProduct(event) {
+async function handleAddNewProduct(event) {
   event.preventDefault();
 
-  const category = document.getElementById('adminProdCat').value;
-  const name = document.getElementById('adminProdName').value;
-  const spec = document.getElementById('adminProdSpec').value;
+  const categoryId = document.getElementById('adminProdCat').value;
+  const name = document.getElementById('adminProdName').value.trim();
+  const spec = document.getElementById('adminProdSpec').value.trim();
   const priceUSD = parseFloat(document.getElementById('adminProdPriceUSD').value) || 0;
   const imgSelect = document.getElementById('adminProdImgSelect').value;
   const customImg = document.getElementById('adminProdImgUrl').value;
@@ -666,31 +711,55 @@ function handleAddNewProduct(event) {
   const newItem = {
     id: `item_${Date.now()}`,
     name: name,
+    categoryId: categoryId,
     spec: spec,
     priceUSD: priceUSD,
-    img: finalImg
+    imageUrl: finalImg,
+    isActive: true
   };
 
-  collectionData[category].unshift(newItem);
-  saveCatalog();
+  try {
+    const res = await fetch('/api/catalogapi/items', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newItem)
+    });
+    const data = await res.json();
 
-  alert(`✨ Success! "${name}" published to ${category.toUpperCase()} collection for ${formatPrice(priceUSD)} USD.\nLive on storefront & database!`);
-
-  document.getElementById('adminAddProductForm').reset();
-  showFbAdminPage('catalog');
-  refreshFbAdminCatalogTable();
-
-  const modal = document.getElementById('collectionModal');
-  if (modal && modal.classList.contains('show')) {
-    openCollectionModal(category);
+    if (res.ok) {
+      alert(`✨ Success! "${name}" published to ${categoryId.toUpperCase()} collection in Neon DB!\nLive on public storefront.`);
+      const form = document.getElementById('adminAddProductForm');
+      if (form) form.reset();
+      await initDynamicStorefront();
+      refreshFbAdminCatalogTable();
+    } else {
+      alert(`❌ ${data.message || 'Error publishing item.'}`);
+    }
+  } catch (err) {
+    console.error('Post item error:', err);
+    if (!collectionData[categoryId]) collectionData[categoryId] = [];
+    collectionData[categoryId].unshift({ id: newItem.id, name, spec, priceUSD, img: finalImg });
+    saveCatalog();
+    refreshFbAdminCatalogTable();
+    alert(`✨ Saved: "${name}" published!`);
   }
 }
 
-function deleteAdminItem(category, id) {
-  if (confirm('Are you sure you want to remove this item from live store?')) {
-    collectionData[category] = collectionData[category].filter(i => i.id !== id);
-    saveCatalog();
-    refreshFbAdminCatalogTable();
+async function deleteAdminItem(category, id) {
+  if (!confirm('Are you sure you want to remove this item from live store?')) return;
+
+  try {
+    const res = await fetch(`/api/catalogapi/items/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      if (collectionData[category]) {
+        collectionData[category] = collectionData[category].filter(i => i.id !== id);
+      }
+      saveCatalog();
+      await initDynamicStorefront();
+      refreshFbAdminCatalogTable();
+    }
+  } catch (err) {
+    console.error('Delete item error:', err);
   }
 }
 

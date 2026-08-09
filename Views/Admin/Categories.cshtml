@@ -1,0 +1,171 @@
+@{
+    ViewData["Title"] = "Jewelry Category Management";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div style="max-width:1100px;margin:0 auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+    <div>
+      <h2 style="font-family:var(--font-serif);color:#0f172a;margin:0;">Dynamic Jewelry Categories</h2>
+      <p style="font-size:13px;color:#64748b;margin:4px 0 0;">Add, edit, or remove collection categories. Changes immediately reflect on the public storefront landing page ("Most Selling Collections").</p>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start;">
+    <!-- Left: Add New Category Form -->
+    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-xl);padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+      <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:16px;font-size:18px;">+ Add New Category</h3>
+      <form id="adminAddCategoryForm" onsubmit="handleAddNewCategory(event)">
+        <div class="form-group">
+          <label class="form-label">Category Unique Key / Code *</label>
+          <input type="text" id="adminCatId" class="form-input" placeholder="e.g. pendants, anklets" required />
+          <small style="font-size:11px;color:#94a3b8;">Lowercase identifier (e.g. rings, necklaces)</small>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category Title *</label>
+          <input type="text" id="adminCatName" class="form-input" placeholder="e.g. Royal Pendants Collection" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Badge Tag</label>
+          <select id="adminCatBadge" class="form-select">
+            <option value="Top Selling">Top Selling</option>
+            <option value="Popular" selected>Popular</option>
+            <option value="Trending">Trending</option>
+            <option value="Featured">Featured</option>
+            <option value="New Arrival">New Arrival</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Subtitle Description *</label>
+          <input type="text" id="adminCatSub" class="form-input" placeholder="e.g. Diamond & Sapphire Medallions" required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Category Card Image URL *</label>
+          <input type="text" id="adminCatImg" class="form-input" placeholder="assets/necklace_1.jpg or https://..." required />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Display Sequence Order</label>
+          <input type="number" id="adminCatOrder" class="form-input" value="5" min="1" />
+        </div>
+
+        <button type="submit" class="btn-admin-submit" style="width:100%;margin-top:12px;">
+          <i class="fa-solid fa-cloud-arrow-up"></i> Save Category to Neon DB
+        </button>
+      </form>
+    </div>
+
+    <!-- Right: Live Categories List -->
+    <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:var(--radius-xl);padding:24px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+      <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:16px;font-size:18px;">Active Storefront Categories</h3>
+      
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Category Title</th>
+              <th>Badge Tag</th>
+              <th>Subtitle</th>
+              <th>Item Count</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminCategoriesTableBody">
+            <!-- Injected by JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    loadAdminCategoriesTable();
+  });
+
+  async function loadAdminCategoriesTable() {
+    try {
+      const res = await fetch('/api/catalogapi/categories');
+      const categories = await res.json();
+      const tbody = document.getElementById('adminCategoriesTableBody');
+      if (!tbody) return;
+
+      if (!categories || categories.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#94a3b8;">No active categories found in database.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = categories.map(c => `
+        <tr>
+          <td><img src="${c.imageUrl}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;" /></td>
+          <td><strong>${c.name}</strong><br/><small style="color:#64748b;">ID: ${c.id}</small></td>
+          <td><span class="badge-cat">${c.badge}</span></td>
+          <td><small style="color:#475569;">${c.subtitle}</small></td>
+          <td><strong style="color:#b45309;">${c.itemCount} items</strong></td>
+          <td>
+            <button class="btn-table-delete" onclick="deleteCategoryFromDb('${c.id}', '${c.name}')">
+              <i class="fa-solid fa-trash"></i> Delete
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    } catch (err) {
+      console.error('Error loading categories:', err);
+    }
+  }
+
+  async function handleAddNewCategory(e) {
+    e.preventDefault();
+    const id = document.getElementById('adminCatId').value.trim().toLowerCase();
+    const name = document.getElementById('adminCatName').value.trim();
+    const badge = document.getElementById('adminCatBadge').value;
+    const subtitle = document.getElementById('adminCatSub').value.trim();
+    const imageUrl = document.getElementById('adminCatImg').value.trim();
+    const displayOrder = parseInt(document.getElementById('adminCatOrder').value, 10) || 1;
+
+    const payload = { id, name, badge, subtitle, imageUrl, displayOrder, isActive: true };
+
+    try {
+      const res = await fetch('/api/catalogapi/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        alert(`✨ ${data.message || 'Category saved successfully!'}`);
+        document.getElementById('adminAddCategoryForm').reset();
+        loadAdminCategoriesTable();
+      } else {
+        alert(`❌ Error: ${data.message || 'Failed to save category.'}`);
+      }
+    } catch (err) {
+      console.error('Failed to post category:', err);
+      alert('❌ Failed to save category to Neon PostgreSQL database.');
+    }
+  }
+
+  async function deleteCategoryFromDb(id, name) {
+    if (!confirm(`Are you sure you want to remove "${name}" category from the live storefront?`)) return;
+
+    try {
+      const res = await fetch(`/api/catalogapi/categories/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (res.ok) {
+        alert(`✨ Category "${name}" removed from storefront!`);
+        loadAdminCategoriesTable();
+      } else {
+        alert(`❌ ${data.message || 'Failed to delete category.'}`);
+      }
+    } catch (err) {
+      console.error('Failed to delete category:', err);
+    }
+  }
+</script>

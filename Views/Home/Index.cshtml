@@ -200,7 +200,8 @@
       <p class="section-sub">Click any category below to view our full catalog of GIA-certified rings, necklaces, earrings, and bracelets.</p>
     </div>
 
-    <div class="collections-grid">
+    <!-- Dynamic Category Card Grid (Reflects Neon PostgreSQL Categories & Admin CRUD) -->
+    <div class="collections-grid" id="mainCategoryGrid">
       <!-- 1. Rings Section -->
       <div class="collection-card reveal" onclick="openCollectionModal('rings')">
         <div class="collection-img-wrap">
