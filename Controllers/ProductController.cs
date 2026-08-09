@@ -23,15 +23,16 @@ namespace SAT1.Controllers
         {
             if (string.IsNullOrWhiteSpace(id))
             {
-                return RedirectToAction("Index", "Home");
+                ViewBag.Message = "Product identifier is required. Please select a piece from our live storefront collections.";
+                return View("RestrictedAccess");
             }
 
             // 1. Query active catalog item by ID (Strict check, NO fallback to prevent ID enumeration)
             var product = await _context.CatalogItems.FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
             if (product == null)
             {
-                // OWASP A01 Protection: Return 404 NotFound if product ID is invalid or disabled
-                return NotFound();
+                ViewBag.Message = "You cannot access this product directly or it is currently unavailable in our catalog.";
+                return View("RestrictedAccess");
             }
 
             // 2. Query parent category and verify it is ACTIVE
@@ -39,8 +40,8 @@ namespace SAT1.Controllers
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == product.CategoryId && c.IsActive);
             if (category == null)
             {
-                // Parent category is hidden or disabled by Admin -> Return 404 NotFound
-                return NotFound();
+                ViewBag.Message = "This collection category is currently hidden by the curator and cannot be accessed directly.";
+                return View("RestrictedAccess");
             }
 
             ViewBag.CategoryName = category.Name;

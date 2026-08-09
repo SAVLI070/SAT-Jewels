@@ -163,6 +163,8 @@ else
     app.UseHttpsRedirection();
 }
 
+app.UseStatusCodePagesWithReExecute("/Home/Restricted");
+
 // OWASP TOP 10 SECURITY HEADERS MIDDLEWARE (A03, A05, A08, A10)
 app.Use(async (context, next) =>
 {
