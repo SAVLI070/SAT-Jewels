@@ -1,0 +1,61 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Logging Out — SAT Jewel</title>
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
+      color: #ffffff;
+      font-family: system-ui, -apple-system, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(212, 178, 112, 0.2);
+      border-top-color: #d4b270;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 20px;
+    }
+    @@keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="spinner"></div>
+  <h2 style="font-weight: 600; margin: 0 0 8px; color: #d4b270;">Clearing Session & Cache...</h2>
+  <p style="color: #94a3b8; font-size: 14px; margin: 0;">Redirecting to Sign In Sanctuary.</p>
+
+  <script>
+    (function () {
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+        if ('caches' in window) {
+          caches.keys().then(function (names) {
+            for (let name of names) caches.delete(name);
+          });
+        }
+      } catch (e) { }
+
+      // Force clean redirect to Sign In page replacing history stack
+      setTimeout(function () {
+        window.location.replace("/Account/SignIn");
+      }, 300);
+    })();
+  </script>
+</body>
+</html>

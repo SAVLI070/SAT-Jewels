@@ -169,10 +169,17 @@ namespace SAT1.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+
+            foreach (var cookie in Request.Cookies.Keys)
+            {
+                Response.Cookies.Delete(cookie);
+            }
+
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0, private";
             Response.Headers["Pragma"] = "no-cache";
-            Response.Headers["Expires"] = "0";
-            return Redirect("/");
+            Response.Headers["Expires"] = "-1";
+
+            return View("LogoutClear");
         }
 
         [HttpGet]
