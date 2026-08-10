@@ -99,12 +99,119 @@
       opacity: 0.8;
     }
 
-    /* Split Product Details Grid */
-    .pd-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 48px;
-      align-items: start;
+    @@media (min-width: 901px) {
+      html, body {
+        height: 100vh !important;
+        overflow: hidden !important;
+      }
+
+      .pd-container {
+        max-width: 1240px;
+        margin: 75px auto 0 !important;
+        padding: 0 24px 16px !important;
+        height: calc(100vh - 75px) !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        box-sizing: border-box;
+        overflow: hidden !important;
+      }
+
+      .pd-breadcrumb {
+        margin-bottom: 12px !important;
+        font-size: 12px !important;
+      }
+
+      .pd-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.05fr;
+        gap: 24px !important;
+        align-items: stretch;
+        flex: 1;
+        max-height: calc(100vh - 120px) !important;
+      }
+
+      .pd-gallery-card, .pd-info-card {
+        padding: 18px 20px !important;
+        border-radius: 20px !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-sizing: border-box;
+      }
+
+      .pd-main-img-wrap {
+        height: calc(100vh - 360px) !important;
+        min-height: 220px !important;
+        max-height: 340px !important;
+      }
+
+      .pd-thumb-grid {
+        gap: 8px !important;
+        margin-top: 10px !important;
+      }
+
+      .pd-thumb {
+        height: 54px !important;
+      }
+
+      .pd-trust-bar {
+        margin-top: 10px !important;
+        padding-top: 10px !important;
+      }
+
+      .pd-badge-row {
+        margin-bottom: 6px !important;
+      }
+
+      .pd-title {
+        font-size: 24px !important;
+        margin: 0 0 4px !important;
+      }
+
+      .pd-spec-line {
+        font-size: 13px !important;
+        margin-bottom: 10px !important;
+      }
+
+      .pd-price-row {
+        margin-bottom: 12px !important;
+        padding-bottom: 10px !important;
+        gap: 10px !important;
+      }
+
+      .pd-price {
+        font-size: 28px !important;
+      }
+
+      .pd-custom-section {
+        margin-bottom: 10px !important;
+      }
+
+      .pd-custom-label {
+        font-size: 12px !important;
+        margin-bottom: 4px !important;
+      }
+
+      .pd-custom-select {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+      }
+
+      .pd-engrave-input {
+        padding: 7px 12px !important;
+        font-size: 12px !important;
+      }
+
+      .pd-action-row {
+        margin-top: 10px !important;
+        gap: 10px !important;
+      }
+
+      .btn-pd-cart, .btn-pd-buy {
+        padding: 10px 16px !important;
+        font-size: 13px !important;
+      }
     }
 
     @@media (max-width: 900px) {
