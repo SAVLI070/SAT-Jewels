@@ -548,6 +548,138 @@ a {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
+/* GIVA-Style Account Cluster & Dropdown Menu */
+.auth-nav-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-nav-cart {
+  position: relative;
+  gap: 8px;
+}
+
+.auth-nav-cart-count {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: var(--champagne-gold);
+  color: #060d0a;
+  font-size: 11px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.account-menu {
+  position: relative;
+}
+
+.account-menu-trigger {
+  cursor: pointer;
+  border: 1px solid var(--border-gold-soft);
+  background: rgba(6, 14, 30, 0.65);
+}
+
+.account-menu-name {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-menu-chevron {
+  font-size: 10px;
+  opacity: 0.8;
+  transition: transform 0.2s ease;
+}
+
+.account-menu.open .account-menu-chevron {
+  transform: rotate(180deg);
+}
+
+.account-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 230px;
+  background: rgba(8, 16, 34, 0.96);
+  border: 1px solid var(--border-gold);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  padding: 8px;
+  display: none;
+  z-index: 1200;
+}
+
+.account-menu.open .account-menu-dropdown {
+  display: block;
+}
+
+.account-menu-head {
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 6px;
+}
+
+.account-menu-hello {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.account-menu-email {
+  font-size: 11px;
+  color: var(--taupe-beige);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.account-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.account-menu-item:hover {
+  background: rgba(212, 178, 112, 0.16);
+  color: #fbbf24;
+}
+
+.account-menu-item i {
+  width: 16px;
+  color: var(--champagne-gold);
+  font-size: 14px;
+}
+
+.account-menu-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 6px 0;
+}
+
+.account-menu-logout {
+  color: #fca5a5 !important;
+}
+
+.account-menu-logout:hover {
+  background: rgba(239, 68, 68, 0.18) !important;
+  color: #f87171 !important;
+}
+
 .btn-ghost {
   padding: 8px 20px;
   border-radius: var(--radius-full);

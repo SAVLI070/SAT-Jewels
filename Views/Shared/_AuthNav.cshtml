@@ -1,0 +1,94 @@
+@{
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var userName = User.Identity?.Name ?? "Client";
+    var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
+    var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+    var firstName = userName.Split(' ').FirstOrDefault() ?? "Account";
+}
+
+<div class="auth-nav-cluster">
+  @if (isAuthenticated)
+  {
+    <!-- Cart Badge Button -->
+    <a href="/Product/Cart" class="btn-auth-nav auth-nav-cart" title="Shopping Cart">
+      <i class="fa-solid fa-bag-shopping"></i>
+      <span>Cart</span>
+      <span class="auth-nav-cart-count" id="navCartCount">0</span>
+    </a>
+
+    <!-- Signed-In User Dropdown Badge (Image 2) -->
+    <div class="account-menu">
+      <button type="button" class="account-menu-trigger btn-auth-nav" aria-haspopup="true" aria-expanded="false" onclick="toggleAccountMenu(event)">
+        <i class="fa-solid fa-user"></i>
+        <span class="account-menu-name">@firstName</span>
+        <i class="fa-solid fa-chevron-down account-menu-chevron"></i>
+      </button>
+      <div class="account-menu-dropdown" role="menu">
+        <div class="account-menu-head">
+          <div class="account-menu-hello">Hello, @userName</div>
+          @if (!string.IsNullOrWhiteSpace(userEmail))
+          {
+            <div class="account-menu-email">@userEmail</div>
+          }
+        </div>
+        <a href="/Product" class="account-menu-item" role="menuitem">
+          <i class="fa-solid fa-gem"></i> Shop Products
+        </a>
+        <a href="/Account/MyAccount" class="account-menu-item" role="menuitem">
+          <i class="fa-regular fa-user"></i> My Account
+        </a>
+        <a href="/Account/Orders" class="account-menu-item" role="menuitem">
+          <i class="fa-solid fa-box"></i> My Orders
+        </a>
+        <a href="/Product/Cart" class="account-menu-item" role="menuitem">
+          <i class="fa-solid fa-bag-shopping"></i> Shopping Cart
+        </a>
+        @if (string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+          <a href="/admin" class="account-menu-item" role="menuitem">
+            <i class="fa-solid fa-gauge-high"></i> Admin Portal
+          </a>
+        }
+        <div class="account-menu-divider"></div>
+        <a href="/Account/Logout" class="account-menu-item account-menu-logout" role="menuitem">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </a>
+      </div>
+    </div>
+  }
+  else
+  {
+    <!-- Guest Sign In Button (Image 1) -->
+    <a href="/Account/SignIn?returnUrl=@Uri.EscapeDataString(returnUrl)" class="btn-auth-nav" id="navSignInBtn">
+      <i class="fa-regular fa-user"></i> Sign In
+    </a>
+  }
+</div>
+
+<script>
+  function toggleAccountMenu(e) {
+    e.stopPropagation();
+    const menu = e.currentTarget.closest('.account-menu');
+    document.querySelectorAll('.account-menu.open').forEach(m => {
+      if (m !== menu) m.classList.remove('open');
+    });
+    menu.classList.toggle('open');
+    e.currentTarget.setAttribute('aria-expanded', menu.classList.contains('open') ? 'true' : 'false');
+  }
+
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.account-menu.open').forEach(m => m.classList.remove('open'));
+  });
+
+  (function syncCartBadge() {
+    try {
+      const saved = localStorage.getItem('sat_shopping_cart_usd');
+      const items = saved ? JSON.parse(saved) : [];
+      const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
+      document.querySelectorAll('#navCartCount, .auth-nav-cart-count').forEach(el => {
+        el.textContent = String(count);
+      });
+    } catch (_) { }
+  })();
+</script>
