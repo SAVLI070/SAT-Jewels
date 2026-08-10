@@ -15,6 +15,26 @@ namespace SAT1.Controllers
             _context = context;
         }
 
+        // GET: /Product (Shop Products)
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> Index()
+        {
+            var products = await _context.CatalogItems
+                .Where(p => p.IsActive)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+            return View(products);
+        }
+
+        // GET: /Product/Cart (Shopping Cart)
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Cart()
+        {
+            return View();
+        }
+
         // GET: /Product/Details/{id}
         // OWASP A01: Strict Access Control & Hidden Category Guard
         [HttpGet]
@@ -57,14 +77,6 @@ namespace SAT1.Controllers
             ViewBag.RelatedItems = relatedItems;
 
             return View(product);
-        }
-
-        // GET: /Product/Cart
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Cart()
-        {
-            return View();
         }
     }
 }

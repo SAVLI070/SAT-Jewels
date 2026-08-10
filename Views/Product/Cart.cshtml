@@ -1,458 +1,175 @@
 @{
-    ViewData["Title"] = "Your Shopping Cart Vault — SAT Jewel";
-    Layout = null;
-    var isAuthenticated = User.Identity?.IsAuthenticated == true;
-    var userName = User.Identity?.Name ?? "VIP Client";
+    ViewData["Title"] = "Shopping Cart";
 }
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your Shopping Cart — SAT Jewel</title>
-
+  <title>Shopping Cart — SAT Jewel Sanctuary</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="~/css/style.css" />
-
   <style>
     body {
-      background: radial-gradient(circle at 50% 20%, #0a1426 0%, #030712 100%);
-      color: var(--cream-ivory);
+      background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
+      color: #ffffff;
       font-family: var(--font-sans);
-      margin: 0;
-      padding: 0;
       min-height: 100vh;
+      margin: 0;
     }
-
     .cart-container {
-      max-width: 1100px;
-      margin: 100px auto 60px;
-      padding: 0 24px;
-      box-sizing: border-box;
+      max-width: 960px;
+      margin: 40px auto 80px;
+      padding: 0 20px;
     }
-
-    .cart-header-head {
-      margin-bottom: 24px;
+    .cart-card {
+      background: rgba(8, 17, 34, 0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(212, 178, 112, 0.35);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
     }
-
     .cart-title {
       font-family: var(--font-serif);
-      font-size: 32px;
-      font-weight: 700;
-      color: #ffffff;
+      font-size: 28px;
       margin: 0 0 6px;
     }
-
-    .cart-sub {
-      font-size: 14px;
-      color: var(--taupe-beige);
-    }
-
-    .cart-grid {
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: 32px;
-      align-items: start;
-    }
-
-    @@media (max-width: 900px) {
-      .cart-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    /* Cart Items Table Panel */
-    .cart-items-card {
-      background: rgba(8, 17, 34, 0.85);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(212, 178, 112, 0.3);
-      border-radius: var(--radius-2xl);
-      padding: 24px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-    }
-
     .cart-item-row {
-      display: grid;
-      grid-template-columns: 72px 1fr auto auto;
-      gap: 16px;
-      align-items: center;
-      padding: 16px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .cart-item-row:last-child {
-      border-bottom: none;
-    }
-
-    .cart-item-img {
-      width: 72px;
-      height: 72px;
-      border-radius: var(--radius-md);
-      object-fit: cover;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .cart-item-name {
-      font-family: var(--font-serif);
-      font-size: 16px;
-      font-weight: 700;
-      color: #ffffff;
-      margin-bottom: 4px;
-    }
-
-    .cart-item-meta {
-      font-size: 12px;
-      color: var(--taupe-beige);
-    }
-
-    .cart-qty-wrap {
       display: flex;
       align-items: center;
-      gap: 8px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: var(--radius-full);
-      padding: 4px 10px;
-    }
-
-    .cart-qty-btn {
-      background: none;
-      border: none;
-      color: var(--champagne-gold);
-      font-size: 14px;
-      cursor: pointer;
-      padding: 2px 6px;
-      transition: color 0.2s;
-    }
-
-    .cart-qty-btn:hover {
-      color: #ffffff;
-    }
-
-    .cart-qty-val {
-      font-size: 13px;
-      font-weight: 700;
-      min-width: 18px;
-      text-align: center;
-    }
-
-    .cart-item-price {
-      font-family: var(--font-serif);
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--champagne-gold);
-      text-align: right;
-    }
-
-    .btn-cart-remove {
-      background: none;
-      border: none;
-      color: #ef4444;
-      font-size: 13px;
-      cursor: pointer;
-      margin-left: 8px;
-      transition: opacity 0.2s;
-    }
-
-    .btn-cart-remove:hover {
-      opacity: 0.8;
-    }
-
-    /* Summary Card Panel */
-    .cart-summary-card {
-      background: rgba(8, 17, 34, 0.85);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(212, 178, 112, 0.3);
-      border-radius: var(--radius-2xl);
-      padding: 28px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-    }
-
-    .cart-sum-title {
-      font-family: var(--font-serif);
-      font-size: 20px;
-      font-weight: 700;
-      color: #ffffff;
-      margin: 0 0 16px;
-      padding-bottom: 12px;
+      justify-content: space-between;
+      padding: 20px 0;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      gap: 16px;
     }
-
-    .cart-sum-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 14px;
-      color: var(--taupe-beige);
-      margin-bottom: 12px;
+    .cart-item-img {
+      width: 70px;
+      height: 70px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1px solid rgba(212, 178, 112, 0.3);
     }
-
-    .cart-sum-total {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border-gold);
-      font-family: var(--font-serif);
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--champagne-gold);
-    }
-
-    .btn-checkout-cart {
-      width: 100%;
-      padding: 14px 0;
-      border-radius: var(--radius-full);
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
-      border: none;
+    .btn-checkout {
+      padding: 14px 36px;
+      border-radius: 30px;
+      background: var(--champagne-gold);
       color: #060d0a;
-      font-size: 15px;
       font-weight: 700;
+      font-size: 15px;
+      border: none;
       cursor: pointer;
-      margin-top: 20px;
       transition: all 0.3s ease;
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 10px;
-      box-shadow: 0 4px 20px rgba(212, 178, 112, 0.35);
     }
-
-    .btn-checkout-cart:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 28px rgba(212, 178, 112, 0.6);
-      background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
-    }
-
-    .empty-cart-box {
-      text-align: center;
-      padding: 48px 20px;
-    }
-
-    .empty-cart-box i {
-      font-size: 48px;
-      color: var(--champagne-gold);
-      margin-bottom: 16px;
+    .btn-checkout:hover {
+      background: #fcebc5;
+      box-shadow: 0 6px 25px rgba(212, 178, 112, 0.5);
     }
   </style>
 </head>
-
 <body>
-  <!-- Top Navbar -->
-  <nav class="navbar scrolled">
-    <div class="container nav-inner">
-      <a href="/" class="nav-logo-slot" style="text-decoration:none;">
-        <div class="sat-logo-emblem" style="width:36px;height:36px;">
-          <img src="~/assets/sat_emblem_clean.png" class="official-sat-logo-img" alt="SAT Emblem" />
-        </div>
-        <div class="sat-logo-text-wrap" style="margin-left:10px;">
-          <div class="sat-logo-brand" style="font-size:18px;">SAT <span>Jewel</span></div>
-          <div class="sat-logo-tagline" style="font-size:8px;">Bespoke Vault</div>
-        </div>
-      </a>
-
-      <div class="nav-actions">
-        @if (isAuthenticated)
-        {
-          <span style="font-size:13px;color:var(--champagne-gold);font-weight:600;"><i class="fa-solid fa-user-check"></i> Welcome, @userName</span>
-        }
-        else
-        {
-          <a href="/Account/SignIn" class="btn-auth-nav">
-            <i class="fa-regular fa-user"></i> Sign In
-          </a>
-        }
-
-        <a href="/#cta" class="btn-primary">
-          <i class="fa-solid fa-envelope"></i> Contact Us
-        </a>
-      </div>
-    </div>
-  </nav>
-
   <div class="cart-container">
-    <div class="cart-header-head">
-      <h1 class="cart-title"><i class="fa-solid fa-bag-shopping" style="color:var(--champagne-gold);"></i> Shopping Cart Vault</h1>
-      <p class="cart-sub">Review your selected GIA-certified bespoke items and proceed to secure USD checkout.</p>
+    <div style="margin-bottom: 20px;">
+      <a href="/" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back to Storefront</a>
     </div>
 
-    @if (!isAuthenticated)
-    {
-      <div style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);border-radius:12px;padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;">
-        <div style="display:flex;align-items:center;gap:10px;color:#fca5a5;">
-          <i class="fa-solid fa-lock"></i>
-          <span>You must be signed in to fill and checkout your shopping cart vault.</span>
-        </div>
-        <a href="/Account/SignIn?returnUrl=/Product/Cart" class="btn-auth-nav" style="background:var(--champagne-gold);color:#060d0a;">Sign In Now</a>
-      </div>
-    }
+    <div class="cart-card">
+      <h1 class="cart-title">Bespoke Shopping Cart</h1>
+      <p style="color:var(--taupe-beige); font-size:14px; margin-bottom:28px;">Review your selected GIA certified fine jewelry pieces before secure checkout.</p>
 
-    <div class="cart-grid">
-      <!-- Left: Cart Items List -->
-      <div class="cart-items-card">
-        <div id="cartItemsList">
-          <!-- Injected dynamically by JavaScript -->
-        </div>
+      <div id="cartItemsContainer">
+        <!-- Rendered dynamically by JavaScript -->
       </div>
 
-      <!-- Right: Summary & Checkout -->
-      <div class="cart-summary-card">
-        <h2 class="cart-sum-title">Order Summary (USD)</h2>
-
-        <div class="cart-sum-row">
-          <span>Subtotal</span>
-          <span id="cartSubtotal">$0 USD</span>
+      <div style="margin-top:28px; padding-top:20px; border-top:1px solid rgba(212,178,112,0.3); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+        <div>
+          <span style="color:var(--taupe-beige); font-size:14px;">Total Amount: </span>
+          <span id="cartTotalDisplay" style="font-family:var(--font-serif); font-size:26px; font-weight:700; color:#fbbf24; margin-left:8px;">$0 USD</span>
         </div>
-        <div class="cart-sum-row">
-          <span>Insured Express Shipping</span>
-          <span style="color:var(--champagne-gold);">Complimentary</span>
-        </div>
-        <div class="cart-sum-row">
-          <span>GIA Dossier & Insurance</span>
-          <span style="color:var(--champagne-gold);">Included</span>
-        </div>
-
-        <div class="cart-sum-total">
-          <span>Total:</span>
-          <span id="cartTotalUSD">$0 USD</span>
-        </div>
-
-        <button class="btn-checkout-cart" onclick="proceedCartCheckout()">
-          <i class="fa-solid fa-credit-card"></i> Proceed to USD Checkout
-        </button>
-
-        <div style="text-align:center;margin-top:16px;">
-          <a href="/#collections" style="color:var(--taupe-beige);font-size:13px;text-decoration:none;">
-            <i class="fa-solid fa-arrow-left"></i> Continue Shopping
-          </a>
-        </div>
+        <button type="button" class="btn-checkout" onclick="initiateCheckout()"><i class="fa-solid fa-lock"></i> Proceed to Secure Checkout</button>
       </div>
     </div>
   </div>
 
   <script>
-    const isUserLoggedIn = @(isAuthenticated ? "true" : "false");
+    document.addEventListener('DOMContentLoaded', renderCart);
 
-    function getCartItems() {
-      const saved = localStorage.getItem('sat_shopping_cart_usd');
-      return saved ? JSON.parse(saved) : [];
-    }
-
-    function saveCartItems(items) {
-      localStorage.setItem('sat_shopping_cart_usd', JSON.stringify(items));
-      renderCartView();
-    }
-
-    function fixImagePath(path) {
-      if (!path) return '/assets/ring_1.jpg';
-      if (path.startsWith('http://') || path.startsWith('https://')) return path;
-      if (path.startsWith('~/')) return path.substring(1);
-      if (!path.startsWith('/')) return '/' + path;
-      return path;
-    }
-
-    function renderCartView() {
-      const items = getCartItems();
-      const container = document.getElementById('cartItemsList');
+    function renderCart() {
+      const container = document.getElementById('cartItemsContainer');
+      const totalEl = document.getElementById('cartTotalDisplay');
       if (!container) return;
 
-      if (!items || items.length === 0) {
-        container.innerHTML = `
-          <div class="empty-cart-box">
-            <i class="fa-solid fa-bag-shopping"></i>
-            <h3 style="font-family:var(--font-serif);margin-bottom:8px;color:#ffffff;">Your Shopping Cart is Empty</h3>
-            <p style="font-size:13px;color:var(--taupe-beige);margin-bottom:20px;">Explore our GIA-certified collections and add items to your vault.</p>
-            <a href="/#collections" class="btn-auth-nav" style="background:var(--champagne-gold);color:#060d0a;">Explore Collections</a>
-          </div>
-        `;
-        document.getElementById('cartSubtotal').textContent = '$0 USD';
-        document.getElementById('cartTotalUSD').textContent = '$0 USD';
-        return;
-      }
+      try {
+        const saved = localStorage.getItem('sat_shopping_cart_usd');
+        const items = saved ? JSON.parse(saved) : [];
 
-      let subtotal = 0;
+        if (items.length === 0) {
+          container.innerHTML = `
+            <div style="text-align:center; padding: 40px 20px;">
+              <i class="fa-solid fa-bag-shopping" style="font-size:42px; color:var(--champagne-gold); margin-bottom:14px;"></i>
+              <h3 style="margin:0 0 8px; font-family:var(--font-serif);">Your Shopping Cart is Empty</h3>
+              <p style="color:var(--taupe-beige); font-size:14px; margin-bottom:20px;">Discover handcrafted engagement rings, necklaces, and GIA diamonds in our shop.</p>
+              <a href="/Product" class="btn-primary" style="display:inline-flex; padding:10px 24px; border-radius:30px; text-decoration:none;"><i class="fa-solid fa-gem"></i> Browse Shop Catalog</a>
+            </div>
+          `;
+          totalEl.textContent = '$0 USD';
+          return;
+        }
 
-      container.innerHTML = items.map((item, index) => {
-        const itemTotal = item.priceUSD * item.quantity;
-        subtotal += itemTotal;
-        const imgSrc = fixImagePath(item.img);
+        let total = 0;
+        let html = '';
 
-        return `
-          <div class="cart-item-row">
-            <img src="${imgSrc}" class="cart-item-img" alt="${item.name}" />
-            <div>
-              <div class="cart-item-name">${item.name}</div>
-              <div class="cart-item-meta">
-                ${item.metal || '18K Gold'} | ${item.carat || '1.5ct GIA'}
-                ${item.engraving ? `| Engraving: "<em>${item.engraving}</em>"` : ''}
+        items.forEach((item, index) => {
+          const itemPrice = Number(item.priceUSD) || 0;
+          const qty = Number(item.quantity) || 1;
+          const subtotal = itemPrice * qty;
+          total += subtotal;
+
+          html += `
+            <div class="cart-item-row">
+              <div style="display:flex; align-items:center; gap:16px;">
+                <img src="${item.img || '/assets/ring_1.jpg'}" class="cart-item-img" alt="${item.name}" />
+                <div>
+                  <div style="font-weight:700; font-family:var(--font-serif); font-size:16px;">${item.name}</div>
+                  <div style="font-size:12px; color:var(--taupe-beige); margin-top:2px;">$${itemPrice.toLocaleString()} USD each</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:16px;">
+                <div style="font-weight:700; color:#fbbf24; font-size:18px;">$${subtotal.toLocaleString()} USD</div>
+                <button type="button" onclick="removeItem(${index})" style="background:none; border:none; color:#fca5a5; cursor:pointer; font-size:16px;" title="Remove Item"><i class="fa-solid fa-trash-can"></i></button>
               </div>
             </div>
-            <div class="cart-qty-wrap">
-              <button class="cart-qty-btn" onclick="updateQty(${index}, -1)">-</button>
-              <span class="cart-qty-val">${item.quantity}</span>
-              <button class="cart-qty-btn" onclick="updateQty(${index}, 1)">+</button>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;">
-              <div class="cart-item-price">$${itemTotal.toLocaleString()} USD</div>
-              <button class="btn-cart-remove" onclick="removeItem(${index})" title="Remove item">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
+          `;
+        });
 
-      document.getElementById('cartSubtotal').textContent = `$${subtotal.toLocaleString()} USD`;
-      document.getElementById('cartTotalUSD').textContent = `$${subtotal.toLocaleString()} USD`;
-    }
-
-    function updateQty(index, change) {
-      const items = getCartItems();
-      if (items[index]) {
-        items[index].quantity += change;
-        if (items[index].quantity <= 0) {
-          items.splice(index, 1);
-        }
-        saveCartItems(items);
+        container.innerHTML = html;
+        totalEl.textContent = '$' + total.toLocaleString() + ' USD';
+      } catch (e) {
+        console.error(e);
       }
     }
 
     function removeItem(index) {
-      const items = getCartItems();
-      if (items[index]) {
+      try {
+        const saved = localStorage.getItem('sat_shopping_cart_usd');
+        let items = saved ? JSON.parse(saved) : [];
         items.splice(index, 1);
-        saveCartItems(items);
-      }
+        localStorage.setItem('sat_shopping_cart_usd', JSON.stringify(items));
+        renderCart();
+        if (typeof syncCartBadge === 'function') syncCartBadge();
+      } catch (e) {}
     }
 
-    function proceedCartCheckout() {
-      if (!isUserLoggedIn) {
-        if (confirm("🔒 Sign In Required!\n\nYou must be signed in to checkout your shopping cart.\n\nWould you like to Sign In now?")) {
-          window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
-        }
-        return;
-      }
-
-      const items = getCartItems();
-      if (!items || items.length === 0) {
-        alert("Your cart is empty. Please add items to checkout.");
-        return;
-      }
-
-      const total = items.reduce((sum, i) => sum + (i.priceUSD * i.quantity), 0);
-      alert(`✨ Payment Checkout Initiated in USD ($)!\n\nTotal Items: ${items.length}\nTotal Amount: $${total.toLocaleString()} USD\n\nThank you! Your GIA certificate & insured order are being processed via Stripe USD.`);
+    function initiateCheckout() {
+      alert('Order Placed Successfully! Your GIA Certificate and insured shipment tracking are being processed.');
       localStorage.removeItem('sat_shopping_cart_usd');
-      renderCartView();
+      window.location.href = '/Account/Orders';
     }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      renderCartView();
-    });
   </script>
 </body>
-
 </html>

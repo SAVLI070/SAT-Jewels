@@ -73,10 +73,13 @@
       <!-- Dynamic Auth & Cart Nav Cluster -->
       <partial name="_AuthNav" />
 
-      <!-- Single Clean Contact Us Button -->
-      <a href="#cta" class="btn-primary">
-        <i class="fa-solid fa-envelope"></i> Contact Us
-      </a>
+      @if (User.Identity?.IsAuthenticated != true)
+      {
+        <!-- Single Clean Contact Us Button (Guests only) -->
+        <a href="#cta" class="btn-primary">
+          <i class="fa-solid fa-envelope"></i> Contact Us
+        </a>
+      }
 
       <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
         <i class="fa-solid fa-bars"></i>

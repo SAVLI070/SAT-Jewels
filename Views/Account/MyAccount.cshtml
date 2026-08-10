@@ -1,0 +1,157 @@
+@{
+    ViewData["Title"] = "My Account";
+    var user = Model as SAT1.Models.User;
+    var fullName = user?.FullName ?? User.Identity?.Name ?? "VIP Member";
+    var email = user?.Email ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
+    var phone = user?.Phone ?? "Not provided";
+    var role = user?.Role ?? User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "Client";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Account — SAT Jewel Bespoke Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="~/css/style.css" />
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
+      color: #ffffff;
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .acc-container {
+      max-width: 900px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+    .acc-card {
+      background: rgba(8, 17, 34, 0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(212, 178, 112, 0.35);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+    .acc-head {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 28px;
+    }
+    .acc-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: rgba(212, 178, 112, 0.2);
+      border: 2px solid #d4b270;
+      color: #fbbf24;
+      font-size: 28px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .acc-title {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      color: #ffffff;
+      margin: 0 0 4px;
+    }
+    .acc-role {
+      display: inline-block;
+      padding: 4px 12px;
+      background: rgba(212, 178, 112, 0.18);
+      border: 1px solid #d4b270;
+      color: #fbbf24;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .acc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    .acc-field {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 18px;
+    }
+    .acc-lbl {
+      font-size: 12px;
+      color: var(--taupe-beige);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .acc-val {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    .acc-btn {
+      padding: 12px 24px;
+      border-radius: 30px;
+      background: var(--champagne-gold);
+      color: #060d0a;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 28px;
+      transition: all 0.3s ease;
+    }
+    .acc-btn:hover {
+      background: #fcebc5;
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body>
+  <div class="acc-container">
+    <div style="margin-bottom: 20px;">
+      <a href="/" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back to Storefront</a>
+    </div>
+    <div class="acc-card">
+      <div class="acc-head">
+        <div class="acc-avatar">@fullName.Substring(0, 1).ToUpper()</div>
+        <div>
+          <h1 class="acc-title">@fullName</h1>
+          <span class="acc-role"><i class="fa-solid fa-shield-halved"></i> @role Member</span>
+        </div>
+      </div>
+      <div class="acc-grid">
+        <div class="acc-field">
+          <div class="acc-lbl"><i class="fa-regular fa-envelope"></i> Email Address</div>
+          <div class="acc-val">@email</div>
+        </div>
+        <div class="acc-field">
+          <div class="acc-lbl"><i class="fa-solid fa-phone"></i> Mobile Phone</div>
+          <div class="acc-val">@phone</div>
+        </div>
+        <div class="acc-field">
+          <div class="acc-lbl"><i class="fa-solid fa-gem"></i> GIA VIP Membership Status</div>
+          <div class="acc-val" style="color:#fbbf24;">Active Vault Member</div>
+        </div>
+        <div class="acc-field">
+          <div class="acc-lbl"><i class="fa-solid fa-lock"></i> Security & Authentication</div>
+          <div class="acc-val" style="color:#4ade80;">OWASP Encrypted (SHA-256)</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        <a href="/Account/Orders" class="acc-btn"><i class="fa-solid fa-box"></i> View My Orders</a>
+        <a href="/Product" class="acc-btn" style="background:rgba(255,255,255,0.1); color:#ffffff; border:1px solid #d4b270;"><i class="fa-solid fa-gem"></i> Shop Jewelry Catalog</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

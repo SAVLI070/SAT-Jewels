@@ -7,6 +7,10 @@ namespace SAT1.Models
         [Key]
         public string OrderId { get; set; } = Guid.NewGuid().ToString();
 
+        public string UserId { get; set; } = string.Empty;
+
+        public string CustomerEmail { get; set; } = string.Empty;
+
         public string ItemName { get; set; } = string.Empty;
 
         public decimal Amount { get; set; }

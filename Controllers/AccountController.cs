@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using SAT1.BAL;
+using SAT1.Models;
 
 namespace SAT1.Controllers
 {
@@ -169,6 +170,42 @@ namespace SAT1.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return Redirect("/");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MyAccount()
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Redirect("/Account/SignIn?returnUrl=/Account/MyAccount");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? "";
+
+            var user = await _authBal.GetUserByIdAsync(userId) ?? new User
+            {
+                FullName = User.Identity?.Name ?? "VIP Member",
+                Email = email,
+                Role = User.FindFirstValue(ClaimTypes.Role) ?? "Client"
+            };
+
+            return View(user);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Orders()
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Redirect("/Account/SignIn?returnUrl=/Account/Orders");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var email = User.FindFirstValue(ClaimTypes.Email) ?? "";
+
+            var orders = await _authBal.GetUserOrdersAsync(userId, email);
+            return View(orders);
         }
     }
 }

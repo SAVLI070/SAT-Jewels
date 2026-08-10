@@ -1,0 +1,127 @@
+@model List<SAT1.Models.Order>
+@{
+    ViewData["Title"] = "My Orders";
+    var orders = Model ?? new List<SAT1.Models.Order>();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Orders — SAT Jewel Bespoke Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="~/css/style.css" />
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
+      color: #ffffff;
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .ord-container {
+      max-width: 1000px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+    .ord-card {
+      background: rgba(8, 17, 34, 0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(212, 178, 112, 0.35);
+      border-radius: 24px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+    .ord-title {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      color: #ffffff;
+      margin: 0 0 6px;
+    }
+    .ord-sub {
+      color: var(--taupe-beige);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .ord-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .ord-table th {
+      background: rgba(10, 20, 38, 0.95);
+      color: #fbbf24;
+      padding: 14px;
+      font-size: 12px;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(212, 178, 112, 0.3);
+      text-align: left;
+    }
+    .ord-table td {
+      padding: 16px 14px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 14px;
+    }
+    .badge-status {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      background: rgba(74, 222, 128, 0.15);
+      border: 1px solid #4ade80;
+      color: #4ade80;
+    }
+  </style>
+</head>
+<body>
+  <div class="ord-container">
+    <div style="margin-bottom: 20px;">
+      <a href="/" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back to Storefront</a>
+    </div>
+    <div class="ord-card">
+      <h1 class="ord-title">My Orders</h1>
+      <p class="ord-sub">Track your GIA certified jewelry purchases, shipping, and certificates.</p>
+
+      @if (!orders.Any())
+      {
+        <div style="text-align:center; padding: 50px 20px;">
+          <i class="fa-solid fa-box-open" style="font-size:48px; color:var(--champagne-gold); margin-bottom:16px;"></i>
+          <h3 style="margin:0 0 8px; font-family:var(--font-serif);">No Orders Found</h3>
+          <p style="color:var(--taupe-beige); font-size:14px; margin-bottom:24px;">Explore our catalog to place your first bespoke jewelry order.</p>
+          <a href="/Product" class="btn-primary" style="display:inline-flex; padding:12px 28px; border-radius:30px; text-decoration:none;"><i class="fa-solid fa-gem"></i> Shop Jewelry Catalog</a>
+        </div>
+      }
+      else
+      {
+        <div class="table-responsive" style="overflow-x:auto;">
+          <table class="ord-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Item Purchased</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              @foreach (var o in orders)
+              {
+                <tr>
+                  <td style="font-weight:700; color:#fbbf24;">@o.OrderId</td>
+                  <td>@o.ItemName</td>
+                  <td style="font-weight:700;">$@o.Amount.ToString("N0") @o.Currency</td>
+                  <td><span class="badge-status">@o.Status</span></td>
+                  <td style="color:var(--taupe-beige); font-size:12px;">@o.CreatedAt.ToString("MMM dd, yyyy")</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+  </div>
+</body>
+</html>

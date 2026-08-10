@@ -61,6 +61,20 @@ namespace SAT1.BAL
             return user;
         }
 
+        public async Task<User?> GetUserByIdAsync(string? userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) return null;
+            return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        }
+
+        public async Task<List<Order>> GetUserOrdersAsync(string? userId, string? email)
+        {
+            return await _context.Orders
+                .Where(o => (userId != null && o.UserId == userId) || (!string.IsNullOrEmpty(email) && o.CustomerEmail.ToLower() == email.ToLower()))
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+        }
+
         // STRICT SECURITY CONTROL: Admin accounts CANNOT be created via Sign Up.
         // All accounts created via public sign up are strictly assigned Role = "Client".
         public async Task<User?> RegisterNewUserAsync(string fullName, string email, string phone, string password, string confirmPassword)

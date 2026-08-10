@@ -1,0 +1,158 @@
+@model List<SAT1.Models.CatalogItem>
+@{
+    ViewData["Title"] = "Jewelry Catalog & Shop";
+    var products = Model ?? new List<SAT1.Models.CatalogItem>();
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bespoke Jewelry Catalog — SAT Jewel Sanctuary</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="~/css/style.css" />
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
+      color: #ffffff;
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .shop-container {
+      max-width: 1200px;
+      margin: 40px auto 80px;
+      padding: 0 20px;
+    }
+    .shop-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .shop-title {
+      font-family: var(--font-serif);
+      font-size: 38px;
+      color: #ffffff;
+      margin: 0 0 10px;
+    }
+    .shop-sub {
+      color: var(--taupe-beige);
+      font-size: 15px;
+    }
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+    @@media (max-width: 992px) {
+      .shop-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @@media (max-width: 600px) {
+      .shop-grid { grid-template-columns: 1fr; }
+    }
+    .shop-card {
+      background: rgba(8, 17, 34, 0.85);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(212, 178, 112, 0.3);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .shop-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--champagne-gold);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 25px rgba(212, 178, 112, 0.25);
+    }
+    .shop-img-wrap {
+      width: 100%;
+      height: 240px;
+      position: relative;
+      overflow: hidden;
+    }
+    .shop-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .shop-card:hover .shop-img {
+      transform: scale(1.06);
+    }
+    .shop-body {
+      padding: 22px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .shop-item-title {
+      font-family: var(--font-serif);
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0 0 8px;
+    }
+    .shop-item-spec {
+      font-size: 13px;
+      color: var(--taupe-beige);
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+    .shop-price {
+      font-family: var(--font-serif);
+      font-size: 24px;
+      font-weight: 700;
+      color: #fbbf24;
+      margin-bottom: 18px;
+    }
+    .btn-shop-details {
+      padding: 12px;
+      border-radius: 30px;
+      background: var(--champagne-gold);
+      color: #060d0a;
+      font-weight: 700;
+      text-decoration: none;
+      text-align: center;
+      transition: all 0.3s ease;
+      display: block;
+      margin-top: auto;
+    }
+    .btn-shop-details:hover {
+      background: #fcebc5;
+      box-shadow: 0 4px 20px rgba(212, 178, 112, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="shop-container">
+    <div style="margin-bottom: 20px;">
+      <a href="/" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back to Storefront</a>
+    </div>
+
+    <div class="shop-header">
+      <h1 class="shop-title">Shop SAT Bespoke Jewelry</h1>
+      <p class="shop-sub">Conflict-free GIA certified engagement rings, necklaces, bracelets, and fine gemstones.</p>
+    </div>
+
+    <div class="shop-grid">
+      @foreach (var item in products)
+      {
+        <div class="shop-card">
+          <div class="shop-img-wrap">
+            <img src="@item.ImageUrl" class="shop-img" alt="@item.Name" />
+          </div>
+          <div class="shop-body">
+            <h3 class="shop-item-title">@item.Name</h3>
+            <p class="shop-item-spec">@item.Spec</p>
+            <div class="shop-price">$@item.PriceUSD.ToString("N0") USD</div>
+            <a href="/Product/Details/@item.Id" class="btn-shop-details"><i class="fa-solid fa-eye"></i> View Piece Details</a>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</body>
+</html>
