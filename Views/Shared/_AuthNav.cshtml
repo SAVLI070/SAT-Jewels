@@ -1,10 +1,22 @@
 @{
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
-    var userName = User.Identity?.Name ?? "Client";
+    var rawName = User.Identity?.Name ?? "";
     var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
     var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
     var returnUrl = Context.Request.Path + Context.Request.QueryString;
-    var firstName = userName.Split(' ').FirstOrDefault() ?? "Account";
+
+    // Clean display name calculation (prevents raw "@" symbol)
+    string displayName = "Client";
+    if (!string.IsNullOrWhiteSpace(rawName) && rawName.Trim() != "@")
+    {
+        displayName = rawName.Trim();
+    }
+    else if (!string.IsNullOrWhiteSpace(userEmail) && userEmail.Contains("@"))
+    {
+        displayName = userEmail.Split('@')[0];
+    }
+
+    var firstName = displayName.Split(' ').FirstOrDefault() ?? "Account";
 }
 
 <div class="auth-nav-cluster">
@@ -26,7 +38,7 @@
       </button>
       <div class="account-menu-dropdown" role="menu">
         <div class="account-menu-head">
-          <div class="account-menu-hello">Hello, @userName</div>
+          <div class="account-menu-hello">Hello, @displayName</div>
           @if (!string.IsNullOrWhiteSpace(userEmail))
           {
             <div class="account-menu-email">@userEmail</div>
@@ -43,6 +55,9 @@
         </a>
         <a href="/Product/Cart" class="account-menu-item" role="menuitem">
           <i class="fa-solid fa-bag-shopping"></i> Shopping Cart
+        </a>
+        <a href="/#cta" class="account-menu-item" role="menuitem">
+          <i class="fa-solid fa-envelope"></i> Contact Us
         </a>
         @if (string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase))
         {

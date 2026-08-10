@@ -590,10 +590,10 @@
           }
 
           <div class="auth-input-group">
-            <label class="auth-label">Full Name *</label>
+            <label class="auth-label">Full Name * <span style="font-size:10px;color:var(--taupe-beige);">(Letters & spaces only)</span></label>
             <div class="auth-input-wrap">
               <i class="fa-regular fa-user"></i>
-              <input type="text" name="fullName" class="auth-input" placeholder="e.g. Eleanor Vance" required />
+              <input type="text" name="fullName" class="auth-input" placeholder="e.g. Eleanor Vance" pattern="^[a-zA-Z\s]{2,50}$" title="Full Name can only contain letters and spaces (no numbers or special characters)." required />
             </div>
           </div>
 
@@ -606,18 +606,18 @@
           </div>
 
           <div class="auth-input-group">
-            <label class="auth-label">Phone Number (Optional)</label>
+            <label class="auth-label">USA Mobile Phone (Optional) <span style="font-size:10px;color:var(--taupe-beige);">(10 digits)</span></label>
             <div class="auth-input-wrap">
               <i class="fa-solid fa-phone"></i>
-              <input type="tel" name="phone" class="auth-input" placeholder="+1 (555) 000-0000" />
+              <input type="tel" name="phone" class="auth-input" placeholder="+1 (555) 000-0000" pattern="^(\+?1\s*[-\.]?)?\(?[2-9]\d{2}\)?\s*[-\.]?\s*\d{3}\s*[-\.]?\s*\d{4}$" title="Mobile number must be a valid 10-digit USA phone number." />
             </div>
           </div>
 
           <div class="auth-input-group">
-            <label class="auth-label">Create Password *</label>
+            <label class="auth-label">Create Password * <span style="font-size:10px;color:var(--taupe-beige);">(Min 8 chars, 1 letter, 1 special char)</span></label>
             <div class="auth-input-wrap">
               <i class="fa-solid fa-lock"></i>
-              <input type="password" name="password" class="auth-input" placeholder="At least 6 characters" minlength="6" required />
+              <input type="password" name="password" class="auth-input" placeholder="At least 8 chars (1 letter, 1 special char)" minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Za-z])(?=.*[\W_]).{8,}$" title="Password must be at least 8 characters with at least 1 lowercase letter, 1 alphabet letter, and 1 special character." required />
             </div>
           </div>
 

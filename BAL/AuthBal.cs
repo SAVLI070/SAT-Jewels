@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Encodings.Web;
 using Microsoft.EntityFrameworkCore;
 using SAT1.Models;
 
@@ -30,7 +29,7 @@ namespace SAT1.BAL
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
                 return null;
 
-            var trimmedEmail = HtmlEncoder.Default.Encode(email.Trim().ToLower());
+            var trimmedEmail = email.Trim().ToLower();
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == trimmedEmail);
 
             // Pre-configured Admin credentials provided by client (admin@satjewel.com / admin123)
@@ -64,7 +63,7 @@ namespace SAT1.BAL
 
         // STRICT SECURITY CONTROL: Admin accounts CANNOT be created via Sign Up.
         // All accounts created via public sign up are strictly assigned Role = "Client".
-        public async Task<User?> RegisterNewUserAsync(string fullName, string email, string phone, string password, string confirmPassword, string? returnUrl = null)
+        public async Task<User?> RegisterNewUserAsync(string fullName, string email, string phone, string password, string confirmPassword)
         {
             if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
                 return null;
@@ -72,7 +71,7 @@ namespace SAT1.BAL
             if (password != confirmPassword)
                 return null;
 
-            var trimmedEmail = HtmlEncoder.Default.Encode(email.Trim().ToLower());
+            var trimmedEmail = email.Trim().ToLower();
             var existing = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == trimmedEmail);
             if (existing != null)
                 return null;
@@ -80,9 +79,9 @@ namespace SAT1.BAL
             var user = new User
             {
                 Id = Guid.NewGuid().ToString(),
-                FullName = HtmlEncoder.Default.Encode(fullName.Trim()),
+                FullName = fullName.Trim(),
                 Email = trimmedEmail,
-                Phone = HtmlEncoder.Default.Encode(phone?.Trim() ?? ""),
+                Phone = phone?.Trim() ?? "",
                 Password = HashPassword(password),
                 Role = "Client", // Strictly Client role ONLY
                 CreatedAt = DateTime.UtcNow
