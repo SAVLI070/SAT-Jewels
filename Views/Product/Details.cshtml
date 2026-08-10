@@ -530,24 +530,16 @@
       </a>
 
       <div class="nav-actions">
-        <a href="/Product/Cart" class="btn-auth-nav" id="cartBtnNav">
-          <i class="fa-solid fa-bag-shopping"></i> Shopping Cart ( <span id="navCartCount">0</span> )
-        </a>
+        <!-- Dynamic Auth & Cart Nav Cluster -->
+        <partial name="_AuthNav" />
 
-        @if (isAuthenticated)
+        @if (!isAuthenticated)
         {
-          <span style="font-size:13px;color:var(--champagne-gold);font-weight:600;"><i class="fa-solid fa-user-check"></i> VIP Client</span>
-        }
-        else
-        {
-          <a href="/Account/SignIn" class="btn-auth-nav">
-            <i class="fa-regular fa-user"></i> Sign In
+          <!-- Standalone Contact Us Button (Guests only) -->
+          <a href="/#cta" class="btn-primary">
+            <i class="fa-solid fa-envelope"></i> Contact Us
           </a>
         }
-
-        <a href="/#cta" class="btn-primary">
-          <i class="fa-solid fa-envelope"></i> Contact Us
-        </a>
       </div>
     </div>
   </nav>
