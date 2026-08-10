@@ -165,11 +165,13 @@ else
 
 app.UseStatusCodePagesWithReExecute("/Home/Restricted");
 
-// OWASP TOP 10 SECURITY HEADERS MIDDLEWARE (A03, A05, A08, A10)
 app.Use(async (context, next) =>
 {
     context.Response.OnStarting(() =>
     {
+        context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0, private";
+        context.Response.Headers["Pragma"] = "no-cache";
+        context.Response.Headers["Expires"] = "-1";
         context.Response.Headers["X-Content-Type-Options"] = "nosniff";
         context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
         context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
