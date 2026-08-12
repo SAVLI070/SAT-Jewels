@@ -159,14 +159,14 @@
       <input type="number" id="adminProdPriceUSD" class="form-input" placeholder="e.g. 2200" min="1" required />
     </div>
 
-    <!-- MULTI-IMAGE UPLOAD ZONE (Max 10 images, max 10MB per image) -->
+    <!-- MULTI-IMAGE UPLOAD ZONE (Cloudinary CDN Powered) -->
     <div class="form-group">
-      <label class="form-label">Upload High-Res Product Photos (Max 10 Images, 10MB per file) *</label>
+      <label class="form-label">Upload High-Res Product Photos (Cloudinary CDN Enabled) *</label>
       
       <div class="upload-dropzone" onclick="document.getElementById('adminUploadFiles').click()">
         <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
         <div style="font-weight:700;color:#ffffff;font-size:15px;margin-bottom:4px;">Click or Drag & Drop Product Images</div>
-        <div style="font-size:12px;color:var(--taupe-beige);">Upload up to 10 photos per item (max 10MB per file, max 100MB total). First image will be main thumbnail.</div>
+        <div style="font-size:12px;color:var(--taupe-beige);">Uploaded images will automatically store in Cloudinary (ktznlodb) and save secure URLs to your PostgreSQL DB.</div>
         <input type="file" id="adminUploadFiles" multiple accept="image/*" style="display:none;" onchange="previewUploadFiles(this)" />
       </div>
 

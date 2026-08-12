@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Microsoft.AspNetCore.Mvc;
 using SAT1.BAL;
 using SAT1.Models;
@@ -10,10 +12,12 @@ namespace SAT1.Controllers
     public class CatalogApiController : ControllerBase
     {
         private readonly CatalogBal _catalogBal;
+        private readonly IConfiguration _configuration;
 
-        public CatalogApiController(CatalogBal catalogBal)
+        public CatalogApiController(CatalogBal catalogBal, IConfiguration configuration)
         {
             _catalogBal = catalogBal;
+            _configuration = configuration;
         }
 
         private bool IsAdminUser()
@@ -206,7 +210,7 @@ namespace SAT1.Controllers
             });
         }
 
-        // OWASP A08: SECURE MULTI-IMAGE FILE UPLOAD
+        // OWASP A08: SECURE MULTI-IMAGE FILE UPLOAD (WITH CLOUDINARY SUPPORT)
         [HttpPost("upload-images")]
         public async Task<IActionResult> UploadImages([FromForm] List<IFormFile> files)
         {
@@ -228,6 +232,17 @@ namespace SAT1.Controllers
             const long maxFileSizeBytes = 10 * 1024 * 1024;
             var allowedExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" };
             var allowedMimeTypes = new HashSet<string> { "image/jpeg", "image/png", "image/webp" };
+
+            var cloudName = _configuration["Cloudinary:CloudName"] ?? "ktznlodb";
+            var apiKey = _configuration["Cloudinary:ApiKey"];
+            var apiSecret = _configuration["Cloudinary:ApiSecret"];
+
+            CloudinaryDotNet.Cloudinary? cloudinary = null;
+            if (!string.IsNullOrWhiteSpace(cloudName) && !string.IsNullOrWhiteSpace(apiKey) && !string.IsNullOrWhiteSpace(apiSecret))
+            {
+                var account = new CloudinaryDotNet.Account(cloudName, apiKey, apiSecret);
+                cloudinary = new CloudinaryDotNet.Cloudinary(account);
+            }
 
             var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
             if (!Directory.Exists(uploadFolder))
@@ -272,7 +287,33 @@ namespace SAT1.Controllers
                     }
                 }
 
-                var uniqueFileName = $"item_{Guid.NewGuid().ToString("N")}{ext}";
+                if (cloudinary != null)
+                {
+                    try
+                    {
+                        using var fileStream = file.OpenReadStream();
+                        var uploadParams = new ImageUploadParams()
+                        {
+                            File = new FileDescription(file.FileName, fileStream),
+                            Folder = "sat_jewels_catalog",
+                            PublicId = $"item_{Guid.NewGuid():N}"
+                        };
+
+                        var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                        if (uploadResult != null && uploadResult.SecureUrl != null)
+                        {
+                            savedUrls.Add(uploadResult.SecureUrl.ToString());
+                            continue;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Cloudinary upload warning: {ex.Message}");
+                    }
+                }
+
+                // Fallback to local uploads directory if Cloudinary API key is not configured
+                var uniqueFileName = $"item_{Guid.NewGuid():N}{ext}";
                 var filePath = Path.Combine(uploadFolder, uniqueFileName);
 
                 using (var destStream = new FileStream(filePath, FileMode.Create))
