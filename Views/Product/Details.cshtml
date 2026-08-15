@@ -1,14 +1,12 @@
 @model SAT1.Models.CatalogItem
 @{
-    ViewData["Title"] = Model.Name + " — Bespoke Luxury Jewelry";
+    ViewData["Title"] = Model.Name + " — SAT Jewel Sanctuary";
     Layout = null;
     var related = ViewBag.RelatedItems as List<SAT1.Models.CatalogItem> ?? new List<SAT1.Models.CatalogItem>();
-    var categoryName = ViewBag.CategoryName as string ?? "Haute Joaillerie";
-    var categoryBadge = ViewBag.CategoryBadge as string ?? "GIA Certified";
-    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var categoryName = ViewBag.CategoryName as string ?? "Engagement Rings";
 
     string FixImg(string? path) {
-        if (string.IsNullOrWhiteSpace(path)) return "/assets/ring_main.png";
+        if (string.IsNullOrWhiteSpace(path)) return "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg";
         if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
         if (path.StartsWith("~/")) return path.Substring(1);
         if (!path.StartsWith("/")) return "/" + path;
@@ -17,7 +15,6 @@
 
     var mainImage = FixImg(Model.ImageUrl);
 
-    // Resolve gallery photos from database
     List<string> galleryList = new List<string>();
     if (!string.IsNullOrWhiteSpace(Model.GalleryImages))
     {
@@ -30,956 +27,869 @@
     {
         galleryList = new List<string> {
             mainImage,
-            "/assets/ring_angle.png",
-            "/assets/ring_clarity.png",
-            "/assets/ring_model.png"
+            "/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png",
+            "/assets/ivevar/ivevar-luxury-rings-925-silver-2-1-75-ct-sparkling-fancy-vivid-green-emerald-cut-moissanite-diamond-engagement-ring-44619311841585_7c5c472f-38eb-4a1b-89ee-25caa5a69c22.png",
+            "/assets/ivevar/modern_wedding_ring_band_be1024e1-bb04-457c-83d2-7acda4fc55b4.png"
         };
     }
 
-    // Parse Metal Options from Database per item (default 10 gold choices)
-    var metalString = string.IsNullOrWhiteSpace(Model.MetalOptions)
-        ? "18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|22K Yellow Gold (+150)|24K Pure Gold (+400)|Platinum 950 (+350)|14K Yellow Gold (-100)|14K White Gold (-100)|10K Solid Gold (-200)|Rose Platinum (+500)"
-        : Model.MetalOptions;
-    var metalList = metalString.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
-
-    // Parse Diamond Carat Options from Database per item
-    var caratString = string.IsNullOrWhiteSpace(Model.CaratOptions)
-        ? "0.5ct GIA (-800)|0.75ct GIA (-500)|1.0ct GIA (-400)|1.25ct GIA (-200)|1.5ct GIA (+0)|1.75ct GIA (+400)|2.0ct GIA (+750)|2.5ct GIA (+1200)|3.0ct GIA (+2000)|5.0ct Solitaire (+5000)"
-        : Model.CaratOptions;
-    var caratList = caratString.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+    var priceINR = (int)(Model.PriceUSD * 83);
+    var originalPriceUSD = (int)(Model.PriceUSD * 1.15m);
+    var originalPriceINR = (int)(priceINR * 1.15m);
 }
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>@Model.Name — SAT Jewel</title>
-
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="~/css/style.css" />
-
   <style>
     body {
-      background: radial-gradient(circle at 50% 20%, #0a1426 0%, #030712 100%);
-      color: var(--cream-ivory);
+      background: #050b14;
+      color: #ffffff;
       font-family: var(--font-sans);
       margin: 0;
-      padding: 0;
+      padding: 0 0 80px;
       min-height: 100vh;
     }
-
     .pd-container {
-      max-width: 1240px;
-      margin: 100px auto 60px;
-      padding: 0 24px;
-      box-sizing: border-box;
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 30px 24px;
     }
-
-    /* Breadcrumbs Navigation */
     .pd-breadcrumb {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       font-size: 13px;
-      color: var(--taupe-beige);
+      color: rgba(255, 255, 255, 0.65);
       margin-bottom: 24px;
     }
-
     .pd-breadcrumb a {
       color: var(--champagne-gold);
       text-decoration: none;
-      transition: opacity 0.2s;
     }
 
-    .pd-breadcrumb a:hover {
-      opacity: 0.8;
+    /* Main 2-Column Product Section */
+    .pd-main-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 48px;
+      margin-bottom: 70px;
+    }
+    @@media (max-width: 960px) {
+      .pd-main-grid { grid-template-columns: 1fr; gap: 32px; }
     }
 
-    @@media (min-width: 901px) {
-      html, body {
-        height: 100vh !important;
-        overflow: hidden !important;
-      }
-
-      .pd-container {
-        max-width: 1240px;
-        margin: 75px auto 0 !important;
-        padding: 0 24px 16px !important;
-        height: calc(100vh - 75px) !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        box-sizing: border-box;
-        overflow: hidden !important;
-      }
-
-      .pd-breadcrumb {
-        margin-bottom: 12px !important;
-        font-size: 12px !important;
-      }
-
-      .pd-grid {
-        display: grid;
-        grid-template-columns: 1fr 1.05fr;
-        gap: 24px !important;
-        align-items: stretch;
-        flex: 1;
-        max-height: calc(100vh - 120px) !important;
-      }
-
-      .pd-gallery-card, .pd-info-card {
-        padding: 18px 20px !important;
-        border-radius: 20px !important;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        box-sizing: border-box;
-      }
-
-      .pd-main-img-wrap {
-        height: calc(100vh - 360px) !important;
-        min-height: 220px !important;
-        max-height: 340px !important;
-      }
-
-      .pd-thumb-grid {
-        gap: 8px !important;
-        margin-top: 10px !important;
-      }
-
-      .pd-thumb {
-        height: 54px !important;
-      }
-
-      .pd-trust-bar {
-        margin-top: 10px !important;
-        padding-top: 10px !important;
-      }
-
-      .pd-badge-row {
-        margin-bottom: 6px !important;
-      }
-
-      .pd-title {
-        font-size: 24px !important;
-        margin: 0 0 4px !important;
-      }
-
-      .pd-spec-line {
-        font-size: 13px !important;
-        margin-bottom: 10px !important;
-      }
-
-      .pd-price-row {
-        margin-bottom: 12px !important;
-        padding-bottom: 10px !important;
-        gap: 10px !important;
-      }
-
-      .pd-price {
-        font-size: 28px !important;
-      }
-
-      .pd-custom-section {
-        margin-bottom: 10px !important;
-      }
-
-      .pd-custom-label {
-        font-size: 12px !important;
-        margin-bottom: 4px !important;
-      }
-
-      .pd-custom-select {
-        padding: 8px 12px !important;
-        font-size: 13px !important;
-      }
-
-      .pd-engrave-input {
-        padding: 7px 12px !important;
-        font-size: 12px !important;
-      }
-
-      .pd-action-row {
-        margin-top: 10px !important;
-        gap: 10px !important;
-      }
-
-      .btn-pd-cart, .btn-pd-buy {
-        padding: 10px 16px !important;
-        font-size: 13px !important;
-      }
+    /* Media 2x2 Grid Column */
+    .pd-media-2x2-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
     }
-
-    @@media (max-width: 900px) {
-      .pd-grid {
-        grid-template-columns: 1fr;
-        gap: 32px;
-      }
-    }
-
-    /* Left Gallery Column */
-    .pd-gallery-card {
-      background: rgba(8, 17, 34, 0.85);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(212, 178, 112, 0.3);
-      border-radius: var(--radius-2xl);
-      padding: 24px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    .pd-media-card {
       position: relative;
-    }
-
-    .pd-main-img-wrap {
-      width: 100%;
-      height: 440px;
-      border-radius: var(--radius-xl);
+      background: #08111e;
+      border-radius: 14px;
       overflow: hidden;
-      position: relative;
-      background: #060d1a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 100%; /* 1:1 Aspect ratio */
+      box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+      transition: border-color 0.3s ease;
     }
-
-    .pd-main-img-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
+    .pd-media-card:hover {
+      border-color: var(--champagne-gold);
     }
-
-    .pd-main-img-wrap:hover img {
-      transform: scale(1.05);
-    }
-
-    .pd-gia-seal {
+    .pd-media-card img, .pd-media-card video {
       position: absolute;
-      top: 16px;
-      left: 16px;
-      background: rgba(10, 20, 38, 0.85);
-      border: 1px solid var(--border-gold);
-      border-radius: var(--radius-full);
-      padding: 6px 14px;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .badge-lab-grown {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.75);
+      color: #ffffff;
+      border: 1px solid rgba(255,255,255,0.3);
       font-size: 11px;
       font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 4px;
+      z-index: 5;
+    }
+    .video-play-indicator {
+      position: absolute;
+      bottom: 12px;
+      left: 12px;
+      background: rgba(13, 27, 42, 0.85);
       color: var(--champagne-gold);
+      border: 1px solid var(--champagne-gold);
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
       display: flex;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      z-index: 5;
     }
 
-    .pd-thumb-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-top: 16px;
-    }
-
-    .pd-thumb {
-      height: 80px;
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      overflow: hidden;
-      cursor: pointer;
-      opacity: 0.65;
-      transition: all 0.3s ease;
-    }
-
-    .pd-thumb.active, .pd-thumb:hover {
-      opacity: 1;
-      border-color: var(--champagne-gold);
-      box-shadow: 0 0 12px rgba(212, 178, 112, 0.4);
-    }
-
-    .pd-thumb img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    /* Trust Highlights Bar */
-    .pd-trust-bar {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 20px;
-      padding-top: 16px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .pd-trust-item {
-      text-align: center;
-      font-size: 11px;
-      color: var(--taupe-beige);
-    }
-
-    .pd-trust-item i {
-      font-size: 16px;
-      color: var(--champagne-gold);
-      margin-bottom: 4px;
-      display: block;
-    }
-
-    /* Right Info & Customization Column */
-    .pd-info-card {
-      background: rgba(8, 17, 34, 0.85);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(212, 178, 112, 0.3);
-      border-radius: var(--radius-2xl);
-      padding: 32px;
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-    }
-
-    .pd-badge-row {
+    /* Right Customizer Panel */
+    .pd-customizer-panel {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 12px;
+      flex-direction: column;
     }
-
     .pd-title {
       font-family: var(--font-serif);
-      font-size: 32px;
+      font-size: 30px;
       font-weight: 700;
       color: #ffffff;
       margin: 0 0 10px;
-      line-height: 1.25;
+      line-height: 1.3;
     }
-
-    .pd-spec-line {
-      font-size: 14px;
-      color: var(--taupe-beige);
-      margin-bottom: 18px;
-    }
-
-    .pd-price-row {
-      display: flex;
-      align-items: baseline;
-      gap: 14px;
-      margin-bottom: 24px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .pd-price {
-      font-family: var(--font-serif);
-      font-size: 34px;
-      font-weight: 700;
-      color: var(--champagne-gold);
-    }
-
-    .pd-price-note {
-      font-size: 12px;
-      color: var(--terracotta-light);
-      font-weight: 600;
-    }
-
-    /* Customization Controls (Dynamic Database Dropdowns) */
-    .pd-custom-section {
+    .pd-sub-spec {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.7);
       margin-bottom: 20px;
     }
+    .pd-price-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .pd-price-inr {
+      font-size: 28px;
+      font-weight: 800;
+      color: #fbbf24;
+    }
+    .pd-price-orig {
+      font-size: 16px;
+      text-decoration: line-through;
+      color: rgba(255, 255, 255, 0.45);
+    }
+    .pd-save-badge {
+      background: #15803d;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+    .pd-sku {
+      margin-left: auto;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    .pd-installments-box {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .pd-installments-box a {
+      color: var(--champagne-gold);
+      text-decoration: underline;
+      cursor: pointer;
+    }
 
-    .pd-custom-label {
+    /* Option Selectors */
+    .pd-opt-label {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    /* Circular Metal Swatches */
+    .metal-swatch-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .metal-swatch-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 800;
+      color: #000000;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    }
+    .metal-swatch-btn.active, .metal-swatch-btn:hover {
+      border-color: var(--champagne-gold);
+      transform: scale(1.15);
+      box-shadow: 0 0 12px rgba(212, 178, 112, 0.6);
+    }
+
+    /* Carat Buttons */
+    .carat-btn-list {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .carat-btn {
+      padding: 10px 20px;
+      background: #08111e;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .carat-btn.active, .carat-btn:hover {
+      background: var(--champagne-gold);
+      color: #060c14;
+      border-color: var(--champagne-gold);
+    }
+
+    /* Free Engraving Box */
+    .engraving-box {
+      margin-bottom: 22px;
+    }
+    .engraving-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #08111e;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .engraving-input:focus {
+      border-color: var(--champagne-gold);
+    }
+
+    /* Ring Size Dropdown */
+    .size-select-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--champagne-gold);
       margin-bottom: 8px;
     }
-
-    .pd-custom-select {
+    .size-dropdown {
       width: 100%;
-      box-sizing: border-box;
       padding: 12px 16px;
-      background: rgba(10, 20, 38, 0.95);
-      border: 1px solid rgba(212, 178, 112, 0.4);
-      border-radius: var(--radius-lg);
-      color: #ffffff;
-      font-size: 14px;
-      font-weight: 600;
-      outline: none;
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23d4b270' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-    }
-
-    .pd-custom-select:focus {
-      border-color: var(--champagne-gold);
-      box-shadow: 0 0 16px rgba(212, 178, 112, 0.5);
-    }
-
-    .pd-custom-select option {
-      background: #081122;
-      color: #ffffff;
-      padding: 10px;
-    }
-
-    .pd-engrave-input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 11px 14px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: var(--radius-md);
-      color: #ffffff;
-      font-size: 13px;
-      outline: none;
-      transition: all 0.25s ease;
-    }
-
-    .pd-engrave-input:focus {
-      border-color: var(--champagne-gold);
-      box-shadow: 0 0 10px rgba(212, 178, 112, 0.3);
-    }
-
-    /* Action Buttons (Add to Cart & Buy Now) */
-    .pd-action-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 28px;
-    }
-
-    .btn-add-cart {
-      padding: 14px 0;
-      border-radius: var(--radius-full);
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid var(--champagne-gold);
-      color: var(--champagne-gold);
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    .btn-add-cart:hover {
-      background: var(--champagne-gold);
-      color: #060d0a;
-      box-shadow: 0 4px 20px rgba(212, 178, 112, 0.4);
-    }
-
-    .btn-buy-now {
-      padding: 14px 0;
-      border-radius: var(--radius-full);
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
-      border: none;
-      color: #060d0a;
-      font-size: 14px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      box-shadow: 0 4px 20px rgba(212, 178, 112, 0.35);
-    }
-
-    .btn-buy-now:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(212, 178, 112, 0.6);
-      background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
-    }
-
-    /* CUSTOM BESPOKE LUXURY MODAL DIALOG */
-    .sat-modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(3, 7, 18, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 99999;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-
-    .sat-modal-overlay.show {
-      opacity: 1;
-      pointer-events: auto;
-    }
-
-    .sat-modal-card {
-      background: linear-gradient(145deg, rgba(10, 20, 38, 0.95), rgba(6, 13, 26, 0.98));
-      border: 1px solid var(--border-gold);
-      border-radius: var(--radius-2xl);
-      padding: 32px;
-      max-width: 440px;
-      width: 90%;
-      text-align: center;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 178, 112, 0.25);
-      transform: scale(0.9);
-      transition: transform 0.3s ease;
-    }
-
-    .sat-modal-overlay.show .sat-modal-card {
-      transform: scale(1);
-    }
-
-    .sat-modal-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: rgba(212, 178, 112, 0.12);
-      border: 1px solid var(--border-gold);
-      color: var(--champagne-gold);
-      font-size: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-    }
-
-    .sat-modal-title {
-      font-family: var(--font-serif);
-      font-size: 22px;
-      font-weight: 700;
-      color: #ffffff;
-      margin: 0 0 10px;
-    }
-
-    .sat-modal-msg {
-      font-size: 14px;
-      color: var(--taupe-beige);
-      line-height: 1.5;
-      margin-bottom: 24px;
-    }
-
-    .sat-modal-actions {
-      display: flex;
-      gap: 12px;
-    }
-
-    .btn-sat-cancel {
-      flex: 1;
-      padding: 12px;
-      border-radius: var(--radius-full);
-      background: rgba(255, 255, 255, 0.08);
+      background: #08111e;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      color: var(--cream-ivory);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-sat-confirm {
-      flex: 1;
-      padding: 12px;
-      border-radius: var(--radius-full);
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
-      border: none;
-      color: #060d0a;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(212, 178, 112, 0.3);
-    }
-
-    /* Cart Toast Alert */
-    .cart-toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: rgba(10, 20, 38, 0.95);
-      border: 1px solid var(--champagne-gold);
-      border-radius: var(--radius-xl);
-      padding: 16px 24px;
+      border-radius: 8px;
       color: #ffffff;
       font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 178, 112, 0.4);
-      z-index: 10000;
-      opacity: 0;
-      transform: translateY(20px);
-      pointer-events: none;
-      transition: all 0.35s ease;
+      outline: none;
+      margin-bottom: 24px;
+      cursor: pointer;
     }
 
-    .cart-toast.show {
-      opacity: 1;
+    /* Action Button */
+    .btn-add-cart-main {
+      width: 100%;
+      padding: 16px;
+      background: var(--champagne-gold);
+      color: #060c14;
+      border: none;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-bottom: 20px;
+    }
+    .btn-add-cart-main:hover {
+      background: #ffffff;
+      color: #000000;
+      box-shadow: 0 6px 25px rgba(212, 178, 112, 0.5);
+    }
+
+    /* Delivery Estimate Box */
+    .delivery-est-box {
+      background: rgba(212, 178, 112, 0.08);
+      border: 1px solid rgba(212, 178, 112, 0.25);
+      border-radius: 10px;
+      padding: 16px 20px;
+      font-size: 13.5px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 4 Value Badges Row */
+    .value-icons-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .value-icons-grid div {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .value-icons-grid i {
+      color: var(--champagne-gold);
+      font-size: 16px;
+    }
+
+    /* Drop a Hint Card */
+    .hint-card {
+      background: #08111e;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      padding: 18px 20px;
+      margin-bottom: 20px;
+    }
+    .btn-hint {
+      margin-top: 10px;
+      padding: 10px 18px;
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+    }
+
+    /* Complimentary Gift Card */
+    .gift-card {
+      background: #08111e;
+      border: 1px solid rgba(212, 178, 112, 0.3);
+      border-radius: 10px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 50px;
+    }
+    .gift-card img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    /* Section Headers */
+    .sec-header {
+      font-family: var(--font-serif);
+      font-size: 28px;
+      font-weight: 700;
+      text-align: center;
+      color: #ffffff;
+      margin: 60px 0 32px;
+    }
+
+    /* FAQ Tabs & Accordions (Screenshot 4) */
+    .faq-tabs {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .faq-tab-btn {
+      padding: 10px 18px;
+      background: #08111e;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .faq-tab-btn.active, .faq-tab-btn:hover {
+      background: var(--champagne-gold);
+      color: #060c14;
+      border-color: var(--champagne-gold);
+    }
+    .faq-item {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 18px 0;
+    }
+    .faq-question {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .faq-answer {
+      display: none;
+      margin-top: 12px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 1.6;
+    }
+
+    /* Testimonials (Screenshot 5) */
+    .testi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-bottom: 80px;
+    }
+    @@media (max-width: 900px) {
+      .testi-grid { grid-template-columns: 1fr; }
+    }
+    .testi-card {
+      background: #08111e;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+    }
+    .testi-stars {
+      color: #fbbf24;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .testi-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .testi-quote {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .testi-author {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--champagne-gold);
+    }
+
+    /* Sticky Bottom Bar (Hidden by default, reveals after scrolling past 450px) */
+    .sticky-bottom-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background: #08111e;
+      border-top: 1px solid rgba(212, 178, 112, 0.3);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+      box-shadow: 0 -8px 25px rgba(0,0,0,0.7);
+      box-sizing: border-box;
+      transform: translateY(100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+    }
+    .sticky-bottom-bar.visible {
       transform: translateY(0);
+      opacity: 1;
       pointer-events: auto;
+    }
+    .sticky-thumb-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .sticky-thumb-title img {
+      width: 42px;
+      height: 42px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+    .sticky-btn-group {
+      display: flex;
+      gap: 12px;
+    }
+    .btn-sticky-cart {
+      padding: 10px 24px;
+      background: var(--champagne-gold);
+      color: #060c14;
+      border: none;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    .btn-sticky-buy {
+      padding: 10px 24px;
+      background: #ffffff;
+      color: #000000;
+      border: none;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: 13px;
+      cursor: pointer;
     }
   </style>
 </head>
-
 <body>
-  <!-- Top Navbar -->
-  <nav class="navbar scrolled">
-    <div class="container nav-inner">
-      <a href="/" class="nav-logo-slot" style="text-decoration:none;">
-        <div class="sat-logo-emblem" style="width:36px;height:36px;">
-          <img src="~/assets/sat_emblem_clean.png" class="official-sat-logo-img" alt="SAT Emblem" />
-        </div>
-        <div class="sat-logo-text-wrap" style="margin-left:10px;">
-          <div class="sat-logo-brand" style="font-size:18px;">SAT <span>Jewel</span></div>
-          <div class="sat-logo-tagline" style="font-size:8px;">Bespoke Vault</div>
-        </div>
+  <!-- Header Navbar -->
+  <nav class="navbar" style="position:relative; background:#08111e; border-bottom:1px solid rgba(212,178,112,0.3);">
+    <div class="container nav-inner" style="padding:14px 20px;">
+      <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:#ffffff;">
+        <img src="~/assets/sat_emblem_clean.png" style="height:32px;" alt="SAT Emblem" />
+        <span style="font-family:var(--font-serif); font-size:20px; font-weight:700;">SAT <span style="color:var(--champagne-gold);">Jewel</span></span>
       </a>
-
-      <div class="nav-actions">
-        <!-- Dynamic Auth & Cart Nav Cluster -->
+      <div style="margin-left:auto;">
         <partial name="_AuthNav" />
-
-        @if (!isAuthenticated)
-        {
-          <!-- Standalone Contact Us Button (Guests only) -->
-          <a href="/#cta" class="btn-primary">
-            <i class="fa-solid fa-envelope"></i> Contact Us
-          </a>
-        }
       </div>
     </div>
   </nav>
 
   <div class="pd-container">
-    <!-- Breadcrumb Navigation (Keeps user in Category Collection View) -->
+    <!-- Breadcrumb Navigation -->
     <div class="pd-breadcrumb">
-      <a href="/"><i class="fa-solid fa-house"></i> Home</a>
-      <span>/</span>
-      <a href="/?openCategory=@Model.CategoryId#collections"><i class="fa-solid fa-gem"></i> @categoryName</a>
-      <span>/</span>
-      <span style="color:#ffffff;font-weight:600;">@Model.Name</span>
+      <a href="/">Home</a> <span>/</span>
+      <a href="/Product">Collections</a> <span>/</span>
+      <a href="/Product/Category?name=@categoryName">@categoryName</a> <span>/</span>
+      <span style="color:#ffffff; font-weight:600;">@Model.Name</span>
     </div>
 
-    <!-- Product Details Main Grid -->
-    <div class="pd-grid">
-      <!-- LEFT: Multi-Image Gallery -->
-      <div class="pd-gallery-card">
-        <div class="pd-main-img-wrap">
-          <img id="mainProductPhoto" src="@galleryList[0]" alt="@Model.Name" />
-          <div class="pd-gia-seal">
-            <i class="fa-solid fa-shield-halved"></i> GIA Certified VVS1
-          </div>
+    <!-- Main Product Section (Screenshots 1 & 2) -->
+    <div class="pd-main-grid">
+      <!-- Left Column: 2x2 Media Showcase with Image & 360 Video Loop -->
+      <div class="pd-media-2x2-grid">
+        <!-- Cell 1: High-res Main Image -->
+        <div class="pd-media-card">
+          <span class="badge-lab-grown">Lab Grown</span>
+          <img src="@mainImage" alt="@Model.Name Main View" />
         </div>
-
-        <div class="pd-thumb-grid">
-          @for (int i = 0; i < galleryList.Count && i < 4; i++)
-          {
-            var imgUrl = galleryList[i];
-            var activeClass = i == 0 ? "active" : "";
-            <div class="pd-thumb @activeClass" onclick="switchProductPhoto(this, '@imgUrl')">
-              <img src="@imgUrl" alt="Gallery Photo @(i + 1)" />
-            </div>
-          }
+        <!-- Cell 2: 360 Video Player -->
+        <div class="pd-media-card">
+          <span class="video-play-indicator"><i class="fa-solid fa-play"></i> 360° Video</span>
+          <video src="/assets/videos/ring_360.mp4" autoplay loop muted playsinline poster="@mainImage"></video>
         </div>
-
-        <div class="pd-trust-bar">
-          <div class="pd-trust-item">
-            <i class="fa-solid fa-plane-lock"></i>
-            Insured SWIFT Express
-          </div>
-          <div class="pd-trust-item">
-            <i class="fa-solid fa-certificate"></i>
-            GIA Certificate Dossier
-          </div>
-          <div class="pd-trust-item">
-            <i class="fa-solid fa-infinity"></i>
-            Lifetime Warranty
-          </div>
+        <!-- Cell 3: Angle View Image -->
+        <div class="pd-media-card">
+          <img src="/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png" alt="@Model.Name Angle" />
+        </div>
+        <!-- Cell 4: Top Profile Image -->
+        <div class="pd-media-card">
+          <img src="/assets/ivevar/ivevar-luxury-rings-925-silver-2-1-75-ct-sparkling-fancy-vivid-green-emerald-cut-moissanite-diamond-engagement-ring-44619311841585_7c5c472f-38eb-4a1b-89ee-25caa5a69c22.png" alt="@Model.Name Profile" />
         </div>
       </div>
 
-      <!-- RIGHT: Specifications & Customization Panel -->
-      <div class="pd-info-card">
-        <div class="pd-badge-row">
-          <span class="section-badge badge-gold">@categoryBadge</span>
-          <span style="font-size:12px;color:var(--champagne-gold);"><i class="fa-solid fa-star"></i> 5.0 (48 Verified Reviews)</span>
-        </div>
-
+      <!-- Right Column: Product Customizer Panel -->
+      <div class="pd-customizer-panel">
         <h1 class="pd-title">@Model.Name</h1>
-        <div class="pd-spec-line">@Model.Spec</div>
+        <div class="pd-sub-spec">
+          Lab Grown Diamond • Asscher Cut • E Color • 1.50 To 3.00 CT • VVS2 Clarity
+        </div>
 
         <div class="pd-price-row">
-          <div class="pd-price" id="displayProductPriceUSD">$@Model.PriceUSD.ToString("N0")</div>
-          <div class="pd-price-note">USD International Transaction</div>
+          <span class="pd-price-inr">₹ @priceINR.ToString("N0")</span>
+          <span class="pd-price-orig">₹ @originalPriceINR.ToString("N0")</span>
+          <span class="pd-save-badge">Save 15%</span>
+          <span class="pd-sku">SKU: IVRFLR1123</span>
+        </div>
+        <div class="pd-installments-box">
+          4 interest-free installments, or from <strong>$80.96/mo</strong> with ShopPay. <a>View sample plans</a>
         </div>
 
-        <!-- DYNAMIC DATABASE DROPDOWN: Precious Metal Options -->
-        <div class="pd-custom-section">
-          <div class="pd-custom-label">
-            <span><i class="fa-solid fa-gem"></i> Choose Precious Metal Purity:</span>
-            <span id="selectedMetalText" style="color:var(--champagne-gold);font-weight:700;">18K Yellow Gold</span>
+        <!-- Metal Type Swatches -->
+        <div class="pd-opt-label">Metal Type: <span id="lblMetal" style="color:var(--champagne-gold);">18K Yellow Gold</span></div>
+        <div class="metal-swatch-list">
+          <button type="button" class="metal-swatch-btn" style="background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%);" onclick="setMetal('925 Silver', this)">SL</button>
+          <button type="button" class="metal-swatch-btn" style="background: linear-gradient(135deg, #fef08a 0%, #eab308 100%);" onclick="setMetal('10K Yellow Gold', this)">10K</button>
+          <button type="button" class="metal-swatch-btn" style="background: linear-gradient(135deg, #fbcfe8 0%, #f43f5e 100%);" onclick="setMetal('10K Rose Gold', this)">10K</button>
+          <button type="button" class="metal-swatch-btn" style="background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);" onclick="setMetal('10K White Gold', this)">10K</button>
+          <button type="button" class="metal-swatch-btn" style="background: linear-gradient(135deg, #fde047 0%, #ca8a04 100%);" onclick="setMetal('14K Yellow Gold', this)">14K</button>
+          <button type="button" class="metal-swatch-btn" style="background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);" onclick="setMetal('14K White Gold', this)">14K</button>
+          <button type="button" class="metal-swatch-btn active" style="background: linear-gradient(135deg, #fef08a 0%, #d97706 100%);" onclick="setMetal('18K Yellow Gold', this)">18K</button>
+          <button type="button" class="metal-swatch-btn" style="background: linear-gradient(135deg, #f43f5e 0%, #fda4af 100%);" onclick="setMetal('18K Rose Gold', this)">18K</button>
+        </div>
+
+        <!-- Diamond Size Selector -->
+        <div class="pd-opt-label">Select Diamond Size: <span id="lblCarat" style="color:var(--champagne-gold);">1.50 CT</span></div>
+        <div class="carat-btn-list">
+          <button type="button" class="carat-btn active" onclick="setCarat('1.50 CT', this)">1.50</button>
+          <button type="button" class="carat-btn" onclick="setCarat('2.00 CT', this)">2.00</button>
+          <button type="button" class="carat-btn" onclick="setCarat('2.50 CT', this)">2.50</button>
+          <button type="button" class="carat-btn" onclick="setCarat('3.00 CT', this)">3.00</button>
+        </div>
+
+        <!-- Free Engraving Box -->
+        <div class="engraving-box">
+          <div class="pd-opt-label">Enter Your Free Engraving</div>
+          <input type="text" class="engraving-input" placeholder="Engrave Text (e.g. Forever & Always)" />
+        </div>
+
+        <!-- Ring Size US Dropdown -->
+        <div class="size-select-row">
+          <div class="pd-opt-label" style="margin:0;">Select Ring Size (US):</div>
+          <a style="font-size:12px; color:var(--champagne-gold); text-decoration:underline; font-weight:700; cursor:pointer;">FIND RING SIZE</a>
+        </div>
+        <select class="size-dropdown">
+          <option>US 5.0 (15.7mm)</option>
+          <option selected>US 6.0 (16.5mm)</option>
+          <option>US 7.0 (17.3mm)</option>
+          <option>US 8.0 (18.2mm)</option>
+        </select>
+
+        <!-- Primary Add to Cart Button -->
+        <button type="button" class="btn-add-cart-main" onclick="addToCartDetailed('@Model.Id', '@Model.Name', @Model.PriceUSD, '@mainImage')">
+          <i class="fa-solid fa-bag-shopping" style="margin-right:8px;"></i> Add to Cart
+        </button>
+
+        <!-- Estimated Delivery Box -->
+        <div class="delivery-est-box">
+          <div><i class="fa-regular fa-clock" style="color:var(--champagne-gold); margin-right:6px;"></i> <strong>Ordered by 12pm PST Today</strong></div>
+          <div style="color:var(--champagne-gold);">Estimated Ship Date: <strong>27 Aug</strong></div>
+        </div>
+
+        <!-- 4 Value Icons Grid -->
+        <div class="value-icons-grid">
+          <div><i class="fa-solid fa-globe"></i> Worldwide shipping</div>
+          <div><i class="fa-solid fa-truck-shield"></i> Free and secure shipping</div>
+          <div><i class="fa-solid fa-gem"></i> 100% diamond value guarantee</div>
+          <div><i class="fa-solid fa-rotate-left"></i> 30-day return or exchange</div>
+        </div>
+
+        <!-- Drop a Hint Card -->
+        <div class="hint-card">
+          <div style="font-size:14px; font-weight:700;"><i class="fa-regular fa-envelope" style="color:var(--champagne-gold); margin-right:8px;"></i> Drop a Hint</div>
+          <div style="font-size:12.5px; color:rgba(255,255,255,0.7); margin-top:4px;">Love this Design? Share a Little Hint with a Loved One.</div>
+          <button type="button" class="btn-hint">DROP A HINT HERE</button>
+        </div>
+
+        <!-- Complimentary Gift Banner -->
+        <div class="gift-card">
+          <img src="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" alt="Complimentary Gift" />
+          <div>
+            <div style="font-size:14px; font-weight:700; color:var(--champagne-gold);">Comes with a Complimentary Gift</div>
+            <div style="font-size:12.5px; color:rgba(255,255,255,0.75);">Choose from Our Selected Gifts Like Pendants or Earrings, Beautifully Wrapped.</div>
           </div>
-          <select class="pd-custom-select" id="metalDropdown" onchange="onMetalDropdownChange(this)">
-            @foreach (var opt in metalList)
-            {
-              var parts = opt.Split('(');
-              var name = parts[0].Trim();
-              var costStr = parts.Length > 1 ? parts[1].Replace(")", "").Trim() : "+0";
-              int cost = 0;
-              int.TryParse(costStr, out cost);
-              var displayLabel = name + (cost > 0 ? $" (+${cost} USD)" : (cost < 0 ? $" (-${Math.Abs(cost)} USD)" : " (Standard)"));
-              <option value="@cost" data-name="@name">@displayLabel</option>
-            }
-          </select>
         </div>
+      </div>
+    </div>
 
-        <!-- DYNAMIC DATABASE DROPDOWN: Diamond Carat Options -->
-        <div class="pd-custom-section">
-          <div class="pd-custom-label">
-            <span><i class="fa-solid fa-diamond"></i> Diamond Carat Weight:</span>
-            <span id="selectedCaratText" style="color:var(--champagne-gold);font-weight:700;">1.5ct GIA</span>
-          </div>
-          <select class="pd-custom-select" id="caratDropdown" onchange="onCaratDropdownChange(this)">
-            @foreach (var opt in caratList)
-            {
-              var parts = opt.Split('(');
-              var name = parts[0].Trim();
-              var costStr = parts.Length > 1 ? parts[1].Replace(")", "").Trim() : "+0";
-              int cost = 0;
-              int.TryParse(costStr, out cost);
-              var displayLabel = name + (cost > 0 ? $" (+${cost} USD)" : (cost < 0 ? $" (-${Math.Abs(cost)} USD)" : " (Standard)"));
-              <option value="@cost" data-name="@name">@displayLabel</option>
-            }
-          </select>
+    <!-- "You Might Also Like" Section (Screenshot 3) -->
+    <h2 class="sec-header">You Might Also Like</h2>
+    <div class="product-grid-4col" style="display:grid; grid-template-columns:repeat(4,1fr); gap:24px; margin-bottom:60px;">
+      <!-- Item 1 -->
+      <div style="background:#08111e; border:1px solid rgba(255,255,255,0.12); border-radius:12px; overflow:hidden;">
+        <div style="position:relative; padding-top:100%;">
+          <img src="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
+          <span style="position:absolute; bottom:10px; right:10px; background:#fef08a; color:#713f12; font-size:10px; font-weight:800; padding:2px 6px; border-radius:3px;">MOISSANITE</span>
         </div>
+        <div style="padding:16px;">
+          <div style="font-size:14px; font-weight:700; color:#fff; margin-bottom:6px;">Asscher Cut Moissanite Diamond Infinity...</div>
+          <div style="font-size:15px; font-weight:800; color:#fbbf24;">$311 USD <span style="font-size:12px; text-decoration:line-through; color:rgba(255,255,255,0.45);">$367</span></div>
+        </div>
+      </div>
+      <!-- Item 2 -->
+      <div style="background:#08111e; border:1px solid rgba(255,255,255,0.12); border-radius:12px; overflow:hidden;">
+        <div style="position:relative; padding-top:100%;">
+          <img src="/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
+          <span style="position:absolute; bottom:10px; right:10px; background:#fef08a; color:#713f12; font-size:10px; font-weight:800; padding:2px 6px; border-radius:3px;">LAB GROWN</span>
+        </div>
+        <div style="padding:16px;">
+          <div style="font-size:14px; font-weight:700; color:#fff; margin-bottom:6px;">Square Asscher Cut Lab Grown Diamond...</div>
+          <div style="font-size:15px; font-weight:800; color:#fbbf24;">$1,917 USD <span style="font-size:12px; text-decoration:line-through; color:rgba(255,255,255,0.45);">$2,262</span></div>
+        </div>
+      </div>
+      <!-- Item 3 -->
+      <div style="background:#08111e; border:1px solid rgba(255,255,255,0.12); border-radius:12px; overflow:hidden;">
+        <div style="position:relative; padding-top:100%;">
+          <img src="/assets/ivevar/VI1_1044_c2ee2b37-dd07-4fed-90fd-1f9be2b8ffed.jpg" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
+          <span style="position:absolute; bottom:10px; right:10px; background:#fef08a; color:#713f12; font-size:10px; font-weight:800; padding:2px 6px; border-radius:3px;">LAB GROWN</span>
+        </div>
+        <div style="padding:16px;">
+          <div style="font-size:14px; font-weight:700; color:#fff; margin-bottom:6px;">Asscher Cut Three Stone Lab Grown...</div>
+          <div style="font-size:15px; font-weight:800; color:#fbbf24;">$3,851 USD <span style="font-size:12px; text-decoration:line-through; color:rgba(255,255,255,0.45);">$4,544</span></div>
+        </div>
+      </div>
+      <!-- Item 4 -->
+      <div style="background:#08111e; border:1px solid rgba(255,255,255,0.12); border-radius:12px; overflow:hidden;">
+        <div style="position:relative; padding-top:100%;">
+          <img src="/assets/ivevar/Moissanite_Solitaire_Ring_800x800.jpg" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
+          <span style="position:absolute; bottom:10px; right:10px; background:#fef08a; color:#713f12; font-size:10px; font-weight:800; padding:2px 6px; border-radius:3px;">LAB GROWN</span>
+        </div>
+        <div style="padding:16px;">
+          <div style="font-size:14px; font-weight:700; color:#fff; margin-bottom:6px;">Asscher Cut Lab Diamond Solitaire...</div>
+          <div style="font-size:15px; font-weight:800; color:#fbbf24;">$1,140 USD <span style="font-size:12px; text-decoration:line-through; color:rgba(255,255,255,0.45);">$1,346</span></div>
+        </div>
+      </div>
+    </div>
 
-        <div class="pd-custom-section">
-          <div class="pd-custom-label">
-            <span>Free Laser Engraving (Optional):</span>
-            <span style="font-size:11px;color:#94a3b8;">Max 20 Characters</span>
-          </div>
-          <input type="text" id="engravingText" class="pd-engrave-input" placeholder="e.g. Forever Yours 2026" maxlength="20" />
-        </div>
+    <!-- "Faq's Have Any Questions?" Section (Screenshot 4) -->
+    <h2 class="sec-header">Faq's Have Any Questions?</h2>
+    <div class="faq-tabs">
+      <button class="faq-tab-btn active">GENERAL</button>
+      <button class="faq-tab-btn">SHIPPING</button>
+      <button class="faq-tab-btn">PAYMENTS</button>
+      <button class="faq-tab-btn">RETURNS AND EXCHANGES</button>
+      <button class="faq-tab-btn">CUSTOM HIP HOP</button>
+      <button class="faq-tab-btn">DIAMOND</button>
+      <button class="faq-tab-btn">DIAMOND RINGS</button>
+    </div>
 
-        <!-- Action Buttons -->
-        <div class="pd-action-grid">
-          <button class="btn-add-cart" onclick="addToCartCurrentProduct()">
-            <i class="fa-solid fa-cart-plus"></i> Add to Cart
-          </button>
-          <button class="btn-buy-now" onclick="instantBuyCurrentProduct()">
-            <i class="fa-solid fa-credit-card"></i> Buy Now (USD)
-          </button>
+    <div style="max-width:900px; margin:0 auto 70px;">
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>What are lab-grown diamonds?</span>
+          <i class="fa-solid fa-plus" style="color:var(--champagne-gold);"></i>
         </div>
+        <div class="faq-answer">
+          Lab-grown diamonds are authentic, real diamonds grown in advanced laboratories using High-Pressure High-Temperature (HPHT) or Chemical Vapor Deposition (CVD) methods, sharing exact chemical, physical, and optical properties with mined diamonds.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>Are lab-grown diamonds real diamonds?</span>
+          <i class="fa-solid fa-plus" style="color:var(--champagne-gold);"></i>
+        </div>
+        <div class="faq-answer">
+          Yes! The FTC certifies that lab-grown diamonds are 100% genuine diamonds with identical hardness (10 on Mohs scale), sparkle, and GIA/IGI certification.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>What is the difference between lab-grown and natural diamonds?</span>
+          <i class="fa-solid fa-plus" style="color:var(--champagne-gold);"></i>
+        </div>
+        <div class="faq-answer">
+          The only difference is origin. Mined diamonds come from deep beneath the earth, whereas lab-grown diamonds are ethically created in a laboratory, offering 40-70% greater value and zero environmental disruption.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>Do your diamonds come with certification?</span>
+          <i class="fa-solid fa-plus" style="color:var(--champagne-gold);"></i>
+        </div>
+        <div class="faq-answer">
+          Every SAT Jewel gemstone of 0.50 ct and above comes with an official GIA or IGI grading report verifying its Cut, Clarity, Color, and Carat weight.
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question" onclick="toggleFaq(this)">
+          <span>What does VVS quality mean?</span>
+          <i class="fa-solid fa-plus" style="color:var(--champagne-gold);"></i>
+        </div>
+        <div class="faq-answer">
+          VVS stands for "Very Very Slightly Included", indicating microscopic inclusions that are virtually impossible to see under 10x magnification, guaranteeing supreme optical clarity.
+        </div>
+      </div>
+    </div>
+
+    <!-- "What People Are Saying" Testimonials Section (Screenshot 5) -->
+    <h2 class="sec-header">What People Are Saying</h2>
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-title">Beautiful Earrings, Fast Delivery</div>
+        <div class="testi-quote">"Beautiful earrings and great quality! The shipment arrived quickly and the packaging was classy. I'm happy with my purchase."</div>
+        <div class="testi-author">Anjali M.</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-title">Stylish and Unique Bracelets</div>
+        <div class="testi-quote">"The bracelets here are unique and stylish. I bought one for myself and one as a birthday gift for my sister. Both loved them!"</div>
+        <div class="testi-author">Lucas W.</div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-title">Traditional with a Modern Twist</div>
+        <div class="testi-quote">"Lovely collection of jewelry with a modern twist! I bought a set for a wedding and got compliments. The team was very helpful."</div>
+        <div class="testi-author">Noah T.</div>
       </div>
     </div>
   </div>
 
-  <!-- BESPOKE LUXURY MODAL DIALOG -->
-  <div class="sat-modal-overlay" id="satLuxuryModal">
-    <div class="sat-modal-card">
-      <div class="sat-modal-icon" id="satModalIcon">
-        <i class="fa-solid fa-user-lock"></i>
-      </div>
-      <h3 class="sat-modal-title" id="satModalTitle">Sign In Required</h3>
-      <p class="sat-modal-msg" id="satModalMsg">You must be signed in to add items to your bespoke shopping cart vault.</p>
-      <div class="sat-modal-actions">
-        <button class="btn-sat-cancel" id="satModalCancelBtn" onclick="closeSatModal()">Cancel</button>
-        <button class="btn-sat-confirm" id="satModalConfirmBtn">Sign In Now</button>
+  <!-- Sticky Bottom Purchase Bar (Visible on scroll across Screenshots 3, 4, 5) -->
+  <div class="sticky-bottom-bar">
+    <div class="sticky-thumb-title">
+      <img src="@mainImage" alt="@Model.Name" />
+      <div>
+        <div style="font-size:14px; font-weight:700; color:#fff;">@Model.Name</div>
+        <div style="font-size:12px; color:var(--champagne-gold);">₹ @priceINR.ToString("N0") INR</div>
       </div>
     </div>
-  </div>
-
-  <!-- Cart Notification Toast -->
-  <div class="cart-toast" id="cartToastAlert">
-    <i class="fa-solid fa-circle-check" style="color:var(--champagne-gold);font-size:20px;"></i>
-    <div>
-      <div style="font-weight:700;">Item Added to Shopping Cart!</div>
-      <div style="font-size:12px;color:var(--taupe-beige);" id="cartToastSubtitle">Item added to your luxury vault cart.</div>
+    <div class="sticky-btn-group">
+      <button type="button" class="btn-sticky-cart" onclick="addToCartDetailed('@Model.Id', '@Model.Name', @Model.PriceUSD, '@mainImage')">Add To Cart</button>
+      <a href="/Product/Cart" class="btn-sticky-buy" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">Buy It Now</a>
     </div>
   </div>
 
   <script>
-    const isUserLoggedIn = @(isAuthenticated ? "true" : "false");
-    const basePriceUSD = @Model.PriceUSD;
-    let selectedMetalExtra = 0;
-    let selectedCaratExtra = 0;
-    let selectedMetal = '18K Yellow Gold';
-    let selectedCarat = '1.5ct GIA';
-
-    function updateCalculatedPrice() {
-      const totalPrice = basePriceUSD + selectedMetalExtra + selectedCaratExtra;
-      document.getElementById('displayProductPriceUSD').textContent = `$${totalPrice.toLocaleString()}`;
-    }
-
-    function onMetalDropdownChange(selectEl) {
-      const selectedOpt = selectEl.options[selectEl.selectedIndex];
-      selectedMetalExtra = parseInt(selectEl.value) || 0;
-      selectedMetal = selectedOpt.getAttribute('data-name') || selectedOpt.text;
-      document.getElementById('selectedMetalText').textContent = selectedMetal;
-      updateCalculatedPrice();
-
-      // Dynamic Image Swap based on Precious Metal Selection (Task 2)
-      const mainPhoto = document.getElementById('mainProductPhoto');
-      if (mainPhoto) {
-        const metalLower = selectedMetal.toLowerCase();
-        if (metalLower.includes('white gold') || metalLower.includes('platinum')) {
-          mainPhoto.src = '/assets/ring_whitegold.png';
-        } else if (metalLower.includes('rose')) {
-          mainPhoto.src = '/assets/ring_rosegold.png';
+    window.addEventListener('scroll', function() {
+      const stickyBar = document.querySelector('.sticky-bottom-bar');
+      if (stickyBar) {
+        if (window.scrollY > 450) {
+          stickyBar.classList.add('visible');
         } else {
-          mainPhoto.src = '@galleryList[0]';
+          stickyBar.classList.remove('visible');
         }
       }
-    }
-
-    function onCaratDropdownChange(selectEl) {
-      const selectedOpt = selectEl.options[selectEl.selectedIndex];
-      selectedCaratExtra = parseInt(selectEl.value) || 0;
-      selectedCarat = selectedOpt.getAttribute('data-name') || selectedOpt.text;
-      document.getElementById('selectedCaratText').textContent = selectedCarat;
-      updateCalculatedPrice();
-    }
-
-    function switchProductPhoto(thumb, imgUrl) {
-      document.querySelectorAll('.pd-thumb').forEach(t => t.classList.remove('active'));
-      thumb.classList.add('active');
-      document.getElementById('mainProductPhoto').src = imgUrl;
-    }
-
-    // BESPOKE MODAL POPUP LOGIC
-    function showSatModal(options) {
-      const modal = document.getElementById('satLuxuryModal');
-      document.getElementById('satModalTitle').textContent = options.title || 'Notification';
-      document.getElementById('satModalMsg').textContent = options.message || '';
-      document.getElementById('satModalIcon').innerHTML = options.icon || '<i class="fa-solid fa-circle-info"></i>';
-
-      const confirmBtn = document.getElementById('satModalConfirmBtn');
-      confirmBtn.textContent = options.confirmText || 'OK';
-
-      confirmBtn.onclick = () => {
-        closeSatModal();
-        if (options.onConfirm) options.onConfirm();
-      };
-
-      const cancelBtn = document.getElementById('satModalCancelBtn');
-      if (options.showCancel === false) {
-        cancelBtn.style.display = 'none';
-      } else {
-        cancelBtn.style.display = 'block';
-      }
-
-      modal.classList.add('show');
-    }
-
-    function closeSatModal() {
-      const modal = document.getElementById('satLuxuryModal');
-      modal.classList.remove('show');
-    }
-
-    // SHOPPING CART SYSTEM
-    function getCartItems() {
-      const saved = localStorage.getItem('sat_shopping_cart_usd');
-      return saved ? JSON.parse(saved) : [];
-    }
-
-    function saveCartItems(items) {
-      localStorage.setItem('sat_shopping_cart_usd', JSON.stringify(items));
-      updateCartBadge();
-    }
-
-    function updateCartBadge() {
-      const items = getCartItems();
-      const countEl = document.getElementById('navCartCount');
-      if (countEl) countEl.textContent = items.reduce((sum, i) => sum + i.quantity, 0);
-    }
-
-    function addToCartCurrentProduct() {
-      if (!isUserLoggedIn) {
-        showSatModal({
-          title: 'Sign In Required',
-          message: 'You must be signed in to add items to your bespoke luxury shopping cart vault.',
-          icon: '<i class="fa-solid fa-user-lock"></i>',
-          confirmText: 'Sign In Now',
-          showCancel: true,
-          onConfirm: () => {
-            window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
-          }
-        });
-        return;
-      }
-
-      const engraving = document.getElementById('engravingText').value.trim();
-      const finalPriceUSD = basePriceUSD + selectedMetalExtra + selectedCaratExtra;
-
-      const cartItem = {
-        id: '@Model.Id',
-        name: '@Model.Name',
-        priceUSD: finalPriceUSD,
-        img: '@galleryList[0]',
-        metal: selectedMetal,
-        carat: selectedCarat,
-        engraving: engraving,
-        quantity: 1
-      };
-
-      const cart = getCartItems();
-
-      const existingItem = cart.find(c => c.id === cartItem.id);
-      if (existingItem) {
-        showSatModal({
-          title: 'Item Already in Vault Cart',
-          message: `"${cartItem.name}" is already in your Shopping Cart. You can adjust quantities or remove items from your Shopping Cart page.`,
-          icon: '<i class="fa-solid fa-bag-shopping"></i>',
-          confirmText: 'View Shopping Cart',
-          showCancel: true,
-          onConfirm: () => {
-            window.location.href = '/Product/Cart';
-          }
-        });
-        return;
-      }
-
-      cart.push(cartItem);
-      saveCartItems(cart);
-
-      // Show Toast Notification
-      const toast = document.getElementById('cartToastAlert');
-      document.getElementById('cartToastSubtitle').textContent = `"${cartItem.name}" (${cartItem.metal}) added to cart.`;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3500);
-    }
-
-    function instantBuyCurrentProduct() {
-      if (!isUserLoggedIn) {
-        showSatModal({
-          title: 'Sign In Required',
-          message: 'You must be signed in to purchase items from our vault.',
-          icon: '<i class="fa-solid fa-user-lock"></i>',
-          confirmText: 'Sign In Now',
-          showCancel: true,
-          onConfirm: () => {
-            window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
-          }
-        });
-        return;
-      }
-
-      addToCartCurrentProduct();
-      window.location.href = '/Product/Cart';
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      // Initialize selected metal & carat from dropdowns
-      const mSelect = document.getElementById('metalDropdown');
-      if (mSelect) onMetalDropdownChange(mSelect);
-
-      const cSelect = document.getElementById('caratDropdown');
-      if (cSelect) onCaratDropdownChange(cSelect);
-
-      updateCartBadge();
     });
+
+    function setMetal(val, btn) {
+      document.getElementById('lblMetal').textContent = val;
+      document.querySelectorAll('.metal-swatch-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function setCarat(val, btn) {
+      document.getElementById('lblCarat').textContent = val;
+      document.querySelectorAll('.carat-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function toggleFaq(el) {
+      const ans = el.nextElementSibling;
+      const icon = el.querySelector('i');
+      if (ans.style.display === 'block') {
+        ans.style.display = 'none';
+        icon.className = 'fa-solid fa-plus';
+      } else {
+        ans.style.display = 'block';
+        icon.className = 'fa-solid fa-minus';
+      }
+    }
+
+    const isUserAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+
+    function addToCartDetailed(id, name, priceUSD, img) {
+      try {
+        const saved = localStorage.getItem('sat_shopping_cart_usd');
+        let items = saved ? JSON.parse(saved) : [];
+        items.push({ id, name, priceUSD, img: img || '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg', quantity: 1 });
+        localStorage.setItem('sat_shopping_cart_usd', JSON.stringify(items));
+        
+        if (!isUserAuthenticated) {
+          alert('🔒 Please sign in to your account first before completing payment.');
+          window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+        } else {
+          window.location.href = '/Product/Cart';
+        }
+      } catch (e) {}
+    }
   </script>
 </body>
-
 </html>

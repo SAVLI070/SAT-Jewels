@@ -1,18 +1,23 @@
 @{
-    ViewData["Title"] = "Shopping Cart & PayPal Checkout";
+    ViewData["Title"] = "Shopping Cart & Home Delivery Checkout";
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var userName = User.Identity?.Name ?? "";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shopping Cart & PayPal Checkout — SAT Jewel Sanctuary</title>
+  <title>Shopping Cart & Home Delivery Checkout — SAT Jewel Sanctuary</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="~/css/style.css" />
-  <!-- Official PayPal Smart Payment Buttons SDK -->
-  <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&enable-funding=venmo,paylater"></script>
+  @if (isAuthenticated)
+  {
+    <!-- Official PayPal Smart Payment Buttons SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&enable-funding=venmo,paylater"></script>
+  }
   <style>
     body {
       background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
@@ -60,7 +65,7 @@
       border-top: 1px solid rgba(212, 178, 112, 0.3);
     }
     .paypal-box-wrap {
-      max-width: 440px;
+      max-width: 520px;
       margin: 20px auto 0;
     }
     .paypal-badge {
@@ -75,6 +80,96 @@
       font-size: 12px;
       font-weight: 700;
       margin-bottom: 14px;
+    }
+    .auth-required-banner {
+      background: rgba(212, 178, 112, 0.08);
+      border: 1px solid rgba(212, 178, 112, 0.4);
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-align: center;
+      margin-top: 24px;
+    }
+    .btn-auth-signin {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: var(--champagne-gold);
+      color: #060c14;
+      font-weight: 800;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+    .btn-auth-signin:hover {
+      background: #ffffff;
+      color: #000000;
+      box-shadow: 0 4px 20px rgba(212, 178, 112, 0.5);
+    }
+    .btn-auth-signup {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: transparent;
+      border: 1px solid var(--champagne-gold);
+      color: var(--champagne-gold);
+      font-weight: 700;
+      border-radius: 30px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    /* Home Delivery Address Form Section */
+    .delivery-form-box {
+      background: #08111e;
+      border: 1px solid rgba(212, 178, 112, 0.35);
+      border-radius: 18px;
+      padding: 24px;
+      margin-top: 28px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+    .delivery-form-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--champagne-gold);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .form-grid-2col {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+    @@media (max-width: 650px) {
+      .form-grid-2col { grid-template-columns: 1fr; }
+    }
+    .form-group-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .form-group-item label {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    .form-input-field {
+      padding: 12px 14px;
+      background: #0d1b2a;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 13.5px;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color 0.25s ease;
+    }
+    .form-input-field:focus {
+      border-color: var(--champagne-gold);
+      box-shadow: 0 0 10px rgba(212, 178, 112, 0.3);
     }
   </style>
 </head>
@@ -92,6 +187,65 @@
         <!-- Rendered dynamically by JavaScript -->
       </div>
 
+      @if (isAuthenticated)
+      {
+        <!-- High Priority Home Delivery Address Form -->
+        <div class="delivery-form-box">
+          <div class="delivery-form-title">
+            <i class="fa-solid fa-truck-ramp-box"></i> Home Delivery Shipping Address <span style="font-size:11px; color:#fbbf24; font-weight:600; margin-left:auto;">[ HIGH PRIORITY ]</span>
+          </div>
+
+          <form id="shippingAddressForm">
+            <div class="form-grid-2col">
+              <div class="form-group-item">
+                <label>Recipient Full Name *</label>
+                <input type="text" id="shipFullName" class="form-input-field" value="@userName" placeholder="e.g. Sahil Kumar" required />
+              </div>
+              <div class="form-group-item">
+                <label>Contact Phone (For Courier Tracking SMS) *</label>
+                <input type="tel" id="shipPhone" class="form-input-field" placeholder="e.g. +91 98765 43210" required />
+              </div>
+            </div>
+
+            <div class="form-group-item" style="margin-top:14px;">
+              <label>Home Delivery Street Address *</label>
+              <input type="text" id="shipStreet" class="form-input-field" placeholder="Flat No., House No., Building Name, Street" required />
+            </div>
+
+            <div class="form-grid-2col" style="margin-top:14px;">
+              <div class="form-group-item">
+                <label>City / Town *</label>
+                <input type="text" id="shipCity" class="form-input-field" placeholder="e.g. Mumbai / New York" required />
+              </div>
+              <div class="form-group-item">
+                <label>State / Province / Region *</label>
+                <input type="text" id="shipState" class="form-input-field" placeholder="e.g. Maharashtra / California" required />
+              </div>
+            </div>
+
+            <div class="form-grid-2col" style="margin-top:14px;">
+              <div class="form-group-item">
+                <label>Postal / ZIP Code *</label>
+                <input type="text" id="shipPostalCode" class="form-input-field" placeholder="e.g. 400001 / 10001" required />
+              </div>
+              <div class="form-group-item">
+                <label>Country *</label>
+                <select id="shipCountry" class="form-input-field" required>
+                  <option value="India" selected>India</option>
+                  <option value="United States">United States</option>
+                  <option value="United Kingdom">United Kingdom</option>
+                  <option value="Canada">Canada</option>
+                  <option value="Australia">Australia</option>
+                  <option value="United Arab Emirates">United Arab Emirates</option>
+                  <option value="Germany">Germany</option>
+                  <option value="France">France</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+      }
+
       <div class="paypal-checkout-panel">
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
           <div>
@@ -101,20 +255,45 @@
           </div>
         </div>
 
-        <div id="paypalContainerBox" class="paypal-box-wrap">
-          <div id="paypal-button-container"></div>
-        </div>
+        @if (isAuthenticated)
+        {
+          <div id="paypalContainerBox" class="paypal-box-wrap">
+            <div id="paypal-button-container"></div>
+          </div>
+        }
+        else
+        {
+          <!-- Sign In Required Gate Banner -->
+          <div class="auth-required-banner">
+            <i class="fa-solid fa-lock" style="font-size:36px; color:var(--champagne-gold); margin-bottom:12px;"></i>
+            <h3 style="margin:0 0 8px; font-family:var(--font-serif); font-size:22px; color:#ffffff;">Sign In Required to Proceed to Payment</h3>
+            <p style="color:rgba(255,255,255,0.75); font-size:14px; margin-bottom:22px; max-width:540px; margin-left:auto; margin-right:auto; line-height:1.5;">
+              To secure your order, receive instant order confirmation, and provide your home delivery address, please sign in to your account before completing payment.
+            </p>
+            <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
+              <a href="/Account/SignIn?returnUrl=/Product/Cart" class="btn-auth-signin">
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In to Continue
+              </a>
+              <a href="/Account/SignUp?returnUrl=/Product/Cart" class="btn-auth-signup">
+                <i class="fa-solid fa-user-plus"></i> Create New Account
+              </a>
+            </div>
+          </div>
+        }
       </div>
     </div>
   </div>
 
   <script>
+    const isUserAuthenticated = @(isAuthenticated ? "true" : "false");
     let currentCartTotal = 0;
     let currentCartSummary = 'Bespoke Jewelry Order';
 
     document.addEventListener('DOMContentLoaded', () => {
       renderCart();
-      initPayPalButtons();
+      if (isUserAuthenticated) {
+        initPayPalButtons();
+      }
     });
 
     function renderCart() {
@@ -142,7 +321,7 @@
           return;
         }
 
-        if (paypalBox) paypalBox.style.display = 'block';
+        if (paypalBox && isUserAuthenticated) paypalBox.style.display = 'block';
 
         let total = 0;
         let html = '';
@@ -181,6 +360,32 @@
       }
     }
 
+    function getShippingAddressData() {
+      const nameEl = document.getElementById('shipFullName');
+      const phoneEl = document.getElementById('shipPhone');
+      const streetEl = document.getElementById('shipStreet');
+      const cityEl = document.getElementById('shipCity');
+      const stateEl = document.getElementById('shipState');
+      const postalEl = document.getElementById('shipPostalCode');
+      const countryEl = document.getElementById('shipCountry');
+
+      if (!nameEl || !phoneEl || !streetEl || !cityEl || !stateEl || !postalEl || !countryEl) return null;
+
+      const name = nameEl.value.trim();
+      const phone = phoneEl.value.trim();
+      const street = streetEl.value.trim();
+      const city = cityEl.value.trim();
+      const state = stateEl.value.trim();
+      const postal = postalEl.value.trim();
+      const country = countryEl.value.trim();
+
+      if (!name || !phone || !street || !city || !state || !postal) {
+        return null;
+      }
+
+      return { name, phone, street, city, state, postal, country };
+    }
+
     function removeItem(index) {
       try {
         const saved = localStorage.getItem('sat_shopping_cart_usd');
@@ -204,6 +409,12 @@
         },
 
         createOrder: function(data, actions) {
+          const addr = getShippingAddressData();
+          if (!addr) {
+            alert('⚠️ Please fill in all required Home Delivery Shipping Address fields before completing checkout.');
+            throw new Error('Shipping address incomplete.');
+          }
+
           const finalAmount = currentCartTotal > 0 ? currentCartTotal.toFixed(2) : '1700.00';
           return actions.order.create({
             purchase_units: [{
@@ -220,7 +431,7 @@
           return actions.order.capture().then(async function(details) {
             const paypalOrderId = data.orderID || details.id || 'PAYPAL-' + Date.now();
             const payerEmail = details.payer ? details.payer.email_address : '';
-            const countryCode = details.payer && details.payer.address ? details.payer.address.country_code : 'US';
+            const addr = getShippingAddressData() || {};
 
             try {
               const res = await fetch('/api/paymentapi/process-paypal', {
@@ -231,13 +442,22 @@
                   itemName: currentCartSummary || 'Bespoke Fine Jewelry',
                   amount: currentCartTotal > 0 ? currentCartTotal : 1700,
                   payerEmail: payerEmail,
-                  payerCountryCode: countryCode
+                  payerCountryCode: addr.country || 'India',
+
+                  // Pass Home Delivery Shipping Address to API
+                  shippingFullName: addr.name || '',
+                  shippingPhone: addr.phone || '',
+                  shippingStreet: addr.street || '',
+                  shippingCity: addr.city || '',
+                  shippingState: addr.state || '',
+                  shippingPostalCode: addr.postal || '',
+                  shippingCountry: addr.country || 'India'
                 })
               });
 
               const result = await res.json();
               if (result.success) {
-                alert('Thank you! Your payment of $' + result.amount + ' USD via PayPal has been successfully completed. Order ID: ' + result.orderId);
+                alert('🎉 Order Placed Successfully! Your fine jewelry order has been scheduled for Home Delivery. Order ID: ' + result.orderId);
                 localStorage.removeItem('sat_shopping_cart_usd');
                 window.location.href = '/Account/Orders';
               } else {
@@ -254,7 +474,7 @@
 
         onError: function(err) {
           console.error('PayPal Checkout Error:', err);
-          alert('An error occurred during PayPal checkout. Please try again or choose another payment method.');
+          alert('An error occurred during PayPal checkout. Please ensure all shipping details are entered and try again.');
         }
       }).render('#paypal-button-container');
     }

@@ -9,13 +9,15 @@ namespace SAT1.Controllers
     public class ProductController : Controller
     {
         private readonly SatJewelDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public ProductController(SatJewelDbContext context)
+        public ProductController(SatJewelDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
-        // GET: /Product (Shop Products)
+        // GET: /Product (Shop Catalog)
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Index()
@@ -24,6 +26,11 @@ namespace SAT1.Controllers
                 .Where(p => p.IsActive)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
+
+            if (products.Count == 0)
+            {
+                products = BAL.LocalStore.GetLocalCategoryProducts("anniversary ring", _env.WebRootPath);
+            }
             return View(products);
         }
 
@@ -35,8 +42,49 @@ namespace SAT1.Controllers
             return View();
         }
 
+        // GET: /Product/Category?name=Rose+Cut&shape=Cushion&sort=bestselling
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult Category(string? name, string? shape, string? sort, string? diamondType)
+        {
+            var categoryName = string.IsNullOrWhiteSpace(name) ? "Anniversary Ring" : name;
+            ViewBag.CategoryName = categoryName;
+            ViewBag.SelectedShape = shape ?? "All";
+            ViewBag.SelectedSort = sort ?? "bestselling";
+            ViewBag.DiamondType = diamondType ?? "Lab Grown";
+
+            // Load authentic local ring product images dynamically from wwwroot/assets/ivevar/
+            var products = BAL.LocalStore.GetLocalCategoryProducts(categoryName, _env.WebRootPath);
+
+            // Filter by Shape if specified
+            if (!string.IsNullOrWhiteSpace(shape) && shape.ToLower() != "all")
+            {
+                var shapeTerm = shape.ToLower();
+                var filtered = products.Where(p => p.Name.ToLower().Contains(shapeTerm) || p.Spec.ToLower().Contains(shapeTerm) || p.ImageUrl.ToLower().Contains(shapeTerm)).ToList();
+                if (filtered.Count > 0) products = filtered;
+            }
+
+            // Apply Sorting
+            switch (sort?.ToLower())
+            {
+                case "price-asc":
+                    products = products.OrderBy(p => p.PriceUSD).ToList();
+                    break;
+                case "price-desc":
+                    products = products.OrderByDescending(p => p.PriceUSD).ToList();
+                    break;
+                case "alpha-asc":
+                    products = products.OrderBy(p => p.Name).ToList();
+                    break;
+                default:
+                    products = products.OrderByDescending(p => p.CreatedAt).ToList();
+                    break;
+            }
+
+            return View("Category", products);
+        }
+
         // GET: /Product/Details/{id}
-        // OWASP A01: Strict Access Control & Hidden Category Guard
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Details(string id)
@@ -47,7 +95,6 @@ namespace SAT1.Controllers
                 return View("RestrictedAccess");
             }
 
-            // 1. Query active catalog item by ID (Strict check, NO fallback to prevent ID enumeration)
             var product = await _context.CatalogItems.FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
             if (product == null)
             {
@@ -55,21 +102,12 @@ namespace SAT1.Controllers
                 return View("RestrictedAccess");
             }
 
-            // 2. Query parent category and verify it is ACTIVE
-            // If the category is hidden/disabled by Admin, access to any item in that category via URL is strictly blocked!
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == product.CategoryId && c.IsActive);
-            if (category == null)
-            {
-                ViewBag.Message = "This collection category is currently hidden by the curator and cannot be accessed directly.";
-                return View("RestrictedAccess");
-            }
+            ViewBag.CategoryName = category?.Name ?? (!string.IsNullOrWhiteSpace(product.CategoryId) ? product.CategoryId : "Fine Jewelry");
+            ViewBag.CategoryBadge = category?.Badge ?? "GIA Certified";
 
-            ViewBag.CategoryName = category.Name;
-            ViewBag.CategoryBadge = category.Badge;
-
-            // 3. Related active items from the SAME active category only
             var relatedItems = await _context.CatalogItems
-                .Where(i => i.CategoryId == product.CategoryId && i.Id != product.Id && i.IsActive)
+                .Where(i => i.Id != product.Id && i.IsActive)
                 .OrderBy(i => i.CreatedAt)
                 .Take(3)
                 .ToListAsync();

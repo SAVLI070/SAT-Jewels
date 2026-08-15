@@ -127,9 +127,11 @@ function initLogoTransition() {
 
   if (!logoContainer || !navSlot) return;
 
+  // On mobile screens or subsequent visits, instantly skip intro overlay
+  const isMobile = window.innerWidth <= 768;
   const isFirstVisit = !sessionStorage.getItem('sat_visited');
 
-  if (!isFirstVisit) {
+  if (isMobile || !isFirstVisit) {
     if (overlay) {
       overlay.style.display = 'none';
       overlay.classList.add('fade-out');
@@ -142,6 +144,18 @@ function initLogoTransition() {
   sessionStorage.setItem('sat_visited', 'true');
   logoContainer.classList.add('intro-animating');
 
+  // Hard safety timeout to guarantee overlay NEVER sticks
+  const safetyTimer = setTimeout(() => {
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.classList.add('fade-out');
+    }
+    if (logoContainer && !logoContainer.classList.contains('nav-landed')) {
+      navSlot.appendChild(logoContainer);
+      logoContainer.classList.add('nav-landed');
+    }
+  }, 1000);
+
   setTimeout(() => {
     const logoRect = logoContainer.getBoundingClientRect();
     const slotRect = navSlot.getBoundingClientRect();
@@ -152,16 +166,20 @@ function initLogoTransition() {
 
     logoContainer.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale * 0.9})`;
 
-    if (overlay) overlay.classList.add('fade-out');
+    if (overlay) {
+      overlay.classList.add('fade-out');
+      setTimeout(() => { overlay.style.display = 'none'; }, 600);
+    }
 
     setTimeout(() => {
+      clearTimeout(safetyTimer);
       navSlot.appendChild(logoContainer);
       logoContainer.classList.add('nav-landed');
       logoContainer.classList.remove('intro-animating');
       logoContainer.style.transform = '';
-    }, 1200);
+    }, 600);
 
-  }, 1400);
+  }, 600);
 }
 
 // 2. Navbar Scroll Shrink & Indicator Logic

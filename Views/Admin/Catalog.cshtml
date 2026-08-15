@@ -16,6 +16,34 @@
     color: #ffffff;
   }
 
+  .cat-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: rgba(10, 20, 38, 0.7);
+    border: 1px solid rgba(212, 178, 112, 0.3);
+    padding: 16px 20px;
+    border-radius: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .cat-filter-select {
+    padding: 10px 16px;
+    background: rgba(8, 17, 34, 0.95);
+    border: 1px solid rgba(212, 178, 112, 0.4);
+    border-radius: 10px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    outline: none;
+  }
+
+  .cat-filter-select option {
+    background: #081122;
+    color: #ffffff;
+  }
+
   .cat-section-header {
     display: flex;
     align-items: center;
@@ -55,8 +83,8 @@
   }
 
   .btn-add-section-item {
-    padding: 10px 18px;
-    background: rgba(212, 178, 112, 0.15);
+    padding: 10px 20px;
+    background: linear-gradient(135deg, rgba(212, 178, 112, 0.2) 0%, rgba(180, 83, 9, 0.2) 100%);
     border: 1px solid var(--champagne-gold);
     border-radius: var(--radius-full);
     color: var(--champagne-gold);
@@ -78,11 +106,12 @@
   }
 
   .cat-item-img {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
     object-fit: cover;
     border: 1px solid rgba(212, 178, 112, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
   }
 
   /* Dark Luxury Table Styling */
@@ -109,14 +138,61 @@
     border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
     font-size: 13px;
   }
+
+  .btn-table-delete {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-table-delete:hover {
+    background: #ef4444;
+    color: #ffffff;
+  }
+
+  .badge-subcat {
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+  }
 </style>
 
-<div style="max-width:1160px;margin:0 auto;">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+<div style="max-width:1280px;margin:0 auto;">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
     <div>
-      <h1 style="font-family:var(--font-serif);color:#ffffff;margin:0 0 6px;font-size:28px;">Live Jewelry Catalog Sections</h1>
-      <p style="color:var(--taupe-beige);font-size:14px;margin:0;">Products grouped by collection category. Add new items directly to any specific section below.</p>
+      <h1 style="font-family:var(--font-serif);color:#ffffff;margin:0 0 6px;font-size:28px;">Jewelry Catalog Management</h1>
+      <p style="color:var(--taupe-beige);font-size:14px;margin:0;">Manage, add, edit, or remove catalog products directly connected to AWS RDS PostgreSQL.</p>
     </div>
+    <a href="/Admin/AddProduct" class="btn-add-section-item" style="padding:12px 24px;font-size:14px;">
+      <i class="fa-solid fa-plus"></i> + Add New Jewelry Item
+    </a>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="cat-filter-bar">
+    <div style="font-weight:700;color:var(--champagne-gold);font-size:13px;"><i class="fa-solid fa-filter"></i> Filter Catalog:</div>
+    
+    <select id="filterCategory" class="cat-filter-select" onchange="filterCatalogTable()">
+      <option value="ALL">All Main Categories</option>
+      <option value="rings">Rings Collection</option>
+      <option value="necklaces">Necklaces Section</option>
+      <option value="earrings">Earrings Section</option>
+      <option value="bracelets">Bracelets Section</option>
+      <option value="fine-jewelry">Fine Jewelry</option>
+      <option value="hiphop">Hip Hop Jewelry</option>
+    </select>
+
+    <input type="text" id="searchCatalog" class="cat-filter-select" placeholder="Search product name..." style="min-width:220px;" onkeyup="filterCatalogTable()" />
   </div>
 
   <div id="catalogSectionsContainer">
@@ -125,8 +201,11 @@
 </div>
 
 <script>
+  let allCatalogItems = [];
+  let allCategories = [];
+
   function fixImgUrl(path) {
-    if (!path) return '/assets/ring_main.png';
+    if (!path) return '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
     if (path.startsWith('~/')) return '/' + path.substring(2);
     if (!path.startsWith('/')) return '/' + path;
@@ -147,96 +226,117 @@
         fetch('/api/catalogapi/items')
       ]);
 
-      const categories = await catRes.json();
-      const allItems = await itemRes.json();
+      allCategories = await catRes.json();
+      allCatalogItems = await itemRes.json();
 
-      if (!categories || categories.length === 0) {
-        container.innerHTML = '<div style="background:rgba(8,17,34,0.85);padding:32px;border-radius:16px;text-align:center;color:var(--taupe-beige);">No categories found in database.</div>';
-        return;
-      }
-
-      const iconMap = {
-        rings: 'fa-gem',
-        necklaces: 'fa-ring',
-        earrings: 'fa-sparkles',
-        bracelets: 'fa-wand-magic-sparkles'
-      };
-
-      container.innerHTML = categories.map(cat => {
-        const catItems = allItems.filter(i => i.categoryId === cat.Id || i.categoryId === cat.id);
-        const icon = iconMap[cat.id] || 'fa-gem';
-
-        let tableHtml = '';
-        if (catItems.length === 0) {
-          tableHtml = `
-            <div style="padding:24px;text-align:center;color:var(--taupe-beige);font-size:14px;background:rgba(10,20,38,0.6);border-radius:12px;">
-              No jewelry items currently in this section. Click <strong style="color:var(--champagne-gold);">+ Add Item to ${cat.name}</strong> to add one.
-            </div>
-          `;
-        } else {
-          tableHtml = `
-            <div class="table-responsive">
-              <table class="admin-table">
-                <thead>
-                  <tr>
-                    <th>Image</th>
-                    <th>Item Title & Spec</th>
-                    <th>Price (USD)</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${catItems.map(item => `
-                    <tr>
-                      <td>
-                        <img src="${fixImgUrl(item.imageUrl)}" class="cat-item-img" onerror="this.src='/assets/ring_main.png'" alt="${item.name}" />
-                      </td>
-                      <td>
-                        <strong style="color:#ffffff;font-size:14px;">${item.name}</strong><br/>
-                        <small style="color:var(--taupe-beige);font-size:12px;">${item.spec}</small>
-                      </td>
-                      <td><strong style="color:var(--champagne-gold);font-size:15px;">$${item.priceUSD.toLocaleString()} USD</strong></td>
-                      <td><span class="status-tag-active">Active Live</span></td>
-                      <td>
-                        <button class="btn-table-delete" onclick="deleteCatalogItem('${item.id}', '${item.name}')">
-                          <i class="fa-solid fa-trash"></i> Delete
-                        </button>
-                      </td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-          `;
-        }
-
-        return `
-          <div class="cat-section-card">
-            <div class="cat-section-header">
-              <div>
-                <h3 class="cat-section-title">
-                  <i class="fa-solid ${icon}" style="color:var(--champagne-gold);"></i> ${cat.name}
-                  <span class="badge-cat" style="font-size:11px;margin-left:8px;">${cat.badge}</span>
-                </h3>
-                <p class="cat-section-sub">${cat.subtitle} — <strong style="color:var(--champagne-gold);">${catItems.length} active items</strong></p>
-              </div>
-              <a href="/Admin/AddProduct?categoryId=${cat.id}" class="btn-add-section-item">
-                <i class="fa-solid fa-plus"></i> + Add Item to ${cat.name}
-              </a>
-            </div>
-            ${tableHtml}
-          </div>
-        `;
-      }).join('');
+      renderCatalogSections(allCategories, allCatalogItems);
     } catch (err) {
       console.error('Error loading grouped catalog:', err);
-      container.innerHTML = '<div style="background:rgba(8,17,34,0.85);padding:32px;border-radius:16px;text-align:center;color:#ef4444;">Failed to load catalog data from database.</div>';
+      container.innerHTML = '<div style="background:rgba(8,17,34,0.85);padding:32px;border-radius:16px;text-align:center;color:#ef4444;">Failed to load catalog data from AWS RDS database.</div>';
     }
   }
 
+  function renderCatalogSections(categories, items) {
+    const container = document.getElementById('catalogSectionsContainer');
+    if (!container) return;
+
+    if (!categories || categories.length === 0) {
+      container.innerHTML = '<div style="background:rgba(8,17,34,0.85);padding:32px;border-radius:16px;text-align:center;color:var(--taupe-beige);">No categories found in AWS RDS database.</div>';
+      return;
+    }
+
+    const iconMap = {
+      rings: 'fa-gem',
+      necklaces: 'fa-ring',
+      earrings: 'fa-sparkles',
+      bracelets: 'fa-wand-magic-sparkles'
+    };
+
+    container.innerHTML = categories.map(cat => {
+      const catItems = items.filter(i => (i.categoryId || '').toLowerCase() === (cat.id || '').toLowerCase());
+      const icon = iconMap[cat.id] || 'fa-gem';
+
+      let tableHtml = '';
+      if (catItems.length === 0) {
+        tableHtml = `
+          <div style="padding:24px;text-align:center;color:var(--taupe-beige);font-size:14px;background:rgba(10,20,38,0.6);border-radius:12px;">
+            No jewelry items currently in this section. Click <strong style="color:var(--champagne-gold);">+ Add Item to ${cat.name}</strong> to add one.
+          </div>
+        `;
+      } else {
+        tableHtml = `
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Item Title & Specification</th>
+                  <th>Price (USD)</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${catItems.map(item => `
+                  <tr>
+                    <td>
+                      <img src="${fixImgUrl(item.imageUrl)}" class="cat-item-img" onerror="this.src='/assets/ivevar/exclusive_regal_star_diamond_ring.jpg'" alt="${item.name}" />
+                    </td>
+                    <td>
+                      <strong style="color:#ffffff;font-size:15px;">${item.name}</strong><br/>
+                      <span class="badge-subcat" style="margin-top:4px;display:inline-block;">${cat.name}</span>
+                      <small style="color:var(--taupe-beige);font-size:12px;margin-left:8px;">${item.spec}</small>
+                    </td>
+                    <td><strong style="color:var(--champagne-gold);font-size:16px;">$${Number(item.priceUSD).toLocaleString()} USD</strong></td>
+                    <td><span class="status-tag-active">Active Live</span></td>
+                    <td>
+                      <button class="btn-table-delete" onclick="deleteCatalogItem('${item.id}', '${item.name.replace(/'/g, "\\'")}')">
+                        <i class="fa-solid fa-trash"></i> Delete
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      }
+
+      return `
+        <div class="cat-section-card" id="cat-card-${cat.id}">
+          <div class="cat-section-header">
+            <div>
+              <h3 class="cat-section-title">
+                <i class="fa-solid ${icon}" style="color:var(--champagne-gold);"></i> ${cat.name}
+                <span class="badge-cat" style="font-size:11px;margin-left:8px;background:rgba(212,178,112,0.15);color:var(--champagne-gold);padding:3px 8px;border-radius:4px;border:1px solid var(--champagne-gold);">${cat.badge || 'Popular'}</span>
+              </h3>
+              <p class="cat-section-sub">${cat.subtitle || 'Fine Jewelry Collection'} — <strong style="color:var(--champagne-gold);">${catItems.length} active items</strong></p>
+            </div>
+            <a href="/Admin/AddProduct?categoryId=${cat.id}" class="btn-add-section-item">
+              <i class="fa-solid fa-plus"></i> + Add Item to ${cat.name}
+            </a>
+          </div>
+          ${tableHtml}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function filterCatalogTable() {
+    const selectedCat = document.getElementById('filterCategory').value.toLowerCase();
+    const query = document.getElementById('searchCatalog').value.toLowerCase().trim();
+
+    const filteredItems = allCatalogItems.filter(item => {
+      const matchesCat = selectedCat === 'all' || (item.categoryId || '').toLowerCase() === selectedCat;
+      const matchesSearch = !query || (item.name || '').toLowerCase().includes(query) || (item.spec || '').toLowerCase().includes(query);
+      return matchesCat && matchesSearch;
+    });
+
+    renderCatalogSections(allCategories, filteredItems);
+  }
+
   async function deleteCatalogItem(id, name) {
-    if (!confirm(`Are you sure you want to delete item "${name}" from database?`)) return;
+    if (!confirm(`Are you sure you want to delete product "${name}" from AWS RDS database?`)) return;
 
     try {
       const res = await fetch(`/api/catalogapi/items/${id}`, { method: 'DELETE' });

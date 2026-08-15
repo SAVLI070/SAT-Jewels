@@ -52,10 +52,20 @@ namespace SAT1.Controllers
                     ItemName = itemName,
                     Amount = amount,
                     Currency = "USD",
-                    CustomerRegion = !string.IsNullOrWhiteSpace(req.PayerCountryCode) ? req.PayerCountryCode : "United States",
+                    CustomerRegion = !string.IsNullOrWhiteSpace(req.ShippingCountry) ? req.ShippingCountry : (req.PayerCountryCode ?? "United States"),
+                    
+                    // High Priority Home Delivery Shipping Address Mapping
+                    ShippingFullName = req.ShippingFullName ?? "Valued Client",
+                    ShippingPhone = req.ShippingPhone ?? string.Empty,
+                    ShippingStreet = req.ShippingStreet ?? string.Empty,
+                    ShippingCity = req.ShippingCity ?? string.Empty,
+                    ShippingState = req.ShippingState ?? string.Empty,
+                    ShippingPostalCode = req.ShippingPostalCode ?? string.Empty,
+                    ShippingCountry = req.ShippingCountry ?? "United States",
+
                     PaymentMethod = "PayPal Express USD (" + req.PayPalOrderId + ")",
                     PayPalTransactionId = req.PayPalOrderId,
-                    Status = "Completed (Insured GIA Dispatch)",
+                    Status = "Completed (Insured GIA Home Delivery Dispatch)",
                     CreatedAt = DateTime.UtcNow
                 };
 
@@ -69,7 +79,8 @@ namespace SAT1.Controllers
                     transactionId = req.PayPalOrderId,
                     amount = order.Amount,
                     currency = order.Currency,
-                    message = "PayPal transaction captured successfully and order logged to database."
+                    shippingAddress = $"{order.ShippingStreet}, {order.ShippingCity}, {order.ShippingState} {order.ShippingPostalCode}, {order.ShippingCountry}",
+                    message = "PayPal transaction captured successfully and home delivery order registered!"
                 });
             }
             catch (Exception ex)
@@ -86,5 +97,14 @@ namespace SAT1.Controllers
         public decimal Amount { get; set; }
         public string? PayerEmail { get; set; }
         public string? PayerCountryCode { get; set; }
+
+        // Home Delivery Address Payload
+        public string? ShippingFullName { get; set; }
+        public string? ShippingPhone { get; set; }
+        public string? ShippingStreet { get; set; }
+        public string? ShippingCity { get; set; }
+        public string? ShippingState { get; set; }
+        public string? ShippingPostalCode { get; set; }
+        public string? ShippingCountry { get; set; }
     }
 }

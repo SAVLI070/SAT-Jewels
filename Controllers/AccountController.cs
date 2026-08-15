@@ -64,11 +64,16 @@ namespace SAT1.Controllers
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
+            var authProperties = new AuthenticationProperties
             {
-                IsPersistent = rememberMe,
-                ExpiresUtc = rememberMe ? DateTime.UtcNow.AddDays(30) : DateTime.UtcNow.AddHours(8)
-            });
+                IsPersistent = rememberMe
+            };
+            if (rememberMe)
+            {
+                authProperties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7);
+            }
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
 
             if (user.Role == "Admin")
             {

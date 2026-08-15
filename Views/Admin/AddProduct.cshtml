@@ -5,7 +5,7 @@
 
 <style>
   .add-prod-panel {
-    max-width: 840px;
+    max-width: 920px;
     margin: 0 auto;
     background: rgba(8, 17, 34, 0.85);
     backdrop-filter: blur(20px);
@@ -98,7 +98,7 @@
   }
 
   .btn-submit-item {
-    padding: 14px 32px;
+    padding: 14px 36px;
     background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
     border: none;
     border-radius: var(--radius-full);
@@ -134,18 +134,49 @@
   <form id="adminAddProductForm" onsubmit="handleAddNewProduct(event)">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
       <div class="form-group">
-        <label class="form-label">Target Collection Category *</label>
-        <select id="adminProdCat" class="form-select" required>
-          <option value="rings">Rings Collection</option>
+        <label class="form-label">Target Main Collection Category *</label>
+        <select id="adminProdCat" class="form-select" required onchange="updateSubCatDropdown(this.value)">
+          <option value="rings" selected>Rings Collection</option>
           <option value="necklaces">Necklaces Section</option>
           <option value="earrings">Earrings Section</option>
           <option value="bracelets">Bracelets Section</option>
+          <option value="fine-jewelry">Fine Jewelry</option>
+          <option value="hiphop">Hip Hop Jewelry</option>
         </select>
       </div>
 
       <div class="form-group">
         <label class="form-label">Item Title / Name *</label>
-        <input type="text" id="adminProdName" class="form-input" placeholder="e.g. Royal Solitaire Emerald Ring" required />
+        <input type="text" id="adminProdName" class="form-input" placeholder="e.g. Royal Solitaire Emerald Cut Ring" required />
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+      <div class="form-group">
+        <label class="form-label">Diamond / Stone Type Filter</label>
+        <select id="adminProdDiamondType" class="form-select">
+          <option value="Lab Grown Diamond" selected>Lab Grown Diamond</option>
+          <option value="Moissanite">Moissanite Diamond</option>
+          <option value="Natural GIA Diamond">Natural GIA Diamond</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Diamond Cut Shape</label>
+        <select id="adminProdCutShape" class="form-select">
+          <option value="Rose Cut">Rose Cut</option>
+          <option value="Radiant Cut">Radiant Cut</option>
+          <option value="Asscher Cut">Asscher Cut</option>
+          <option value="Oval Cut">Oval Cut</option>
+          <option value="Emerald Cut">Emerald Cut</option>
+          <option value="Round Cut" selected>Round Cut</option>
+          <option value="Marquise Cut">Marquise Cut</option>
+          <option value="Princess Cut">Princess Cut</option>
+          <option value="Cushion Cut">Cushion Cut</option>
+          <option value="Pear Cut">Pear Cut</option>
+          <option value="Kite Cut">Kite Cut</option>
+          <option value="Triangle Cut">Triangle Cut</option>
+        </select>
       </div>
     </div>
 
@@ -179,6 +210,7 @@
       <label class="form-label">Or Choose Preset AI Studio Image Asset (Optional Fallback)</label>
       <select id="adminProdImgSelect" class="form-select">
         <option value="">-- None (Use Uploaded Images Above) --</option>
+        <option value="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg">Exclusive Regal Star Ring (/assets/ivevar/exclusive_regal_star_diamond_ring.jpg)</option>
         <option value="assets/ring_main.png">Royal Solitaire Ring (assets/ring_main.png)</option>
         <option value="assets/ring_angle.png">Halo Cushion Ring (assets/ring_angle.png)</option>
         <option value="assets/necklace_main.png">Imperial Diamond Necklace (assets/necklace_main.png)</option>
@@ -192,7 +224,7 @@
 
     <div style="margin-top:32px;text-align:right;">
       <button type="submit" class="btn-submit-item" id="btnSubmitItem">
-        <i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live
+        <i class="fa-solid fa-paper-plane"></i> Save to AWS RDS DB & Publish Live
       </button>
     </div>
   </form>
@@ -275,14 +307,14 @@
         } else {
           alert(`Image Upload Error: ${uploadData.message || 'Failed to upload images'}`);
           submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live';
+          submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to AWS RDS DB & Publish Live';
           return;
         }
       } catch (err) {
         console.error('Error uploading images:', err);
         alert('Network error uploading images.');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live';
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to AWS RDS DB & Publish Live';
         return;
       }
     }
@@ -295,10 +327,10 @@
       galleryImages = uploadedUrls.join(',');
     } else if (selectedPreset) {
       mainImageUrl = selectedPreset;
-      galleryImages = `${selectedPreset},assets/ring_clarity.png,assets/ring_model.png`;
+      galleryImages = `${selectedPreset},/assets/ivevar/exclusive_regal_star_diamond_ring.jpg`;
     } else {
-      mainImageUrl = 'assets/ring_main.png';
-      galleryImages = 'assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png';
+      mainImageUrl = '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';
+      galleryImages = '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png';
     }
 
     const payload = {
@@ -312,7 +344,7 @@
     };
 
     try {
-      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Database...';
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to AWS RDS DB...';
 
       const res = await fetch('/api/catalogapi/items', {
         method: 'POST',
@@ -327,13 +359,13 @@
       } else {
         alert('Failed to publish product item.');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live';
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to AWS RDS DB & Publish Live';
       }
     } catch (err) {
       console.error('Error publishing product:', err);
       alert('Network error publishing item.');
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to Neon DB & Publish Live';
+      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to AWS RDS DB & Publish Live';
     }
   }
 </script>

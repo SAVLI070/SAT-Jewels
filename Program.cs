@@ -7,7 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add Neon PostgreSQL Database Context
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<SatJewelDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(connectionString, npgsqlOptions =>
+    {
+        npgsqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorCodesToAdd: null);
+    }));
 
 // Add Controllers and Views
 builder.Services.AddControllersWithViews();
@@ -22,6 +28,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Account/SignIn";
         options.AccessDeniedPath = "/Account/SignIn";
+        options.Cookie.Name = "SATJewel_AuthSession";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.IsEssential = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        options.SlidingExpiration = true;
     });
 
 var app = builder.Build();
@@ -61,6 +73,12 @@ using (var scope = app.Services.CreateScope())
                 ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_CatalogItems"" PRIMARY KEY (""Id"")
             );
+
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""ParentId"" text;
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""CategoryType"" text NOT NULL DEFAULT 'Main Category';
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""SubCategoryName"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""DiamondType"" text NOT NULL DEFAULT 'Lab Grown Diamond';
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""DiamondCutShape"" text NOT NULL DEFAULT 'All Shapes';
 
             ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""GalleryImages"" text NOT NULL DEFAULT '';
             ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""MetalOptions"" text NOT NULL DEFAULT '18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|22K Yellow Gold (+150)|24K Pure Gold (+400)|Platinum 950 (+350)|14K Yellow Gold (-100)|14K White Gold (-100)|10K Solid Gold (-200)|Rose Platinum (+500)';
@@ -117,18 +135,8 @@ using (var scope = app.Services.CreateScope())
             db.SaveChanges();
         }
 
-        // Seed initial items if empty (OWASP A01: Cryptographically Unguessable Product IDs)
-        if (!db.CatalogItems.Any())
-        {
-            db.CatalogItems.AddRange(
-                new CatalogItem { Id = "sat-prod-8f3a9b2c1d4e", Name = "Royal Solitaire Diamond Ring", CategoryId = "rings", Spec = "18K Gold | 1.5ct GIA VVS1, E Color | Brilliant Cut", PriceUSD = 2200, ImageUrl = "assets/ring_main.png", GalleryImages = "assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png" },
-                new CatalogItem { Id = "sat-prod-7c9e6679425a", Name = "Halo Cushion Cut Engagement Ring", CategoryId = "rings", Spec = "Platinum 950 | 2.0ct Halo Setting | IF Clarity", PriceUSD = 2900, ImageUrl = "assets/ring_angle.png", GalleryImages = "assets/ring_main.png,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png" },
-                new CatalogItem { Id = "sat-prod-4b2a9f1c8e3d", Name = "Imperial Diamond Floral Pendant", CategoryId = "necklaces", Spec = "18K Yellow Gold | Marquise & Pear Cut Diamonds", PriceUSD = 4200, ImageUrl = "assets/necklace_1.jpg", GalleryImages = "assets/necklace_1.jpg,assets/ring_clarity.png,assets/ring_model.png" },
-                new CatalogItem { Id = "sat-prod-3f8d2b1a9c4e", Name = "Chandelier Diamond Drop Earrings", CategoryId = "earrings", Spec = "18K Gold | 2.2ct Triple Drop Diamonds", PriceUSD = 2500, ImageUrl = "assets/earring_card.jpg", GalleryImages = "assets/earring_card.jpg,assets/ring_clarity.png,assets/ring_model.png" },
-                new CatalogItem { Id = "sat-prod-9e4a2c1b8f3d", Name = "Classic Diamond Tennis Bracelet", CategoryId = "bracelets", Spec = "Platinum 950 | 5.0ct Total Weight | Round Cut", PriceUSD = 4700, ImageUrl = "assets/bracelet_card.jpg", GalleryImages = "assets/bracelet_card.jpg,assets/ring_whitegold.png,assets/ring_clarity.png,assets/ring_model.png" }
-            );
-            db.SaveChanges();
-        }
+        // Seed All 12 Sub-Categories & Products using downloaded high-res ivevar assets
+        SAT1.BAL.DbSeeder.SeedAllCollections(db, app.Environment.WebRootPath);
 
         // Seed Admin User Credentials into Database (admin@satjewel.com / admin123)
         if (!db.Users.Any(u => u.Email == "admin@satjewel.com" || u.Role == "Admin"))

@@ -4,8 +4,16 @@ namespace SAT1.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly IWebHostEnvironment _env;
+
+        public HomeController(IWebHostEnvironment env)
+        {
+            _env = env;
+        }
+
         public IActionResult Index()
         {
+            ViewBag.CategoryCounts = BAL.LocalStore.GetCategoryCounts(_env.WebRootPath);
             return View();
         }
 
