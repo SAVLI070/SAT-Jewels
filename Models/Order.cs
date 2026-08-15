@@ -19,9 +19,11 @@ namespace SAT1.Models
 
         public string CustomerRegion { get; set; } = "United States";
 
-        public string PaymentMethod { get; set; } = "Credit Card (Stripe USD)";
+        public string PaymentMethod { get; set; } = "PayPal Express USD";
 
-        public string Status { get; set; } = "Pending GIA Dispatch";
+        public string PayPalTransactionId { get; set; } = string.Empty;
+
+        public string Status { get; set; } = "Completed (GIA Insured Dispatch)";
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

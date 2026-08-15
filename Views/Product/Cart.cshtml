@@ -1,16 +1,18 @@
 @{
-    ViewData["Title"] = "Shopping Cart";
+    ViewData["Title"] = "Shopping Cart & PayPal Checkout";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shopping Cart — SAT Jewel Sanctuary</title>
+  <title>Shopping Cart & PayPal Checkout — SAT Jewel Sanctuary</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="~/css/style.css" />
+  <!-- Official PayPal Smart Payment Buttons SDK -->
+  <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&enable-funding=venmo,paylater"></script>
   <style>
     body {
       background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
@@ -52,23 +54,27 @@
       object-fit: cover;
       border: 1px solid rgba(212, 178, 112, 0.3);
     }
-    .btn-checkout {
-      padding: 14px 36px;
-      border-radius: 30px;
-      background: var(--champagne-gold);
-      color: #060d0a;
-      font-weight: 700;
-      font-size: 15px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
+    .paypal-checkout-panel {
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(212, 178, 112, 0.3);
+    }
+    .paypal-box-wrap {
+      max-width: 440px;
+      margin: 20px auto 0;
+    }
+    .paypal-badge {
       display: inline-flex;
       align-items: center;
-      gap: 10px;
-    }
-    .btn-checkout:hover {
-      background: #fcebc5;
-      box-shadow: 0 6px 25px rgba(212, 178, 112, 0.5);
+      gap: 8px;
+      padding: 6px 14px;
+      background: rgba(0, 112, 186, 0.15);
+      border: 1px solid #0070ba;
+      border-radius: 20px;
+      color: #38bdf8;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 14px;
     }
   </style>
 </head>
@@ -80,28 +86,41 @@
 
     <div class="cart-card">
       <h1 class="cart-title">Bespoke Shopping Cart</h1>
-      <p style="color:var(--taupe-beige); font-size:14px; margin-bottom:28px;">Review your selected GIA certified fine jewelry pieces before secure checkout.</p>
+      <p style="color:var(--taupe-beige); font-size:14px; margin-bottom:28px;">Review your GIA certified fine jewelry pieces before secure PayPal USD checkout.</p>
 
       <div id="cartItemsContainer">
         <!-- Rendered dynamically by JavaScript -->
       </div>
 
-      <div style="margin-top:28px; padding-top:20px; border-top:1px solid rgba(212,178,112,0.3); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-        <div>
-          <span style="color:var(--taupe-beige); font-size:14px;">Total Amount: </span>
-          <span id="cartTotalDisplay" style="font-family:var(--font-serif); font-size:26px; font-weight:700; color:#fbbf24; margin-left:8px;">$0 USD</span>
+      <div class="paypal-checkout-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+          <div>
+            <div class="paypal-badge"><i class="fa-brands fa-paypal"></i> PayPal USD Express Checkout</div>
+            <div style="color:var(--taupe-beige); font-size:14px;">Total Order Subtotal:</div>
+            <div id="cartTotalDisplay" style="font-family:var(--font-serif); font-size:30px; font-weight:700; color:#fbbf24; margin-top:2px;">$0 USD</div>
+          </div>
         </div>
-        <button type="button" class="btn-checkout" onclick="initiateCheckout()"><i class="fa-solid fa-lock"></i> Proceed to Secure Checkout</button>
+
+        <div id="paypalContainerBox" class="paypal-box-wrap">
+          <div id="paypal-button-container"></div>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', renderCart);
+    let currentCartTotal = 0;
+    let currentCartSummary = 'Bespoke Jewelry Order';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      renderCart();
+      initPayPalButtons();
+    });
 
     function renderCart() {
       const container = document.getElementById('cartItemsContainer');
       const totalEl = document.getElementById('cartTotalDisplay');
+      const paypalBox = document.getElementById('paypalContainerBox');
       if (!container) return;
 
       try {
@@ -118,17 +137,23 @@
             </div>
           `;
           totalEl.textContent = '$0 USD';
+          if (paypalBox) paypalBox.style.display = 'none';
+          currentCartTotal = 0;
           return;
         }
 
+        if (paypalBox) paypalBox.style.display = 'block';
+
         let total = 0;
         let html = '';
+        let names = [];
 
         items.forEach((item, index) => {
           const itemPrice = Number(item.priceUSD) || 0;
           const qty = Number(item.quantity) || 1;
           const subtotal = itemPrice * qty;
           total += subtotal;
+          names.push(item.name || 'Jewelry Piece');
 
           html += `
             <div class="cart-item-row">
@@ -147,6 +172,8 @@
           `;
         });
 
+        currentCartTotal = total;
+        currentCartSummary = names.join(', ');
         container.innerHTML = html;
         totalEl.textContent = '$' + total.toLocaleString() + ' USD';
       } catch (e) {
@@ -165,10 +192,71 @@
       } catch (e) {}
     }
 
-    function initiateCheckout() {
-      alert('Order Placed Successfully! Your GIA Certificate and insured shipment tracking are being processed.');
-      localStorage.removeItem('sat_shopping_cart_usd');
-      window.location.href = '/Account/Orders';
+    function initPayPalButtons() {
+      if (typeof paypal === 'undefined') return;
+
+      paypal.Buttons({
+        style: {
+          layout: 'vertical',
+          color:  'gold',
+          shape:  'rect',
+          label:  'paypal'
+        },
+
+        createOrder: function(data, actions) {
+          const finalAmount = currentCartTotal > 0 ? currentCartTotal.toFixed(2) : '1700.00';
+          return actions.order.create({
+            purchase_units: [{
+              description: currentCartSummary || 'SAT Bespoke Jewelry Order',
+              amount: {
+                currency_code: 'USD',
+                value: finalAmount
+              }
+            }]
+          });
+        },
+
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(async function(details) {
+            const paypalOrderId = data.orderID || details.id || 'PAYPAL-' + Date.now();
+            const payerEmail = details.payer ? details.payer.email_address : '';
+            const countryCode = details.payer && details.payer.address ? details.payer.address.country_code : 'US';
+
+            try {
+              const res = await fetch('/api/paymentapi/process-paypal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  payPalOrderId: paypalOrderId,
+                  itemName: currentCartSummary || 'Bespoke Fine Jewelry',
+                  amount: currentCartTotal > 0 ? currentCartTotal : 1700,
+                  payerEmail: payerEmail,
+                  payerCountryCode: countryCode
+                })
+              });
+
+              const result = await res.json();
+              if (result.success) {
+                alert('Thank you! Your payment of $' + result.amount + ' USD via PayPal has been successfully completed. Order ID: ' + result.orderId);
+                localStorage.removeItem('sat_shopping_cart_usd');
+                window.location.href = '/Account/Orders';
+              } else {
+                alert('Payment captured, but order registration warning: ' + result.message);
+                window.location.href = '/Account/Orders';
+              }
+            } catch (err) {
+              alert('Payment Completed via PayPal! Redirecting to your Orders...');
+              localStorage.removeItem('sat_shopping_cart_usd');
+              window.location.href = '/Account/Orders';
+            }
+          });
+        },
+
+        onError: function(err) {
+          console.error('PayPal Checkout Error:', err);
+          alert('An error occurred during PayPal checkout. Please try again or choose another payment method.');
+        }
+      }).render('#paypal-button-container');
     }
   </script>
 </body>
