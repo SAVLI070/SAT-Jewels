@@ -44,19 +44,43 @@ namespace SAT1.Controllers
             return View();
         }
 
-        // GET: /Product/Category?name=Rose+Cut&shape=Cushion&sort=bestselling
+        // GET: /Product/Category?id=2 & /Product/Category?name=Rose+Cut
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Category(string? name, string? shape, string? sort, string? diamondType)
+        public async Task<IActionResult> Category(string? name, long? id, RingCategoryEnum? categoryEnum, string? shape, string? sort, string? diamondType)
         {
-            var categoryName = string.IsNullOrWhiteSpace(name) ? "Anniversary Ring" : name;
+            List<CatalogItem> products;
+            string categoryName = "Anniversary Ring";
+
+            if (id.HasValue && id.Value > 0)
+            {
+                var catEnum = (RingCategoryEnum)id.Value;
+                categoryName = catEnum.ToString();
+                ViewBag.CategoryId = id.Value;
+                products = await _catalogBal.GetProductsByNumericIdAsync(id.Value, _env.WebRootPath);
+            }
+            else if (categoryEnum.HasValue)
+            {
+                long catNum = (long)categoryEnum.Value;
+                categoryName = categoryEnum.Value.ToString();
+                ViewBag.CategoryId = catNum;
+                products = await _catalogBal.GetProductsByEnumCategoryAsync(categoryEnum.Value, _env.WebRootPath);
+            }
+            else if (long.TryParse(name, out long parsedNumericId))
+            {
+                ViewBag.CategoryId = parsedNumericId;
+                products = await _catalogBal.GetProductsByNumericIdAsync(parsedNumericId, _env.WebRootPath);
+            }
+            else
+            {
+                categoryName = string.IsNullOrWhiteSpace(name) ? "Anniversary Ring" : name;
+                products = await _catalogBal.GetProductsByCategoryIdAsync(categoryName, _env.WebRootPath);
+            }
+
             ViewBag.CategoryName = categoryName;
             ViewBag.SelectedShape = shape ?? "All";
             ViewBag.SelectedSort = sort ?? "bestselling";
             ViewBag.DiamondType = diamondType ?? "Lab Grown";
-
-            // Fetch products strictly matching this specific subcategory CategoryId (FarmBridge Data Binding Pattern)
-            var products = await _catalogBal.GetProductsByCategoryIdAsync(categoryName, _env.WebRootPath);
 
             // Filter by Shape if specified
             if (!string.IsNullOrWhiteSpace(shape) && shape.ToLower() != "all")

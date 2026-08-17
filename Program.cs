@@ -123,8 +123,8 @@ using (var scope = app.Services.CreateScope())
             db.Database.ExecuteSqlRaw(updateGallerySql);
         } catch { }
 
-        // Auto-seeding disabled per user directive: "Do not Feed in this command anything in any data tables"
-        // Database tables remain 100% clean for manual user data feeding
+        // Seed 7-Table Relational Architecture Data with Strict Subcategory Isolation
+        SAT1.BAL.RelationalDbSeeder.SeedRelationalData(db);
     }
     catch (Exception ex)
     {

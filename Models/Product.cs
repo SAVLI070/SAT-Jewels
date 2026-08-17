@@ -12,9 +12,8 @@ namespace SAT1.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long ProductId { get; set; }
 
-        [Required(ErrorMessage = "Category ID is required.")]
-        [MaxLength(150, ErrorMessage = "Category ID cannot exceed 150 characters.")]
-        public string CategoryId { get; set; } = "rings";
+        [Required(ErrorMessage = "Category ID reference is required.")]
+        public long CategoryId { get; set; } = (long)RingCategoryEnum.Rings;
 
         [Required(ErrorMessage = "Product Name is required.")]
         [MaxLength(255, ErrorMessage = "Product Name cannot exceed 255 characters.")]
@@ -63,6 +62,9 @@ namespace SAT1.Models
         public bool IsAvailable { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [ForeignKey("CategoryId")]
+        public virtual Category? Category { get; set; }
 
         public virtual ICollection<ProductVariant> Variants { get; set; } = new List<ProductVariant>();
         public virtual ICollection<ProductImage> Images { get; set; } = new List<ProductImage>();

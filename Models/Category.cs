@@ -9,35 +9,37 @@ namespace SAT1.Models
     public class Category
     {
         [Key]
-        [Required(ErrorMessage = "Category ID is required.")]
-        [MaxLength(150, ErrorMessage = "Category ID / Slug cannot exceed 150 characters.")]
-        public string Id { get; set; } = Guid.NewGuid().ToString().ToLower();
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long CategoryId { get; set; }
 
         [Required(ErrorMessage = "Category Name is required.")]
         [MaxLength(100, ErrorMessage = "Category Name cannot exceed 100 characters.")]
         public string Name { get; set; } = string.Empty;
 
-        // Hierarchical Nested Category Fields (Self-referencing Foreign Key)
+        [Required(ErrorMessage = "Slug is required.")]
         [MaxLength(150)]
-        public string? ParentId { get; set; } // Null for Main Parent Category, or ID of Parent Category
+        public string Slug { get; set; } = string.Empty;
+
+        // Hierarchical Self-referencing Foreign Key (long)
+        public long? ParentCategoryId { get; set; }
 
         [MaxLength(50)]
-        public string CategoryType { get; set; } = "Main Category"; // Main Category, Sub Category, Diamond Cut / Stone Type
+        public string CategoryType { get; set; } = "Main Category";
 
         [MaxLength(100)]
-        public string SubCategoryName { get; set; } = string.Empty; // e.g. Engagement Ring, Wedding Band, Eternity Ring
+        public string SubCategoryName { get; set; } = string.Empty;
 
         [MaxLength(50)]
-        public string DiamondType { get; set; } = "Lab Grown Diamond"; // Lab Grown Diamond, Moissanite, Natural Diamond
+        public string DiamondType { get; set; } = "Lab Grown Diamond";
 
         [MaxLength(50)]
-        public string DiamondCutShape { get; set; } = "All Shapes"; // Rose Cut, Radiant Cut, Oval Cut, etc.
+        public string DiamondCutShape { get; set; } = "All Shapes";
 
         [MaxLength(50)]
-        public string Badge { get; set; } = "Popular"; // Top Selling, Popular, Trending, Featured, New Arrival
+        public string Badge { get; set; } = "Popular";
 
         [MaxLength(200)]
-        public string Subtitle { get; set; } = string.Empty; // e.g. Solitaires & Halos
+        public string Subtitle { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Image URL is required.")]
         [MaxLength(500, ErrorMessage = "Image URL cannot exceed 500 characters.")]
@@ -50,7 +52,14 @@ namespace SAT1.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-        [ForeignKey("ParentId")]
+        [NotMapped]
+        public string Id 
+        { 
+            get => CategoryId.ToString(); 
+            set { if (long.TryParse(value, out long parseId)) CategoryId = parseId; } 
+        }
+
+        [ForeignKey("ParentCategoryId")]
         public virtual Category? ParentCategory { get; set; }
 
         public virtual ICollection<Category> SubCategories { get; set; } = new List<Category>();

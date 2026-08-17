@@ -223,6 +223,72 @@ namespace SAT1.BAL
             return LocalStore.GetLocalCategoryProducts(categoryQuery, webRootPath);
         }
 
+        // Strongly-Typed Enum Category Filtering (Numeric long ID matching)
+        public async Task<List<CatalogItem>> GetProductsByEnumCategoryAsync(RingCategoryEnum categoryEnum, string webRootPath)
+        {
+            long numericId = (long)categoryEnum;
+            var subcategorySlug = categoryEnum.ToString().ToLower();
+
+            // 1. Query Products table by numeric long CategoryId
+            var relationalProducts = await _context.Products
+                .Include(p => p.Images)
+                .Where(p => p.IsAvailable && (p.CategoryId == numericId || p.ProductSlug.Contains(subcategorySlug)))
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            if (relationalProducts.Count > 0)
+            {
+                return relationalProducts.Select(p => new CatalogItem
+                {
+                    Id = $"sat-prod-{p.ProductId}",
+                    Name = p.ProductName,
+                    CategoryId = p.CategoryId.ToString(),
+                    Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}",
+                    PriceUSD = p.BasePriceUSD,
+                    ImageUrl = p.Images.FirstOrDefault(img => img.IsMainImage)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl ?? "/assets/ring_1.jpg",
+                    GalleryImages = string.Join(",", p.Images.Select(img => img.ImageUrl)),
+                    IsActive = p.IsAvailable,
+                    CreatedAt = p.CreatedAt
+                }).ToList();
+            }
+
+            return await GetProductsByCategoryIdAsync(categoryEnum.ToString(), webRootPath);
+        }
+
+        // Overload accepting numeric long categoryId from UI click
+        public async Task<List<CatalogItem>> GetProductsByNumericIdAsync(long categoryId, string webRootPath)
+        {
+            if (Enum.IsDefined(typeof(RingCategoryEnum), categoryId))
+            {
+                return await GetProductsByEnumCategoryAsync((RingCategoryEnum)categoryId, webRootPath);
+            }
+
+            // Directly query DB by numeric long CategoryId
+            var dbItems = await _context.Products
+                .Include(p => p.Images)
+                .Where(p => p.IsAvailable && p.CategoryId == categoryId)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            if (dbItems.Count > 0)
+            {
+                return dbItems.Select(p => new CatalogItem
+                {
+                    Id = $"sat-prod-{p.ProductId}",
+                    Name = p.ProductName,
+                    CategoryId = p.CategoryId.ToString(),
+                    Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity}",
+                    PriceUSD = p.BasePriceUSD,
+                    ImageUrl = p.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl ?? "/assets/ring_1.jpg",
+                    GalleryImages = string.Join(",", p.Images.Select(i => i.ImageUrl)),
+                    IsActive = p.IsAvailable,
+                    CreatedAt = p.CreatedAt
+                }).ToList();
+            }
+
+            return await GetProductsByCategoryIdAsync(categoryId.ToString(), webRootPath);
+        }
+
         public async Task<List<CatalogItem>> GetAllCatalogItemsAsync()
         {
             return await _context.CatalogItems

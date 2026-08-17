@@ -46,7 +46,8 @@ namespace SAT1.Models
             modelBuilder.Entity<Category>().HasData(
                 new Category
                 {
-                    Id = "rings",
+                    CategoryId = 1,
+                    Slug = "rings",
                     Name = "Rings Collection",
                     Badge = "Top Selling",
                     Subtitle = "Solitaires & Halos",
@@ -55,7 +56,8 @@ namespace SAT1.Models
                 },
                 new Category
                 {
-                    Id = "necklaces",
+                    CategoryId = 14,
+                    Slug = "necklaces",
                     Name = "Necklaces Section",
                     Badge = "Popular",
                     Subtitle = "Chokers & Pendants",
@@ -64,7 +66,8 @@ namespace SAT1.Models
                 },
                 new Category
                 {
-                    Id = "earrings",
+                    CategoryId = 15,
+                    Slug = "earrings",
                     Name = "Earrings Section",
                     Badge = "Trending",
                     Subtitle = "Studs & Drops",
@@ -73,7 +76,8 @@ namespace SAT1.Models
                 },
                 new Category
                 {
-                    Id = "bracelets",
+                    CategoryId = 16,
+                    Slug = "bracelets",
                     Name = "Bracelets Section",
                     Badge = "Featured",
                     Subtitle = "Tennis & Bangles",
