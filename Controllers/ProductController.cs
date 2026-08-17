@@ -10,11 +10,13 @@ namespace SAT1.Controllers
     {
         private readonly SatJewelDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly BAL.CatalogBal _catalogBal;
 
-        public ProductController(SatJewelDbContext context, IWebHostEnvironment env)
+        public ProductController(SatJewelDbContext context, IWebHostEnvironment env, BAL.CatalogBal catalogBal)
         {
             _context = context;
             _env = env;
+            _catalogBal = catalogBal;
         }
 
         // GET: /Product (Shop Catalog)
@@ -45,7 +47,7 @@ namespace SAT1.Controllers
         // GET: /Product/Category?name=Rose+Cut&shape=Cushion&sort=bestselling
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Category(string? name, string? shape, string? sort, string? diamondType)
+        public async Task<IActionResult> Category(string? name, string? shape, string? sort, string? diamondType)
         {
             var categoryName = string.IsNullOrWhiteSpace(name) ? "Anniversary Ring" : name;
             ViewBag.CategoryName = categoryName;
@@ -53,8 +55,8 @@ namespace SAT1.Controllers
             ViewBag.SelectedSort = sort ?? "bestselling";
             ViewBag.DiamondType = diamondType ?? "Lab Grown";
 
-            // Load authentic local ring product images dynamically from wwwroot/assets/ivevar/
-            var products = BAL.LocalStore.GetLocalCategoryProducts(categoryName, _env.WebRootPath);
+            // Fetch products strictly matching this specific subcategory CategoryId (FarmBridge Data Binding Pattern)
+            var products = await _catalogBal.GetProductsByCategoryIdAsync(categoryName, _env.WebRootPath);
 
             // Filter by Shape if specified
             if (!string.IsNullOrWhiteSpace(shape) && shape.ToLower() != "all")

@@ -181,6 +181,31 @@ namespace SAT1.BAL
             return true;
         }
 
+        // FarmBridge Data Binding Pattern: Dynamic Filtering by Category ID / Subcategory Slug
+        public async Task<List<CatalogItem>> GetProductsByCategoryIdAsync(string categoryQuery, string webRootPath)
+        {
+            if (string.IsNullOrWhiteSpace(categoryQuery))
+            {
+                categoryQuery = "anniversary ring";
+            }
+
+            var cleanKey = categoryQuery.Trim().ToLower().Replace("-", "_").Replace(" ", "_");
+
+            // 1. Query Database via EF Core LINQ parameterized SQL
+            var dbProducts = await _context.CatalogItems
+                .Where(i => i.IsActive && (i.CategoryId.ToLower() == cleanKey || i.CategoryId.ToLower().Replace("-", "_") == cleanKey || i.CategoryId.ToLower().Replace("_", " ") == cleanKey.Replace("_", " ")))
+                .OrderByDescending(i => i.CreatedAt)
+                .ToListAsync();
+
+            if (dbProducts.Count > 0)
+            {
+                return dbProducts;
+            }
+
+            // 2. Fallback to LocalStore provider filtered strictly for that specific subcategory
+            return LocalStore.GetLocalCategoryProducts(categoryQuery, webRootPath);
+        }
+
         public async Task<List<CatalogItem>> GetAllCatalogItemsAsync()
         {
             return await _context.CatalogItems
