@@ -10,11 +10,11 @@ namespace SAT1.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long ImageId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Product ID reference is required.")]
         public long ProductId { get; set; }
 
-        [Required]
-        [MaxLength(500)]
+        [Required(ErrorMessage = "Image URL is required.")]
+        [MaxLength(500, ErrorMessage = "Image URL cannot exceed 500 characters.")]
         public string ImageUrl { get; set; } = string.Empty;
 
         public bool IsMainImage { get; set; } = false;

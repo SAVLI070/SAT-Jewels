@@ -11,27 +11,28 @@ namespace SAT1.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long PaymentId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Order ID reference is required.")]
         public string OrderId { get; set; } = string.Empty;
 
-        [Required]
+        [Required(ErrorMessage = "Payment Gateway is required.")]
         [MaxLength(50)]
         public string PaymentGateway { get; set; } = "Stripe_International";
 
-        [Required]
+        [Required(ErrorMessage = "Gateway Transaction ID is required.")]
         [MaxLength(255)]
         public string GatewayTransactionId { get; set; } = string.Empty;
 
         [MaxLength(10)]
         public string Currency { get; set; } = "USD";
 
+        [Required(ErrorMessage = "Amount in USD is required.")]
         [Column(TypeName = "numeric(18,2)")]
         public decimal AmountUSD { get; set; }
 
         [Column(TypeName = "numeric(18,2)")]
         public decimal? SettlementINR { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Payment Status is required.")]
         [MaxLength(50)]
         public string PaymentStatus { get; set; } = "Authorized";
 

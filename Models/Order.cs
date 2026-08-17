@@ -1,45 +1,82 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SAT1.Models
 {
+    [Table("Orders")]
     public class Order
     {
         [Key]
+        [Required(ErrorMessage = "Order ID is required.")]
         public string OrderId { get; set; } = Guid.NewGuid().ToString();
+
+        [MaxLength(50)]
+        public string OrderNumber { get; set; } = $"SAT-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}";
 
         public string UserId { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Customer Email is required.")]
+        [EmailAddress(ErrorMessage = "Customer Email must be a valid email address.")]
+        [MaxLength(255)]
         public string CustomerEmail { get; set; } = string.Empty;
 
         public string ItemName { get; set; } = string.Empty;
 
-        public decimal Amount { get; set; }
+        public byte[] CustomerNameEncrypted { get; set; } = Array.Empty<byte>();
 
-        public string Currency { get; set; } = "USD";
+        public byte[] ShippingAddressEncrypted { get; set; } = Array.Empty<byte>();
 
-        public string CustomerRegion { get; set; } = "United States";
-
-        // High Priority Home Delivery Shipping Address Fields
         public string ShippingFullName { get; set; } = string.Empty;
 
         public string ShippingPhone { get; set; } = string.Empty;
 
         public string ShippingStreet { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "City is required.")]
+        [MaxLength(100)]
         public string ShippingCity { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "State is required.")]
+        [MaxLength(50)]
         public string ShippingState { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Postal Code is required.")]
+        [MaxLength(20)]
         public string ShippingPostalCode { get; set; } = string.Empty;
 
+        [Required(ErrorMessage = "Country is required.")]
+        [MaxLength(50)]
         public string ShippingCountry { get; set; } = "United States";
+
+        public string CustomerRegion { get; set; } = "United States";
+
+        [Required(ErrorMessage = "Total Amount in USD is required.")]
+        [Column(TypeName = "numeric(18,2)")]
+        public decimal TotalAmountUSD { get; set; }
+
+        [NotMapped]
+        public decimal Amount { get => TotalAmountUSD; set => TotalAmountUSD = value; }
+
+        public string Currency { get; set; } = "USD";
 
         public string PaymentMethod { get; set; } = "PayPal Express USD";
 
         public string PayPalTransactionId { get; set; } = string.Empty;
 
-        public string Status { get; set; } = "Completed (GIA Insured Home Delivery Dispatch)";
+        [MaxLength(50)]
+        public string OrderStatus { get; set; } = "Pending";
+
+        [NotMapped]
+        public string Status { get => OrderStatus; set => OrderStatus = value; }
+
+        [MaxLength(100)]
+        public string? TrackingNumber { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
+        public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
     }
 }
