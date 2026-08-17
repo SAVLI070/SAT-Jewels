@@ -47,9 +47,9 @@ namespace SAT1.BAL
                         (RingCategoryEnum.ToiEtMoiRings, "toi-et-moi-rings", "Toi et Moi Three Stone", "three_stone")
                     };
 
-                    var metals = new[] { "14K Yellow Gold", "18K White Gold", "18K Rose Gold", "Platinum 950" };
-                    var clarities = new[] { "VVS1", "VVS2", "VS1", "FL" };
-                    var colors = new[] { "D", "E", "F", "Fancy Yellow" };
+                    var metalEnums = new[] { MetalTypeEnum.YellowGold14K, MetalTypeEnum.WhiteGold18K, MetalTypeEnum.RoseGold18K, MetalTypeEnum.Platinum950 };
+                    var clarityEnums = new[] { DiamondClarityEnum.VVS1, DiamondClarityEnum.VVS2, DiamondClarityEnum.VS1, DiamondClarityEnum.FL };
+                    var colorEnums = new[] { DiamondColorEnum.ColorD, DiamondColorEnum.ColorE, DiamondColorEnum.ColorF, DiamondColorEnum.FancyYellow };
 
                     int prodCount = 0;
                     foreach (var sc in subcats)
@@ -63,10 +63,16 @@ namespace SAT1.BAL
                             var prodName = $"SAT Luxury {sc.Label} Diamond Ring #{i}";
                             var slug = $"sat-luxury-{sc.Slug}-{i}";
                             var price = 1450.00m + ((prodCount * 185) % 4800);
-                            var metal = metals[(i - 1) % metals.Length];
+                            
+                            var selectedMetalEnum = metalEnums[(i - 1) % metalEnums.Length];
+                            var selectedClarityEnum = clarityEnums[(i - 1) % clarityEnums.Length];
+                            var selectedColorEnum = colorEnums[(i - 1) % colorEnums.Length];
+
+                            var metal = selectedMetalEnum.GetDisplayName();
+                            var clarity = selectedClarityEnum.GetDisplayName();
+                            var color = selectedColorEnum.GetDisplayName();
+
                             var carat = Math.Round(1.20m + (i * 0.35m), 2);
-                            var clarity = clarities[(i - 1) % clarities.Length];
-                            var color = colors[(i - 1) % colors.Length];
                             var desc = $"Handcrafted luxury {sc.Label} diamond ring featuring a {carat}ct {color}/{clarity} lab-grown diamond set in solid {metal}.";
                             var imgUrl = $"/assets/ivevar/{sc.Folder}/00{i}_ivevar-luxury-rings.jpg";
 
