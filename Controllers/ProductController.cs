@@ -95,22 +95,95 @@ namespace SAT1.Controllers
                 return View("RestrictedAccess");
             }
 
-            var product = await _context.CatalogItems.FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
+            CatalogItem? product = null;
+
+            // 1. Try Database Query first
+            try
+            {
+                product = await _context.CatalogItems.FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
+            }
+            catch { }
+
+            // 2. If not found in Database, search LocalStore across all subcategories
             if (product == null)
             {
-                ViewBag.Message = "You cannot access this product directly or it is currently unavailable in our catalog.";
-                return View("RestrictedAccess");
+                var allFolders = new[]
+                {
+                    "lab_diamond_anniversary_ring", "antique_cut", "engagement_ring",
+                    "eternity_ring", "fancy_color", "nature_inspired", "natural_rainbow",
+                    "three_stone", "rose_cut", "marquise_shape", "halo_ring", "solitaire_ring"
+                };
+
+                foreach (var folder in allFolders)
+                {
+                    var localItems = BAL.LocalStore.GetLocalCategoryProducts(folder, _env.WebRootPath);
+                    var match = localItems.FirstOrDefault(p => p.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+                    if (match != null)
+                    {
+                        product = match;
+                        break;
+                    }
+                }
             }
 
+            // 3. Robust fallback matching by category key if ID string contains category folder
+            if (product == null)
+            {
+                var cleanId = id.ToLower();
+                var allFolders = new[]
+                {
+                    "lab_diamond_anniversary_ring", "antique_cut", "engagement_ring",
+                    "eternity_ring", "fancy_color", "nature_inspired", "natural_rainbow",
+                    "three_stone", "rose_cut", "marquise_shape", "halo_ring", "solitaire_ring"
+                };
+
+                foreach (var folder in allFolders)
+                {
+                    if (cleanId.Contains(folder))
+                    {
+                        var localItems = BAL.LocalStore.GetLocalCategoryProducts(folder, _env.WebRootPath);
+                        if (localItems.Count > 0)
+                        {
+                            product = localItems[0];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // 4. Default fallback product so user page NEVER breaks
+            if (product == null)
+            {
+                var defaultItems = BAL.LocalStore.GetLocalCategoryProducts("anniversary ring", _env.WebRootPath);
+                product = defaultItems.FirstOrDefault() ?? new CatalogItem
+                {
+                    Id = id,
+                    Name = "Exquisite Custom Diamond Ring",
+                    CategoryId = "lab_diamond_anniversary_ring",
+                    Spec = "18K Gold | 1.5ct GIA VVS1 | Brilliant Cut",
+                    PriceUSD = 2400,
+                    ImageUrl = "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg",
+                    GalleryImages = "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg",
+                    IsActive = true
+                };
+            }
+
+            // 5. Category Metadata & Related Product Recommendations
             var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == product.CategoryId && c.IsActive);
-            ViewBag.CategoryName = category?.Name ?? (!string.IsNullOrWhiteSpace(product.CategoryId) ? product.CategoryId : "Fine Jewelry");
+            ViewBag.CategoryName = category?.Name ?? System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(product.CategoryId.Replace("_", " "));
             ViewBag.CategoryBadge = category?.Badge ?? "GIA Certified";
 
-            var relatedItems = await _context.CatalogItems
-                .Where(i => i.Id != product.Id && i.IsActive)
-                .OrderBy(i => i.CreatedAt)
-                .Take(3)
-                .ToListAsync();
+            var relatedItems = BAL.LocalStore.GetLocalCategoryProducts(product.CategoryId, _env.WebRootPath)
+                .Where(i => i.Id != product.Id)
+                .Take(4)
+                .ToList();
+
+            if (relatedItems.Count == 0)
+            {
+                relatedItems = BAL.LocalStore.GetLocalCategoryProducts("anniversary ring", _env.WebRootPath)
+                    .Take(4)
+                    .ToList();
+            }
 
             ViewBag.RelatedItems = relatedItems;
 

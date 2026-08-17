@@ -8,7 +8,12 @@ namespace SAT1.Models
 
         public DbSet<Category> Categories { get; set; } = null!;
         public DbSet<CatalogItem> CatalogItems { get; set; } = null!;
+        public DbSet<Product> Products { get; set; } = null!;
+        public DbSet<ProductVariant> ProductVariants { get; set; } = null!;
+        public DbSet<ProductImage> ProductImages { get; set; } = null!;
         public DbSet<Order> Orders { get; set; } = null!;
+        public DbSet<OrderItem> OrderItems { get; set; } = null!;
+        public DbSet<Payment> Payments { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
