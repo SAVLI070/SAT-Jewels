@@ -37,14 +37,65 @@ namespace SAT1.BAL
         public static List<CatalogItem> GetLocalCategoryProducts(string categoryQuery, string webRootPath)
         {
             var results = new List<CatalogItem>();
-            string folderName = "lab_diamond_anniversary_ring";
-            string displayCategory = "Lab Diamond Anniversary Ring";
+            string folderName = string.Empty;
+            string displayCategory = string.Empty;
 
-            // Match query to category folder
-            var cleanKey = (categoryQuery ?? "anniversary ring").Trim().ToLower().Replace("-", " ");
+            if (string.IsNullOrWhiteSpace(categoryQuery))
+            {
+                categoryQuery = "all";
+            }
+
+            var cleanKey = categoryQuery.Trim().ToLower().Replace("-", " ").Replace("_", " ");
+
+            // Dynamic Mode: If "all" is requested, load products dynamically across all available subcategory folders
+            if (cleanKey == "all")
+            {
+                int globalIdx = 1;
+                foreach (var kvp in CategoryConfigs.Values.Distinct())
+                {
+                    var catFolder = Path.Combine(webRootPath, "assets", "ivevar", kvp.Folder);
+                    if (Directory.Exists(catFolder))
+                    {
+                        var files = Directory.GetFiles(catFolder, "*.*", SearchOption.TopDirectoryOnly)
+                            .Where(s => s.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                        s.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+                                        s.EndsWith(".webp", StringComparison.OrdinalIgnoreCase) ||
+                                        s.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase))
+                            .Take(15)
+                            .ToList();
+
+                        foreach (var file in files)
+                        {
+                            var fileName = Path.GetFileName(file);
+                            var webPath = $"/assets/ivevar/{kvp.Folder}/{fileName}";
+                            var readableName = FormatProductName(fileName, kvp.Name, globalIdx);
+
+                            results.Add(new CatalogItem
+                            {
+                                Id = $"sat-local-{kvp.Folder}-{globalIdx}",
+                                Name = readableName,
+                                CategoryId = kvp.Folder,
+                                Spec = $"18K Gold / Platinum 950 | {1.5 + ((globalIdx % 5) * 0.4):0.1}ct GIA Certified | {kvp.Name}",
+                                PriceUSD = 2400 + ((globalIdx * 370) % 3200),
+                                ImageUrl = webPath,
+                                GalleryImages = webPath,
+                                MetalOptions = "18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|Platinum 950 (+350)",
+                                CaratOptions = "1.5ct GIA (+0)|2.0ct GIA (+750)|3.0ct GIA (+2000)",
+                                IsActive = true,
+                                CreatedAt = DateTime.UtcNow.AddMinutes(-globalIdx)
+                            });
+                            globalIdx++;
+                        }
+                    }
+                }
+                return results;
+            }
+
+            // Match dynamic query to category folder
             foreach (var kvp in CategoryConfigs)
             {
-                if (cleanKey.Contains(kvp.Key.Replace("-", " ")) || kvp.Key.Replace("-", " ").Contains(cleanKey))
+                var cfgKey = kvp.Key.Replace("-", " ").Replace("_", " ");
+                if (cleanKey.Contains(cfgKey) || cfgKey.Contains(cleanKey))
                 {
                     displayCategory = kvp.Value.Name;
                     folderName = kvp.Value.Folder;
@@ -52,11 +103,13 @@ namespace SAT1.BAL
                 }
             }
 
-            var targetFolder = Path.Combine(webRootPath, "assets", "ivevar", folderName);
-            if (!Directory.Exists(targetFolder))
+            if (string.IsNullOrWhiteSpace(folderName))
             {
-                targetFolder = Path.Combine(webRootPath, "assets", "ivevar", "lab_diamond_anniversary_ring");
+                folderName = cleanKey.Replace(" ", "_");
+                displayCategory = System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(cleanKey);
             }
+
+            var targetFolder = Path.Combine(webRootPath, "assets", "ivevar", folderName);
 
             if (Directory.Exists(targetFolder))
             {

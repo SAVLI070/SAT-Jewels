@@ -181,19 +181,36 @@ namespace SAT1.BAL
             return true;
         }
 
-        // FarmBridge Data Binding Pattern: Dynamic Filtering by Category ID / Subcategory Slug
-        public async Task<List<CatalogItem>> GetProductsByCategoryIdAsync(string categoryQuery, string webRootPath)
+        // Dynamic Universal Category & Subcategory Filtering (FarmBridge Multi-Way Query Pattern)
+        public async Task<List<CatalogItem>> GetProductsByCategoryIdAsync(string? categoryQuery, string webRootPath)
         {
             if (string.IsNullOrWhiteSpace(categoryQuery))
             {
-                categoryQuery = "anniversary ring";
+                categoryQuery = "all";
             }
 
             var cleanKey = categoryQuery.Trim().ToLower().Replace("-", "_").Replace(" ", "_");
 
-            // 1. Query Database via EF Core LINQ parameterized SQL
+            // 1. If "all", return all active products dynamically
+            if (cleanKey == "all")
+            {
+                var allDb = await _context.CatalogItems
+                    .Where(i => i.IsActive)
+                    .OrderByDescending(i => i.CreatedAt)
+                    .ToListAsync();
+
+                if (allDb.Count > 0) return allDb;
+                return LocalStore.GetLocalCategoryProducts("all", webRootPath);
+            }
+
+            // 2. Dynamic Query Database via EF Core LINQ parameterized SQL matching any CategoryId, Name, or Subcategory Slug
             var dbProducts = await _context.CatalogItems
-                .Where(i => i.IsActive && (i.CategoryId.ToLower() == cleanKey || i.CategoryId.ToLower().Replace("-", "_") == cleanKey || i.CategoryId.ToLower().Replace("_", " ") == cleanKey.Replace("_", " ")))
+                .Where(i => i.IsActive && (
+                    i.CategoryId.ToLower() == cleanKey || 
+                    i.CategoryId.ToLower().Replace("-", "_") == cleanKey || 
+                    i.CategoryId.ToLower().Replace("_", " ") == cleanKey.Replace("_", " ") ||
+                    i.Name.ToLower().Contains(cleanKey.Replace("_", " "))
+                ))
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
 
@@ -202,7 +219,7 @@ namespace SAT1.BAL
                 return dbProducts;
             }
 
-            // 2. Fallback to LocalStore provider filtered strictly for that specific subcategory
+            // 3. Dynamic LocalStore provider matching whichever category the user clicked
             return LocalStore.GetLocalCategoryProducts(categoryQuery, webRootPath);
         }
 
