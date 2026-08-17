@@ -37,14 +37,7 @@ namespace SAT1.BAL
                 {
                     var subcats = new List<(RingCategoryEnum EnumVal, string Slug, string Label, string Folder)>
                     {
-                        (RingCategoryEnum.AnniversaryRings, "anniversary-rings", "Anniversary", "lab_diamond_anniversary_ring"),
-                        (RingCategoryEnum.RoseCutRings, "rose-cut-rings", "Rose Cut", "rose_cut"),
-                        (RingCategoryEnum.AntiqueCutRings, "antique-cut-rings", "Antique Cut", "antique_cut"),
-                        (RingCategoryEnum.EngagementRings, "engagement-rings", "Engagement", "engagement_ring"),
-                        (RingCategoryEnum.EternityRings, "eternity-rings", "Eternity", "eternity_ring"),
-                        (RingCategoryEnum.FancyColorRings, "fancy-color-rings", "Fancy Color", "fancy_color"),
-                        (RingCategoryEnum.SolitaireRings, "solitaire-rings", "Solitaire", "solitaire_ring"),
-                        (RingCategoryEnum.ToiEtMoiRings, "toi-et-moi-rings", "Toi et Moi Three Stone", "three_stone")
+                        (RingCategoryEnum.AnniversaryRings, "anniversary-rings", "Anniversary", "lab_diamond_anniversary_ring")
                     };
 
                     var metalEnums = new[] { MetalTypeEnum.YellowGold14K, MetalTypeEnum.WhiteGold18K, MetalTypeEnum.RoseGold18K, MetalTypeEnum.Platinum950 };
