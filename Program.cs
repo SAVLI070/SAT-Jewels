@@ -123,36 +123,8 @@ using (var scope = app.Services.CreateScope())
             db.Database.ExecuteSqlRaw(updateGallerySql);
         } catch { }
 
-        // Seed initial categories if empty
-        if (!db.Categories.Any())
-        {
-            db.Categories.AddRange(
-                new Category { Id = "rings", Name = "Rings Collection", Badge = "Top Selling", Subtitle = "Solitaires & Halos", ImageUrl = "assets/ring_1.jpg", DisplayOrder = 1 },
-                new Category { Id = "necklaces", Name = "Necklaces Section", Badge = "Popular", Subtitle = "Chokers & Pendants", ImageUrl = "assets/necklace_1.jpg", DisplayOrder = 2 },
-                new Category { Id = "earrings", Name = "Earrings Section", Badge = "Trending", Subtitle = "Studs & Drops", ImageUrl = "assets/earring_card.jpg", DisplayOrder = 3 },
-                new Category { Id = "bracelets", Name = "Bracelets Section", Badge = "Featured", Subtitle = "Tennis & Bangles", ImageUrl = "assets/bracelet_card.jpg", DisplayOrder = 4 }
-            );
-            db.SaveChanges();
-        }
-
-        // Seed All 12 Sub-Categories & Products using downloaded high-res ivevar assets
-        SAT1.BAL.DbSeeder.SeedAllCollections(db, app.Environment.WebRootPath);
-
-        // Seed Admin User Credentials into Database (admin@satjewel.com / admin123)
-        if (!db.Users.Any(u => u.Email == "admin@satjewel.com" || u.Role == "Admin"))
-        {
-            db.Users.Add(new User
-            {
-                Id = "admin_seed_1",
-                FullName = "SAT Administrator",
-                Email = "admin@satjewel.com",
-                Phone = "1234567890",
-                Password = "admin123",
-                Role = "Admin",
-                CreatedAt = DateTime.UtcNow
-            });
-            db.SaveChanges();
-        }
+        // Auto-seeding disabled per user directive: "Do not Feed in this command anything in any data tables"
+        // Database tables remain 100% clean for manual user data feeding
     }
     catch (Exception ex)
     {
