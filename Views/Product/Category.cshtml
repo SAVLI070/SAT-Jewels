@@ -466,71 +466,87 @@
       </div>
     </div>
 
-    <!-- Diamond Shape Cut Carousel Section (Dark Luxury Theme) -->
-    <div class="shapes-carousel-wrap">
-      <div class="shape-nav-arrow shape-nav-prev" onclick="scrollShapes(-200)"><i class="fa-solid fa-chevron-left"></i></div>
-      <div class="shape-nav-arrow shape-nav-next" onclick="scrollShapes(200)"><i class="fa-solid fa-chevron-right"></i></div>
-      
-      <div class="shapes-track" id="shapesTrack">
-        <!-- 1. Kite -->
-        <a href="/Product/Category?id=@categoryId&shape=Kite" class="shape-cut-card @(selectedShape == "Kite" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/kite-cut-diamond-70x70.webp" alt="Kite Cut" /></div>
-          <span>Kite</span>
+    <!-- Diamond Shape Line-Art Circle Icon Bar (Matches Landing Page & Bianca Chiara Style) -->
+    <div class="diamond-shapes-wrapper" style="margin: 20px auto 28px; padding: 16px 0; background: rgba(8, 17, 30, 0.6); border: 1px solid rgba(212, 178, 112, 0.25); border-radius: 16px;">
+      <div class="diamond-shapes-track">
+        <!-- 1. Round -->
+        <a href="/Product/Category?id=@categoryId&shape=Round" class="shape-line-item @(selectedShape == "Round" ? "active" : "")">
+          <div class="shape-icon-box" style="@(selectedShape == "Round" ? "background: rgba(212, 178, 112, 0.25); border-color: #d4b270; box-shadow: 0 0 20px rgba(212,178,112,0.4);" : "")">
+            <img src="/assets/shapes/bianca/round.svg" alt="Round Diamond Cut" />
+          </div>
+          <span class="shape-label-text" style="@(selectedShape == "Round" ? "color: #fbbf24; font-weight: 700;" : "")">Round</span>
         </a>
+
         <!-- 2. Marquise -->
-        <a href="/Product/Category?id=@categoryId&shape=Marquise" class="shape-cut-card @(selectedShape == "Marquise" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/MARQUISE_a48c3046-45a5-49b6-91da-dcc29d117e5d.webp" alt="Marquise Cut" /></div>
-          <span>Marquise</span>
+        <a href="/Product/Category?id=@categoryId&shape=Marquise" class="shape-line-item @(selectedShape == "Marquise" ? "active" : "")">
+          <div class="shape-icon-box" style="@(selectedShape == "Marquise" ? "background: rgba(212, 178, 112, 0.25); border-color: #d4b270; box-shadow: 0 0 20px rgba(212,178,112,0.4);" : "")">
+            <img src="/assets/shapes/bianca/marquise.svg" alt="Marquise Diamond Cut" />
+          </div>
+          <span class="shape-label-text" style="@(selectedShape == "Marquise" ? "color: #fbbf24; font-weight: 700;" : "")">Marquise</span>
         </a>
-        <!-- 3. Oval -->
-        <a href="/Product/Category?id=@categoryId&shape=Oval" class="shape-cut-card @(selectedShape == "Oval" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/OVAL_017dfb3c-6db1-4c92-a310-829e558a5c8f.webp" alt="Oval Cut" /></div>
-          <span>Oval</span>
+
+        <!-- 3. Asscher -->
+        <a href="/Product/Category?id=@categoryId&shape=Asscher" class="shape-line-item @(selectedShape == "Asscher" ? "active" : "")">
+          <div class="shape-icon-box" style="@(selectedShape == "Asscher" ? "background: rgba(212, 178, 112, 0.25); border-color: #d4b270; box-shadow: 0 0 20px rgba(212,178,112,0.4);" : "")">
+            <img src="/assets/shapes/bianca/asscher.svg" alt="Asscher Diamond Cut" />
+          </div>
+          <span class="shape-label-text" style="@(selectedShape == "Asscher" ? "color: #fbbf24; font-weight: 700;" : "")">Asscher</span>
         </a>
+
         <!-- 4. Pear -->
-        <a href="/Product/Category?id=@categoryId&shape=Pear" class="shape-cut-card @(selectedShape == "Pear" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/PEAR_1fe9fa6a-32bf-4aae-bf7f-1b810b3abcfb.webp" alt="Pear Cut" /></div>
-          <span>Pear</span>
+        <a href="/Product/Category?id=@categoryId&shape=Pear" class="shape-line-item @(selectedShape == "Pear" ? "active" : "")">
+          <div class="shape-icon-box" style="@(selectedShape == "Pear" ? "background: rgba(212, 178, 112, 0.25); border-color: #d4b270; box-shadow: 0 0 20px rgba(212,178,112,0.4);" : "")">
+            <img src="/assets/shapes/bianca/pear.svg" alt="Pear Diamond Cut" />
+          </div>
+          <span class="shape-label-text" style="@(selectedShape == "Pear" ? "color: #fbbf24; font-weight: 700;" : "")">Pear</span>
         </a>
+
         <!-- 5. Princess -->
-        <a href="/Product/Category?id=@categoryId&shape=Princess" class="shape-cut-card @(selectedShape == "Princess" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/PRINCESS_b794f059-a3d9-4d1e-be22-8e450972cad3.webp" alt="Princess Cut" /></div>
-          <span>Princess</span>
+        <a href="/Product/Category?id=@categoryId&shape=Princess" class="shape-line-item @(selectedShape == "Princess" ? "active" : "")">
+          <div class="shape-icon-box" style="@(selectedShape == "Princess" ? "background: rgba(212, 178, 112, 0.25); border-color: #d4b270; box-shadow: 0 0 20px rgba(212,178,112,0.4);" : "")">
+            <img src="/assets/shapes/bianca/princess.svg" alt="Princess Diamond Cut" />
+          </div>
+          <span class="shape-label-text" style="@(selectedShape == "Princess" ? "color: #fbbf24; font-weight: 700;" : "")">Princess</span>
         </a>
-        <!-- 6. Radiant -->
-        <a href="/Product/Category?id=@categoryId&shape=Radiant" class="shape-cut-card @(selectedShape == "Radiant" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/RADIANT_297fa9d7-1308-4549-89ec-00cb38530f32.webp" alt="Radiant Cut" /></div>
-          <span>Radiant</span>
+
+        <!-- 6. Cushion -->
+        <a href="/Product/Category?id=@categoryId&shape=Cushion" class="shape-line-item @(selectedShape == "Cushion" ? "active" : "")">
+          <div class="shape-icon-box" style="@(selectedShape == "Cushion" ? "background: rgba(212, 178, 112, 0.25); border-color: #d4b270; box-shadow: 0 0 20px rgba(212,178,112,0.4);" : "")">
+            <img src="/assets/shapes/bianca/cushion.svg" alt="Cushion Diamond Cut" />
+          </div>
+          <span class="shape-label-text" style="@(selectedShape == "Cushion" ? "color: #fbbf24; font-weight: 700;" : "")">Cushion</span>
         </a>
-        <!-- 7. Round -->
-        <a href="/Product/Category?id=@categoryId&shape=Round" class="shape-cut-card @(selectedShape == "Round" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/ROUND_dc6c8398-deaf-413b-ac75-981584bf4734.webp" alt="Round Cut" /></div>
-          <span>Round</span>
+
+        <!-- 7. Radiant -->
+        <a href="/Product/Category?id=@categoryId&shape=Radiant" class="shape-line-item @(selectedShape == "Radiant" ? "active" : "")">
+          <div class="shape-icon-box" style="@(selectedShape == "Radiant" ? "background: rgba(212, 178, 112, 0.25); border-color: #d4b270; box-shadow: 0 0 20px rgba(212,178,112,0.4);" : "")">
+            <img src="/assets/shapes/bianca/radiant.svg" alt="Radiant Diamond Cut" />
+          </div>
+          <span class="shape-label-text" style="@(selectedShape == "Radiant" ? "color: #fbbf24; font-weight: 700;" : "")">Radiant</span>
         </a>
-        <!-- 8. Triangle -->
-        <a href="/Product/Category?id=@categoryId&shape=Triangle" class="shape-cut-card @(selectedShape == "Triangle" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/triangle-shaped-diamond.png" alt="Triangle Cut" /></div>
-          <span>Triangle</span>
+
+        <!-- 8. Oval -->
+        <a href="/Product/Category?id=@categoryId&shape=Oval" class="shape-line-item @(selectedShape == "Oval" ? "active" : "")">
+          <div class="shape-icon-box" style="@(selectedShape == "Oval" ? "background: rgba(212, 178, 112, 0.25); border-color: #d4b270; box-shadow: 0 0 20px rgba(212,178,112,0.4);" : "")">
+            <img src="/assets/shapes/bianca/oval.svg" alt="Oval Diamond Cut" />
+          </div>
+          <span class="shape-label-text" style="@(selectedShape == "Oval" ? "color: #fbbf24; font-weight: 700;" : "")">Oval</span>
         </a>
-        <!-- 9. Trillion -->
-        <a href="/Product/Category?id=@categoryId&shape=Trillion" class="shape-cut-card @(selectedShape == "Trillion" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/Trilliant.png" alt="Trillion Cut" /></div>
-          <span>Trillion</span>
+
+        <!-- 9. Emerald -->
+        <a href="/Product/Category?id=@categoryId&shape=Emerald" class="shape-line-item @(selectedShape == "Emerald" ? "active" : "")">
+          <div class="shape-icon-box" style="@(selectedShape == "Emerald" ? "background: rgba(212, 178, 112, 0.25); border-color: #d4b270; box-shadow: 0 0 20px rgba(212,178,112,0.4);" : "")">
+            <img src="/assets/shapes/bianca/emerald.svg" alt="Emerald Diamond Cut" />
+          </div>
+          <span class="shape-label-text" style="@(selectedShape == "Emerald" ? "color: #fbbf24; font-weight: 700;" : "")">Emerald</span>
         </a>
-        <!-- 10. Cushion -->
-        <a href="/Product/Category?id=@categoryId&shape=Cushion" class="shape-cut-card @(selectedShape == "Cushion" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/CUSHION_723dab7e-4ad9-4c32-a60b-31890b22895f.webp" alt="Cushion Cut" /></div>
-          <span>Cushion</span>
-        </a>
-        <!-- 11. Emerald -->
-        <a href="/Product/Category?id=@categoryId&shape=Emerald" class="shape-cut-card @(selectedShape == "Emerald" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/EMERALD_4a9412af-1aeb-44f9-b903-2e303baefe4d.webp" alt="Emerald Cut" /></div>
-          <span>Emerald</span>
-        </a>
-        <!-- 12. Rose Cut -->
-        <a href="/Product/Category?id=@categoryId&shape=Rose" class="shape-cut-card @(selectedShape == "Rose" ? "active" : "")">
-          <div class="shape-img-box"><img src="/assets/shapes/ROUND_dc6c8398-deaf-413b-ac75-981584bf4734.webp" alt="Rose Cut" /></div>
-          <span>Rose</span>
+
+        <!-- 10. Heart -->
+        <a href="/Product/Category?id=@categoryId&shape=Heart" class="shape-line-item @(selectedShape == "Heart" ? "active" : "")">
+          <div class="shape-icon-box" style="@(selectedShape == "Heart" ? "background: rgba(212, 178, 112, 0.25); border-color: #d4b270; box-shadow: 0 0 20px rgba(212,178,112,0.4);" : "")">
+            <img src="/assets/shapes/bianca/heart.svg" alt="Heart Diamond Cut" />
+          </div>
+          <span class="shape-label-text" style="@(selectedShape == "Heart" ? "color: #fbbf24; font-weight: 700;" : "")">Heart</span>
         </a>
       </div>
     </div>
