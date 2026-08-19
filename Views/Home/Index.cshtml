@@ -193,24 +193,121 @@
   </div>
 </section>
 
-<!-- SHOP BY CATEGORY SECTION (MATCHES REFERENCE IMAGES 1, 2, 3, 4) -->
-<section id="collections" style="padding: 70px 0 50px; background: transparent; position: relative; z-index: 10;">
+<!-- 1. SHOP LAB DIAMOND ENGAGEMENT RINGS BY SHAPE (BIANCA CHIARA STYLE) -->
+<section id="shapes-section" style="padding: 70px 0 30px; background: transparent; position: relative; z-index: 10;">
+  <div class="container" style="position: relative; z-index: 20;">
+    <div style="text-align: center; margin-bottom: 36px;">
+      <h2 style="font-family: var(--font-serif); font-size: 32px; color: #ffffff; margin: 0 0 10px; font-weight: 500; letter-spacing: 0.5px;">
+        Shop Lab Diamond Engagement Rings by Shape
+      </h2>
+      <div style="width: 50px; height: 1.5px; background: var(--champagne-gold); margin: 0 auto;"></div>
+    </div>
+
+    <!-- 10 Diamond Shapes Line-Art Icon Grid / Scrollable Track -->
+    <div class="diamond-shapes-wrapper">
+      <div class="diamond-shapes-track">
+        <!-- 1. Round -->
+        <a href="/Product/Category?id=5&shape=Round" class="shape-line-item">
+          <div class="shape-icon-box">
+            <img src="/assets/shapes/bianca/round.svg" alt="Round Diamond Cut" />
+          </div>
+          <span class="shape-label-text">Round</span>
+        </a>
+
+        <!-- 2. Marquise -->
+        <a href="/Product/Category?id=5&shape=Marquise" class="shape-line-item">
+          <div class="shape-icon-box">
+            <img src="/assets/shapes/bianca/marquise.svg" alt="Marquise Diamond Cut" />
+          </div>
+          <span class="shape-label-text">Marquise</span>
+        </a>
+
+        <!-- 3. Asscher -->
+        <a href="/Product/Category?id=5&shape=Asscher" class="shape-line-item">
+          <div class="shape-icon-box">
+            <img src="/assets/shapes/bianca/asscher.svg" alt="Asscher Diamond Cut" />
+          </div>
+          <span class="shape-label-text">Asscher</span>
+        </a>
+
+        <!-- 4. Pear -->
+        <a href="/Product/Category?id=5&shape=Pear" class="shape-line-item">
+          <div class="shape-icon-box">
+            <img src="/assets/shapes/bianca/pear.svg" alt="Pear Diamond Cut" />
+          </div>
+          <span class="shape-label-text">Pear</span>
+        </a>
+
+        <!-- 5. Princess -->
+        <a href="/Product/Category?id=5&shape=Princess" class="shape-line-item">
+          <div class="shape-icon-box">
+            <img src="/assets/shapes/bianca/princess.svg" alt="Princess Diamond Cut" />
+          </div>
+          <span class="shape-label-text">Princess</span>
+        </a>
+
+        <!-- 6. Cushion -->
+        <a href="/Product/Category?id=5&shape=Cushion" class="shape-line-item">
+          <div class="shape-icon-box">
+            <img src="/assets/shapes/bianca/cushion.svg" alt="Cushion Diamond Cut" />
+          </div>
+          <span class="shape-label-text">Cushion</span>
+        </a>
+
+        <!-- 7. Radiant -->
+        <a href="/Product/Category?id=5&shape=Radiant" class="shape-line-item">
+          <div class="shape-icon-box">
+            <img src="/assets/shapes/bianca/radiant.svg" alt="Radiant Diamond Cut" />
+          </div>
+          <span class="shape-label-text">Radiant</span>
+        </a>
+
+        <!-- 8. Oval -->
+        <a href="/Product/Category?id=5&shape=Oval" class="shape-line-item">
+          <div class="shape-icon-box">
+            <img src="/assets/shapes/bianca/oval.svg" alt="Oval Diamond Cut" />
+          </div>
+          <span class="shape-label-text">Oval</span>
+        </a>
+
+        <!-- 9. Emerald -->
+        <a href="/Product/Category?id=5&shape=Emerald" class="shape-line-item">
+          <div class="shape-icon-box">
+            <img src="/assets/shapes/bianca/emerald.svg" alt="Emerald Diamond Cut" />
+          </div>
+          <span class="shape-label-text">Emerald</span>
+        </a>
+
+        <!-- 10. Heart -->
+        <a href="/Product/Category?id=5&shape=Heart" class="shape-line-item">
+          <div class="shape-icon-box">
+            <img src="/assets/shapes/bianca/heart.svg" alt="Heart Diamond Cut" />
+          </div>
+          <span class="shape-label-text">Heart</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2. SHOP BY CATEGORY SECTION (EXACT 6 MAIN CATEGORIES) -->
+<section id="collections" style="padding: 40px 0 50px; background: transparent; position: relative; z-index: 10;">
   <div class="container" style="position: relative; z-index: 20;">
     <div style="text-align: center; margin-bottom: 36px;">
       <h2 style="font-family: var(--font-serif); font-size: 36px; color: #ffffff; margin: 0 0 10px; font-weight: 500; letter-spacing: 0.5px;">Shop By Category</h2>
       <div style="width: 50px; height: 1.5px; background: var(--champagne-gold); margin: 0 auto;"></div>
     </div>
 
-    <!-- Desktop Horizontal Scroll Carousel with Navigation Arrows & Mobile 2-Column Grid -->
+    <!-- Desktop Horizontal Scroll Carousel & Mobile 2-Column Grid -->
     <div class="cat-carousel-container">
       <!-- Carousel Navigation Left Arrow -->
       <button type="button" class="cat-slider-arrow cat-arrow-left" onclick="scrollCatSlider(-300)" aria-label="Previous Category">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
 
-      <!-- Track containing the 6 Main Categories -->
+      <!-- Track containing ONLY the 6 Main Categories -->
       <div class="cat-carousel-track" id="mainCatTrack">
-        <!-- 1. Engagement Rings -->
+        <!-- 1. ENGAGEMENT RINGS -->
         <a href="/Product/Category?id=5" class="cat-carousel-card">
           <div class="cat-card-image-box">
             <img src="/assets/hero_1.jpg" alt="Engagement Rings" loading="eager" />
@@ -218,23 +315,23 @@
           <div class="cat-card-title-label">Engagement Rings &rarr;</div>
         </a>
 
-        <!-- 2. Wedding Bands -->
+        <!-- 2. WEDDING RINGS -->
         <a href="/Product/Category?id=6" class="cat-carousel-card">
           <div class="cat-card-image-box">
-            <img src="/assets/ring_model.png" alt="Wedding Bands" loading="lazy" />
+            <img src="/assets/ring_model.png" alt="Wedding Rings" loading="lazy" />
           </div>
-          <div class="cat-card-title-label">Wedding Bands</div>
+          <div class="cat-card-title-label">Wedding Rings</div>
         </a>
 
-        <!-- 3. Necklaces -->
-        <a href="/Product/Category?id=15" class="cat-carousel-card">
+        <!-- 3. BRIDAL SETS -->
+        <a href="/Product/Category?id=2" class="cat-carousel-card">
           <div class="cat-card-image-box">
-            <img src="/assets/necklace_1.jpg" alt="Necklaces" loading="lazy" />
+            <img src="/assets/ivevar/Bridel_set.png" alt="Bridal Sets" loading="lazy" />
           </div>
-          <div class="cat-card-title-label">Necklaces</div>
+          <div class="cat-card-title-label">Bridal Sets</div>
         </a>
 
-        <!-- 4. Earrings -->
+        <!-- 4. EARRINGS -->
         <a href="/Product/Category?id=14" class="cat-carousel-card">
           <div class="cat-card-image-box">
             <img src="/assets/earring_card.jpg" alt="Earrings" loading="lazy" />
@@ -242,20 +339,20 @@
           <div class="cat-card-title-label">Earrings</div>
         </a>
 
-        <!-- 5. Men's Wedding Bands -->
-        <a href="/Product/Category?id=16" class="cat-carousel-card">
-          <div class="cat-card-image-box">
-            <img src="/assets/ivevar/Men_s_ring.png" alt="Men's Wedding Bands" loading="lazy" />
-          </div>
-          <div class="cat-card-title-label">Men's Wedding Bands</div>
-        </a>
-
-        <!-- 6. Bracelets -->
+        <!-- 5. BRACELETS -->
         <a href="/Product/Category?id=17" class="cat-carousel-card">
           <div class="cat-card-image-box">
             <img src="/assets/bracelet_card.jpg" alt="Bracelets" loading="lazy" />
           </div>
           <div class="cat-card-title-label">Bracelets</div>
+        </a>
+
+        <!-- 6. NECKLACES -->
+        <a href="/Product/Category?id=15" class="cat-carousel-card">
+          <div class="cat-card-image-box">
+            <img src="/assets/necklace_1.jpg" alt="Necklaces" loading="lazy" />
+          </div>
+          <div class="cat-card-title-label">Necklaces</div>
         </a>
       </div>
 

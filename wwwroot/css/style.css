@@ -2891,6 +2891,95 @@ a {
 }
 
 /* ==========================================================================
+   SHOP LAB DIAMOND ENGAGEMENT RINGS BY SHAPE (BIANCA CHIARA STYLE)
+   ========================================================================== */
+.diamond-shapes-wrapper {
+  max-width: 1240px;
+  margin: 0 auto;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 10px 0 20px;
+}
+
+.diamond-shapes-wrapper::-webkit-scrollbar {
+  display: none;
+}
+
+.diamond-shapes-track {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 28px;
+  min-width: max-content;
+  margin: 0 auto;
+}
+
+.shape-line-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.25s ease;
+  padding: 6px 10px;
+}
+
+.shape-icon-box {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(10, 20, 38, 0.5);
+  border: 1px solid rgba(212, 178, 112, 0.3);
+  padding: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.shape-icon-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: invert(1) brightness(2);
+  transition: transform 0.3s ease;
+}
+
+.shape-line-item:hover .shape-icon-box {
+  background: rgba(212, 178, 112, 0.2);
+  border-color: #d4b270;
+  box-shadow: 0 0 22px rgba(212, 178, 112, 0.4);
+  transform: translateY(-4px);
+}
+
+.shape-line-item:hover .shape-icon-box img {
+  transform: scale(1.12);
+}
+
+.shape-label-text {
+  margin-top: 10px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  letter-spacing: 0.3px;
+}
+
+.shape-line-item:hover .shape-label-text {
+  color: #fbbf24;
+}
+
+@media (max-width: 1024px) {
+  .diamond-shapes-track {
+    justify-content: flex-start;
+    gap: 20px;
+    padding: 0 16px;
+  }
+}
+
+/* ==========================================================================
    SHOP BY CATEGORY SECTION (MATCHES REFERENCE IMAGES 1, 2, 3, 4)
    ========================================================================== */
 .cat-carousel-container {

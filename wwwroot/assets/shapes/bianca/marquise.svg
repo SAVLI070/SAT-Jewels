@@ -1,0 +1,12 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+  <path d='M50 8 C25 30 25 70 50 92 C75 70 75 30 50 8 Z'/>
+  <polygon points='50,22 35,50 50,78 65,50'/>
+  <line x1='50' y1='8' x2='50' y2='22'/>
+  <line x1='50' y1='78' x2='50' y2='92'/>
+  <line x1='35' y1='50' x2='26' y2='50'/>
+  <line x1='65' y1='50' x2='74' y2='50'/>
+  <line x1='50' y1='22' x2='26' y2='50'/>
+  <line x1='50' y1='22' x2='74' y2='50'/>
+  <line x1='50' y1='78' x2='26' y2='50'/>
+  <line x1='50' y1='78' x2='74' y2='50'/>
+</svg>

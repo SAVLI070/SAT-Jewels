@@ -1,0 +1,8 @@
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'>
+  <path d='M50 28 C40 10 10 12 10 40 C10 65 38 82 50 92 C62 82 90 65 90 40 C90 12 60 10 50 28 Z'/>
+  <path d='M50 40 C44 26 24 28 24 46 C24 62 42 74 50 82 C58 74 76 62 76 46 C76 28 56 26 50 40 Z'/>
+  <line x1='50' y1='28' x2='50' y2='40'/>
+  <line x1='50' y1='82' x2='50' y2='92'/>
+  <line x1='10' y1='40' x2='24' y2='46'/>
+  <line x1='90' y1='40' x2='76' y2='46'/>
+</svg>
