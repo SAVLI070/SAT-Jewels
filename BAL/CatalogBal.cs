@@ -194,30 +194,39 @@ namespace SAT1.BAL
             // 1. If "all", return all active products dynamically
             if (cleanKey == "all")
             {
-                var allDb = await _context.CatalogItems
-                    .Where(i => i.IsActive)
-                    .OrderByDescending(i => i.CreatedAt)
-                    .ToListAsync();
+                try
+                {
+                    var allDb = await _context.CatalogItems
+                        .Where(i => i.IsActive)
+                        .OrderByDescending(i => i.CreatedAt)
+                        .ToListAsync();
 
-                if (allDb.Count > 0) return allDb;
+                    if (allDb.Count > 0) return allDb;
+                }
+                catch { }
+
                 return LocalStore.GetLocalCategoryProducts("all", webRootPath);
             }
 
             // 2. Dynamic Query Database via EF Core LINQ parameterized SQL matching any CategoryId, Name, or Subcategory Slug
-            var dbProducts = await _context.CatalogItems
-                .Where(i => i.IsActive && (
-                    i.CategoryId.ToLower() == cleanKey || 
-                    i.CategoryId.ToLower().Replace("-", "_") == cleanKey || 
-                    i.CategoryId.ToLower().Replace("_", " ") == cleanKey.Replace("_", " ") ||
-                    i.Name.ToLower().Contains(cleanKey.Replace("_", " "))
-                ))
-                .OrderByDescending(i => i.CreatedAt)
-                .ToListAsync();
-
-            if (dbProducts.Count > 0)
+            try
             {
-                return dbProducts;
+                var dbProducts = await _context.CatalogItems
+                    .Where(i => i.IsActive && (
+                        i.CategoryId.ToLower() == cleanKey || 
+                        i.CategoryId.ToLower().Replace("-", "_") == cleanKey || 
+                        i.CategoryId.ToLower().Replace("_", " ") == cleanKey.Replace("_", " ") ||
+                        i.Name.ToLower().Contains(cleanKey.Replace("_", " "))
+                    ))
+                    .OrderByDescending(i => i.CreatedAt)
+                    .ToListAsync();
+
+                if (dbProducts.Count > 0)
+                {
+                    return dbProducts;
+                }
             }
+            catch { }
 
             // 3. Dynamic LocalStore provider matching whichever category the user clicked
             return LocalStore.GetLocalCategoryProducts(categoryQuery, webRootPath);
@@ -230,27 +239,31 @@ namespace SAT1.BAL
             var subcategorySlug = categoryEnum.ToString().ToLower();
 
             // 1. Query Products table by numeric long CategoryId
-            var relationalProducts = await _context.Products
-                .Include(p => p.Images)
-                .Where(p => p.IsAvailable && (p.CategoryId == numericId || p.ProductSlug.Contains(subcategorySlug)))
-                .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync();
-
-            if (relationalProducts.Count > 0)
+            try
             {
-                return relationalProducts.Select(p => new CatalogItem
+                var relationalProducts = await _context.Products
+                    .Include(p => p.Images)
+                    .Where(p => p.IsAvailable && (p.CategoryId == numericId || p.ProductSlug.Contains(subcategorySlug)))
+                    .OrderByDescending(p => p.CreatedAt)
+                    .ToListAsync();
+
+                if (relationalProducts.Count > 0)
                 {
-                    Id = $"sat-prod-{p.ProductId}",
-                    Name = p.ProductName,
-                    CategoryId = p.CategoryId.ToString(),
-                    Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}",
-                    PriceUSD = p.BasePriceUSD,
-                    ImageUrl = p.Images.FirstOrDefault(img => img.IsMainImage)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl ?? "/assets/ring_1.jpg",
-                    GalleryImages = string.Join(",", p.Images.Select(img => img.ImageUrl)),
-                    IsActive = p.IsAvailable,
-                    CreatedAt = p.CreatedAt
-                }).ToList();
+                    return relationalProducts.Select(p => new CatalogItem
+                    {
+                        Id = $"sat-prod-{p.ProductId}",
+                        Name = p.ProductName,
+                        CategoryId = p.CategoryId.ToString(),
+                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}",
+                        PriceUSD = p.BasePriceUSD,
+                        ImageUrl = p.Images.FirstOrDefault(img => img.IsMainImage)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl ?? "/assets/ring_1.jpg",
+                        GalleryImages = string.Join(",", p.Images.Select(img => img.ImageUrl)),
+                        IsActive = p.IsAvailable,
+                        CreatedAt = p.CreatedAt
+                    }).ToList();
+                }
             }
+            catch { }
 
             return await GetProductsByCategoryIdAsync(categoryEnum.ToString(), webRootPath);
         }
@@ -264,27 +277,31 @@ namespace SAT1.BAL
             }
 
             // Directly query DB by numeric long CategoryId
-            var dbItems = await _context.Products
-                .Include(p => p.Images)
-                .Where(p => p.IsAvailable && p.CategoryId == categoryId)
-                .OrderByDescending(p => p.CreatedAt)
-                .ToListAsync();
-
-            if (dbItems.Count > 0)
+            try
             {
-                return dbItems.Select(p => new CatalogItem
+                var dbItems = await _context.Products
+                    .Include(p => p.Images)
+                    .Where(p => p.IsAvailable && p.CategoryId == categoryId)
+                    .OrderByDescending(p => p.CreatedAt)
+                    .ToListAsync();
+
+                if (dbItems.Count > 0)
                 {
-                    Id = $"sat-prod-{p.ProductId}",
-                    Name = p.ProductName,
-                    CategoryId = p.CategoryId.ToString(),
-                    Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity}",
-                    PriceUSD = p.BasePriceUSD,
-                    ImageUrl = p.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl ?? "/assets/ring_1.jpg",
-                    GalleryImages = string.Join(",", p.Images.Select(i => i.ImageUrl)),
-                    IsActive = p.IsAvailable,
-                    CreatedAt = p.CreatedAt
-                }).ToList();
+                    return dbItems.Select(p => new CatalogItem
+                    {
+                        Id = $"sat-prod-{p.ProductId}",
+                        Name = p.ProductName,
+                        CategoryId = p.CategoryId.ToString(),
+                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity}",
+                        PriceUSD = p.BasePriceUSD,
+                        ImageUrl = p.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl ?? "/assets/ring_1.jpg",
+                        GalleryImages = string.Join(",", p.Images.Select(i => i.ImageUrl)),
+                        IsActive = p.IsAvailable,
+                        CreatedAt = p.CreatedAt
+                    }).ToList();
+                }
             }
+            catch { }
 
             return await GetProductsByCategoryIdAsync(categoryId.ToString(), webRootPath);
         }

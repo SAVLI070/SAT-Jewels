@@ -17,12 +17,20 @@ namespace SAT1.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Query exact product count per numeric CategoryId directly from Neon PostgreSQL DB
-            var dbCounts = await _context.Products
-                .Where(p => p.IsAvailable)
-                .GroupBy(p => p.CategoryId)
-                .Select(g => new { CategoryId = g.Key, Count = g.Count() })
-                .ToDictionaryAsync(x => x.CategoryId, x => x.Count);
+            var dbCounts = new Dictionary<long, int>();
+            try
+            {
+                // Query exact product count per numeric CategoryId directly from Neon PostgreSQL DB
+                dbCounts = await _context.Products
+                    .Where(p => p.IsAvailable)
+                    .GroupBy(p => p.CategoryId)
+                    .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+                    .ToDictionaryAsync(x => x.CategoryId, x => x.Count);
+            }
+            catch
+            {
+                dbCounts = new Dictionary<long, int>();
+            }
 
             ViewBag.CategoryCountsByNumericId = dbCounts;
             return View();

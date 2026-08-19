@@ -4,8 +4,39 @@ using SAT1.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add Neon PostgreSQL Database Context
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+// Resolve & Validate PostgreSQL Connection String (Render / Neon Cloud DB)
+var rawConn = builder.Configuration["DATABASE_URL"] 
+    ?? builder.Configuration.GetConnectionString("DefaultConnection") 
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+
+string connectionString = "Host=ep-soft-sound-azkeypgg-pooler.c-3.ap-southeast-1.aws.neon.tech;Port=5432;Database=neondb;Username=neondb_owner;Password=npg_yX8TV4rmHEqR;Ssl Mode=Require;Trust Server Certificate=true;";
+
+if (!string.IsNullOrWhiteSpace(rawConn) && !rawConn.Contains("database-1.cluster-c0rk64yygjkf.us-east-1.rds.amazonaws.com"))
+{
+    if (rawConn.StartsWith("postgres://") || rawConn.StartsWith("postgresql://"))
+    {
+        try
+        {
+            var uri = new Uri(rawConn);
+            var userInfo = uri.UserInfo.Split(':');
+            var user = userInfo[0];
+            var password = userInfo.Length > 1 ? userInfo[1] : "";
+            var host = uri.Host;
+            var port = uri.Port > 0 ? uri.Port : 5432;
+            var dbName = uri.AbsolutePath.TrimStart('/');
+            connectionString = $"Host={host};Port={port};Database={dbName};Username={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true;";
+        }
+        catch
+        {
+            // Fallback to active Neon DB connection string if URL parsing fails
+        }
+    }
+    else
+    {
+        connectionString = rawConn;
+    }
+}
+
 builder.Services.AddDbContext<SatJewelDbContext>(options =>
     options.UseNpgsql(connectionString, npgsqlOptions =>
     {
