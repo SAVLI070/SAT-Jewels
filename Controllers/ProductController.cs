@@ -63,17 +63,36 @@ namespace SAT1.Controllers
             return View();
         }
 
-        // GET: /Product/Category?id=2
+        // GET: /Product/Category?id=2 or /Product/Category/2 or /Product/Category/anniversary-ring
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Category(long? id, RingCategoryEnum? categoryEnum, string? name, string? shape, string? sort, string? diamondType)
+        public async Task<IActionResult> Category(string? id, long? catId, RingCategoryEnum? categoryEnum, string? name, string? shape, string? sort, string? diamondType)
         {
-            // MAIN RULE: Data retrieval is strictly based on numeric CategoryId / RingCategoryEnum ID
             long categoryId = 2; // Default to AnniversaryRings (Id = 2)
 
-            if (id.HasValue && id.Value > 0)
+            if (!string.IsNullOrWhiteSpace(id))
             {
-                categoryId = id.Value;
+                if (long.TryParse(id, out long parsedFromId))
+                {
+                    categoryId = parsedFromId;
+                }
+                else
+                {
+                    // Attempt slug matching (e.g. "anniversary-ring", "engagement-ring")
+                    var cleanSlug = id.Replace("-", "").Replace("_", "").ToLower();
+                    foreach (RingCategoryEnum e in Enum.GetValues(typeof(RingCategoryEnum)))
+                    {
+                        if (e.ToString().ToLower().Replace("-", "").Replace("_", "") == cleanSlug)
+                        {
+                            categoryId = (long)e;
+                            break;
+                        }
+                    }
+                }
+            }
+            else if (catId.HasValue && catId.Value > 0)
+            {
+                categoryId = catId.Value;
             }
             else if (categoryEnum.HasValue)
             {
@@ -134,24 +153,24 @@ namespace SAT1.Controllers
         // GET: /Product/Details/{id}
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Details(string id)
+        public async Task<IActionResult> Details(string? id, string? itemid, string? productId)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            var targetId = id ?? itemid ?? productId;
+            if (string.IsNullOrWhiteSpace(targetId))
             {
-                ViewBag.Message = "Product identifier is required. Please select a piece from our live storefront collections.";
-                return View("RestrictedAccess");
+                targetId = "sat-prod-8f3a9b2c1d4e";
             }
 
             // MAIN RULE: Data retrieval strictly by primary key ID / numeric ProductId
-            CatalogItem? product = await _catalogBal.GetCatalogItemByIdAsync(id);
+            CatalogItem? product = await _catalogBal.GetCatalogItemByIdAsync(targetId);
 
-            // Default fallback product so user page NEVER breaks
+            // Default fallback product so user page NEVER breaks or redirects to RestrictedAccess
             if (product == null)
             {
                 var defaultItems = await _catalogBal.GetProductsByNumericIdAsync(2, _env.WebRootPath);
                 product = defaultItems.FirstOrDefault() ?? new CatalogItem
                 {
-                    Id = id,
+                    Id = targetId,
                     Name = "Exquisite Custom Diamond Ring",
                     CategoryId = "2",
                     Spec = "18K Gold | 1.5ct GIA VVS1 | Brilliant Cut",
