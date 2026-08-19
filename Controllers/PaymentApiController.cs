@@ -31,14 +31,32 @@ namespace SAT1.Controllers
         [HttpPost("process-paypal")]
         public async Task<IActionResult> ProcessPayPalOrder([FromBody] PayPalCheckoutRequest req)
         {
+            // GATE 1: User Must Be Authenticated to Perform Payment
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Unauthorized(new { success = false, message = "SIGN IN REQUIRED: You must be signed in to your SAT Jewel account to complete payment." });
+            }
+
             if (req == null || string.IsNullOrWhiteSpace(req.PayPalOrderId))
             {
                 return BadRequest(new { success = false, message = "Invalid PayPal order transaction payload." });
             }
 
+            // GATE 2: User Must Have Provided Complete Shipping Address before Payment
+            if (string.IsNullOrWhiteSpace(req.ShippingFullName) ||
+                string.IsNullOrWhiteSpace(req.ShippingPhone) ||
+                string.IsNullOrWhiteSpace(req.ShippingStreet) ||
+                string.IsNullOrWhiteSpace(req.ShippingCity) ||
+                string.IsNullOrWhiteSpace(req.ShippingState) ||
+                string.IsNullOrWhiteSpace(req.ShippingPostalCode) ||
+                string.IsNullOrWhiteSpace(req.ShippingCountry))
+            {
+                return BadRequest(new { success = false, message = "SHIPPING ADDRESS REQUIRED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, Postal Code, Country) is required before payment permission is granted." });
+            }
+
             try
             {
-                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "guest_" + Guid.NewGuid().ToString("N").Substring(0, 8);
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "guest";
                 var userEmail = User.FindFirstValue(ClaimTypes.Email) ?? req.PayerEmail ?? "client@satjewels.com";
 
                 var itemName = !string.IsNullOrWhiteSpace(req.ItemName) ? req.ItemName : "Bespoke Jewelry Order";
@@ -52,16 +70,16 @@ namespace SAT1.Controllers
                     ItemName = itemName,
                     Amount = amount,
                     Currency = "USD",
-                    CustomerRegion = !string.IsNullOrWhiteSpace(req.ShippingCountry) ? req.ShippingCountry : (req.PayerCountryCode ?? "United States"),
+                    CustomerRegion = req.ShippingCountry,
                     
                     // High Priority Home Delivery Shipping Address Mapping
-                    ShippingFullName = req.ShippingFullName ?? "Valued Client",
-                    ShippingPhone = req.ShippingPhone ?? string.Empty,
-                    ShippingStreet = req.ShippingStreet ?? string.Empty,
-                    ShippingCity = req.ShippingCity ?? string.Empty,
-                    ShippingState = req.ShippingState ?? string.Empty,
-                    ShippingPostalCode = req.ShippingPostalCode ?? string.Empty,
-                    ShippingCountry = req.ShippingCountry ?? "United States",
+                    ShippingFullName = req.ShippingFullName.Trim(),
+                    ShippingPhone = req.ShippingPhone.Trim(),
+                    ShippingStreet = req.ShippingStreet.Trim(),
+                    ShippingCity = req.ShippingCity.Trim(),
+                    ShippingState = req.ShippingState.Trim(),
+                    ShippingPostalCode = req.ShippingPostalCode.Trim(),
+                    ShippingCountry = req.ShippingCountry.Trim(),
 
                     PaymentMethod = "PayPal Express USD (" + req.PayPalOrderId + ")",
                     PayPalTransactionId = req.PayPalOrderId,

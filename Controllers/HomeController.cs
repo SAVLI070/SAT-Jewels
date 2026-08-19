@@ -1,19 +1,30 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SAT1.Models;
 
 namespace SAT1.Controllers
 {
     public class HomeController : Controller
     {
         private readonly IWebHostEnvironment _env;
+        private readonly SatJewelDbContext _context;
 
-        public HomeController(IWebHostEnvironment env)
+        public HomeController(IWebHostEnvironment env, SatJewelDbContext context)
         {
             _env = env;
+            _context = context;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            ViewBag.CategoryCounts = BAL.LocalStore.GetCategoryCounts(_env.WebRootPath);
+            // Query exact product count per numeric CategoryId directly from Neon PostgreSQL DB
+            var dbCounts = await _context.Products
+                .Where(p => p.IsAvailable)
+                .GroupBy(p => p.CategoryId)
+                .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(x => x.CategoryId, x => x.Count);
+
+            ViewBag.CategoryCountsByNumericId = dbCounts;
             return View();
         }
 

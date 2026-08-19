@@ -1,7 +1,8 @@
-@model List<SAT1.Models.CatalogItem>
+  @model List<SAT1.Models.CatalogItem>
 @{
-    ViewData["Title"] = (ViewBag.CategoryName ?? "Lab Diamond Collection") + " — SAT Jewel Sanctuary";
+    var categoryId = ViewBag.CategoryId ?? 2;
     var categoryName = ViewBag.CategoryName as string ?? "Anniversary Ring";
+    ViewData["Title"] = categoryName + " — SAT Jewel Sanctuary";
     var selectedShape = ViewBag.SelectedShape as string ?? "All";
     var selectedSort = ViewBag.SelectedSort as string ?? "bestselling";
 }
@@ -448,62 +449,62 @@
       
       <div class="shapes-track" id="shapesTrack">
         <!-- 1. Kite -->
-        <a href="/Product/Category?name=@categoryName&shape=Kite" class="shape-cut-card @(selectedShape == "Kite" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Kite" class="shape-cut-card @(selectedShape == "Kite" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/kite-cut-diamond-70x70.webp" alt="Kite Cut" /></div>
           <span>Kite</span>
         </a>
         <!-- 2. Marquise -->
-        <a href="/Product/Category?name=@categoryName&shape=Marquise" class="shape-cut-card @(selectedShape == "Marquise" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Marquise" class="shape-cut-card @(selectedShape == "Marquise" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/MARQUISE_a48c3046-45a5-49b6-91da-dcc29d117e5d.webp" alt="Marquise Cut" /></div>
           <span>Marquise</span>
         </a>
         <!-- 3. Oval -->
-        <a href="/Product/Category?name=@categoryName&shape=Oval" class="shape-cut-card @(selectedShape == "Oval" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Oval" class="shape-cut-card @(selectedShape == "Oval" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/OVAL_017dfb3c-6db1-4c92-a310-829e558a5c8f.webp" alt="Oval Cut" /></div>
           <span>Oval</span>
         </a>
         <!-- 4. Pear -->
-        <a href="/Product/Category?name=@categoryName&shape=Pear" class="shape-cut-card @(selectedShape == "Pear" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Pear" class="shape-cut-card @(selectedShape == "Pear" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/PEAR_1fe9fa6a-32bf-4aae-bf7f-1b810b3abcfb.webp" alt="Pear Cut" /></div>
           <span>Pear</span>
         </a>
         <!-- 5. Princess -->
-        <a href="/Product/Category?name=@categoryName&shape=Princess" class="shape-cut-card @(selectedShape == "Princess" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Princess" class="shape-cut-card @(selectedShape == "Princess" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/PRINCESS_b794f059-a3d9-4d1e-be22-8e450972cad3.webp" alt="Princess Cut" /></div>
           <span>Princess</span>
         </a>
         <!-- 6. Radiant -->
-        <a href="/Product/Category?name=@categoryName&shape=Radiant" class="shape-cut-card @(selectedShape == "Radiant" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Radiant" class="shape-cut-card @(selectedShape == "Radiant" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/RADIANT_297fa9d7-1308-4549-89ec-00cb38530f32.webp" alt="Radiant Cut" /></div>
           <span>Radiant</span>
         </a>
         <!-- 7. Round -->
-        <a href="/Product/Category?name=@categoryName&shape=Round" class="shape-cut-card @(selectedShape == "Round" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Round" class="shape-cut-card @(selectedShape == "Round" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/ROUND_dc6c8398-deaf-413b-ac75-981584bf4734.webp" alt="Round Cut" /></div>
           <span>Round</span>
         </a>
         <!-- 8. Triangle -->
-        <a href="/Product/Category?name=@categoryName&shape=Triangle" class="shape-cut-card @(selectedShape == "Triangle" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Triangle" class="shape-cut-card @(selectedShape == "Triangle" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/triangle-shaped-diamond.png" alt="Triangle Cut" /></div>
           <span>Triangle</span>
         </a>
         <!-- 9. Trillion -->
-        <a href="/Product/Category?name=@categoryName&shape=Trillion" class="shape-cut-card @(selectedShape == "Trillion" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Trillion" class="shape-cut-card @(selectedShape == "Trillion" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/Trilliant.png" alt="Trillion Cut" /></div>
           <span>Trillion</span>
         </a>
         <!-- 10. Cushion -->
-        <a href="/Product/Category?name=@categoryName&shape=Cushion" class="shape-cut-card @(selectedShape == "Cushion" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Cushion" class="shape-cut-card @(selectedShape == "Cushion" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/CUSHION_723dab7e-4ad9-4c32-a60b-31890b22895f.webp" alt="Cushion Cut" /></div>
           <span>Cushion</span>
         </a>
         <!-- 11. Emerald -->
-        <a href="/Product/Category?name=@categoryName&shape=Emerald" class="shape-cut-card @(selectedShape == "Emerald" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Emerald" class="shape-cut-card @(selectedShape == "Emerald" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/EMERALD_4a9412af-1aeb-44f9-b903-2e303baefe4d.webp" alt="Emerald Cut" /></div>
           <span>Emerald</span>
         </a>
         <!-- 12. Rose Cut -->
-        <a href="/Product/Category?name=@categoryName&shape=Rose" class="shape-cut-card @(selectedShape == "Rose" ? "active" : "")">
+        <a href="/Product/Category?id=@categoryId&shape=Rose" class="shape-cut-card @(selectedShape == "Rose" ? "active" : "")">
           <div class="shape-img-box"><img src="/assets/shapes/ROUND_dc6c8398-deaf-413b-ac75-981584bf4734.webp" alt="Rose Cut" /></div>
           <span>Rose</span>
         </a>
@@ -513,7 +514,7 @@
     <!-- Sub Sort Controls Bar -->
     <div class="sub-sort-bar">
       <div style="display: flex; align-items: center; gap: 16px;">
-        <a href="/Product/Category?name=@categoryName" class="clear-link">Clear</a>
+        <a href="/Product/Category?id=@categoryId" class="clear-link">Clear</a>
         <span style="font-size: 13px; color: rgba(255, 255, 255, 0.75); background: rgba(212, 178, 112, 0.12); border: 1px solid rgba(212, 178, 112, 0.3); padding: 4px 12px; border-radius: 20px; font-weight: 600; letter-spacing: 0.3px;">
           Showing @(Model?.Count ?? 0) items
         </span>
@@ -536,8 +537,6 @@
         foreach (var item in Model)
         {
           var originalPriceUSD = (int)(item.PriceUSD * 1.15m);
-          var originalPriceINR = (int)(item.PriceUSD * 83 * 1.15m);
-          var priceINR = (int)(item.PriceUSD * 83);
           var imgSrc = string.IsNullOrEmpty(item.ImageUrl) ? "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" : item.ImageUrl;
 
           <div class="ivevar-product-card">
@@ -555,9 +554,6 @@
                 <span class="price-main">$@item.PriceUSD.ToString("N0") USD</span>
                 <span class="price-orig">$@originalPriceUSD.ToString("N0")</span>
                 <span class="save-badge">Save 15%</span>
-              </div>
-              <div class="inr-price-row">
-                ₹ @priceINR.ToString("N0") <span style="text-decoration:line-through;">₹ @originalPriceINR.ToString("N0")</span>
               </div>
               <div class="rating-stars">
                 <i class="fa-solid fa-star"></i>

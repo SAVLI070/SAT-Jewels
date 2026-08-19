@@ -33,6 +33,12 @@ namespace SAT1.Models
         [Column(TypeName = "numeric(18,2)")]
         public decimal BasePriceUSD { get; set; }
 
+        public decimal Price
+        {
+            get => BasePriceUSD;
+            set => BasePriceUSD = value;
+        }
+
         [Required(ErrorMessage = "Default Metal Type is required.")]
         [MaxLength(50, ErrorMessage = "Default Metal Type cannot exceed 50 characters.")]
         public string DefaultMetalType { get; set; } = "14K Yellow Gold";

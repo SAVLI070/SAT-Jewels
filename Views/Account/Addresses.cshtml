@@ -1,0 +1,396 @@
+@model List<SAT1.Models.UserAddress>
+@{
+    Layout = null;
+    ViewData["Title"] = "Saved Addresses";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saved Addresses — SAT Jewel Bespoke Vault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="~/css/style.css" />
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
+      color: #ffffff;
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      margin: 0;
+    }
+    .acc-container {
+      max-width: 960px;
+      margin: 50px auto;
+      padding: 0 20px;
+    }
+    .acc-card {
+      background: rgba(8, 17, 34, 0.85);
+      backdrop-filter: blur(24px);
+      border: 1px solid rgba(212, 178, 112, 0.35);
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+    }
+    .page-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .page-title {
+      font-family: var(--font-serif);
+      font-size: 26px;
+      margin: 0;
+      color: #ffffff;
+    }
+    .btn-add-new {
+      padding: 10px 20px;
+      background: var(--champagne-gold);
+      color: #060d0a;
+      border: none;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+    .btn-add-new:hover {
+      background: #fcebc5;
+      transform: translateY(-2px);
+    }
+    .alert-success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid #22c55e;
+      color: #4ade80;
+      padding: 12px 18px;
+      border-radius: 12px;
+      margin-bottom: 24px;
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .address-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    @@media (max-width: 768px) {
+      .address-grid { grid-template-columns: 1fr; }
+    }
+    .address-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 22px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+    .address-card.default-card {
+      border-color: #d4b270;
+      background: rgba(212, 178, 112, 0.06);
+    }
+    .default-badge {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      background: rgba(212, 178, 112, 0.2);
+      border: 1px solid #d4b270;
+      color: #fbbf24;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+    .addr-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 6px;
+    }
+    .addr-line {
+      font-size: 13.5px;
+      color: rgba(255, 255, 255, 0.75);
+      line-height: 1.5;
+    }
+    .addr-actions {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn-action {
+      background: transparent;
+      border: none;
+      color: var(--champagne-gold);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-action.btn-del {
+      color: #ef4444;
+    }
+    .btn-action:hover {
+      text-decoration: underline;
+    }
+    /* Modal styles for Add/Edit Address */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    .modal-box {
+      background: #08111e;
+      border: 1px solid var(--champagne-gold);
+      border-radius: 20px;
+      max-width: 540px;
+      width: 100%;
+      padding: 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    }
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--taupe-beige);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .form-control {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: #ffffff;
+      font-size: 13.5px;
+      box-sizing: border-box;
+    }
+    .form-row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="acc-container">
+    <div style="margin-bottom: 20px; display:flex; gap:16px;">
+      <a href="/Account/MyAccount" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back to My Account</a>
+      <a href="/" style="color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px;">Storefront</a>
+    </div>
+
+    <div class="acc-card">
+      @if (TempData["SuccessMessage"] != null)
+      {
+        <div class="alert-success">
+          <i class="fa-solid fa-circle-check"></i> @TempData["SuccessMessage"]
+        </div>
+      }
+
+      <div class="page-title-row">
+        <h1 class="page-title"><i class="fa-solid fa-location-dot" style="color:var(--champagne-gold); margin-right:10px;"></i> Saved Addresses</h1>
+        <button type="button" class="btn-add-new" onclick="openAddAddressModal()">
+          <i class="fa-solid fa-plus"></i> Add New Address
+        </button>
+      </div>
+
+      @if (Model != null && Model.Count > 0)
+      {
+        <div class="address-grid">
+          @foreach (var item in Model)
+          {
+            <div class="address-card @(item.IsDefault ? "default-card" : "")">
+              @if (item.IsDefault)
+              {
+                <span class="default-badge"><i class="fa-solid fa-star"></i> Default Address</span>
+              }
+              <div class="addr-name">@item.FullName</div>
+              <div class="addr-line">@item.StreetAddress @(!string.IsNullOrWhiteSpace(item.ApartmentSuite) ? ", " + item.ApartmentSuite : "")</div>
+              <div class="addr-line">@item.City, @item.State @item.PostalCode</div>
+              <div class="addr-line">@item.Country</div>
+              @if (!string.IsNullOrWhiteSpace(item.Phone))
+              {
+                <div class="addr-line" style="margin-top:4px;"><i class="fa-solid fa-phone" style="font-size:11px; color:var(--champagne-gold);"></i> @item.Phone</div>
+              }
+
+              <div class="addr-actions">
+                <button type="button" class="btn-action" onclick='openEditAddressModal(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(item)))'>
+                  <i class="fa-solid fa-pen"></i> Edit
+                </button>
+
+                <form method="post" action="/Account/DeleteAddress" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this address?');">
+                  <input type="hidden" name="addressId" value="@item.AddressId" />
+                  <button type="submit" class="btn-action btn-del">
+                    <i class="fa-solid fa-trash-can"></i> Delete
+                  </button>
+                </form>
+
+                @if (!item.IsDefault)
+                {
+                  <form method="post" action="/Account/SetDefaultAddress" style="display:inline; margin-left:auto;">
+                    <input type="hidden" name="addressId" value="@item.AddressId" />
+                    <button type="submit" class="btn-action" style="color:var(--taupe-beige);">
+                      Set Default
+                    </button>
+                  </form>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+      else
+      {
+        <div style="text-align:center; padding: 48px 20px;">
+          <i class="fa-solid fa-location-dot" style="font-size:42px; color:rgba(212,178,112,0.4); margin-bottom:12px;"></i>
+          <h3 style="margin:0 0 8px;">No Saved Addresses Found</h3>
+          <p style="color:rgba(255,255,255,0.6); margin-bottom:20px;">Add your shipping addresses for seamless 1-click checkout.</p>
+          <button type="button" class="btn-add-new" onclick="openAddAddressModal()">
+            <i class="fa-solid fa-plus"></i> Add Address Now
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ADD / EDIT ADDRESS MODAL -->
+  <div class="modal-overlay" id="addressModal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="modalTitle" style="margin:0; font-family:var(--font-serif); font-size:20px; color:#ffffff;">Add New Address</h3>
+        <button type="button" style="background:none; border:none; color:#ffffff; font-size:18px; cursor:pointer;" onclick="closeAddressModal()">&times;</button>
+      </div>
+
+      <form method="post" action="/Account/SaveAddress">
+        <input type="hidden" id="modalAddressId" name="AddressId" value="" />
+
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" id="modalFullName" name="FullName" class="form-control" placeholder="John Doe" required />
+        </div>
+
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="text" id="modalPhone" name="Phone" class="form-control" placeholder="555-123-4567" />
+        </div>
+
+        <div class="form-group">
+          <label>Street Address</label>
+          <input type="text" id="modalStreetAddress" name="StreetAddress" class="form-control" placeholder="123 Fifth Avenue" required />
+        </div>
+
+        <div class="form-group">
+          <label>Apartment, Suite, Unit (Optional)</label>
+          <input type="text" id="modalApartmentSuite" name="ApartmentSuite" class="form-control" placeholder="Apt 4B" />
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" id="modalCity" name="City" class="form-control" placeholder="New York" required />
+          </div>
+          <div class="form-group">
+            <label>State / Province</label>
+            <input type="text" id="modalState" name="State" class="form-control" placeholder="NY" required />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Zip / Postal Code</label>
+            <input type="text" id="modalPostalCode" name="PostalCode" class="form-control" placeholder="10001" required />
+          </div>
+          <div class="form-group">
+            <label>Country</label>
+            <select id="modalCountry" name="Country" class="form-control">
+              <option value="United States" selected>United States</option>
+              <option value="Canada">Canada</option>
+              <option value="United Kingdom">United Kingdom</option>
+              <option value="Australia">Australia</option>
+              <option value="India">India</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-top:10px; margin-bottom:20px; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" id="modalIsDefault" name="IsDefault" value="true" />
+          <label for="modalIsDefault" style="font-size:13px; color:#ffffff; cursor:pointer;">Set as default shipping address</label>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button type="button" class="btn-action" style="color:rgba(255,255,255,0.6);" onclick="closeAddressModal()">Cancel</button>
+          <button type="submit" class="btn-add-new">Save Address</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openAddAddressModal() {
+      document.getElementById('modalTitle').innerText = 'Add New Address';
+      document.getElementById('modalAddressId').value = '';
+      document.getElementById('modalFullName').value = '';
+      document.getElementById('modalPhone').value = '';
+      document.getElementById('modalStreetAddress').value = '';
+      document.getElementById('modalApartmentSuite').value = '';
+      document.getElementById('modalCity').value = '';
+      document.getElementById('modalState').value = '';
+      document.getElementById('modalPostalCode').value = '';
+      document.getElementById('modalCountry').value = 'United States';
+      document.getElementById('modalIsDefault').checked = false;
+      document.getElementById('addressModal').style.display = 'flex';
+    }
+
+    function openEditAddressModal(item) {
+      document.getElementById('modalTitle').innerText = 'Edit Saved Address';
+      document.getElementById('modalAddressId').value = item.AddressId || '';
+      document.getElementById('modalFullName').value = item.FullName || '';
+      document.getElementById('modalPhone').value = item.Phone || '';
+      document.getElementById('modalStreetAddress').value = item.StreetAddress || '';
+      document.getElementById('modalApartmentSuite').value = item.ApartmentSuite || '';
+      document.getElementById('modalCity').value = item.City || '';
+      document.getElementById('modalState').value = item.State || '';
+      document.getElementById('modalPostalCode').value = item.PostalCode || '';
+      document.getElementById('modalCountry').value = item.Country || 'United States';
+      document.getElementById('modalIsDefault').checked = item.IsDefault || false;
+      document.getElementById('addressModal').style.display = 'flex';
+    }
+
+    function closeAddressModal() {
+      document.getElementById('addressModal').style.display = 'none';
+    }
+  </script>
+</body>
+</html>

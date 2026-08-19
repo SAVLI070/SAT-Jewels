@@ -1,4 +1,5 @@
 @{
+    Layout = null;
     ViewData["Title"] = "Shopping Cart & Home Delivery Checkout";
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     var userName = User.Identity?.Name ?? "";
@@ -13,11 +14,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="~/css/style.css" />
-  @if (isAuthenticated)
-  {
-    <!-- Official PayPal Smart Payment Buttons SDK -->
-    <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&enable-funding=venmo,paylater"></script>
-  }
+  <!-- Official Dual Payment Gateways (PayPal SDK + Razorpay Checkout.js) -->
+  <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&enable-funding=venmo,paylater"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
     body {
       background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
@@ -189,13 +188,33 @@
 
       @if (isAuthenticated)
       {
+        var savedAddresses = ViewBag.SavedAddresses as List<SAT1.Models.UserAddress> ?? new List<SAT1.Models.UserAddress>();
+
         <!-- High Priority Home Delivery Address Form -->
         <div class="delivery-form-box">
           <div class="delivery-form-title">
-            <i class="fa-solid fa-truck-ramp-box"></i> Home Delivery Shipping Address <span style="font-size:11px; color:#fbbf24; font-weight:600; margin-left:auto;">[ HIGH PRIORITY ]</span>
+            <i class="fa-solid fa-truck-ramp-box"></i> Home Delivery Shipping Address <span style="font-size:11px; color:#fbbf24; font-weight:600; margin-left:auto;">[ REQUIRED FOR PAYMENT ]</span>
           </div>
 
-          <form id="shippingAddressForm">
+          @if (savedAddresses.Count > 0)
+          {
+            <div style="margin-bottom: 18px; padding: 12px 16px; background: rgba(212,178,112,0.12); border: 1px solid rgba(212,178,112,0.35); border-radius: 12px;">
+              <label style="font-size: 12px; font-weight: 700; color: #fbbf24; display: block; margin-bottom: 6px;">
+                <i class="fa-solid fa-bookmark"></i> Quick Select From Saved Address Vault:
+              </label>
+              <select id="savedAddressSelector" class="form-input-field" onchange="loadSavedAddress(this.value)" style="border-color:#d4b270;">
+                <option value="">-- Choose a Saved Shipping Address --</option>
+                @foreach (var addr in savedAddresses)
+                {
+                  <option value="@Html.Raw(System.Text.Json.JsonSerializer.Serialize(addr))" selected="@(addr.IsDefault ? "selected" : null)">
+                    @(addr.IsDefault ? "⭐ [DEFAULT] " : "")@addr.FullName - @addr.StreetAddress, @addr.City, @addr.State
+                  </option>
+                }
+              </select>
+            </div>
+          }
+
+          <form id="shippingAddressForm" oninput="checkAddressValidation()">
             <div class="form-grid-2col">
               <div class="form-group-item">
                 <label>Recipient Full Name *</label>
@@ -257,25 +276,45 @@
 
         @if (isAuthenticated)
         {
-          <div id="paypalContainerBox" class="paypal-box-wrap">
-            <div id="paypal-button-container"></div>
+          <!-- Dynamic Address Status Warning -->
+          <div id="addressWarningNotice" style="margin-top:16px; padding:14px 18px; background:rgba(239,68,68,0.12); border:1px solid #ef4444; border-radius:12px; color:#fca5a5; font-size:13.5px; display:flex; align-items:center; gap:10px;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size:18px; color:#ef4444;"></i>
+            <div>
+              <strong>Payment Permission Locked:</strong> Please fill in all required shipping address fields above before payment can be authorized.
+            </div>
+          </div>
+
+          <div id="paypalContainerBox" class="paypal-box-wrap" style="opacity: 0.5; pointer-events: none;">
+            <!-- Option 1: Official PayPal Smart Buttons (Guest Checkout Enabled) -->
+            <div style="margin-bottom: 16px;">
+              <div style="font-size:12px; color:var(--taupe-beige); font-weight:700; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Option 1: Pay with PayPal</div>
+              <div id="paypal-button-container"></div>
+            </div>
+
+            <!-- Option 2: Razorpay Independent Card Gateway (No PayPal Prompt, Embedded Modal) -->
+            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed rgba(212, 178, 112, 0.3);">
+              <div style="font-size:12px; color:var(--taupe-beige); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Option 2: Pay with Credit / Debit Card (Razorpay)</div>
+              <button type="button" id="btnRazorpayCard" class="btn-razorpay-card" onclick="payWithRazorpay()" style="width:100%; padding:14px 20px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color:#ffffff; border:1px solid rgba(212, 178, 112, 0.5); border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(0,0,0,0.3); transition:all 0.3s ease;">
+                <i class="fa-solid fa-credit-card" style="color:var(--champagne-gold); font-size:18px;"></i> Pay with Card (No PayPal Required)
+              </button>
+            </div>
           </div>
         }
         else
         {
-          <!-- Sign In Required Gate Banner -->
+          <!-- GATE 1: Sign In Required Banner -->
           <div class="auth-required-banner">
-            <i class="fa-solid fa-lock" style="font-size:36px; color:var(--champagne-gold); margin-bottom:12px;"></i>
-            <h3 style="margin:0 0 8px; font-family:var(--font-serif); font-size:22px; color:#ffffff;">Sign In Required to Proceed to Payment</h3>
-            <p style="color:rgba(255,255,255,0.75); font-size:14px; margin-bottom:22px; max-width:540px; margin-left:auto; margin-right:auto; line-height:1.5;">
-              To secure your order, receive instant order confirmation, and provide your home delivery address, please sign in to your account before completing payment.
+            <i class="fa-solid fa-user-lock" style="font-size:42px; color:#f59e0b; margin-bottom:12px;"></i>
+            <h3 style="margin:0 0 8px; font-family:var(--font-serif); font-size:24px; color:#ffffff;">🚫 Permission Denied: Sign In Required</h3>
+            <p style="color:rgba(255,255,255,0.8); font-size:14px; margin-bottom:24px; max-width:560px; margin-left:auto; margin-right:auto; line-height:1.6;">
+              You must sign in to your SAT Jewel account before any payment or shipping transaction can be authorized.
             </p>
             <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
               <a href="/Account/SignIn?returnUrl=/Product/Cart" class="btn-auth-signin">
-                <i class="fa-solid fa-right-to-bracket"></i> Sign In to Continue
+                <i class="fa-solid fa-right-to-bracket"></i> Sign In to Proceed
               </a>
               <a href="/Account/SignUp?returnUrl=/Product/Cart" class="btn-auth-signup">
-                <i class="fa-solid fa-user-plus"></i> Create New Account
+                <i class="fa-solid fa-user-plus"></i> Create Account
               </a>
             </div>
           </div>
@@ -292,9 +331,64 @@
     document.addEventListener('DOMContentLoaded', () => {
       renderCart();
       if (isUserAuthenticated) {
+        // Auto-select default saved address if dropdown exists
+        const savedSelect = document.getElementById('savedAddressSelector');
+        if (savedSelect && savedSelect.value) {
+          loadSavedAddress(savedSelect.value);
+        }
+        checkAddressValidation();
         initPayPalButtons();
       }
     });
+
+    function loadSavedAddress(jsonStr) {
+      if (!jsonStr) return;
+      try {
+        const item = JSON.parse(jsonStr);
+        if (item.FullName) document.getElementById('shipFullName').value = item.FullName;
+        if (item.Phone) document.getElementById('shipPhone').value = item.Phone;
+        if (item.StreetAddress) document.getElementById('shipStreet').value = item.StreetAddress;
+        if (item.City) document.getElementById('shipCity').value = item.City;
+        if (item.State) document.getElementById('shipState').value = item.State;
+        if (item.PostalCode) document.getElementById('shipPostalCode').value = item.PostalCode;
+        if (item.Country) document.getElementById('shipCountry').value = item.Country;
+        checkAddressValidation();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function checkAddressValidation() {
+      const addr = getShippingAddressData();
+      const notice = document.getElementById('addressWarningNotice');
+      const paypalBox = document.getElementById('paypalContainerBox');
+
+      if (addr) {
+        if (notice) {
+          notice.style.background = 'rgba(34, 197, 94, 0.12)';
+          notice.style.borderColor = '#22c55e';
+          notice.style.color = '#4ade80';
+          notice.innerHTML = '<i class="fa-solid fa-circle-check" style="font-size:18px; color:#22c55e;"></i> <div><strong>Payment Authorized:</strong> Shipping address verified. You may now complete your PayPal payment below.</div>';
+        }
+        if (paypalBox) {
+          paypalBox.style.opacity = '1';
+          paypalBox.style.pointerEvents = 'auto';
+        }
+        return true;
+      } else {
+        if (notice) {
+          notice.style.background = 'rgba(239,68,68,0.12)';
+          notice.style.borderColor = '#ef4444';
+          notice.style.color = '#fca5a5';
+          notice.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="font-size:18px; color:#ef4444;"></i> <div><strong>Payment Permission Locked:</strong> Complete home delivery shipping address required before payment button unlocks.</div>';
+        }
+        if (paypalBox) {
+          paypalBox.style.opacity = '0.5';
+          paypalBox.style.pointerEvents = 'none';
+        }
+        return false;
+      }
+    }
 
     function renderCart() {
       const container = document.getElementById('cartItemsContainer');
@@ -408,67 +502,87 @@
           label:  'paypal'
         },
 
-        createOrder: function(data, actions) {
+        onClick: function(data, actions) {
+          if (!isUserAuthenticated) {
+            alert('🚫 PERMISSION DENIED: You must sign in to your account before proceeding to payment.');
+            window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+            return actions.reject();
+          }
+
           const addr = getShippingAddressData();
           if (!addr) {
-            alert('⚠️ Please fill in all required Home Delivery Shipping Address fields before completing checkout.');
+            alert('⚠️ PERMISSION DENIED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, ZIP) is required before payment can be initialized.');
+            checkAddressValidation();
+            return actions.reject();
+          }
+          return actions.resolve();
+        },
+
+        createOrder: async function(data, actions) {
+          const addr = getShippingAddressData();
+          if (!addr) {
+            alert('⚠️ Shipping Address Required before completing checkout.');
             throw new Error('Shipping address incomplete.');
           }
 
-          const finalAmount = currentCartTotal > 0 ? currentCartTotal.toFixed(2) : '1700.00';
-          return actions.order.create({
-            purchase_units: [{
-              description: currentCartSummary || 'SAT Bespoke Jewelry Order',
-              amount: {
-                currency_code: 'USD',
-                value: finalAmount
-              }
-            }]
-          });
+          // Security Rule: Never send price/amount! Pass only productId & quantity to server
+          const firstItemId = window.cartItems && window.cartItems.length > 0 ? window.cartItems[0].id : 'sat-prod-441';
+          const qty = window.cartItems && window.cartItems.length > 0 ? (window.cartItems[0].qty || 1) : 1;
+
+          try {
+            const res = await fetch('/api/payment/create-order', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productId: firstItemId,
+                quantity: qty,
+                shippingFullName: addr.name,
+                shippingPhone: addr.phone,
+                shippingStreet: addr.street,
+                shippingCity: addr.city,
+                shippingState: addr.state,
+                shippingPostalCode: addr.postal,
+                shippingCountry: addr.country
+              })
+            });
+
+            const result = await res.json();
+            if (result.success && result.orderId) {
+              return result.orderId;
+            } else {
+              alert('Error initializing PayPal order: ' + (result.message || 'Server error'));
+              throw new Error(result.message);
+            }
+          } catch (err) {
+            console.error('PayPal createOrder error:', err);
+            throw err;
+          }
         },
 
         onApprove: function(data, actions) {
-          return actions.order.capture().then(async function(details) {
-            const paypalOrderId = data.orderID || details.id || 'PAYPAL-' + Date.now();
-            const payerEmail = details.payer ? details.payer.email_address : '';
-            const addr = getShippingAddressData() || {};
-
-            try {
-              const res = await fetch('/api/paymentapi/process-paypal', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  payPalOrderId: paypalOrderId,
-                  itemName: currentCartSummary || 'Bespoke Fine Jewelry',
-                  amount: currentCartTotal > 0 ? currentCartTotal : 1700,
-                  payerEmail: payerEmail,
-                  payerCountryCode: addr.country || 'India',
-
-                  // Pass Home Delivery Shipping Address to API
-                  shippingFullName: addr.name || '',
-                  shippingPhone: addr.phone || '',
-                  shippingStreet: addr.street || '',
-                  shippingCity: addr.city || '',
-                  shippingState: addr.state || '',
-                  shippingPostalCode: addr.postal || '',
-                  shippingCountry: addr.country || 'India'
-                })
-              });
-
-              const result = await res.json();
-              if (result.success) {
-                alert('🎉 Order Placed Successfully! Your fine jewelry order has been scheduled for Home Delivery. Order ID: ' + result.orderId);
-                localStorage.removeItem('sat_shopping_cart_usd');
-                window.location.href = '/Account/Orders';
+          // Verify payment server-side via GET API (Never trust frontend completion signal alone)
+          return fetch('/api/payment/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ payPalOrderId: data.orderID })
+          })
+          .then(res => res.json())
+          .then(result => {
+            if (result.success) {
+              localStorage.removeItem('sat_shopping_cart_usd');
+              if (typeof showPaymentSuccessModal === 'function') {
+                showPaymentSuccessModal(result.orderId);
               } else {
-                alert('Payment captured, but order registration warning: ' + result.message);
+                alert('🎉 Order Placed Successfully! Order ID: ' + result.orderId);
                 window.location.href = '/Account/Orders';
               }
-            } catch (err) {
-              alert('Payment Completed via PayPal! Redirecting to your Orders...');
-              localStorage.removeItem('sat_shopping_cart_usd');
-              window.location.href = '/Account/Orders';
+            } else {
+              alert('⚠️ PayPal Verification Warning: ' + result.message);
             }
+          })
+          .catch(err => {
+            console.error('PayPal Verify Error:', err);
+            alert('Payment received. Order is being processed under Order ID: ' + data.orderID);
           });
         },
 
@@ -477,6 +591,99 @@
           alert('An error occurred during PayPal checkout. Please ensure all shipping details are entered and try again.');
         }
       }).render('#paypal-button-container');
+    }
+
+    // Razorpay Embedded Card Payment Modal (Independent path - No PayPal prompt)
+    async function payWithRazorpay() {
+      if (!isUserAuthenticated) {
+        alert('🚫 PERMISSION DENIED: You must sign in to your account before proceeding to payment.');
+        window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+        return;
+      }
+
+      const addr = getShippingAddressData();
+      if (!addr) {
+        alert('⚠️ PERMISSION DENIED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, ZIP) is required before payment can be initialized.');
+        checkAddressValidation();
+        return;
+      }
+
+      const firstItemId = window.cartItems && window.cartItems.length > 0 ? window.cartItems[0].id : 'sat-prod-441';
+      const qty = window.cartItems && window.cartItems.length > 0 ? (window.cartItems[0].qty || 1) : 1;
+
+      try {
+        // Step 1: Server calculates price & creates Razorpay Order
+        const res = await fetch('/api/payment/razorpay/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: firstItemId,
+            quantity: qty,
+            shippingFullName: addr.name,
+            shippingPhone: addr.phone,
+            shippingStreet: addr.street,
+            shippingCity: addr.city,
+            shippingState: addr.state,
+            shippingPostalCode: addr.postal,
+            shippingCountry: addr.country
+          })
+        });
+
+        const data = await res.json();
+        if (!data.success) {
+          alert('Error initializing Razorpay order: ' + data.message);
+          return;
+        }
+
+        // Step 2: Open Embedded Razorpay Checkout.js Modal
+        const options = {
+          key: data.keyId,
+          amount: Math.round(data.amountUSD * 100),
+          currency: 'USD',
+          name: 'SAT Luxury Jewellery',
+          description: 'Bespoke Fine Jewelry Order',
+          image: '/assets/ring_1.jpg',
+          order_id: data.razorpayOrderId,
+          handler: async function (response) {
+            // Step 3: Server-side HMAC Signature Verification
+            const verifyRes = await fetch('/api/payment/razorpay/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpayOrderId: response.razorpay_order_id,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature
+              })
+            });
+
+            const verifyResult = await verifyRes.json();
+            if (verifyResult.success) {
+              localStorage.removeItem('sat_shopping_cart_usd');
+              if (typeof showPaymentSuccessModal === 'function') {
+                showPaymentSuccessModal(verifyResult.orderId);
+              } else {
+                alert('🎉 Razorpay Card Order Placed Successfully! Order ID: ' + verifyResult.orderId);
+                window.location.href = '/Account/Orders';
+              }
+            } else {
+              alert('⚠️ Razorpay Signature Verification Alert: ' + verifyResult.message);
+            }
+          },
+          prefill: {
+            name: addr.name,
+            contact: addr.phone
+          },
+          theme: {
+            color: '#d4b270'
+          }
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.open();
+      } catch (err) {
+        console.error('Razorpay Checkout Exception:', err);
+        alert('An error occurred during Razorpay card checkout. Please try again.');
+      }
     }
   </script>
 </body>

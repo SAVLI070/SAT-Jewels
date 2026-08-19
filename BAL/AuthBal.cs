@@ -105,5 +105,110 @@ namespace SAT1.BAL
             await _context.SaveChangesAsync();
             return user;
         }
+
+        // =========================================================================
+        // USER ADDRESS MANAGEMENT (ADD / EDIT / DELETE / LIST SAVED ADDRESSES)
+        // =========================================================================
+
+        public async Task<List<UserAddress>> GetUserAddressesAsync(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) return new List<UserAddress>();
+            return await _context.UserAddresses
+                .Where(a => a.UserId == userId)
+                .OrderByDescending(a => a.IsDefault)
+                .ThenByDescending(a => a.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<UserAddress?> GetAddressByIdAsync(string addressId, string userId)
+        {
+            if (string.IsNullOrWhiteSpace(addressId)) return null;
+            return await _context.UserAddresses.FirstOrDefaultAsync(a => a.AddressId == addressId && a.UserId == userId);
+        }
+
+        public async Task<UserAddress> AddUserAddressAsync(UserAddress address)
+        {
+            if (string.IsNullOrWhiteSpace(address.AddressId))
+            {
+                address.AddressId = Guid.NewGuid().ToString();
+            }
+            address.CreatedAt = DateTime.UtcNow;
+
+            var existing = await _context.UserAddresses.Where(a => a.UserId == address.UserId).ToListAsync();
+            if (existing.Count == 0 || address.IsDefault)
+            {
+                foreach (var item in existing)
+                {
+                    item.IsDefault = false;
+                }
+                address.IsDefault = true;
+            }
+
+            _context.UserAddresses.Add(address);
+            await _context.SaveChangesAsync();
+            return address;
+        }
+
+        public async Task<bool> UpdateUserAddressAsync(UserAddress address)
+        {
+            var existing = await _context.UserAddresses.FirstOrDefaultAsync(a => a.AddressId == address.AddressId && a.UserId == address.UserId);
+            if (existing == null) return false;
+
+            existing.FullName = address.FullName;
+            existing.Phone = address.Phone;
+            existing.StreetAddress = address.StreetAddress;
+            existing.ApartmentSuite = address.ApartmentSuite;
+            existing.City = address.City;
+            existing.State = address.State;
+            existing.PostalCode = address.PostalCode;
+            existing.Country = address.Country;
+
+            if (address.IsDefault)
+            {
+                var others = await _context.UserAddresses.Where(a => a.UserId == address.UserId && a.AddressId != address.AddressId).ToListAsync();
+                foreach (var item in others)
+                {
+                    item.IsDefault = false;
+                }
+                existing.IsDefault = true;
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteUserAddressAsync(string addressId, string userId)
+        {
+            var existing = await _context.UserAddresses.FirstOrDefaultAsync(a => a.AddressId == addressId && a.UserId == userId);
+            if (existing == null) return false;
+
+            _context.UserAddresses.Remove(existing);
+            await _context.SaveChangesAsync();
+
+            // If default was deleted, set next address as default
+            var remaining = await _context.UserAddresses.Where(a => a.UserId == userId).ToListAsync();
+            if (remaining.Count > 0 && !remaining.Any(a => a.IsDefault))
+            {
+                remaining[0].IsDefault = true;
+                await _context.SaveChangesAsync();
+            }
+
+            return true;
+        }
+
+        public async Task<bool> SetDefaultUserAddressAsync(string addressId, string userId)
+        {
+            var userAddresses = await _context.UserAddresses.Where(a => a.UserId == userId).ToListAsync();
+            var target = userAddresses.FirstOrDefault(a => a.AddressId == addressId);
+            if (target == null) return false;
+
+            foreach (var item in userAddresses)
+            {
+                item.IsDefault = (item.AddressId == addressId);
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

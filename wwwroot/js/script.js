@@ -680,3 +680,56 @@ function toggleMenu() {
   const mobileMenu = document.getElementById('mobileMenu');
   if (mobileMenu) mobileMenu.classList.toggle('active');
 }
+
+// 12. Global SAT Bespoke Lottie Diamond Loading Engine
+function showLottieLoader(text) {
+  const loader = document.getElementById('satLottieLoader');
+  const textEl = document.querySelector('.sat-lottie-text');
+  if (text && textEl) {
+    textEl.innerHTML = `<span class="sat-gold-sparkle"><i class="fa-solid fa-gem"></i></span> ${text}`;
+  }
+  if (loader) loader.classList.add('active');
+}
+
+function hideLottieLoader() {
+  const loader = document.getElementById('satLottieLoader');
+  if (loader) loader.classList.remove('active');
+}
+
+// Global Payment Success Lottie Trigger
+function showPaymentSuccessModal(orderId) {
+  hideLottieLoader();
+  const modal = document.getElementById('satPaymentSuccessModal');
+  const orderIdEl = document.getElementById('successOrderIdDisplay');
+  const player = document.getElementById('paymentSuccessLottiePlayer');
+
+  if (orderIdEl && orderId) {
+    orderIdEl.textContent = `Order ID: ${orderId}`;
+  }
+  if (player && typeof player.stop === 'function' && typeof player.play === 'function') {
+    player.stop();
+    player.play();
+  }
+  if (modal) {
+    modal.classList.add('active');
+  }
+}
+
+// Global Click Interceptor for Subcategory, Product & Shape Navigation
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a');
+  if (link && link.href && !link.target && !link.getAttribute('href').startsWith('#') && !link.getAttribute('href').startsWith('javascript:')) {
+    try {
+      const url = new URL(link.href, window.location.origin);
+      const path = url.pathname.toLowerCase();
+      
+      if (path.includes('/product/category') || path.includes('/product/details') || path === '/product') {
+        showLottieLoader('Loading Bespoke Collection...');
+      }
+    } catch (err) {}
+  }
+});
+
+window.addEventListener('pageshow', () => {
+  hideLottieLoader();
+});

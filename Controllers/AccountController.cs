@@ -222,5 +222,77 @@ namespace SAT1.Controllers
             var orders = await _authBal.GetUserOrdersAsync(userId, email);
             return View(orders);
         }
+
+        // =========================================================================
+        // USER ADDRESS MANAGEMENT ACTIONS (ADD / EDIT / DELETE / LIST ADDRESSES)
+        // =========================================================================
+
+        [HttpGet]
+        public async Task<IActionResult> Addresses()
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Redirect("/Account/SignIn?returnUrl=/Account/Addresses");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            var addresses = await _authBal.GetUserAddressesAsync(userId);
+            return View(addresses);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SaveAddress(UserAddress model)
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Redirect("/Account/SignIn?returnUrl=/Account/Addresses");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            model.UserId = userId;
+
+            if (string.IsNullOrWhiteSpace(model.AddressId))
+            {
+                await _authBal.AddUserAddressAsync(model);
+                TempData["SuccessMessage"] = "New address successfully added to your account vault.";
+            }
+            else
+            {
+                await _authBal.UpdateUserAddressAsync(model);
+                TempData["SuccessMessage"] = "Address details updated successfully.";
+            }
+
+            return RedirectToAction("Addresses");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteAddress(string addressId)
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Redirect("/Account/SignIn?returnUrl=/Account/Addresses");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            await _authBal.DeleteUserAddressAsync(addressId, userId);
+            TempData["SuccessMessage"] = "Address deleted from your account.";
+
+            return RedirectToAction("Addresses");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SetDefaultAddress(string addressId)
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Redirect("/Account/SignIn?returnUrl=/Account/Addresses");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
+            await _authBal.SetDefaultUserAddressAsync(addressId, userId);
+            TempData["SuccessMessage"] = "Default shipping address updated.";
+
+            return RedirectToAction("Addresses");
+        }
     }
 }

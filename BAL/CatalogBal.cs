@@ -297,9 +297,89 @@ namespace SAT1.BAL
                 .ToListAsync();
         }
 
+        public async Task<CatalogItem?> GetProductByNumericIdAsync(long productId)
+        {
+            var p = await _context.Products
+                .Include(p => p.Images)
+                .Include(p => p.Variants)
+                .FirstOrDefaultAsync(p => p.ProductId == productId && p.IsAvailable);
+
+            if (p != null)
+            {
+                var mainImg = p.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl ?? "/assets/ring_1.jpg";
+                var allImgs = p.Images.Select(i => i.ImageUrl).ToList();
+
+                var metalVariants = p.Variants
+                    .Where(v => !string.IsNullOrEmpty(v.MetalType))
+                    .Select(v => $"{v.MetalType} ({(v.PriceAdjustmentUSD >= 0 ? "+" : "")}{v.PriceAdjustmentUSD:F0})")
+                    .Distinct()
+                    .ToList();
+
+                var caratVariants = p.Variants
+                    .Where(v => v.CaratWeight > 0)
+                    .Select(v => $"{v.CaratWeight:F2} CT ({(v.PriceAdjustmentUSD >= 0 ? "+" : "")}{v.PriceAdjustmentUSD:F0})")
+                    .Distinct()
+                    .ToList();
+
+                return new CatalogItem
+                {
+                    Id = $"sat-prod-{p.ProductId}",
+                    Name = p.ProductName,
+                    CategoryId = p.CategoryId.ToString(),
+                    Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}",
+                    PriceUSD = p.BasePriceUSD,
+                    ImageUrl = mainImg,
+                    GalleryImages = string.Join(",", allImgs),
+                    MetalOptions = metalVariants.Count > 0 ? string.Join("|", metalVariants) : string.Empty,
+                    CaratOptions = caratVariants.Count > 0 ? string.Join("|", caratVariants) : string.Empty,
+                    IsActive = p.IsAvailable,
+                    CreatedAt = p.CreatedAt
+                };
+            }
+
+            return null;
+        }
+
         public async Task<CatalogItem?> GetCatalogItemByIdAsync(string id)
         {
-            return await _context.CatalogItems.FirstOrDefaultAsync(i => i.Id == id);
+            if (string.IsNullOrWhiteSpace(id)) return null;
+
+            // 1. Try numeric ProductId extraction (e.g., sat-prod-101 or 101)
+            var cleanId = id.Replace("sat-prod-", "").Replace("sat-local-", "");
+            if (long.TryParse(cleanId, out long numericProductId))
+            {
+                var dbProd = await GetProductByNumericIdAsync(numericProductId);
+                if (dbProd != null) return dbProd;
+            }
+
+            // 2. Query CatalogItems table by primary key ID
+            var catalogItem = await _context.CatalogItems.FirstOrDefaultAsync(i => i.Id == id);
+            if (catalogItem != null)
+            {
+                // Query dedicated MetalOptions and CaratOptions database tables
+                var dbMetals = await _context.MetalOptions
+                    .Where(m => m.CatalogItemId == catalogItem.Id)
+                    .OrderBy(m => m.DisplayOrder)
+                    .ToListAsync();
+
+                var dbCarats = await _context.CaratOptions
+                    .Where(c => c.CatalogItemId == catalogItem.Id)
+                    .OrderBy(c => c.DisplayOrder)
+                    .ToListAsync();
+
+                if (dbMetals.Count > 0)
+                {
+                    catalogItem.MetalOptions = string.Join("|", dbMetals.Select(m => $"{m.MetalName} ({(m.PriceOffsetUSD >= 0 ? "+" : "")}{m.PriceOffsetUSD:F0})"));
+                }
+                if (dbCarats.Count > 0)
+                {
+                    catalogItem.CaratOptions = string.Join("|", dbCarats.Select(c => $"{c.CaratLabel} ({(c.PriceOffsetUSD >= 0 ? "+" : "")}{c.PriceOffsetUSD:F0})"));
+                }
+
+                return catalogItem;
+            }
+
+            return null;
         }
 
         public async Task<CatalogItem> AddCatalogItemAsync(CatalogItem item)

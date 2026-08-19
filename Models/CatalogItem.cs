@@ -16,18 +16,27 @@ namespace SAT1.Models
         public string Spec { get; set; } = string.Empty;
 
         [Required]
-        public decimal PriceUSD { get; set; }
+        public decimal Price { get; set; }
+
+        public decimal PriceUSD 
+        { 
+            get => Price; 
+            set => Price = value; 
+        }
 
         public string ImageUrl { get; set; } = string.Empty;
 
         public string GalleryImages { get; set; } = string.Empty; // Comma-separated multi-angle photo URLs
 
-        public string MetalOptions { get; set; } = "18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|22K Yellow Gold (+150)|24K Pure Gold (+400)|Platinum 950 (+350)|14K Yellow Gold (-100)|14K White Gold (-100)|10K Solid Gold (-200)|Rose Platinum (+500)";
+        public string MetalOptions { get; set; } = string.Empty;
 
-        public string CaratOptions { get; set; } = "0.5ct GIA (-800)|0.75ct GIA (-500)|1.0ct GIA (-400)|1.25ct GIA (-200)|1.5ct GIA (+0)|1.75ct GIA (+400)|2.0ct GIA (+750)|2.5ct GIA (+1200)|3.0ct GIA (+2000)|5.0ct Solitaire (+5000)";
+        public string CaratOptions { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public virtual ICollection<MetalOption> MetalOptionList { get; set; } = new List<MetalOption>();
+        public virtual ICollection<CaratOption> CaratOptionList { get; set; } = new List<CaratOption>();
     }
 }

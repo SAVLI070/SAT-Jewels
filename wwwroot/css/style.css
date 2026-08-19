@@ -2838,3 +2838,54 @@ a {
     max-width: 140px !important;
   }
 }
+
+/* Global SAT Bespoke Lottie Diamond Loading Overlay */
+.sat-lottie-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(5, 11, 20, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.sat-lottie-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sat-lottie-modal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 17, 34, 0.92);
+  border: 1px solid rgba(212, 178, 112, 0.4);
+  border-radius: 20px;
+  padding: 28px 42px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+.sat-lottie-text {
+  margin-top: 10px;
+  font-family: var(--font-serif);
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sat-gold-sparkle {
+  color: #fbbf24;
+  animation: pulseGold 1.5s infinite ease-in-out;
+}
+@keyframes pulseGold {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}

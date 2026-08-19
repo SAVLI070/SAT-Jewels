@@ -36,6 +36,13 @@ namespace SAT1.Models
         [MaxLength(50)]
         public string PaymentStatus { get; set; } = "Authorized";
 
+        [MaxLength(100)]
+        public string ProviderOrderId { get; set; } = string.Empty;
+
+        public bool SignatureVerified { get; set; } = false;
+
+        public string? RawPayload { get; set; }
+
         public byte[]? EncryptedGatewayPayload { get; set; }
 
         public DateTime PaymentDate { get; set; } = DateTime.UtcNow;

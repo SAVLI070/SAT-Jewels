@@ -16,11 +16,59 @@
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
+  <!-- Official Lottie Player Web Component SDK -->
+  <script src="https://unpkg.com/@@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
   <!-- Stylesheet -->
   <link rel="stylesheet" href="~/css/style.css" />
 </head>
 
 <body>
+  <!-- Global SAT Bespoke Lottie Diamond Loading Overlay -->
+  <div id="satLottieLoader" class="sat-lottie-overlay">
+    <div class="sat-lottie-modal">
+      <lottie-player 
+        src="/assets/animations/loading_diamond.json" 
+        background="transparent" 
+        speed="1.2" 
+        style="width: 140px; height: 140px;" 
+        loop 
+        autoplay>
+      </lottie-player>
+      <div class="sat-lottie-text">
+        <span class="sat-gold-sparkle"><i class="fa-solid fa-gem"></i></span> Loading Bespoke Collection...
+      </div>
+    </div>
+  </div>
+
+  <!-- Global SAT Bespoke Payment Success Lottie Modal -->
+  <div id="satPaymentSuccessModal" class="sat-lottie-overlay">
+    <div class="sat-lottie-modal" style="max-width: 460px; text-align: center; padding: 36px 30px;">
+      <lottie-player 
+        id="paymentSuccessLottiePlayer"
+        src="/assets/animations/payment_success.json" 
+        background="transparent" 
+        speed="1.0" 
+        style="width: 170px; height: 170px; margin: 0 auto;" 
+        autoplay>
+      </lottie-player>
+      
+      <h2 style="font-family: var(--font-serif); font-size: 24px; color: #ffffff; margin: 10px 0 6px;">
+        Payment Successful!
+      </h2>
+      <p id="successOrderIdDisplay" style="color: #fbbf24; font-size: 14px; font-weight: 700; margin: 0 0 14px;">
+        Order Confirmed & Scheduled
+      </p>
+      <p style="color: rgba(255, 255, 255, 0.8); font-size: 13.5px; line-height: 1.6; margin-bottom: 24px;">
+        Thank you for your purchase! Your bespoke GIA-certified fine jewelry piece has been scheduled for Home Delivery.
+      </p>
+
+      <a href="/Account/Orders" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 28px; border-radius: 30px; text-decoration: none; font-weight: 700; font-size: 14px; background: var(--champagne-gold); color: #060c14;">
+        <i class="fa-solid fa-box-open"></i> View My Orders
+      </a>
+    </div>
+  </div>
+
   @RenderBody()
 
   <script src="~/js/script.js"></script>

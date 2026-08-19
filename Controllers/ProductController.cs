@@ -39,48 +39,66 @@ namespace SAT1.Controllers
         // GET: /Product/Cart (Shopping Cart)
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult Cart()
+        public async Task<IActionResult> Cart()
         {
+            ViewBag.SavedAddresses = new List<UserAddress>();
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userId))
+                {
+                    try
+                    {
+                        ViewBag.SavedAddresses = await _context.UserAddresses
+                            .Where(a => a.UserId == userId)
+                            .OrderByDescending(a => a.IsDefault)
+                            .ToListAsync();
+                    }
+                    catch
+                    {
+                        ViewBag.SavedAddresses = new List<UserAddress>();
+                    }
+                }
+            }
             return View();
         }
 
-        // GET: /Product/Category?id=2 & /Product/Category?name=Rose+Cut
+        // GET: /Product/Category?id=2
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Category(string? name, long? id, RingCategoryEnum? categoryEnum, string? shape, string? sort, string? diamondType)
+        public async Task<IActionResult> Category(long? id, RingCategoryEnum? categoryEnum, string? name, string? shape, string? sort, string? diamondType)
         {
-            List<CatalogItem> products;
-            string categoryName = "Anniversary Ring";
+            // MAIN RULE: Data retrieval is strictly based on numeric CategoryId / RingCategoryEnum ID
+            long categoryId = 2; // Default to AnniversaryRings (Id = 2)
 
             if (id.HasValue && id.Value > 0)
             {
-                var catEnum = (RingCategoryEnum)id.Value;
-                categoryName = catEnum.ToString();
-                ViewBag.CategoryId = id.Value;
-                products = await _catalogBal.GetProductsByNumericIdAsync(id.Value, _env.WebRootPath);
+                categoryId = id.Value;
             }
             else if (categoryEnum.HasValue)
             {
-                long catNum = (long)categoryEnum.Value;
-                categoryName = categoryEnum.Value.ToString();
-                ViewBag.CategoryId = catNum;
-                products = await _catalogBal.GetProductsByEnumCategoryAsync(categoryEnum.Value, _env.WebRootPath);
+                categoryId = (long)categoryEnum.Value;
             }
-            else if (long.TryParse(name, out long parsedNumericId))
+            else if (!string.IsNullOrWhiteSpace(name) && long.TryParse(name, out long parsedId))
             {
-                ViewBag.CategoryId = parsedNumericId;
-                products = await _catalogBal.GetProductsByNumericIdAsync(parsedNumericId, _env.WebRootPath);
-            }
-            else
-            {
-                categoryName = string.IsNullOrWhiteSpace(name) ? "Anniversary Ring" : name;
-                products = await _catalogBal.GetProductsByCategoryIdAsync(categoryName, _env.WebRootPath);
+                categoryId = parsedId;
             }
 
-            ViewBag.CategoryName = categoryName;
+            var enumVal = Enum.IsDefined(typeof(RingCategoryEnum), categoryId)
+                ? (RingCategoryEnum)categoryId
+                : RingCategoryEnum.AnniversaryRings;
+
+            string categoryDisplayName = enumVal.GetDisplayName();
+            ViewBag.CategoryId = categoryId;
+            ViewBag.CategoryEnum = enumVal;
+            ViewBag.CategoryName = categoryDisplayName;
+
+            // Fetch products strictly by numeric long CategoryId
+            List<CatalogItem> products = await _catalogBal.GetProductsByNumericIdAsync(categoryId, _env.WebRootPath);
+
             ViewBag.SelectedShape = shape ?? "All";
-            ViewBag.SelectedSort = sort ?? "bestselling";
-            ViewBag.DiamondType = diamondType ?? "Lab Grown";
+            ViewBag.SelectedSort = sort ?? SortOptionEnum.Bestselling.ToString().ToLower();
+            ViewBag.DiamondType = diamondType ?? DiamondTypeEnum.LabGrown.GetDisplayName();
 
             // Filter by Shape if specified
             if (!string.IsNullOrWhiteSpace(shape) && shape.ToLower() != "all")
@@ -90,16 +108,19 @@ namespace SAT1.Controllers
                 if (filtered.Count > 0) products = filtered;
             }
 
-            // Apply Sorting
+            // Apply Enum-based Sorting
             switch (sort?.ToLower())
             {
                 case "price-asc":
+                case "priceasc":
                     products = products.OrderBy(p => p.PriceUSD).ToList();
                     break;
                 case "price-desc":
+                case "pricedesc":
                     products = products.OrderByDescending(p => p.PriceUSD).ToList();
                     break;
                 case "alpha-asc":
+                case "alphaasc":
                     products = products.OrderBy(p => p.Name).ToList();
                     break;
                 default:
@@ -121,71 +142,18 @@ namespace SAT1.Controllers
                 return View("RestrictedAccess");
             }
 
-            CatalogItem? product = null;
+            // MAIN RULE: Data retrieval strictly by primary key ID / numeric ProductId
+            CatalogItem? product = await _catalogBal.GetCatalogItemByIdAsync(id);
 
-            // 1. Try Database Query first
-            try
-            {
-                product = await _context.CatalogItems.FirstOrDefaultAsync(p => p.Id == id && p.IsActive);
-            }
-            catch { }
-
-            // 2. If not found in Database, search LocalStore across all subcategories
+            // Default fallback product so user page NEVER breaks
             if (product == null)
             {
-                var allFolders = new[]
-                {
-                    "lab_diamond_anniversary_ring", "antique_cut", "engagement_ring",
-                    "eternity_ring", "fancy_color", "nature_inspired", "natural_rainbow",
-                    "three_stone", "rose_cut", "marquise_shape", "halo_ring", "solitaire_ring"
-                };
-
-                foreach (var folder in allFolders)
-                {
-                    var localItems = BAL.LocalStore.GetLocalCategoryProducts(folder, _env.WebRootPath);
-                    var match = localItems.FirstOrDefault(p => p.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-                    if (match != null)
-                    {
-                        product = match;
-                        break;
-                    }
-                }
-            }
-
-            // 3. Robust fallback matching by category key if ID string contains category folder
-            if (product == null)
-            {
-                var cleanId = id.ToLower();
-                var allFolders = new[]
-                {
-                    "lab_diamond_anniversary_ring", "antique_cut", "engagement_ring",
-                    "eternity_ring", "fancy_color", "nature_inspired", "natural_rainbow",
-                    "three_stone", "rose_cut", "marquise_shape", "halo_ring", "solitaire_ring"
-                };
-
-                foreach (var folder in allFolders)
-                {
-                    if (cleanId.Contains(folder))
-                    {
-                        var localItems = BAL.LocalStore.GetLocalCategoryProducts(folder, _env.WebRootPath);
-                        if (localItems.Count > 0)
-                        {
-                            product = localItems[0];
-                            break;
-                        }
-                    }
-                }
-            }
-
-            // 4. Default fallback product so user page NEVER breaks
-            if (product == null)
-            {
-                var defaultItems = BAL.LocalStore.GetLocalCategoryProducts("anniversary ring", _env.WebRootPath);
+                var defaultItems = await _catalogBal.GetProductsByNumericIdAsync(2, _env.WebRootPath);
                 product = defaultItems.FirstOrDefault() ?? new CatalogItem
                 {
                     Id = id,
                     Name = "Exquisite Custom Diamond Ring",
-                    CategoryId = "lab_diamond_anniversary_ring",
+                    CategoryId = "2",
                     Spec = "18K Gold | 1.5ct GIA VVS1 | Brilliant Cut",
                     PriceUSD = 2400,
                     ImageUrl = "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg",
@@ -194,22 +162,21 @@ namespace SAT1.Controllers
                 };
             }
 
-            // 5. Category Metadata & Related Product Recommendations
-            var category = await _context.Categories.FirstOrDefaultAsync(c => c.Id == product.CategoryId && c.IsActive);
-            ViewBag.CategoryName = category?.Name ?? System.Globalization.CultureInfo.CurrentCulture.TextInfo.ToTitleCase(product.CategoryId.Replace("_", " "));
-            ViewBag.CategoryBadge = category?.Badge ?? "GIA Certified";
+            // Category Metadata & Related Product Recommendations using numeric CategoryId
+            if (long.TryParse(product.CategoryId, out long catId) && Enum.IsDefined(typeof(RingCategoryEnum), catId))
+            {
+                ViewBag.CategoryName = ((RingCategoryEnum)catId).GetDisplayName();
+            }
+            else
+            {
+                ViewBag.CategoryName = "Fine Jewelry";
+            }
+            ViewBag.CategoryBadge = "GIA Certified";
 
-            var relatedItems = BAL.LocalStore.GetLocalCategoryProducts(product.CategoryId, _env.WebRootPath)
+            var relatedItems = (await _catalogBal.GetProductsByNumericIdAsync(long.TryParse(product.CategoryId, out long cId) ? cId : 2, _env.WebRootPath))
                 .Where(i => i.Id != product.Id)
                 .Take(4)
                 .ToList();
-
-            if (relatedItems.Count == 0)
-            {
-                relatedItems = BAL.LocalStore.GetLocalCategoryProducts("anniversary ring", _env.WebRootPath)
-                    .Take(4)
-                    .ToList();
-            }
 
             ViewBag.RelatedItems = relatedItems;
 

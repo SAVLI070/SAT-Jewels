@@ -151,6 +151,36 @@ namespace SAT1.Models
         OldMineCut = 12
     }
 
+    public enum DiamondTypeEnum : int
+    {
+        [Display(Name = "Lab Grown")]
+        LabGrown = 1,
+
+        [Display(Name = "Moissanite")]
+        Moissanite = 2,
+
+        [Display(Name = "Natural Rainbow")]
+        NaturalRainbow = 3
+    }
+
+    public enum SortOptionEnum : int
+    {
+        [Display(Name = "Featured / Bestselling")]
+        Bestselling = 1,
+
+        [Display(Name = "Price: Low to High")]
+        PriceAsc = 2,
+
+        [Display(Name = "Price: High to Low")]
+        PriceDesc = 3,
+
+        [Display(Name = "Alphabetical: A to Z")]
+        AlphaAsc = 4,
+
+        [Display(Name = "Newest Arrivals")]
+        Newest = 5
+    }
+
     public static class EnumExtensions
     {
         public static string GetDisplayName(this Enum enumValue)

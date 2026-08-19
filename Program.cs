@@ -18,10 +18,17 @@ builder.Services.AddDbContext<SatJewelDbContext>(options =>
 // Add Controllers and Views
 builder.Services.AddControllersWithViews();
 
-// Register BAL (Business Access Layer) Helpers matching FarmBridge Architecture
+// Add HttpClient for External Payment Gateways (PayPal & Razorpay)
+builder.Services.AddHttpClient();
+
+// Register BAL & DAL Payment Services
+builder.Services.AddScoped<SAT1.DAL.OrderRepository>();
 builder.Services.AddScoped<SAT1.BAL.CatalogBal>();
 builder.Services.AddScoped<SAT1.BAL.AdminBal>();
 builder.Services.AddScoped<SAT1.BAL.AuthBal>();
+builder.Services.AddScoped<SAT1.BAL.PayPalService>();
+builder.Services.AddScoped<SAT1.BAL.RazorpayService>();
+builder.Services.AddScoped<SAT1.BAL.OrderBusinessService>();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -83,6 +90,26 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""GalleryImages"" text NOT NULL DEFAULT '';
             ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""MetalOptions"" text NOT NULL DEFAULT '18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|22K Yellow Gold (+150)|24K Pure Gold (+400)|Platinum 950 (+350)|14K Yellow Gold (-100)|14K White Gold (-100)|10K Solid Gold (-200)|Rose Platinum (+500)';
             ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""CaratOptions"" text NOT NULL DEFAULT '0.5ct GIA (-800)|0.75ct GIA (-500)|1.0ct GIA (-400)|1.25ct GIA (-200)|1.5ct GIA (+0)|1.75ct GIA (+400)|2.0ct GIA (+750)|2.5ct GIA (+1200)|3.0ct GIA (+2000)|5.0ct Solitaire (+5000)';
+            ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""Price"" numeric NOT NULL DEFAULT 0.0;
+            UPDATE ""CatalogItems"" SET ""Price"" = ""PriceUSD"" WHERE ""Price"" = 0 AND ""PriceUSD"" > 0;
+            ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""Price"" numeric NOT NULL DEFAULT 0.0;
+            UPDATE ""Products"" SET ""Price"" = ""BasePriceUSD"" WHERE ""Price"" = 0 AND ""BasePriceUSD"" > 0;
+
+            CREATE TABLE IF NOT EXISTS ""MetalOptions"" (
+                ""Id"" serial PRIMARY KEY,
+                ""CatalogItemId"" text NOT NULL,
+                ""MetalName"" text NOT NULL,
+                ""PriceOffsetUSD"" numeric NOT NULL DEFAULT 0.0,
+                ""DisplayOrder"" integer NOT NULL DEFAULT 1
+            );
+
+            CREATE TABLE IF NOT EXISTS ""CaratOptions"" (
+                ""Id"" serial PRIMARY KEY,
+                ""CatalogItemId"" text NOT NULL,
+                ""CaratLabel"" text NOT NULL,
+                ""PriceOffsetUSD"" numeric NOT NULL DEFAULT 0.0,
+                ""DisplayOrder"" integer NOT NULL DEFAULT 1
+            );
 
             CREATE TABLE IF NOT EXISTS ""Users"" (
                 ""Id"" text NOT NULL,
@@ -106,6 +133,35 @@ using (var scope = app.Services.CreateScope())
                 ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_Orders"" PRIMARY KEY (""OrderId"")
             );
+
+            CREATE TABLE IF NOT EXISTS ""UserAddresses"" (
+                ""AddressId"" text NOT NULL,
+                ""UserId"" text NOT NULL,
+                ""FullName"" text NOT NULL,
+                ""Phone"" text NOT NULL DEFAULT '',
+                ""StreetAddress"" text NOT NULL,
+                ""ApartmentSuite"" text NOT NULL DEFAULT '',
+                ""City"" text NOT NULL,
+                ""State"" text NOT NULL,
+                ""PostalCode"" text NOT NULL,
+                ""Country"" text NOT NULL DEFAULT 'United States',
+                ""IsDefault"" boolean NOT NULL DEFAULT false,
+                CONSTRAINT ""PK_UserAddresses"" PRIMARY KEY (""AddressId"")
+            );
+
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaymentProvider"" text NOT NULL DEFAULT 'PayPal';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderPaymentId"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ExpectedAmount"" numeric NOT NULL DEFAULT 0.0;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""AmountPaid"" numeric NOT NULL DEFAULT 0.0;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaidAt"" timestamp with time zone;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""BuyerInfo"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""IsSuspicious"" boolean NOT NULL DEFAULT false;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""SuspiciousReason"" text;
+
+            ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""SignatureVerified"" boolean NOT NULL DEFAULT false;
+            ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""RawPayload"" text;
         ";
 
         db.Database.ExecuteSqlRaw(createTablesSql);

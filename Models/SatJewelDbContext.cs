@@ -15,6 +15,9 @@ namespace SAT1.Models
         public DbSet<OrderItem> OrderItems { get; set; } = null!;
         public DbSet<Payment> Payments { get; set; } = null!;
         public DbSet<User> Users { get; set; } = null!;
+        public DbSet<UserAddress> UserAddresses { get; set; } = null!;
+        public DbSet<MetalOption> MetalOptions { get; set; } = null!;
+        public DbSet<CaratOption> CaratOptions { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

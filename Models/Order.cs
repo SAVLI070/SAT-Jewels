@@ -71,8 +71,27 @@ namespace SAT1.Models
         [NotMapped]
         public string Status { get => OrderStatus; set => OrderStatus = value; }
 
+        public string PaymentProvider { get; set; } = "PayPal";
+
         [MaxLength(100)]
-        public string? TrackingNumber { get; set; }
+        public string ProviderOrderId { get; set; } = string.Empty;
+
+        [MaxLength(100)]
+        public string ProviderPaymentId { get; set; } = string.Empty;
+
+        [Column(TypeName = "numeric(18,2)")]
+        public decimal ExpectedAmount { get; set; }
+
+        [Column(TypeName = "numeric(18,2)")]
+        public decimal AmountPaid { get; set; }
+
+        public DateTime? PaidAt { get; set; }
+
+        public string BuyerInfo { get; set; } = string.Empty;
+
+        public bool IsSuspicious { get; set; } = false;
+
+        public string? SuspiciousReason { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
