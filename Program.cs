@@ -204,6 +204,21 @@ using (var scope = app.Services.CreateScope())
             UPDATE ""CatalogItems"" SET ""Id"" = 'sat-prod-4b2a9f1c8e3d', ""ImageUrl"" = 'assets/necklace_main.png', ""GalleryImages"" = 'assets/necklace_main.png,assets/necklace_detail.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'neck_1';
             UPDATE ""CatalogItems"" SET ""Id"" = 'sat-prod-3f8d2b1a9c4e', ""ImageUrl"" = 'assets/earring_main.png', ""GalleryImages"" = 'assets/earring_main.png,assets/necklace_detail.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'ear_1';
             UPDATE ""CatalogItems"" SET ""Id"" = 'sat-prod-9e4a2c1b8f3d', ""ImageUrl"" = 'assets/bracelet_main.png', ""GalleryImages"" = 'assets/bracelet_main.png,assets/ring_whitegold.png,assets/ring_clarity.png,assets/ring_model.png' WHERE ""Id"" = 'brac_1';
+
+            INSERT INTO ""Categories"" (""CategoryId"", ""Name"", ""Slug"", ""ParentCategoryId"", ""CategoryType"", ""SubCategoryName"", ""DiamondType"", ""DiamondCutShape"", ""Badge"", ""Subtitle"", ""ImageUrl"", ""DisplayOrder"", ""IsActive"", ""CreatedAt"")
+            VALUES 
+            (5, 'ENGAGEMENT RINGS', 'engagement-rings', NULL, 'Main Category', 'Engagement Ring', 'Lab Grown Diamond', 'All Shapes', 'Bestseller', 'Solitaires & Custom Halos', '/assets/hero_1.jpg', 1, true, CURRENT_TIMESTAMP),
+            (6, 'WEDDING RINGS', 'wedding-rings', NULL, 'Main Category', 'Wedding Ring', 'Lab Grown Diamond', 'All Shapes', 'Popular', 'Eternity & Wedding Bands', '/assets/ring_model.png', 2, true, CURRENT_TIMESTAMP),
+            (2, 'BRIDAL SETS', 'bridal-sets', NULL, 'Main Category', 'Bridal Set', 'Lab Grown Diamond', 'All Shapes', 'Featured', 'Matching Engagement & Band Sets', '/assets/ivevar/Bridel_set.png', 3, true, CURRENT_TIMESTAMP),
+            (14, 'EARRINGS', 'earrings', NULL, 'Main Category', 'Earrings', 'Lab Grown Diamond', 'All Shapes', 'Trending', 'Diamond Studs & Drop Earrings', '/assets/earring_card.jpg', 4, true, CURRENT_TIMESTAMP),
+            (17, 'BRACELETS', 'bracelets', NULL, 'Main Category', 'Bracelets', 'Lab Grown Diamond', 'All Shapes', 'Luxury', 'Tennis Bracelets & Bangles', '/assets/bracelet_card.jpg', 5, true, CURRENT_TIMESTAMP),
+            (15, 'NECKLACES', 'necklaces', NULL, 'Main Category', 'Necklaces', 'Lab Grown Diamond', 'All Shapes', 'New', 'Pendant & Solitaire Necklaces', '/assets/necklace_1.jpg', 6, true, CURRENT_TIMESTAMP)
+            ON CONFLICT (""CategoryId"") DO UPDATE SET 
+            ""Name"" = EXCLUDED.""Name"",
+            ""Slug"" = EXCLUDED.""Slug"",
+            ""CategoryType"" = 'Main Category',
+            ""ImageUrl"" = EXCLUDED.""ImageUrl"",
+            ""DisplayOrder"" = EXCLUDED.""DisplayOrder"";
         ";
 
         try {
