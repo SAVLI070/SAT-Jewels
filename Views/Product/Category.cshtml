@@ -442,6 +442,30 @@
 
   <!-- Main Content Container -->
   <div class="cat-container">
+    <!-- Sub-Category Pill Navigation Bar (Matches Image 5) -->
+    <div style="margin: 20px 0 24px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;">
+      <div style="display: flex; gap: 12px; padding: 4px 0; min-width: max-content;">
+        <a href="/Product/Category?id=5" class="subcat-pill @(categoryId == 5 ? "active" : "")">
+          ENGAGEMENT RINGS
+        </a>
+        <a href="/Product/Category?id=6" class="subcat-pill @(categoryId == 6 ? "active" : "")">
+          WEDDING RINGS
+        </a>
+        <a href="/Product/Category?id=2" class="subcat-pill @(categoryId == 2 ? "active" : "")">
+          BRIDAL SETS
+        </a>
+        <a href="/Product/Category?id=14" class="subcat-pill @(categoryId == 14 ? "active" : "")">
+          EARRINGS
+        </a>
+        <a href="/Product/Category?id=17" class="subcat-pill @(categoryId == 17 ? "active" : "")">
+          BRACELETS
+        </a>
+        <a href="/Product/Category?id=15" class="subcat-pill @(categoryId == 15 ? "active" : "")">
+          NECKLACES
+        </a>
+      </div>
+    </div>
+
     <!-- Diamond Shape Cut Carousel Section (Dark Luxury Theme) -->
     <div class="shapes-carousel-wrap">
       <div class="shape-nav-arrow shape-nav-prev" onclick="scrollShapes(-200)"><i class="fa-solid fa-chevron-left"></i></div>

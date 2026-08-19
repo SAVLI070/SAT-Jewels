@@ -2889,3 +2889,164 @@ a {
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.15); }
 }
+
+/* ==========================================================================
+   SHOP BY CATEGORY SECTION (MATCHES REFERENCE IMAGES 1, 2, 3, 4)
+   ========================================================================== */
+.cat-carousel-container {
+  position: relative;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 10px;
+}
+
+.cat-carousel-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 10px 5px 25px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.cat-carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.cat-carousel-card {
+  flex: 0 0 calc(25% - 15px);
+  min-width: 250px;
+  scroll-snap-align: start;
+  text-decoration: none;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.35s ease;
+}
+
+.cat-carousel-card:hover {
+  transform: translateY(-5px);
+}
+
+.cat-card-image-box {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  background: #08111e;
+  border: 1px solid rgba(212, 178, 112, 0.2);
+  box-shadow: 0 12px 35px rgba(0,0,0,0.5);
+}
+
+.cat-card-image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.cat-carousel-card:hover .cat-card-image-box img {
+  transform: scale(1.06);
+}
+
+.cat-card-title-label {
+  margin-top: 14px;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  color: #ffffff;
+  letter-spacing: 0.2px;
+  transition: color 0.25s ease;
+}
+
+.cat-carousel-card:hover .cat-card-title-label {
+  color: #fbbf24;
+}
+
+/* Nav Carousel Arrow Buttons (Matches Images 1 & 2) */
+.cat-slider-arrow {
+  position: absolute;
+  top: 42%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #08111e;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  cursor: pointer;
+  z-index: 30;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45);
+  transition: all 0.25s ease;
+}
+
+.cat-slider-arrow:hover {
+  background: #d4b270;
+  color: #050b14;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.cat-arrow-left {
+  left: -14px;
+}
+
+.cat-arrow-right {
+  right: -14px;
+}
+
+/* Sub-Category Pill Navigation Bar (Matches Image 5) */
+.subcat-pill {
+  padding: 10px 24px;
+  background: rgba(10, 20, 38, 0.6);
+  border: 1px solid rgba(212, 178, 112, 0.3);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.25s ease;
+  white-space: nowrap;
+}
+
+.subcat-pill:hover, .subcat-pill.active {
+  background: rgba(212, 178, 112, 0.15);
+  border-color: #d4b270;
+  color: #fbbf24;
+  box-shadow: 0 0 15px rgba(212, 178, 112, 0.3);
+}
+
+/* Mobile Responsive 2-Column Grid Layout (Matches Images 3 & 4) */
+@media (max-width: 768px) {
+  .cat-carousel-track {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+    overflow-x: visible !important;
+    padding: 0 !important;
+  }
+  
+  .cat-carousel-card {
+    flex: none !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .cat-slider-arrow {
+    display: none !important;
+  }
+
+  .cat-card-title-label {
+    font-size: 13.5px;
+    margin-top: 10px;
+  }
+}

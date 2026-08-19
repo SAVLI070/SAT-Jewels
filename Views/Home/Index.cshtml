@@ -193,292 +193,88 @@
   </div>
 </section>
 
-<!-- MOST SELLING COLLECTIONS SHOWCASE (IVEVAR.COM STYLE DYNAMIC 12-CATEGORY GRID) -->
-<section id="collections" style="padding: 60px 0; background: transparent; position: relative; z-index: 10;">
+<!-- SHOP BY CATEGORY SECTION (MATCHES REFERENCE IMAGES 1, 2, 3, 4) -->
+<section id="collections" style="padding: 70px 0 50px; background: transparent; position: relative; z-index: 10;">
   <div class="container" style="position: relative; z-index: 20;">
-    <!-- Top Toggle Switch (Transparent background container with luxury gold pill buttons matching Image 2) -->
-    <div style="display: flex; justify-content: center; margin-bottom: 36px; position: relative; z-index: 100;">
-      <div style="background: transparent; padding: 0; display: inline-flex; align-items: center; gap: 16px;">
-        <button type="button" id="tab-lab-grown" onclick="switchDiamondTab('lab-grown')" style="padding: 12px 28px; background: rgba(212, 178, 112, 0.18); color: #fef08a; border: 1.5px solid #d4b270; font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 9999px; outline: none; pointer-events: auto; font-family: var(--font-sans); box-shadow: 0 0 20px rgba(212, 178, 112, 0.35); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.3s ease;">
-          <i class="fa-solid fa-gem" style="margin-right: 6px; color: #d4b270;"></i> LAB-GROWN DIAMOND
-        </button>
-        <button type="button" id="tab-moissanite" onclick="switchDiamondTab('moissanite')" style="padding: 12px 28px; background: rgba(10, 20, 38, 0.5); color: #cbd5e1; border: 1px solid rgba(212, 178, 112, 0.3); font-weight: 700; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 9999px; outline: none; pointer-events: auto; font-family: var(--font-sans); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.3s ease;">
-          <i class="fa-solid fa-sparkles" style="margin-right: 6px; color: var(--taupe-beige);"></i> MOISSANITE
-        </button>
+    <div style="text-align: center; margin-bottom: 36px;">
+      <h2 style="font-family: var(--font-serif); font-size: 36px; color: #ffffff; margin: 0 0 10px; font-weight: 500; letter-spacing: 0.5px;">Shop By Category</h2>
+      <div style="width: 50px; height: 1.5px; background: var(--champagne-gold); margin: 0 auto;"></div>
+    </div>
+
+    <!-- Desktop Horizontal Scroll Carousel with Navigation Arrows & Mobile 2-Column Grid -->
+    <div class="cat-carousel-container">
+      <!-- Carousel Navigation Left Arrow -->
+      <button type="button" class="cat-slider-arrow cat-arrow-left" onclick="scrollCatSlider(-300)" aria-label="Previous Category">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
+      <!-- Track containing the 6 Main Categories -->
+      <div class="cat-carousel-track" id="mainCatTrack">
+        <!-- 1. Engagement Rings -->
+        <a href="/Product/Category?id=5" class="cat-carousel-card">
+          <div class="cat-card-image-box">
+            <img src="/assets/hero_1.jpg" alt="Engagement Rings" loading="eager" />
+          </div>
+          <div class="cat-card-title-label">Engagement Rings &rarr;</div>
+        </a>
+
+        <!-- 2. Wedding Bands -->
+        <a href="/Product/Category?id=6" class="cat-carousel-card">
+          <div class="cat-card-image-box">
+            <img src="/assets/ring_model.png" alt="Wedding Bands" loading="lazy" />
+          </div>
+          <div class="cat-card-title-label">Wedding Bands</div>
+        </a>
+
+        <!-- 3. Necklaces -->
+        <a href="/Product/Category?id=15" class="cat-carousel-card">
+          <div class="cat-card-image-box">
+            <img src="/assets/necklace_1.jpg" alt="Necklaces" loading="lazy" />
+          </div>
+          <div class="cat-card-title-label">Necklaces</div>
+        </a>
+
+        <!-- 4. Earrings -->
+        <a href="/Product/Category?id=14" class="cat-carousel-card">
+          <div class="cat-card-image-box">
+            <img src="/assets/earring_card.jpg" alt="Earrings" loading="lazy" />
+          </div>
+          <div class="cat-card-title-label">Earrings</div>
+        </a>
+
+        <!-- 5. Men's Wedding Bands -->
+        <a href="/Product/Category?id=16" class="cat-carousel-card">
+          <div class="cat-card-image-box">
+            <img src="/assets/ivevar/Men_s_ring.png" alt="Men's Wedding Bands" loading="lazy" />
+          </div>
+          <div class="cat-card-title-label">Men's Wedding Bands</div>
+        </a>
+
+        <!-- 6. Bracelets -->
+        <a href="/Product/Category?id=17" class="cat-carousel-card">
+          <div class="cat-card-image-box">
+            <img src="/assets/bracelet_card.jpg" alt="Bracelets" loading="lazy" />
+          </div>
+          <div class="cat-card-title-label">Bracelets</div>
+        </a>
       </div>
-    </div>
 
-    <!-- 1. LAB-GROWN DIAMOND GRID (Default Active) -->
-    <div id="grid-lab-grown" style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 20px;" class="ivevar-grid-wrap">
-      <!-- 1. Anniversary Ring (CategoryId = 2) -->
-      <a href="/Product/Category?id=2" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" alt="Anniversary Ring" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Anniversary Ring</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(2, 186)) items</div>
-        </div>
-      </a>
-
-      <!-- 2. Antique Cut (CategoryId = 4) -->
-      <a href="/Product/Category?id=4" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png" alt="Antique Cut" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Antique Cut</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(4, 3)) items</div>
-        </div>
-      </a>
-
-      <!-- 3. Engagement Ring (CategoryId = 5) -->
-      <a href="/Product/Category?id=5" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/ivevar-luxury-rings-925-silver-2-1-75-ct-sparkling-fancy-vivid-green-emerald-cut-moissanite-diamond-engagement-ring-44619311841585_7c5c472f-38eb-4a1b-89ee-25caa5a69c22.png" alt="Engagement Ring" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Engagement Ring</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(5, 227)) items</div>
-        </div>
-      </a>
-
-      <!-- 4. Eternity Ring (CategoryId = 6) -->
-      <a href="/Product/Category?id=6" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/modern_wedding_ring_band_be1024e1-bb04-457c-83d2-7acda4fc55b4.png" alt="Eternity Ring" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Eternity Ring</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(6, 69)) items</div>
-        </div>
-      </a>
-
-      <!-- 5. Fancy Color (CategoryId = 7) -->
-      <a href="/Product/Category?id=7" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/ivevar-luxury-rings-925-silver-2-1-75-ct-sparkling-fancy-vivid-green-emerald-cut-moissanite-diamond-engagement-ring-41282365587761_c3a72ced-577d-4174-b965-8b1f333fcef4.jpg" alt="Fancy Color" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Fancy Color</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(7, 31)) items</div>
-        </div>
-      </a>
-
-      <!-- 6. Nature Inspired (CategoryId = 12) -->
-      <a href="/Product/Category?id=12" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/round_floral_cluster_diamond_ring_41298c3e-e25f-4180-b5af-f7bf458ffc72.jpg" alt="Nature Inspired" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Nature Inspired</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(12, 124)) items</div>
-        </div>
-      </a>
-
-      <!-- 7. Natural Rainbow (CategoryId = 13) -->
-      <a href="/Product/Category?id=13" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/All_Rainbow_Collection.jpg" alt="Natural Rainbow" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Natural Rainbow</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(13, 59)) items</div>
-        </div>
-      </a>
-
-      <!-- 8. Rose Cut (CategoryId = 3) -->
-      <a href="/Product/Category?id=3" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/radiant_emerlad_shiny_ring_ba059c3b-0120-43e0-8275-5c9bce94cf98.jpg" alt="Rose Cut" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Rose Cut</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(3, 3)) items</div>
-        </div>
-      </a>
-
-      <!-- 9. Three Stone (CategoryId = 9) -->
-      <a href="/Product/Category?id=9" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/VI1_1044_c2ee2b37-dd07-4fed-90fd-1f9be2b8ffed.jpg" alt="Three Stone" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Three Stone</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(9, 117)) items</div>
-        </div>
-      </a>
-
-      <!-- 10. Marquise Cut (CategoryId = 11) -->
-      <a href="/Product/Category?id=11" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/VI1_1046_0ecff396-bdfb-4162-9115-d4f5dd6252f7.jpg" alt="Marquise Cut" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Marquise Cut</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(11, 78)) items</div>
-        </div>
-      </a>
-
-      <!-- 11. Halo (CategoryId = 10) -->
-      <a href="/Product/Category?id=10" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/Moissanite_Halo_Ring_800x800.jpg" alt="Halo" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Halo</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(10, 123)) items</div>
-        </div>
-      </a>
-
-      <!-- 12. Solitaire (CategoryId = 8) -->
-      <a href="/Product/Category?id=8" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/Moissanite_Solitaire_Ring_800x800.jpg" alt="Solitaire" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div class="cat-card-title">Solitaire</div>
-          <div class="cat-card-count">@(catCounts.GetValueOrDefault(8, 170)) items</div>
-        </div>
-      </a>
-    </div>
-
-    <!-- 2. MOISSANITE GRID -->
-    <div id="grid-moissanite" style="display: none; grid-template-columns: repeat(6, 1fr); gap: 20px;" class="ivevar-grid-wrap">
-      <!-- 1. Three Stone (CategoryId = 9) -->
-      <a href="/Product/Category?id=9" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/VI1_5920_31370247-10f6-4c34-ad7b-df6c37d0da0c.jpg" alt="Three Stone" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Three Stone</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(9, 117)) items</div>
-        </div>
-      </a>
-
-      <!-- 2. Solitaire (CategoryId = 8) -->
-      <a href="/Product/Category?id=8" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/Moissanite_Solitaire_Ring_800x800.jpg" alt="Solitaire" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Solitaire</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(8, 170)) items</div>
-        </div>
-      </a>
-
-      <!-- 3. Halo (CategoryId = 10) -->
-      <a href="/Product/Category?id=10" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/Moissanite_Halo_Ring_800x800.jpg" alt="Halo" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Halo</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(10, 123)) items</div>
-        </div>
-      </a>
-
-      <!-- 4. Eternity Ring (CategoryId = 6) -->
-      <a href="/Product/Category?id=6" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/modern_wedding_ring_band_be1024e1-bb04-457c-83d2-7acda4fc55b4.png" alt="Eternity Ring" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Eternity Ring</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(6, 69)) items</div>
-        </div>
-      </a>
-
-      <!-- 5. Antique Cut (CategoryId = 4) -->
-      <a href="/Product/Category?id=4" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png" alt="Antique Cut" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Antique Cut</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(4, 3)) items</div>
-        </div>
-      </a>
-
-      <!-- 6. Nature Inspired (CategoryId = 12) -->
-      <a href="/Product/Category?id=12" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/women_s_daily_wear_ring.jpg" alt="Daily Wear" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Daily Wear</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(12, 124)) items</div>
-        </div>
-      </a>
-
-      <!-- 7. Fancy Color (CategoryId = 7) -->
-      <a href="/Product/Category?id=7" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/ivevar-luxury-rings-925-silver-2-1-75-ct-sparkling-fancy-vivid-green-emerald-cut-moissanite-diamond-engagement-ring-41282365587761_c3a72ced-577d-4174-b965-8b1f333fcef4.jpg" alt="Fancy Color" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Fancy Color</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(7, 31)) items</div>
-        </div>
-      </a>
-
-      <!-- 8. Engagement Ring (CategoryId = 5) -->
-      <a href="/Product/Category?id=5" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/Men_s_ring.png" alt="Men's Ring" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Men's Ring</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(5, 227)) items</div>
-        </div>
-      </a>
-
-      <!-- 9. Halo (CategoryId = 10) -->
-      <a href="/Product/Category?id=10" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/ivevar-luxury-rings-925-silver-4-08-tcw-exclusive-moe-initials-moissanite-diamond-studded-rectangular-statement-ring-with-pave-halo-detailing-41293898023217_f48fa586-e3f6-4f92-b713-123dbbe08c6a.jpg" alt="Pave Ring" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Pave Ring</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(10, 123)) items</div>
-        </div>
-      </a>
-
-      <!-- 10. Three Stone (CategoryId = 9) -->
-      <a href="/Product/Category?id=9" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/4_4_b87d689c-c248-4b99-832f-709697698471.jpg" alt="Toi Moi Ring" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Toi Moi Ring</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(9, 117)) items</div>
-        </div>
-      </a>
-
-      <!-- 11. Anniversary Ring (CategoryId = 2) -->
-      <a href="/Product/Category?id=2" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" alt="Anniversary Ring" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Anniversary Ring</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(2, 186)) items</div>
-        </div>
-      </a>
-
-      <!-- 12. Natural Rainbow (CategoryId = 13) -->
-      <a href="/Product/Category?id=13" style="text-decoration:none; color:inherit;">
-        <div style="background: rgba(10, 20, 38, 0.45); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-radius: 12px; border: 1px solid rgba(212, 178, 112, 0.25); overflow: hidden; text-align: center; padding-bottom: 16px; transition: transform 0.3s ease, border-color 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.4);" onmouseover="this.style.transform='translateY(-6px)'; this.style.borderColor='var(--champagne-gold)';" onmouseout="this.style.transform='none'; this.style.borderColor='rgba(212, 178, 112, 0.25)';">
-          <div style="width:100%; padding-top:100%; position:relative; background:transparent;">
-            <img src="/assets/ivevar/Bridel_set.png" alt="Wedding Rings" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover;" />
-          </div>
-          <div style="font-family:var(--font-serif); font-size:16px; font-weight:600; margin-top:12px; color:#ffffff;">Wedding Rings</div>
-          <div style="font-size:12px; color:rgba(255,255,255,0.55); margin-top:3px;">@(catCounts.GetValueOrDefault(13, 59)) items</div>
-        </div>
-      </a>
+      <!-- Carousel Navigation Right Arrow -->
+      <button type="button" class="cat-slider-arrow cat-arrow-right" onclick="scrollCatSlider(300)" aria-label="Next Category">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
     </div>
   </div>
 </section>
+
+<script>
+  function scrollCatSlider(offset) {
+    const track = document.getElementById('mainCatTrack');
+    if (track) {
+      track.scrollBy({ left: offset, behavior: 'smooth' });
+    }
+  }
+</script>
 
 <script>
   function switchDiamondTab(tabType) {
