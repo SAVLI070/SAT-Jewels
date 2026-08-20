@@ -122,63 +122,38 @@ function updateCategoryCounts() {
 // 1. Animated S-A-T Logo Transition into Top Navbar
 function initLogoTransition() {
   const logoContainer = document.getElementById('intro-logo-container');
-  const navSlot = document.querySelector('.nav-logo-slot');
   const overlay = document.getElementById('intro-overlay');
 
-  if (!logoContainer || !navSlot) return;
+  if (!logoContainer) return;
 
-  // On mobile screens, fast-track to navbar
   const isMobile = window.innerWidth <= 768;
   if (isMobile) {
     if (overlay) {
       overlay.style.display = 'none';
       overlay.classList.add('fade-out');
     }
-    navSlot.appendChild(logoContainer);
-    logoContainer.classList.add('nav-landed');
+    logoContainer.style.display = 'none';
     return;
   }
 
   logoContainer.classList.add('intro-animating');
 
-  // Hard safety timeout to guarantee overlay NEVER sticks
-  const safetyTimer = setTimeout(() => {
-    if (overlay) {
-      overlay.style.display = 'none';
-      overlay.classList.add('fade-out');
-    }
-    if (logoContainer && !logoContainer.classList.contains('nav-landed')) {
-      navSlot.appendChild(logoContainer);
-      logoContainer.classList.add('nav-landed');
-    }
-  }, 2500);
-
-  // Step 1: Wait for S -> A -> T -> Jewel sequential reveal animation (1.4s)
+  // Fade out intro overlay after S-A-T letter reveal sequence completes
   setTimeout(() => {
-    const logoRect = logoContainer.getBoundingClientRect();
-    const slotRect = navSlot.getBoundingClientRect();
-
-    const deltaX = slotRect.left - (window.innerWidth / 2 - logoRect.width / 2);
-    const deltaY = slotRect.top + (slotRect.height / 2) - (window.innerHeight / 2);
-    const scale = slotRect.height / logoRect.height;
-
-    logoContainer.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${scale * 0.92})`;
-
     if (overlay) {
       overlay.classList.add('fade-out');
-      setTimeout(() => { overlay.style.display = 'none'; }, 700);
+    }
+    if (logoContainer) {
+      logoContainer.style.opacity = '0';
+      logoContainer.style.transition = 'opacity 0.6s ease';
     }
 
-    // Step 2: Permanently dock into navbar slot
     setTimeout(() => {
-      clearTimeout(safetyTimer);
-      navSlot.appendChild(logoContainer);
-      logoContainer.classList.add('nav-landed');
-      logoContainer.classList.remove('intro-animating');
-      logoContainer.style.transform = '';
-    }, 700);
+      if (overlay) overlay.style.display = 'none';
+      if (logoContainer) logoContainer.style.display = 'none';
+    }, 600);
 
-  }, 1450);
+  }, 1350);
 }
 
 // 2. Navbar Scroll Shrink & Indicator Logic
