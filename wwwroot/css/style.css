@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Alex+Brush&family=Pinyon+Script&family=Great+Vibes&display=swap');
+
 /* 
   SAT Jewel — Complete Master Design System & Glassmorphism Stylesheet
   Includes Automatic Location Currency & Clean White FarmBridge Admin Portal
@@ -299,9 +301,16 @@ a {
   white-space: nowrap;
 }
 
-.sat-logo-brand span {
-  color: var(--champagne-gold);
-  font-style: italic;
+.sat-logo-brand span, .sat-brand-script {
+  color: var(--champagne-gold, #d4b270) !important;
+  font-family: 'Alex Brush', 'Pinyon Script', 'Great Vibes', cursive !important;
+  font-size: 1.32em !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+  line-height: 0.8 !important;
+  display: inline-block !important;
+  margin-left: 4px !important;
+  vertical-align: baseline !important;
 }
 
 .sat-logo-tagline {
