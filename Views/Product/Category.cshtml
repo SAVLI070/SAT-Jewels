@@ -410,6 +410,32 @@
       font-size: 12px;
       color: var(--champagne-gold, #d4b270);
     }
+
+    @@media (max-width: 768px) {
+      .sub-sort-bar {
+        margin-bottom: 18px;
+      }
+      .sat-sort-btn {
+        padding: 9px 16px;
+        font-size: 11.5px;
+        gap: 8px;
+        border-radius: 6px;
+      }
+      .sat-sort-val-desktop {
+        display: none !important;
+      }
+      .sat-sort-dropdown-menu {
+        min-width: 195px;
+        right: 0;
+        padding: 6px 0;
+        border-radius: 8px;
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.95);
+      }
+      .sat-sort-item {
+        padding: 10px 16px;
+        font-size: 12.5px;
+      }
+    }
     
     /* 4-Column Product Grid (SAT Jewel Dark Theme) */
     .product-grid-4col {
@@ -695,8 +721,8 @@
     <div class="sub-sort-bar">
       <div class="sat-sort-wrap">
         <button type="button" class="sat-sort-btn" onclick="toggleSatSortMenu()" id="satSortBtn">
-          <span>SORT BY <i class="fa-solid fa-angle-down" style="font-size: 11px; margin-left: 4px;"></i></span>
-          <span style="color: var(--champagne-gold, #d4b270); font-weight: 800;">@GetSortDisplayName(selectedSort)</span>
+          <span>SORT BY <i class="fa-solid fa-angle-down sat-sort-chevron" style="font-size: 11px; margin-left: 2px;"></i></span>
+          <span class="sat-sort-val-desktop" style="color: var(--champagne-gold, #d4b270); font-weight: 800; margin-left: 6px;">@GetSortDisplayName(selectedSort)</span>
         </button>
 
         <div class="sat-sort-dropdown-menu" id="satSortMenu">
