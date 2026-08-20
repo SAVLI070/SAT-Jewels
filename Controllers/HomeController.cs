@@ -37,6 +37,19 @@ namespace SAT1.Controllers
         }
 
         [HttpGet]
+        public IActionResult CustomRings()
+        {
+            ViewData["Title"] = "Design Your Own Custom Engagement Ring — SAT Jewel Sanctuary";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult CraftProcess()
+        {
+            return RedirectToAction("CustomRings");
+        }
+
+        [HttpGet]
         public IActionResult Restricted()
         {
             ViewBag.Message = "The page or item you requested is not accessible directly or has been moved.";

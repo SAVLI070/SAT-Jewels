@@ -1,0 +1,396 @@
+@{
+    ViewData["Title"] = "Design Your Own Custom Engagement Ring — SAT Jewel Sanctuary";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>@ViewData["Title"]</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="~/css/style.css" />
+  <style>
+    body {
+      background: #050b14;
+      color: #ffffff;
+      font-family: var(--font-sans, 'Plus Jakarta Sans', sans-serif);
+      margin: 0;
+      min-height: 100vh;
+    }
+
+    /* 1. HERO TITLE HEADER */
+    .bespoke-hero-header {
+      text-align: center;
+      padding: 75px 24px 55px;
+      background: radial-gradient(circle at 50% 30%, #0a1628 0%, #030712 100%);
+      border-bottom: 1px solid rgba(212, 178, 112, 0.25);
+    }
+    .bespoke-main-title {
+      font-family: var(--font-serif, 'Playfair Display', serif);
+      font-size: 44px;
+      font-weight: 500;
+      color: #ffffff;
+      margin: 0 0 18px;
+      letter-spacing: -0.3px;
+    }
+    .bespoke-main-subtitle {
+      max-width: 920px;
+      margin: 0 auto;
+      font-size: 14.5px;
+      line-height: 1.8;
+      color: rgba(255, 255, 255, 0.82);
+      font-weight: 400;
+    }
+
+    /* 2. MADE FOR YOU SECTION (SPLIT TWO COLUMN) */
+    .bespoke-section {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+    .bespoke-split-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+    .bespoke-split-grid.reverse {
+      grid-template-columns: 1fr 1fr;
+    }
+    .bespoke-text-box {
+      padding: 10px 0;
+    }
+    .bespoke-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--champagne-gold, #d4b270);
+      margin-bottom: 16px;
+    }
+    .bespoke-heading {
+      font-family: var(--font-serif, 'Playfair Display', serif);
+      font-size: 38px;
+      font-weight: 400;
+      line-height: 1.25;
+      color: #ffffff;
+      margin: 0 0 24px;
+      letter-spacing: -0.2px;
+    }
+    .bespoke-paragraph {
+      font-size: 14px;
+      line-height: 1.85;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 400;
+      margin-bottom: 34px;
+    }
+    .bespoke-img-card {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(212, 178, 112, 0.3);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      background: #08111e;
+    }
+    .bespoke-img-card img {
+      width: 100%;
+      height: 480px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+    .bespoke-img-card:hover img {
+      transform: scale(1.03);
+    }
+
+    /* BUTTON STYLING */
+    .btn-sat-gold {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: var(--champagne-gold, #d4b270);
+      color: #060c14;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 16px 36px;
+      border-radius: 4px;
+      box-shadow: 0 6px 20px rgba(212, 178, 112, 0.35);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .btn-sat-gold:hover {
+      background: #fef08a;
+      color: #000000;
+      box-shadow: 0 10px 30px rgba(212, 178, 112, 0.55);
+      transform: translateY(-2px);
+    }
+    .btn-sat-outline {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: rgba(8, 17, 30, 0.6);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 16px 36px;
+      border-radius: 4px;
+      border: 1px solid rgba(212, 178, 112, 0.5);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .btn-sat-outline:hover {
+      background: var(--champagne-gold, #d4b270);
+      color: #060c14;
+      border-color: var(--champagne-gold, #d4b270);
+      transform: translateY(-2px);
+    }
+
+    /* 3. WORK PROCESS HEADER */
+    .process-main-header {
+      text-align: center;
+      padding: 70px 24px 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .process-main-title {
+      font-family: var(--font-serif, 'Playfair Display', serif);
+      font-size: 42px;
+      font-weight: 400;
+      color: #ffffff;
+      margin: 0;
+      letter-spacing: -0.2px;
+    }
+
+    /* PROCESS STEP ROW STYLES */
+    .step-row-bg-dark {
+      background: #030712;
+      border-top: 1px solid rgba(212, 178, 112, 0.15);
+      border-bottom: 1px solid rgba(212, 178, 112, 0.15);
+    }
+    .step-row-bg-light {
+      background: #08111e;
+    }
+
+    /* 4. BOTTOM CONSULTATION CTA BANNER */
+    .bespoke-cta-banner {
+      text-align: center;
+      padding: 90px 24px;
+      background: radial-gradient(circle at 50% 50%, #0d1b2e 0%, #030712 100%);
+      border-top: 1px solid rgba(212, 178, 112, 0.3);
+      position: relative;
+    }
+    .cta-banner-title {
+      font-family: var(--font-serif, 'Playfair Display', serif);
+      font-size: 40px;
+      font-weight: 400;
+      color: #ffffff;
+      margin: 0 0 16px;
+    }
+    .cta-banner-desc {
+      font-size: 15px;
+      color: rgba(255, 255, 255, 0.8);
+      max-width: 680px;
+      margin: 0 auto 36px;
+      line-height: 1.7;
+    }
+    .cta-btn-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* RESPONSIVE BREAKPOINTS */
+    @@media (max-width: 992px) {
+      .bespoke-split-grid,
+      .bespoke-split-grid.reverse {
+        grid-template-columns: 1fr !important;
+        gap: 36px !important;
+      }
+      .bespoke-split-grid.reverse .bespoke-img-card {
+        order: -1;
+      }
+      .bespoke-main-title {
+        font-size: 32px;
+      }
+      .bespoke-heading {
+        font-size: 30px;
+      }
+      .process-main-title {
+        font-size: 32px;
+      }
+      .bespoke-img-card img {
+        height: 380px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- PAGE BREADCRUMB NAVIGATION BAR -->
+  <nav class="cat-breadcrumb-nav" style="background:#08111e; border-bottom:1px solid rgba(255,255,255,0.1); padding:16px 0;">
+    <div class="cat-container" style="max-width:1280px; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between;">
+      <div style="font-size:13px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:8px;">
+        <a href="/" style="color:#ffffff; text-decoration:none;">Home</a>
+        <span>/</span>
+        <span style="color:var(--champagne-gold);">Custom Engagement Rings</span>
+      </div>
+      <div>
+        <a href="/" style="color:var(--champagne-gold); font-size:13.5px; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-arrow-left" style="font-size:12px;"></i> Back to Home
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 1. HERO TITLE HEADER -->
+  <header class="bespoke-hero-header">
+    <div style="max-width: 1080px; margin: 0 auto;">
+      <h1 class="bespoke-main-title">Design Your Own Engagement Ring</h1>
+      <p class="bespoke-main-subtitle">
+        Start your Bespoke Engagement Ring Design today with a SAT Jewel Bespoke Design package. Each of our beautiful custom made engagement rings is meticulously crafted with utmost care and attention to detail. From concept to creation, we'll create your perfect ring.
+      </p>
+    </div>
+  </header>
+
+  <!-- 2. MADE FOR YOU SECTION -->
+  <section class="bespoke-section">
+    <div class="bespoke-split-grid">
+      <!-- Left Column Text -->
+      <div class="bespoke-text-box">
+        <span class="bespoke-badge">MADE FOR YOU</span>
+        <h2 class="bespoke-heading">Bespoke Jewellery Service Made For The One You Love</h2>
+        <p class="bespoke-paragraph">
+          Jewellery is often considered very personal. Many pieces, for example, are associated with important life events or milestones in our lives or the lives of those we love. We are talking about, for instance, engagements, anniversaries, birthdays, and other significant moments. Because these events have a unique emotional value, the jewellery becomes a reminder of those moments. Jewellery is also often given as a gift, so it represents a strong emotional connection. And, of course, there is also an expression of individuality and symbolic meanings to rings, bracelets, necklaces, and other jewellery choices. Now, sometimes, it can be difficult to find the perfect piece. This is why many people turn to bespoke jewellery services, as they let you design your rings exactly how you want them.
+        </p>
+        <a href="/Home/Index#cta" class="btn-sat-gold">
+          BOOK CONSULTATION
+        </a>
+      </div>
+
+      <!-- Right Column Image -->
+      <div class="bespoke-img-card">
+        <img src="/assets/bespoke/bespoke_craftsman.jpg" alt="Master Jeweler Hand Setting Custom Ring" />
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. THE BESPOKE JEWELLERY WORK PROCESS SECTION -->
+  <div class="process-main-header">
+    <h2 class="process-main-title">The Bespoke Jewellery Work Process</h2>
+  </div>
+
+  <!-- STEP 1: IDEAS -->
+  <section class="step-row-bg-dark">
+    <div class="bespoke-section">
+      <div class="bespoke-split-grid reverse">
+        <!-- Left Image -->
+        <div class="bespoke-img-card">
+          <img src="/assets/bespoke/bespoke_ideas.jpg" alt="Step 1 Ideas Showroom Consultation" />
+        </div>
+        <!-- Right Text -->
+        <div class="bespoke-text-box">
+          <span class="bespoke-badge">STEP 1</span>
+          <h3 class="bespoke-heading">Ideas</h3>
+          <p class="bespoke-paragraph">
+            The first thing is to decide what you would like your dream ring to look like. Next, look through our extensive online catalogue to get some inspiration and then bring your ideas to your exclusive one-on-one session with one of our experts. We'll talk you through a whole host of ideas and find the one that will be on your partner's finger for a lifetime.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 2: THE BASIC DESIGN -->
+  <section class="step-row-bg-light">
+    <div class="bespoke-section">
+      <div class="bespoke-split-grid">
+        <!-- Left Text -->
+        <div class="bespoke-text-box">
+          <span class="bespoke-badge">STEP 2</span>
+          <h3 class="bespoke-heading">The Basic Design</h3>
+          <p class="bespoke-paragraph">
+            Your consultant will create a basic design with your primary ideas roughed out. This serves as a price estimate whilst we work with you to finalise the design so that it is exactly how you want it to be before we start finalising the design.
+          </p>
+        </div>
+        <!-- Right Image -->
+        <div class="bespoke-img-card">
+          <img src="/assets/bespoke/bespoke_sketch.jpg" alt="Step 2 Hand Sketching Custom Ring Blueprint" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 3: THE STONE -->
+  <section class="step-row-bg-dark">
+    <div class="bespoke-section">
+      <div class="bespoke-split-grid reverse">
+        <!-- Left Image -->
+        <div class="bespoke-img-card">
+          <img src="/assets/bespoke/bespoke_stones.jpg" alt="Step 3 Loose GIA Diamonds Selection" />
+        </div>
+        <!-- Right Text -->
+        <div class="bespoke-text-box">
+          <span class="bespoke-badge">STEP 3</span>
+          <h3 class="bespoke-heading">The Stone</h3>
+          <p class="bespoke-paragraph">
+            No engagement ring would be complete without a diamond or a gemstone to catch the eye. With over 100,000 options to choose from, your consultant will be invaluable in helping you find the one that your partner has waited so long for. Once you've found the one your heart desires, we'll add it to the design and move on to step 4.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STEP 4: HANDCRAFTING & PERFECTION -->
+  <section class="step-row-bg-light">
+    <div class="bespoke-section">
+      <div class="bespoke-split-grid">
+        <!-- Left Text -->
+        <div class="bespoke-text-box">
+          <span class="bespoke-badge">STEP 4</span>
+          <h3 class="bespoke-heading">Handcrafting &amp; Perfection</h3>
+          <p class="bespoke-paragraph">
+            Once the design and stone are finalized, our master goldsmiths begin handcrafting your bespoke ring in our workshop using 100% solid 18k gold or platinum. Every diamond is hand-set under high magnification to ensure enduring brilliance, security, and a flawless finish for a lifetime of love.
+          </p>
+        </div>
+        <!-- Right Image -->
+        <div class="bespoke-img-card">
+          <img src="/assets/bespoke/bespoke_craftsman.jpg" alt="Step 4 Master Jeweler Handcrafting Engagement Ring" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. BOTTOM CONSULTATION CTA BANNER -->
+  <section class="bespoke-cta-banner">
+    <div style="max-width: 900px; margin: 0 auto;">
+      <span class="bespoke-badge" style="letter-spacing: 0.3em;">BEGIN YOUR STORY</span>
+      <h2 class="cta-banner-title">Ready to Create Your Bespoke Ring?</h2>
+      <p class="cta-banner-desc">
+        Schedule a private 1-on-1 consultation with our master jewelry artisans and turn your vision into a breathtaking heirloom piece.
+      </p>
+      <div class="cta-btn-group">
+        <a href="/Home/Index#cta" class="btn-sat-gold">
+          BOOK CONSULTATION
+        </a>
+        <a href="/Product/Category?id=1" class="btn-sat-outline">
+          EXPLORE CATALOGUE
+        </a>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>
