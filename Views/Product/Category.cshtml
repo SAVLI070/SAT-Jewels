@@ -24,12 +24,90 @@
       min-height: 100vh;
       margin: 0;
     }
-    /* Top Hero Header Section with Signature SAT Jewel Dark Luxury Palette */
-    .cat-hero-bg {
+    /* Redirection Header & 6 Category Buttons Section (Tasks 1, 2 & 3) */
+    .cat-redir-section {
+      text-align: center;
+      padding: 44px 0 36px;
       background: radial-gradient(circle at 50% 20%, #0a1426 0%, #030712 100%);
-      padding: 36px 0 44px;
-      border-bottom: 1px solid rgba(212, 178, 112, 0.25);
+      border-bottom: 1px solid rgba(212, 178, 112, 0.2);
     }
+    .cat-redir-title {
+      font-family: var(--font-serif);
+      font-size: 34px;
+      font-weight: 500;
+      color: #ffffff;
+      margin: 0 0 14px;
+      letter-spacing: -0.2px;
+    }
+    .cat-redir-desc {
+      max-width: 960px;
+      margin: 0 auto 30px;
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 400;
+      padding: 0 16px;
+    }
+    .cat-redir-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    @@media (max-width: 992px) {
+      .cat-redir-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+      }
+    }
+    @@media (max-width: 768px) {
+      .cat-redir-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .cat-redir-title {
+        font-size: 26px;
+      }
+      .cat-redir-desc {
+        font-size: 12.5px;
+        margin-bottom: 22px;
+      }
+    }
+    .cat-redir-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f4f4f6;
+      color: #111827;
+      border: 1px solid #d1d5db;
+      padding: 15px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 2px;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      white-space: nowrap;
+    }
+    .cat-redir-btn:hover {
+      background: #ffffff;
+      border-color: #d4b270;
+      color: #000000;
+      box-shadow: 0 4px 12px rgba(212, 178, 112, 0.3);
+      transform: translateY(-1px);
+    }
+    .cat-redir-btn.active {
+      background: #ffffff;
+      border: 2px solid #d4b270;
+      color: #000000;
+      font-weight: 800;
+      box-shadow: 0 0 15px rgba(212, 178, 112, 0.35);
+    }
+
     .cat-container {
       max-width: 1280px;
       margin: 0 auto;
@@ -389,6 +467,7 @@
 </head>
 <body>
   <!-- SAT Jewel Navigation Bar (Dark Metallic Luxury Header) -->
+  <!-- Clean Glitch-Free Header Section for Category Pages (Task 2) -->
   <nav class="navbar" style="position:relative; background:#08111e; border-bottom:1px solid rgba(212,178,112,0.3);">
     <div class="container nav-inner" style="padding:14px 20px;">
       <a href="/" style="display:flex; align-items:center; gap:12px; text-decoration:none; color:#ffffff;">
@@ -399,93 +478,46 @@
         </div>
       </a>
 
-      <!-- Category Header Nav Links Cluster -->
-      <div class="nav-links mobile-hidden" style="margin-left: 24px; display: flex; align-items: center; gap: 20px;">
-        <a href="/" class="nav-link" style="color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13.5px; font-weight: 600;">Home</a>
-        <div class="sat-nav-dropdown-wrap">
-          <a href="javascript:void(0)" class="nav-link" style="color: var(--champagne-gold); text-decoration: none; font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 4px;" onclick="if(window.innerWidth <= 992) openSatMobileDrawer(); else this.parentElement.classList.toggle('active');">
-            <i class="fa-solid fa-gem" style="font-size: 11px;"></i>
-            <span>Collections</span>
-            <i class="fa-solid fa-chevron-down" style="font-size: 9px; opacity: 0.8;"></i>
-          </a>
-          <partial name="_MegaMenu" />
-        </div>
-        <a href="/Home/Index#craft-video-section" class="nav-link" style="color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13.5px; font-weight: 600;">Craft Process</a>
-      </div>
-
-      <div style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+      <div style="margin-left:auto; display:flex; align-items:center; gap:14px;">
+        <a href="/" style="color:var(--champagne-gold); font-size:13.5px; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-arrow-left" style="font-size:12px;"></i> Back to Home
+        </a>
         <partial name="_AuthNav" />
-        <button class="hamburger desktop-hidden" onclick="openSatMobileDrawer()" aria-label="Menu" style="background:transparent; border:none; color:#ffffff; font-size:20px; cursor:pointer;">
-          <i class="fa-solid fa-bars"></i>
-        </button>
       </div>
     </div>
   </nav>
 
-  <!-- Top Hero Header Section (Signature Dark Theme matching SAT Jewel) -->
-  <section class="cat-hero-bg">
+  <!-- Task 1 & Task 3: 6 Category Redirection Buttons Section (Identical UI to Reference Images 1 & 2) -->
+  <section class="cat-redir-section">
     <div class="cat-container">
-      <div class="cat-breadcrumb">
-        <a href="/">Home</a> <span>&gt;</span>
-        <span style="color:#ffffff; font-weight:600;">Lab Diamond @categoryName</span>
-      </div>
+      <h1 class="cat-redir-title">Lab Grown Diamond @categoryName</h1>
+      <p class="cat-redir-desc">
+        Shop Lab Grown Diamond @categoryName, the perfect symbol of love and commitment. Explore @categoryName.ToLower() in a variety of styles, including solitaire, pavé, hidden halo, halo, halo &amp; pavé, three stone, bezel, cluster, split shank, Toi et Moi, and many other beautiful designs.
+      </p>
 
-      <div class="cat-hero-grid">
-        <!-- Left Box -->
-        <div>
-          <h1 class="cat-hero-title">Lab Diamond @categoryName</h1>
-          <p class="cat-hero-desc">
-            Celebrate your enduring commitment with our magnificent collection of <strong style="color:var(--champagne-gold);">Lab Diamond @categoryName s</strong>. These rings are designed to honor your milestones, featuring stunning, continuous sparkle in classic and contemporary settings like eternity bands and glamorous five-stone designs.
-          </p>
-          <p class="cat-hero-desc">
-            Every diamond is <strong style="color:var(--champagne-gold);">lab-created</strong>, possessing the exact brilliance and chemical composition of a natural diamond.
-          </p>
-          <a class="cat-read-more">Read More</a>
-
-          <div class="cat-features-row">
-            <span><i class="fa-solid fa-box-open"></i> Ready to ship worldwide</span>
-            <span><i class="fa-solid fa-rotate-left"></i> Easy 30-day returns</span>
-          </div>
-        </div>
-
-        <!-- Right Box: Banner Card Image -->
-        <div>
-          <div class="cat-banner-card">
-            <img src="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" alt="Lab Diamond @categoryName Banner" />
-            <div class="cat-banner-overlay-text">
-              LAB DIAMOND @categoryName.ToUpper()
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Main Content Container -->
-  <div class="cat-container">
-    <!-- Sub-Category Pill Navigation Bar (Matches Image 5) -->
-    <div style="margin: 20px 0 24px; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none;">
-      <div style="display: flex; gap: 12px; padding: 4px 0; min-width: max-content;">
-        <a href="/Product/Category?id=5" class="subcat-pill @(categoryId == 5 ? "active" : "")">
+      <!-- 6 Equal-Width Redirection Buttons (Desktop: 1 Row, Mobile: 2 Columns) -->
+      <div class="cat-redir-grid">
+        <a href="/Product/Category?id=1" class="cat-redir-btn @(categoryId == 1 ? "active" : "")">
           ENGAGEMENT RINGS
         </a>
-        <a href="/Product/Category?id=6" class="subcat-pill @(categoryId == 6 ? "active" : "")">
+        <a href="/Product/Category?id=2" class="cat-redir-btn @(categoryId == 2 ? "active" : "")">
           WEDDING RINGS
         </a>
-        <a href="/Product/Category?id=2" class="subcat-pill @(categoryId == 2 ? "active" : "")">
+        <a href="/Product/Category?id=3" class="cat-redir-btn @(categoryId == 3 ? "active" : "")">
           BRIDAL SETS
         </a>
-        <a href="/Product/Category?id=14" class="subcat-pill @(categoryId == 14 ? "active" : "")">
+        <a href="/Product/Category?id=4" class="cat-redir-btn @(categoryId == 4 ? "active" : "")">
           EARRINGS
         </a>
-        <a href="/Product/Category?id=17" class="subcat-pill @(categoryId == 17 ? "active" : "")">
+        <a href="/Product/Category?id=5" class="cat-redir-btn @(categoryId == 5 ? "active" : "")">
           BRACELETS
         </a>
-        <a href="/Product/Category?id=15" class="subcat-pill @(categoryId == 15 ? "active" : "")">
+        <a href="/Product/Category?id=6" class="cat-redir-btn @(categoryId == 6 ? "active" : "")">
           NECKLACES
         </a>
       </div>
     </div>
+  </section>
 
     <!-- Diamond Shape Line-Art Circle Icon Bar (Matches Landing Page & Bianca Chiara Style) -->
     <div class="diamond-shapes-wrapper" style="margin: 20px auto 28px; padding: 16px 0; background: rgba(8, 17, 30, 0.6); border: 1px solid rgba(212, 178, 112, 0.25); border-radius: 16px;">
