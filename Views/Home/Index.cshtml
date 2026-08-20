@@ -50,7 +50,7 @@
         <span>Home</span>
       </a>
       <div class="sat-nav-dropdown-wrap" onmouseenter="openSatMegaDropdown()" onmouseleave="closeSatMegaDropdown()">
-        <a href="javascript:void(0)" class="nav-link" onclick="toggleSatMegaDropdown()">
+        <a href="#collections" class="nav-link" onclick="if(window.innerWidth <= 992) { openSatMobileDrawer(); return false; }">
           <i class="fa-solid fa-gem"></i>
           <span>Collections</span>
           <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px; opacity: 0.8;"></i>
