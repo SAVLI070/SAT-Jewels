@@ -24,29 +24,35 @@
       min-height: 100vh;
       margin: 0;
     }
-    /* Redirection Header & 6 Category Buttons Section (Tasks 1, 2 & 3) */
+    /* Redirection Header & 6 Category Buttons Section with AI Banners */
     .cat-redir-section {
       text-align: center;
-      padding: 44px 0 36px;
-      background: radial-gradient(circle at 50% 20%, #0a1426 0%, #030712 100%);
-      border-bottom: 1px solid rgba(212, 178, 112, 0.2);
+      padding: 56px 0 42px;
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      border-bottom: 1px solid rgba(212, 178, 112, 0.35);
+      position: relative;
+      box-shadow: inset 0 0 120px rgba(0,0,0,0.85);
     }
     .cat-redir-title {
       font-family: var(--font-serif);
-      font-size: 34px;
+      font-size: 38px;
       font-weight: 500;
       color: #ffffff;
       margin: 0 0 14px;
       letter-spacing: -0.2px;
+      text-shadow: 0 3px 18px rgba(0,0,0,0.95);
     }
     .cat-redir-desc {
       max-width: 960px;
-      margin: 0 auto 30px;
-      font-size: 13.5px;
-      line-height: 1.65;
-      color: rgba(255, 255, 255, 0.8);
+      margin: 0 auto 32px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.92);
       font-weight: 400;
       padding: 0 16px;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.95);
     }
     .cat-redir-grid {
       display: grid;
@@ -490,8 +496,8 @@
     </div>
   </nav>
 
-  <!-- Task 1 & Task 3: 6 Category Redirection Buttons Section (Identical UI to Reference Images 1 & 2) -->
-  <section class="cat-redir-section">
+  <!-- 6 Category Redirection Banner Section with AI Generated Background Banners -->
+  <section class="cat-redir-section" style="background-image: linear-gradient(180deg, rgba(5, 11, 20, 0.72) 0%, rgba(5, 11, 20, 0.94) 100%), url('/assets/categories/banners/cat_banner_@(categoryId).jpg');">
     <div class="cat-container">
       <h1 class="cat-redir-title">Lab Grown Diamond @categoryName</h1>
       <p class="cat-redir-desc">
