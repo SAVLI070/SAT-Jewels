@@ -483,7 +483,6 @@
 
 <script>
   function openSatMobileDrawer() {
-    if (window.innerWidth > 992) return; // Guard: mobile only
     const drawer = document.getElementById('satMobileDrawer');
     const backdrop = document.getElementById('satMobileDrawerBackdrop');
     if (drawer && backdrop) {
@@ -503,6 +502,21 @@
       document.body.style.overflow = '';
     }
   }
+
+  function toggleSatMegaDropdown() {
+    const dropdown = document.getElementById('satMegaDropdown');
+    if (dropdown) {
+      dropdown.classList.toggle('show');
+    }
+  }
+
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('satMegaDropdown');
+    const wrap = e.target.closest('.sat-nav-dropdown-wrap');
+    if (!wrap && dropdown && !dropdown.contains(e.target)) {
+      dropdown.classList.remove('show');
+    }
+  });
 
   // Close drawer on resize to desktop
   window.addEventListener('resize', () => {

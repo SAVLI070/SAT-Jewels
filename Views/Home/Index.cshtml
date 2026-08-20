@@ -50,12 +50,11 @@
         <span>Home</span>
       </a>
       <div class="sat-nav-dropdown-wrap">
-        <a href="javascript:void(0)" class="nav-link" onclick="if(window.innerWidth <= 992) openSatMobileDrawer(); else this.parentElement.classList.toggle('active');">
+        <a href="javascript:void(0)" class="nav-link" onclick="if(window.innerWidth <= 992) openSatMobileDrawer(); else toggleSatMegaDropdown();">
           <i class="fa-solid fa-gem"></i>
           <span>Collections</span>
           <i class="fa-solid fa-chevron-down" style="font-size: 10px; margin-left: 4px; opacity: 0.8;"></i>
         </a>
-        <partial name="_MegaMenu" />
       </div>
 
       <a href="#craft-video-section" class="nav-link">
