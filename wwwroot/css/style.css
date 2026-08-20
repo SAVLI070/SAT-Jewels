@@ -391,10 +391,11 @@ a {
 }
 
 .sat-logo-brand {
-  font-family: var(--font-serif);
-  font-size: 24px;
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif);
+  font-size: 22px;
   font-weight: 700;
-  color: var(--cream-ivory);
+  font-style: normal;
+  color: #ffffff;
   letter-spacing: 0.08em;
   line-height: 1;
   white-space: nowrap;
@@ -402,13 +403,15 @@ a {
 
 .sat-logo-brand span, .sat-brand-script {
   color: var(--champagne-gold, #d4b270) !important;
-  font-family: 'Alex Brush', 'Pinyon Script', 'Great Vibes', cursive !important;
-  font-size: 1.32em !important;
-  font-weight: 400 !important;
+  font-family: var(--font-serif, 'Playfair Display', Georgia, serif) !important;
+  font-size: 1em !important;
+  font-weight: 700 !important;
   font-style: normal !important;
-  line-height: 0.8 !important;
+  letter-spacing: 0.06em !important;
+  line-height: 1 !important;
   display: inline-block !important;
-  margin-left: 4px !important;
+  margin-left: 5px !important;
+  text-transform: none !important;
   vertical-align: baseline !important;
 }
 
