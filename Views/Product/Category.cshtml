@@ -609,13 +609,7 @@
 
     <!-- Sub Sort Controls Bar -->
     <div class="sub-sort-bar">
-      <div style="display: flex; align-items: center; gap: 16px;">
-        <a href="/Product/Category?id=@categoryId" class="clear-link">Clear</a>
-        <span style="font-size: 13px; color: rgba(255, 255, 255, 0.75); background: rgba(212, 178, 112, 0.12); border: 1px solid rgba(212, 178, 112, 0.3); padding: 4px 12px; border-radius: 20px; font-weight: 600; letter-spacing: 0.3px;">
-          Showing @(Model?.Count ?? 0) items
-        </span>
-      </div>
-      <div class="sort-select-box">
+      <div class="sort-select-box" style="margin-left: auto;">
         <label for="sortSelect">Sort by:</label>
         <select id="sortSelect" class="sort-dropdown" onchange="applySorting(this.value)">
           <option value="bestselling" selected="@(selectedSort == "bestselling")">Best selling</option>
