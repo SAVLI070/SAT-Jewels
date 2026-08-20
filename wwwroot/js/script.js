@@ -207,10 +207,12 @@ function initNavbar() {
 
   function moveIndicator(el) {
     if (!indicator || !el) return;
+    const container = indicator.parentElement;
+    if (!container) return;
     const rect = el.getBoundingClientRect();
-    const parentRect = el.parentElement.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
     indicator.style.width = `${rect.width}px`;
-    indicator.style.left = `${rect.left - parentRect.left}px`;
+    indicator.style.left = `${rect.left - containerRect.left}px`;
     indicator.style.opacity = '1';
   }
 

@@ -114,32 +114,33 @@
     </a>
   </div>
 
-  <!-- MAIN MOBILE CATEGORY LIST -->
+  <!-- SCREEN 1: MAIN NAVIGATION BAR OPTIONS -->
   <div class="sat-mob-screen active" id="satMobMainScreen">
     <div class="sat-mob-menu-list">
-      <a href="/Product/Category?id=1" class="sat-mob-menu-item">
-        <span>ENGAGEMENT RINGS</span>
-        <i class="fa-solid fa-chevron-right"></i>
+      <a href="/" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span><i class="fa-solid fa-house" style="margin-right:10px; opacity:0.85;"></i> Home</span>
       </a>
-      <a href="/Product/Category?id=2" class="sat-mob-menu-item">
-        <span>WEDDING RINGS</span>
+
+      <!-- DRILLDOWN BUTTON TO COLLECTIONS (SCREEN 2) -->
+      <button type="button" class="sat-mob-menu-item trigger-sub" onclick="openSatMobSubMenu('Collections')">
+        <span><i class="fa-solid fa-gem" style="margin-right:10px; color:var(--champagne-gold, #d4b270);"></i> Collections</span>
         <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+      <a href="/Home/Index#craft-video-section" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span><i class="fa-solid fa-hammer" style="margin-right:10px; opacity:0.85;"></i> Craft Process</span>
       </a>
-      <a href="/Product/Category?id=3" class="sat-mob-menu-item">
-        <span>BRIDAL SETS</span>
-        <i class="fa-solid fa-chevron-right"></i>
+
+      <a href="/Home/Index#ai-features" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span><i class="fa-solid fa-chart-line" style="margin-right:10px; opacity:0.85;"></i> AI Valuer</span>
       </a>
-      <a href="/Product/Category?id=4" class="sat-mob-menu-item">
-        <span>EARRINGS</span>
-        <i class="fa-solid fa-chevron-right"></i>
+
+      <a href="/Home/Index#why" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span><i class="fa-solid fa-shield-halved" style="margin-right:10px; opacity:0.85;"></i> Why SAT Jewel</span>
       </a>
-      <a href="/Product/Category?id=5" class="sat-mob-menu-item">
-        <span>BRACELETS</span>
-        <i class="fa-solid fa-chevron-right"></i>
-      </a>
-      <a href="/Product/Category?id=6" class="sat-mob-menu-item">
-        <span>NECKLACES</span>
-        <i class="fa-solid fa-chevron-right"></i>
+
+      <a href="/Home/Index#cta" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span><i class="fa-solid fa-envelope" style="margin-right:10px; opacity:0.85;"></i> Contact Us</span>
       </a>
     </div>
 
@@ -164,6 +165,54 @@
         <i class="fa-solid fa-globe"></i>
         <span>USD $</span>
       </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: COLLECTIONS DRILLDOWN (6 MAIN CATEGORIES - MATCHING USER IMAGE 1) -->
+  <div class="sat-mob-screen" id="satMobSubScreen">
+    <button type="button" class="sat-mob-back-btn" onclick="backSatMobMainScreen()">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Back to Main Menu</span>
+    </button>
+
+    <div class="sat-mob-menu-list">
+      <a href="/Product/Category?id=1" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span>ENGAGEMENT RINGS</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+      <a href="/Product/Category?id=2" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span>WEDDING RINGS</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+      <a href="/Product/Category?id=3" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span>BRIDAL SETS</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+      <a href="/Product/Category?id=4" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span>EARRINGS</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+      <a href="/Product/Category?id=5" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span>BRACELETS</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+      <a href="/Product/Category?id=6" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+        <span>NECKLACES</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </a>
+    </div>
+
+    <!-- Extra Mobile Utility Links -->
+    <div class="sat-mob-utility-list">
+      <a href="https://wa.me/919265051773" target="_blank" rel="noopener" class="sat-mob-util-item">
+        <i class="fa-brands fa-whatsapp whatsapp-icon"></i>
+        <span>+91 9265051773</span>
+      </a>
+
+      <a href="/Home/Index#cta" class="sat-mob-util-item" onclick="closeSatMobileDrawer()">
+        <i class="fa-solid fa-calendar-check"></i>
+        <span>Virtual Appointment</span>
+      </a>
     </div>
   </div>
 
@@ -462,6 +511,26 @@
     font-size: 18px;
   }
 
+  .sat-mob-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--champagne-gold, #d4b270);
+    background: rgba(212, 178, 112, 0.1);
+    border: none;
+    border-bottom: 1px solid rgba(212, 178, 112, 0.2);
+    cursor: pointer;
+    text-align: left;
+    width: 100%;
+    transition: background 0.2s;
+  }
+  .sat-mob-back-btn:hover {
+    background: rgba(212, 178, 112, 0.2);
+  }
+
   /* STRICT VIEWPORT BREAKPOINTS */
   @@media (min-width: 993px) {
     .sat-mobile-drawer,
@@ -485,6 +554,7 @@
     const drawer = document.getElementById('satMobileDrawer');
     const backdrop = document.getElementById('satMobileDrawerBackdrop');
     if (drawer && backdrop) {
+      backSatMobMainScreen(); // Ensure Screen 1 opens first!
       drawer.style.display = 'flex';
       drawer.classList.add('active');
       backdrop.classList.add('active');
@@ -499,6 +569,24 @@
       drawer.classList.remove('active');
       backdrop.classList.remove('active');
       document.body.style.overflow = '';
+    }
+  }
+
+  function openSatMobSubMenu(title) {
+    const mainScreen = document.getElementById('satMobMainScreen');
+    const subScreen = document.getElementById('satMobSubScreen');
+    if (mainScreen && subScreen) {
+      mainScreen.classList.remove('active');
+      subScreen.classList.add('active');
+    }
+  }
+
+  function backSatMobMainScreen() {
+    const mainScreen = document.getElementById('satMobMainScreen');
+    const subScreen = document.getElementById('satMobSubScreen');
+    if (mainScreen && subScreen) {
+      subScreen.classList.remove('active');
+      mainScreen.classList.add('active');
     }
   }
 
