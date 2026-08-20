@@ -217,17 +217,40 @@ function initNavbar() {
   }
 
   function updateNavIndicator() {
-    const fromTop = window.scrollY + 100;
-    links.forEach(link => {
-      const section = document.querySelector(link.getAttribute('href'));
+    const scrollPos = window.scrollY + 180;
+    let activeFound = false;
+
+    const hashLinks = Array.from(links).filter(l => {
+      const href = l.getAttribute('href');
+      return href && href.startsWith('#');
+    });
+
+    if (window.scrollY <= 50) {
+      const homeLink = document.querySelector('.nav-link[href="#hero"]');
+      if (homeLink) {
+        links.forEach(l => l.classList.remove('active'));
+        homeLink.classList.add('active');
+        moveIndicator(homeLink);
+        return;
+      }
+    }
+
+    for (let i = hashLinks.length - 1; i >= 0; i--) {
+      const link = hashLinks[i];
+      const href = link.getAttribute('href');
+      const section = document.querySelector(href);
+
       if (section) {
-        if (section.offsetTop <= fromTop && section.offsetTop + section.offsetHeight > fromTop) {
+        const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+        if (scrollPos >= sectionTop - 100) {
           links.forEach(l => l.classList.remove('active'));
           link.classList.add('active');
           moveIndicator(link);
+          activeFound = true;
+          break;
         }
       }
-    });
+    }
   }
 
   const activeLink = document.querySelector('.nav-link.active');
