@@ -85,33 +85,37 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f4f4f6;
-      color: #111827;
-      border: 1px solid #d1d5db;
-      padding: 15px 8px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      padding: 14px 8px;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.6px;
       text-transform: uppercase;
       text-decoration: none;
-      border-radius: 2px;
-      transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border-radius: 6px;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
       white-space: nowrap;
     }
     .cat-redir-btn:hover {
-      background: #ffffff;
-      border-color: #d4b270;
-      color: #000000;
-      box-shadow: 0 4px 12px rgba(212, 178, 112, 0.3);
-      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.32);
+      border-color: var(--champagne-gold, #d4b270);
+      color: #ffffff;
+      box-shadow: 0 6px 24px rgba(212, 178, 112, 0.4);
+      transform: translateY(-2px);
     }
     .cat-redir-btn.active {
-      background: #ffffff;
-      border: 2px solid #d4b270;
-      color: #000000;
+      background: rgba(212, 178, 112, 0.28);
+      border: 2px solid var(--champagne-gold, #d4b270);
+      color: #ffffff;
       font-weight: 800;
-      box-shadow: 0 0 15px rgba(212, 178, 112, 0.35);
+      box-shadow: 0 0 25px rgba(212, 178, 112, 0.6);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
 
     .cat-container {
