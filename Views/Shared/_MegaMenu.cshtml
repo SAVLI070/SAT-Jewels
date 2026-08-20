@@ -598,10 +598,27 @@
     height: 24px;
     object-fit: contain;
   }
+  /* STRICT VIEWPORT BREAKPOINTS */
+  @@media (min-width: 993px) {
+    .sat-mobile-drawer,
+    .sat-mobile-drawer-backdrop {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      pointer-events: none !important;
+    }
+  }
+
+  @@media (max-width: 992px) {
+    .sat-mega-dropdown {
+      display: none !important;
+    }
+  }
 </style>
 
 <script>
   function openSatMobileDrawer() {
+    if (window.innerWidth > 992) return; // Strict guard: never open on desktop/laptop screen!
     const drawer = document.getElementById('satMobileDrawer');
     const backdrop = document.getElementById('satMobileDrawerBackdrop');
     if (drawer && backdrop) {
@@ -640,4 +657,11 @@
       mainScreen.classList.add('active');
     }
   }
+
+  // Close drawer on resize to desktop
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 992) {
+      closeSatMobileDrawer();
+    }
+  });
 </script>
