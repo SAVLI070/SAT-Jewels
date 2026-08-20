@@ -14,7 +14,7 @@ namespace SAT1.BAL
             {
                 // Execute SQL cleanup: Truncate all product/order/cart data while preserving table structures
                 var cleanTablesSql = @"
-                    TRUNCATE TABLE ""CartItems"", ""OrderItems"", ""Orders"", ""Payments"", ""ProductVariants"", ""ProductImages"", ""Products"", ""CatalogItems"" RESTART IDENTITY CASCADE;
+                    TRUNCATE TABLE ""OrderItems"", ""Orders"", ""Payments"", ""ProductVariants"", ""ProductImages"", ""Products"", ""CatalogItems"" RESTART IDENTITY CASCADE;
                     TRUNCATE TABLE ""Categories"" RESTART IDENTITY CASCADE;
                 ";
 
