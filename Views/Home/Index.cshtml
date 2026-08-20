@@ -3,23 +3,21 @@
     var catCounts = ViewBag.CategoryCountsByNumericId as Dictionary<long, int> ?? new Dictionary<long, int>();
 }
 
-<!-- Intro Animation Overlay with Golden Pulse Halo -->
+<!-- Intro Animation Overlay -->
 <div id="intro-overlay">
   <div class="intro-bg-glow"></div>
-  <div class="intro-orbital-spinner"></div>
 </div>
 
-<!-- Centered Official Luxury Emblem Logo & Shop Name that animates S-A-T line by line to Navbar -->
+<!-- Centered Animated Shop Name (S-A-T Jewel) that lands beside logo in Navbar -->
 <div id="intro-logo-container">
-  <img src="~/assets/sat_logo_transparent.png" class="official-sat-logo-full" alt="SAT Jewels Official Logo" style="height: 48px; width: auto; object-fit: contain;" />
   <div class="sat-logo-text-wrap" style="display: flex; flex-direction: column;">
-    <div class="sat-logo-brand" style="font-family: var(--font-serif); font-size: 24px; font-weight: 700; color: #ffffff; letter-spacing: 0.06em; line-height: 1; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+    <div class="sat-logo-brand" style="font-family: var(--font-serif, 'Playfair Display', serif); font-size: 26px; font-weight: 700; color: #ffffff; letter-spacing: 0.12em; line-height: 1; white-space: nowrap; display: flex; align-items: center;">
       <span class="sat-letter sat-letter-s">S</span>
-      <span class="sat-letter sat-letter-a">A</span>
-      <span class="sat-letter sat-letter-t">T</span>
-      <span class="sat-brand-script sat-word-jewel" style="margin-left: 4px;">Jewel</span>
+      <span class="sat-letter sat-letter-a" style="margin-left: 2px;">A</span>
+      <span class="sat-letter sat-letter-t" style="margin-left: 2px;">T</span>
+      <span class="sat-brand-script sat-word-jewel" style="margin-left: 8px; font-size: 28px;">Jewel</span>
     </div>
-    <div class="sat-logo-tagline" style="font-size: 9.5px; font-weight: 600; color: rgba(255, 255, 255, 0.75); letter-spacing: 0.18em; text-transform: uppercase; margin-top: 2px;">Fine Jewelry</div>
+    <div class="sat-logo-tagline" style="font-size: 9.5px; font-weight: 600; color: rgba(255, 255, 255, 0.75); letter-spacing: 0.22em; text-transform: uppercase; margin-top: 3px;">Fine Jewelry</div>
   </div>
 </div>
 
@@ -45,8 +43,11 @@
 <!-- Navbar — Single Horizontal Line -->
 <nav class="navbar" id="navbar">
   <div class="container nav-inner">
-    <!-- Target Slot where centered logo lands -->
-    <div class="nav-logo-slot"></div>
+    <!-- Navbar Brand Wrap: Shop Logo Emblem + Landed Animated Shop Name -->
+    <a href="/" class="sat-nav-brand-wrap" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+      <img src="~/assets/sat_logo_transparent.png" class="official-sat-logo-nav" alt="SAT Jewels Official Logo" style="height: 42px; width: auto; object-fit: contain;" />
+      <div class="nav-logo-slot"></div>
+    </a>
 
     <!-- Navigation Bar Links -->
     <div class="nav-links">

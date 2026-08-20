@@ -199,9 +199,14 @@ a {
   transform: none !important;
 }
 
-/* S A T Sequential Letter Animations */
+/* S A T Sequential Letter Animations (Luxury Serif Typography) */
 .sat-letter {
   display: inline-block;
+  font-family: var(--font-serif, 'Playfair Display', serif);
+  font-weight: 700;
+  font-style: normal;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   opacity: 0;
   transform: translateY(16px) scale(0.65);
   filter: blur(6px);
