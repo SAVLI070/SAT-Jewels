@@ -119,12 +119,12 @@ function updateCategoryCounts() {
   if (adminTotalEl) adminTotalEl.textContent = totalItems;
 }
 
-// 1. Animated S-A-T Logo Transition into Top Navbar
+// 1. Animated S-A-T Logo Transition into Top Navbar (Active until page completely loaded)
 function initLogoTransition() {
   const logoContainer = document.getElementById('intro-logo-container');
   const overlay = document.getElementById('intro-overlay');
 
-  if (!logoContainer) return;
+  if (!logoContainer || !overlay) return;
 
   const isMobile = window.innerWidth <= 768;
   if (isMobile) {
@@ -138,11 +138,13 @@ function initLogoTransition() {
 
   logoContainer.classList.add('intro-animating');
 
-  // Fade out intro overlay after S-A-T letter reveal sequence completes
-  setTimeout(() => {
-    if (overlay) {
-      overlay.classList.add('fade-out');
-    }
+  let pageLoaded = false;
+  let minAnimDone = false;
+
+  function finishLoadingOverlay() {
+    if (!pageLoaded || !minAnimDone) return;
+
+    overlay.classList.add('fade-out');
     if (logoContainer) {
       logoContainer.style.opacity = '0';
       logoContainer.style.transition = 'opacity 0.6s ease';
@@ -152,8 +154,24 @@ function initLogoTransition() {
       if (overlay) overlay.style.display = 'none';
       if (logoContainer) logoContainer.style.display = 'none';
     }, 600);
+  }
 
-  }, 1350);
+  // Minimum duration for S-A-T letter animation sequence (1.2s)
+  setTimeout(() => {
+    minAnimDone = true;
+    finishLoadingOverlay();
+  }, 1200);
+
+  // Guarantee loading animation stays active until site resources & DOM are 100% loaded
+  if (document.readyState === 'complete') {
+    pageLoaded = true;
+    finishLoadingOverlay();
+  } else {
+    window.addEventListener('load', () => {
+      pageLoaded = true;
+      finishLoadingOverlay();
+    });
+  }
 }
 
 // 2. Navbar Scroll Shrink & Indicator Logic
