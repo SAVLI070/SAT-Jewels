@@ -177,31 +177,30 @@
   }
 
   .sat-mega-dropdown {
-    position: absolute;
-    top: calc(100% + 12px);
+    position: fixed;
+    top: 76px;
     left: 50%;
     transform: translateX(-50%);
     width: min(980px, 94vw);
-    background: rgba(8, 17, 30, 0.97);
+    background: rgba(8, 17, 30, 0.98);
     backdrop-filter: blur(24px);
     border: 1px solid rgba(212, 178, 112, 0.35);
     border-radius: 14px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
     padding: 26px 30px;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 99999;
+    z-index: 999999;
   }
 
-  .sat-nav-dropdown-wrap:hover .sat-mega-dropdown,
-  .sat-nav-dropdown-wrap.active .sat-mega-dropdown,
-  .sat-mega-dropdown.show {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
+  .sat-mega-dropdown.show,
+  .sat-mega-dropdown:hover {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    transform: translateX(-50%) translateY(0) !important;
   }
 
   /* Mega Grid */
@@ -503,10 +502,23 @@
     }
   }
 
-  function toggleSatMegaDropdown() {
+  function openSatMegaDropdown() {
+    if (window.innerWidth <= 992) return;
     const dropdown = document.getElementById('satMegaDropdown');
-    if (dropdown) {
-      dropdown.classList.toggle('show');
+    if (dropdown) dropdown.classList.add('show');
+  }
+
+  function closeSatMegaDropdown() {
+    const dropdown = document.getElementById('satMegaDropdown');
+    if (dropdown) dropdown.classList.remove('show');
+  }
+
+  function toggleSatMegaDropdown() {
+    if (window.innerWidth <= 992) {
+      openSatMobileDrawer();
+    } else {
+      const dropdown = document.getElementById('satMegaDropdown');
+      if (dropdown) dropdown.classList.toggle('show');
     }
   }
 

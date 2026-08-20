@@ -1086,8 +1086,8 @@
       <!-- Details Header Nav Links Cluster -->
       <div class="nav-links mobile-hidden" style="margin-left: 24px; display: flex; align-items: center; gap: 20px;">
         <a href="/" class="nav-link" style="color: rgba(255,255,255,0.85); text-decoration: none; font-size: 13.5px; font-weight: 600;">Home</a>
-        <div class="sat-nav-dropdown-wrap">
-          <a href="javascript:void(0)" class="nav-link" style="color: var(--champagne-gold); text-decoration: none; font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 4px;" onclick="if(window.innerWidth <= 992) openSatMobileDrawer(); else toggleSatMegaDropdown();">
+        <div class="sat-nav-dropdown-wrap" onmouseenter="openSatMegaDropdown()" onmouseleave="closeSatMegaDropdown()">
+          <a href="javascript:void(0)" class="nav-link" style="color: var(--champagne-gold); text-decoration: none; font-size: 13.5px; font-weight: 700; display: flex; align-items: center; gap: 4px;" onclick="toggleSatMegaDropdown()">
             <i class="fa-solid fa-gem" style="font-size: 11px;"></i>
             <span>Collections</span>
             <i class="fa-solid fa-chevron-down" style="font-size: 9px; opacity: 0.8;"></i>
