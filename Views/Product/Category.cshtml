@@ -483,6 +483,9 @@
           <i class="fa-solid fa-arrow-left" style="font-size:12px;"></i> Back to Home
         </a>
         <partial name="_AuthNav" />
+        <button class="hamburger desktop-hidden" onclick="openSatMobileDrawer()" aria-label="Menu" style="background:transparent; border:none; color:#ffffff; font-size:22px; cursor:pointer;">
+          <i class="fa-solid fa-bars"></i>
+        </button>
       </div>
     </div>
   </nav>
@@ -703,6 +706,9 @@
       } catch (e) {}
     }
   </script>
+
+  <!-- SAT Jewel Mobile Sidebar Drawer & Mega Menu Partial -->
+  <partial name="_MegaMenu" />
 
   <!-- SAT Jewel Footer -->
   <partial name="_Footer" />

@@ -4,17 +4,6 @@
 <div class="sat-mega-dropdown" id="satMegaDropdown">
   <div class="sat-mega-container">
     
-    <!-- Top Horizontal Sub-Categories Navigation Bar -->
-    <div class="sat-mega-subnav">
-      <a href="/Product/Category?id=1" class="sat-mega-subnav-link">Best Seller</a>
-      <a href="/Product/Category?id=1" class="sat-mega-subnav-link active">Engagement Rings</a>
-      <a href="/Product/Category?id=2" class="sat-mega-subnav-link">Wedding Rings</a>
-      <a href="/Product/Category?id=3" class="sat-mega-subnav-link">Bridal Sets</a>
-      <a href="/Product/Category?id=4" class="sat-mega-subnav-link">Earrings</a>
-      <a href="/Product/Category?id=5" class="sat-mega-subnav-link">Bracelets</a>
-      <a href="/Product/Category?id=6" class="sat-mega-subnav-link">Necklaces</a>
-    </div>
-
     <!-- Main Mega Content Grid -->
     <div class="sat-mega-grid">
 
@@ -243,20 +232,21 @@
 
   .sat-mega-dropdown {
     position: absolute;
-    top: 100%;
-    left: 0;
-    width: 92vw;
-    max-width: 1280px;
-    background: #060e19;
+    top: calc(100% + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(1040px, 94vw);
+    background: rgba(8, 17, 30, 0.96);
+    backdrop-filter: blur(20px);
     border: 1px solid rgba(212, 178, 112, 0.35);
-    border-radius: 12px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
-    padding: 24px 30px 28px;
+    border-radius: 14px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+    padding: 26px 30px;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 9999;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 99999;
   }
 
   .sat-nav-dropdown-wrap:hover .sat-mega-dropdown,
@@ -265,7 +255,7 @@
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
   }
 
   /* Subnav Bar */
@@ -618,12 +608,14 @@
 
 <script>
   function openSatMobileDrawer() {
-    if (window.innerWidth > 992) return; // Strict guard: never open on desktop/laptop screen!
+    if (window.innerWidth > 992) return; // Guard: mobile only
     const drawer = document.getElementById('satMobileDrawer');
     const backdrop = document.getElementById('satMobileDrawerBackdrop');
     if (drawer && backdrop) {
+      drawer.style.display = 'flex';
       drawer.classList.add('active');
       backdrop.classList.add('active');
+      document.body.style.overflow = 'hidden';
     }
   }
 
@@ -633,6 +625,7 @@
     if (drawer && backdrop) {
       drawer.classList.remove('active');
       backdrop.classList.remove('active');
+      document.body.style.overflow = '';
     }
   }
 
