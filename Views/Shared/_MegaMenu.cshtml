@@ -1,4 +1,6 @@
-<!-- SAT JEWEL LUXURY MEGA MENU DROPDOWN -->
+<!-- SAT JEWEL LUXURY MEGA MENU & MOBILE OFF-CANVAS DRAWER -->
+
+<!-- 1. DESKTOP MEGA MENU DROPDOWN (ALIGNED TO LEFT CONTAINER EDGE) -->
 <div class="sat-mega-dropdown" id="satMegaDropdown">
   <div class="sat-mega-container">
     
@@ -108,8 +110,132 @@
   </div>
 </div>
 
+
+<!-- 2. MOBILE OFF-CANVAS NAVIGATION DRAWER (MATCHING REFERENCE IMAGES 2 & 3) -->
+<div class="sat-mobile-drawer-backdrop" id="satMobileDrawerBackdrop" onclick="closeSatMobileDrawer()"></div>
+
+<div class="sat-mobile-drawer" id="satMobileDrawer">
+  
+  <!-- Mobile Header Control Bar -->
+  <div class="sat-mob-header">
+    <button type="button" class="sat-mob-close-btn" onclick="closeSatMobileDrawer()" aria-label="Close menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+    
+    <div class="sat-mob-logo-center">
+      <img src="/assets/sat_logo_transparent.png" alt="SAT Jewel Logo" style="height:28px;" />
+    </div>
+
+    <a href="/Product/Cart" class="sat-mob-cart-btn" aria-label="View Cart">
+      <i class="fa-solid fa-bag-shopping"></i>
+    </a>
+  </div>
+
+  <!-- LEVEL 1: MAIN MOBILE CATEGORY LIST (IMAGE 2) -->
+  <div class="sat-mob-screen active" id="satMobMainScreen">
+    <div class="sat-mob-menu-list">
+      <a href="/Product/Category?id=5" class="sat-mob-menu-item">
+        <span>Best Seller</span>
+      </a>
+
+      <button type="button" class="sat-mob-menu-item trigger-sub" onclick="openSatMobSubMenu('Diamond Ring')">
+        <span>Diamond Ring</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+      <button type="button" class="sat-mob-menu-item trigger-sub" onclick="openSatMobSubMenu('Fine Jewelry')">
+        <span>Fine Jewelry</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+      <button type="button" class="sat-mob-menu-item trigger-sub" onclick="openSatMobSubMenu('SAT Exclusive')">
+        <span>SAT Exclusive</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+      <button type="button" class="sat-mob-menu-item trigger-sub" onclick="openSatMobSubMenu('Hip Hop Jewelry')">
+        <span>Hip Hop Jewelry</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+      <button type="button" class="sat-mob-menu-item trigger-sub" onclick="openSatMobSubMenu('Diamonds')">
+        <span>Diamonds</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+
+      <button type="button" class="sat-mob-menu-item trigger-sub" onclick="openSatMobSubMenu('Gifts')">
+        <span>Gifts</span>
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+
+    <!-- Extra Mobile Utility Links (WhatsApp, Appointment, Account, Currency) -->
+    <div class="sat-mob-utility-list">
+      <a href="https://wa.me/919265051773" target="_blank" rel="noopener" class="sat-mob-util-item">
+        <i class="fa-brands fa-whatsapp whatsapp-icon"></i>
+        <span>+91 9265051773</span>
+      </a>
+
+      <a href="/Home/Index#cta" class="sat-mob-util-item" onclick="closeSatMobileDrawer()">
+        <i class="fa-solid fa-calendar-check"></i>
+        <span>Virtual Appointment</span>
+      </a>
+
+      <a href="/Account/SignIn" class="sat-mob-util-item">
+        <i class="fa-regular fa-user"></i>
+        <span>Log in</span>
+      </a>
+
+      <div class="sat-mob-util-item">
+        <i class="fa-solid fa-globe"></i>
+        <span>USD $</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- LEVEL 2: DRILLDOWN SUB-CATEGORY SCREEN (IMAGE 3) -->
+  <div class="sat-mob-screen" id="satMobSubScreen">
+    <button type="button" class="sat-mob-back-btn" onclick="backSatMobMainScreen()">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span id="satMobSubTitle">Diamond Ring</span>
+    </button>
+
+    <div class="sat-mob-sub-scroll">
+      <!-- Section 1: Lab Grown Diamonds -->
+      <div class="sat-mob-sub-group">
+        <h4 class="sat-mob-group-title">
+          LAB GROWN DIAMONDS
+          <i class="fa-solid fa-circle-info sat-info-icon"></i>
+        </h4>
+        
+        <div class="sat-mob-ring-grid">
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/round.svg" alt="Engagement Rings" /><span>Engagement Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/marquise.svg" alt="Eternity Rings" /><span>Eternity Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/asscher.svg" alt="Anniversary Rings" /><span>Anniversary Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/pear.svg" alt="Solitaire Rings" /><span>Solitaire Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/princess.svg" alt="Halo Rings" /><span>Halo Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/cushion.svg" alt="Toi Moi Rings" /><span>Toi Moi Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/radiant.svg" alt="Three Stone Rings" /><span>Three Stone Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/oval.svg" alt="Nature Inspired Rings" /><span>Nature Inspired Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/emerald.svg" alt="Rose Cut Rings" /><span>Rose Cut Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/heart.svg" alt="Fancy Color Rings" /><span>Fancy Color Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/asscher.svg" alt="Antique Cut Rings" /><span>Antique Cut Rings</span></a>
+          <a href="/Product/Category?id=6" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/round.svg" alt="Wedding Rings" /><span>Wedding Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/oval.svg" alt="Minimal Rings" /><span>Minimal Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/cushion.svg" alt="Daily wear Rings" /><span>Daily wear Rings</span></a>
+          <a href="/Product/Category?id=6" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/radiant.svg" alt="Wedding Band Rings" /><span>Wedding Band Rings</span></a>
+          <a href="/Product/Category?id=5" class="sat-mob-ring-card"><img src="/assets/shapes/bianca/emerald.svg" alt="Exclusive Lab Grown Diamond Rings" /><span>Exclusive Lab Grown Diamond Rings</span></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
 <style>
-  /* SAT MEGA MENU STYLES */
+  /* DESKTOP MEGA MENU STYLES (PROPER LEFT CONTAINER ALIGNMENT) */
   .sat-nav-dropdown-wrap {
     position: relative;
     display: inline-block;
@@ -118,14 +244,13 @@
   .sat-mega-dropdown {
     position: absolute;
     top: 100%;
-    left: 50%;
-    transform: translateX(-50%) translateY(12px);
-    width: 95vw;
+    left: 0;
+    width: 92vw;
     max-width: 1280px;
     background: #060e19;
     border: 1px solid rgba(212, 178, 112, 0.35);
     border-radius: 12px;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.95);
     padding: 24px 30px 28px;
     opacity: 0;
     visibility: hidden;
@@ -140,10 +265,10 @@
     opacity: 1;
     visibility: visible;
     pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
+    transform: translateY(0);
   }
 
-  /* Top Subnav Bar */
+  /* Subnav Bar */
   .sat-mega-subnav {
     display: flex;
     align-items: center;
@@ -202,12 +327,10 @@
     cursor: pointer;
   }
 
-  /* Sublist 2 columns */
   .sat-mega-sublist-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 16px;
-
   }
   .sat-sublist-col {
     display: flex;
@@ -237,7 +360,6 @@
     opacity: 1;
   }
 
-  /* Bottom All Link */
   .sat-mega-col-footer {
     margin-top: 20px;
     padding-top: 12px;
@@ -258,7 +380,6 @@
     color: #ffffff;
   }
 
-  /* Featured Card */
   .sat-mega-card {
     position: relative;
     width: 100%;
@@ -313,25 +434,210 @@
     transform: translateY(-2px);
   }
 
-  /* Mobile Responsive Dropdown */
-  @@media (max-width: 992px) {
-    .sat-mega-dropdown {
-      position: static;
-      transform: none !important;
-      width: 100%;
-      max-width: 100%;
-      display: none;
-      padding: 16px;
-      box-shadow: none;
-    }
-    .sat-mega-dropdown.show {
-      display: block;
-    }
-    .sat-mega-grid {
-      grid-template-columns: 1fr;
-    }
-    .sat-mega-featured-col {
-      display: none;
-    }
+  /* MOBILE OFF-CANVAS DRAWER STYLES (IMAGES 2 & 3) */
+  .sat-mobile-drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(5px);
+    z-index: 99998;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+  .sat-mobile-drawer-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .sat-mobile-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 88vw;
+    max-width: 360px;
+    height: 100vh;
+    background: #ffffff;
+    color: #111111;
+    z-index: 99999;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 10px 0 40px rgba(0,0,0,0.5);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .sat-mobile-drawer.active {
+    transform: translateX(0);
+  }
+
+  /* Mobile Header */
+  .sat-mob-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+  }
+  .sat-mob-close-btn, .sat-mob-cart-btn {
+    background: transparent;
+    border: none;
+    font-size: 20px;
+    color: #111111;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  /* Screens */
+  .sat-mob-screen {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    overflow-y: auto;
+  }
+  .sat-mob-screen.active {
+    display: flex;
+  }
+
+  /* Level 1 List */
+  .sat-mob-menu-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .sat-mob-menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #111111;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #f3f4f6;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+  }
+  .sat-mob-menu-item i {
+    font-size: 13px;
+    color: #9ca3af;
+  }
+
+  /* Utility list */
+  .sat-mob-utility-list {
+    margin-top: 10px;
+    border-top: 1px solid #e5e7eb;
+  }
+  .sat-mob-util-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    font-size: 14px;
+    color: #374151;
+    text-decoration: none;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  .sat-mob-util-item i {
+    font-size: 18px;
+    color: #6b7280;
+  }
+  .whatsapp-icon {
+    color: #25D366 !important;
+  }
+
+  /* Level 2 Sub Screen */
+  .sat-mob-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111111;
+    background: #f9fafb;
+    border: none;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .sat-mob-sub-scroll {
+    padding: 16px 20px;
+  }
+  .sat-mob-group-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111111;
+    letter-spacing: 0.05em;
+    margin: 0 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sat-mob-ring-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .sat-mob-ring-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+    color: #374151;
+    font-size: 13.5px;
+    font-weight: 500;
+  }
+  .sat-mob-ring-card img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
   }
 </style>
+
+<script>
+  function openSatMobileDrawer() {
+    const drawer = document.getElementById('satMobileDrawer');
+    const backdrop = document.getElementById('satMobileDrawerBackdrop');
+    if (drawer && backdrop) {
+      drawer.classList.add('active');
+      backdrop.classList.add('active');
+    }
+  }
+
+  function closeSatMobileDrawer() {
+    const drawer = document.getElementById('satMobileDrawer');
+    const backdrop = document.getElementById('satMobileDrawerBackdrop');
+    if (drawer && backdrop) {
+      drawer.classList.remove('active');
+      backdrop.classList.remove('active');
+    }
+  }
+
+  function openSatMobSubMenu(title) {
+    const mainScreen = document.getElementById('satMobMainScreen');
+    const subScreen = document.getElementById('satMobSubScreen');
+    const subTitle = document.getElementById('satMobSubTitle');
+
+    if (subTitle) subTitle.innerText = title;
+    if (mainScreen && subScreen) {
+      mainScreen.classList.remove('active');
+      subScreen.classList.add('active');
+    }
+  }
+
+  function backSatMobMainScreen() {
+    const mainScreen = document.getElementById('satMobMainScreen');
+    const subScreen = document.getElementById('satMobSubScreen');
+
+    if (mainScreen && subScreen) {
+      subScreen.classList.remove('active');
+      mainScreen.classList.add('active');
+    }
+  }
+</script>
