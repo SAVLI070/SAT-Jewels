@@ -142,6 +142,23 @@ namespace SAT1.Controllers
                 case "alphaasc":
                     products = products.OrderBy(p => p.Name).ToList();
                     break;
+                case "alpha-desc":
+                case "alphadesc":
+                    products = products.OrderByDescending(p => p.Name).ToList();
+                    break;
+                case "date-asc":
+                case "dateasc":
+                    products = products.OrderBy(p => p.CreatedAt).ToList();
+                    break;
+                case "date-desc":
+                case "datedesc":
+                    products = products.OrderByDescending(p => p.CreatedAt).ToList();
+                    break;
+                case "relevant":
+                    products = products.OrderBy(p => p.Id).ToList();
+                    break;
+                case "featured":
+                case "bestselling":
                 default:
                     products = products.OrderByDescending(p => p.CreatedAt).ToList();
                     break;

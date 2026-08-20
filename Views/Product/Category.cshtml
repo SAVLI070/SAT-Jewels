@@ -6,6 +6,21 @@
     var selectedShape = ViewBag.SelectedShape as string ?? "All";
     var selectedSort = ViewBag.SelectedSort as string ?? "bestselling";
 }
+@functions {
+    string GetSortDisplayName(string key) {
+        return (key?.ToLower()) switch {
+            "featured" => "Featured",
+            "relevant" => "Most relevant",
+            "alpha-asc" => "Alphabetically, A-Z",
+            "alpha-desc" => "Alphabetically, Z-A",
+            "price-asc" => "Price, low to high",
+            "price-desc" => "Price, high to low",
+            "date-asc" => "Date, old to new",
+            "date-desc" => "Date, new to old",
+            _ => "Best selling"
+        };
+    }
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -302,39 +317,98 @@
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
     }
     
-    /* Sub Sort Bar */
+    /* Luxury Custom SORT BY Dropdown Controls */
     .sub-sort-bar {
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       align-items: center;
       margin-bottom: 28px;
-      font-size: 13.5px;
+      position: relative;
     }
-    .clear-link {
-      color: var(--champagne-gold);
-      text-decoration: underline;
-      cursor: pointer;
-      font-weight: 600;
+    .sat-sort-wrap {
+      position: relative;
+      display: inline-block;
     }
-    .sort-select-box {
+    .sat-sort-btn {
       display: flex;
       align-items: center;
-      gap: 10px;
-      color: rgba(255, 255, 255, 0.75);
-    }
-    .sort-dropdown {
-      padding: 8px 16px;
-      border: 1px solid rgba(212, 178, 112, 0.35);
+      gap: 12px;
+      padding: 11px 22px;
+      background: #08111e;
+      border: 1px solid rgba(212, 178, 112, 0.4);
       border-radius: 8px;
-      font-size: 13.5px;
-      background: #0d1b2a;
       color: #ffffff;
-      outline: none;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.35);
+      transition: all 0.25s ease;
+    }
+    .sat-sort-btn:hover,
+    .sat-sort-btn.open {
+      border-color: var(--champagne-gold, #d4b270);
+      box-shadow: 0 4px 22px rgba(212, 178, 112, 0.4);
+      background: #0d1b2e;
+    }
+    .sat-sort-chevron {
+      font-size: 11px;
+      color: var(--champagne-gold, #d4b270);
+      transition: transform 0.3s ease;
+    }
+    .sat-sort-btn.open .sat-sort-chevron {
+      transform: rotate(180deg);
+    }
+    .sat-sort-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 250px;
+      background: rgba(8, 17, 30, 0.98);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      border: 1px solid rgba(212, 178, 112, 0.4);
+      border-radius: 12px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.9);
+      padding: 8px 0;
+      z-index: 999;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-8px);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .sat-sort-dropdown-menu.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .sat-sort-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 22px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+      transition: all 0.2s ease;
       cursor: pointer;
     }
-    .sort-dropdown option {
-      background: #08111e;
-      color: #ffffff;
+    .sat-sort-item:hover {
+      background: rgba(212, 178, 112, 0.12);
+      color: var(--champagne-gold, #d4b270);
+    }
+    .sat-sort-item.active {
+      color: var(--champagne-gold, #d4b270);
+      font-weight: 700;
+      background: rgba(212, 178, 112, 0.18);
+    }
+    .sat-sort-item i {
+      font-size: 12px;
+      color: var(--champagne-gold, #d4b270);
     }
     
     /* 4-Column Product Grid (SAT Jewel Dark Theme) */
@@ -617,16 +691,52 @@
       </div>
     </div>
 
-    <!-- Sub Sort Controls Bar -->
+    <!-- Sub Sort Controls Bar with SAT Jewel Luxury Custom SORT BY Dropdown -->
     <div class="sub-sort-bar">
-      <div class="sort-select-box" style="margin-left: auto;">
-        <label for="sortSelect">Sort by:</label>
-        <select id="sortSelect" class="sort-dropdown" onchange="applySorting(this.value)">
-          <option value="bestselling" selected="@(selectedSort == "bestselling")">Best selling</option>
-          <option value="price-asc" selected="@(selectedSort == "price-asc")">Price, low to high</option>
-          <option value="price-desc" selected="@(selectedSort == "price-desc")">Price, high to low</option>
-          <option value="alpha-asc" selected="@(selectedSort == "alpha-asc")">Alphabetically, A-Z</option>
-        </select>
+      <div class="sat-sort-wrap">
+        <button type="button" class="sat-sort-btn" onclick="toggleSatSortMenu()" id="satSortBtn">
+          <span>SORT BY <i class="fa-solid fa-angle-down" style="font-size: 11px; margin-left: 4px;"></i></span>
+          <span style="color: var(--champagne-gold, #d4b270); font-weight: 800;">@GetSortDisplayName(selectedSort)</span>
+        </button>
+
+        <div class="sat-sort-dropdown-menu" id="satSortMenu">
+          <a href="javascript:void(0)" onclick="applySorting('featured')" class="sat-sort-item @(selectedSort == "featured" ? "active" : "")">
+            <span>Featured</span>
+            @if (selectedSort == "featured") { <i class="fa-solid fa-check"></i> }
+          </a>
+          <a href="javascript:void(0)" onclick="applySorting('relevant')" class="sat-sort-item @(selectedSort == "relevant" ? "active" : "")">
+            <span>Most relevant</span>
+            @if (selectedSort == "relevant") { <i class="fa-solid fa-check"></i> }
+          </a>
+          <a href="javascript:void(0)" onclick="applySorting('bestselling')" class="sat-sort-item @(selectedSort == "bestselling" || string.IsNullOrEmpty(selectedSort) ? "active" : "")">
+            <span>Best selling</span>
+            @if (selectedSort == "bestselling" || string.IsNullOrEmpty(selectedSort)) { <i class="fa-solid fa-check"></i> }
+          </a>
+          <a href="javascript:void(0)" onclick="applySorting('alpha-asc')" class="sat-sort-item @(selectedSort == "alpha-asc" ? "active" : "")">
+            <span>Alphabetically, A-Z</span>
+            @if (selectedSort == "alpha-asc") { <i class="fa-solid fa-check"></i> }
+          </a>
+          <a href="javascript:void(0)" onclick="applySorting('alpha-desc')" class="sat-sort-item @(selectedSort == "alpha-desc" ? "active" : "")">
+            <span>Alphabetically, Z-A</span>
+            @if (selectedSort == "alpha-desc") { <i class="fa-solid fa-check"></i> }
+          </a>
+          <a href="javascript:void(0)" onclick="applySorting('price-asc')" class="sat-sort-item @(selectedSort == "price-asc" ? "active" : "")">
+            <span>Price, low to high</span>
+            @if (selectedSort == "price-asc") { <i class="fa-solid fa-check"></i> }
+          </a>
+          <a href="javascript:void(0)" onclick="applySorting('price-desc')" class="sat-sort-item @(selectedSort == "price-desc" ? "active" : "")">
+            <span>Price, high to low</span>
+            @if (selectedSort == "price-desc") { <i class="fa-solid fa-check"></i> }
+          </a>
+          <a href="javascript:void(0)" onclick="applySorting('date-asc')" class="sat-sort-item @(selectedSort == "date-asc" ? "active" : "")">
+            <span>Date, old to new</span>
+            @if (selectedSort == "date-asc") { <i class="fa-solid fa-check"></i> }
+          </a>
+          <a href="javascript:void(0)" onclick="applySorting('date-desc')" class="sat-sort-item @(selectedSort == "date-desc" ? "active" : "")">
+            <span>Date, new to old</span>
+            @if (selectedSort == "date-desc") { <i class="fa-solid fa-check"></i> }
+          </a>
+        </div>
       </div>
     </div>
 
@@ -685,6 +795,25 @@
     function scrollShapes(offset) {
       document.getElementById('shapesTrack').scrollBy({ left: offset, behavior: 'smooth' });
     }
+
+    function toggleSatSortMenu() {
+      const menu = document.getElementById('satSortMenu');
+      const btn = document.getElementById('satSortBtn');
+      if (menu && btn) {
+        menu.classList.toggle('show');
+        btn.classList.toggle('open');
+      }
+    }
+
+    document.addEventListener('click', (e) => {
+      const wrap = e.target.closest('.sat-sort-wrap');
+      const menu = document.getElementById('satSortMenu');
+      const btn = document.getElementById('satSortBtn');
+      if (!wrap && menu && btn) {
+        menu.classList.remove('show');
+        btn.classList.remove('open');
+      }
+    });
 
     function applySorting(sortVal) {
       const urlParams = new URLSearchParams(window.location.search);
