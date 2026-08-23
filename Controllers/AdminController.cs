@@ -4,6 +4,7 @@ using SAT1.BAL;
 namespace SAT1.Controllers
 {
     [Route("admin")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class AdminController : Controller
     {
         private readonly AdminBal _adminBal;
@@ -18,6 +19,17 @@ namespace SAT1.Controllers
             return _adminBal.CheckAdminAccess(User);
         }
 
+        private IActionResult HandleUnauthorized()
+        {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                ViewBag.Message = $"You are currently signed in as customer '{User.Identity.Name}'. The Admin Portal requires Administrator privileges. Please sign out and log in with your Admin credentials.";
+                return View("~/Views/Shared/RestrictedAccess.cshtml");
+            }
+
+            return Redirect("/Account/SignIn?returnUrl=" + System.Net.WebUtility.UrlEncode(Request.Path));
+        }
+
         [HttpGet("")]
         [HttpGet("index")]
         [HttpGet("dashboard")]
@@ -25,7 +37,7 @@ namespace SAT1.Controllers
         {
             if (!CheckAccess())
             {
-                return Redirect("/Account/SignIn");
+                return HandleUnauthorized();
             }
             ViewBag.Title = "Dashboard Overview";
             return View("Index");
@@ -36,7 +48,7 @@ namespace SAT1.Controllers
         {
             if (!CheckAccess())
             {
-                return Redirect("/Account/SignIn");
+                return HandleUnauthorized();
             }
             ViewBag.Title = "Jewelry Category Management";
             return View();
@@ -47,7 +59,7 @@ namespace SAT1.Controllers
         {
             if (!CheckAccess())
             {
-                return Redirect("/Account/SignIn");
+                return HandleUnauthorized();
             }
             ViewBag.Title = "Live Jewelry Catalog Table";
             return View();
@@ -58,7 +70,7 @@ namespace SAT1.Controllers
         {
             if (!CheckAccess())
             {
-                return Redirect("/Account/SignIn");
+                return HandleUnauthorized();
             }
             ViewBag.Title = "Publish New Collection Item";
             return View();

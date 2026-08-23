@@ -285,9 +285,12 @@
           </div>
 
           <div id="paypalContainerBox" class="paypal-box-wrap" style="opacity: 0.5; pointer-events: none;">
-            <!-- Option 1: Official PayPal Smart Buttons (Guest Checkout Enabled) -->
+            <!-- Option 1: Official PayPal Express & Direct PayPal.Me Gateway -->
             <div style="margin-bottom: 16px;">
               <div style="font-size:12px; color:var(--taupe-beige); font-weight:700; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Option 1: Pay with PayPal</div>
+              <button type="button" id="btnPayPalDirect" onclick="payWithPayPalMe()" style="width:100%; padding:14px 20px; background:linear-gradient(135deg, #ffc439 0%, #e0a800 100%); color:#003087; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(255,196,57,0.35); transition:all 0.3s ease; margin-bottom:12px;">
+                <i class="fa-brands fa-paypal" style="font-size:22px; color:#003087;"></i> Pay with PayPal (<span id="paypalBtnAmountDisplay">$0 USD</span>)
+              </button>
               <div id="paypal-button-container"></div>
             </div>
 
@@ -449,8 +452,81 @@
         currentCartSummary = names.join(', ');
         container.innerHTML = html;
         totalEl.textContent = '$' + total.toLocaleString() + ' USD';
+        const btnDisplay = document.getElementById('paypalBtnAmountDisplay');
+        if (btnDisplay) btnDisplay.textContent = '$' + total.toLocaleString() + ' USD';
       } catch (e) {
         console.error(e);
+      }
+    }
+
+    async function payWithPayPalMe() {
+      if (!isUserAuthenticated) {
+        alert('🚫 PERMISSION DENIED: You must sign in to your account before proceeding to payment.');
+        window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+        return;
+      }
+
+      const addr = getShippingAddressData();
+      if (!addr) {
+        alert('⚠️ PERMISSION DENIED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, ZIP) is required before payment can be initialized.');
+        checkAddressValidation();
+        return;
+      }
+
+      if (currentCartTotal <= 0) {
+        alert('Your shopping cart is empty.');
+        return;
+      }
+
+      const btn = document.getElementById('btnPayPalDirect');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparing PayPal USD Transfer...';
+      }
+
+      try {
+        const res = await fetch('/api/paymentapi/process-paypal-me', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            itemName: currentCartSummary,
+            amount: currentCartTotal,
+            shippingFullName: addr.name,
+            shippingPhone: addr.phone,
+            shippingStreet: addr.street,
+            shippingCity: addr.city,
+            shippingState: addr.state,
+            shippingPostalCode: addr.postal,
+            shippingCountry: addr.country
+          })
+        });
+
+        const data = await res.json();
+        if (data.success && data.directPaymentUrl) {
+          // Open direct PayPal.Me link pre-filled with exact amount in new tab
+          window.open(data.directPaymentUrl, '_blank');
+          
+          localStorage.removeItem('sat_shopping_cart_usd');
+          if (typeof showPaymentSuccessModal === 'function') {
+            showPaymentSuccessModal(data.orderId);
+          } else {
+            alert(`🎉 Order Registered! Order ID: ${data.orderId}\n\nWe have opened PayPal.Me in a new window pre-filled for your $${data.amount} USD transfer.`);
+            window.location.href = '/Account/Orders';
+          }
+        } else {
+          alert('Error initializing PayPal transfer: ' + (data.message || 'Server error'));
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fa-brands fa-paypal" style="font-size:22px; color:#003087;"></i> Pay with PayPal ($${currentCartTotal.toLocaleString()} USD)`;
+          }
+        }
+      } catch (err) {
+        console.error('PayPal.Me Checkout Error:', err);
+        alert('An error occurred. Please try again.');
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = `<i class="fa-brands fa-paypal" style="font-size:22px; color:#003087;"></i> Pay with PayPal ($${currentCartTotal.toLocaleString()} USD)`;
+        }
       }
     }
 

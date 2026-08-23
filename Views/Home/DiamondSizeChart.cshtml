@@ -1,0 +1,487 @@
+@{
+    ViewData["Title"] = "Diamond Size Chart — SAT Jewel";
+}
+
+<div class="dsc-page-wrap">
+    <!-- Header Banner -->
+    <div class="dsc-header-section">
+        <div class="dsc-breadcrumb"><a href="/">Home</a> &rsaquo; <span>Diamond Size Chart</span></div>
+        <h1 class="dsc-main-title">Diamond Size Chart</h1>
+        <p class="dsc-main-subtitle">Want to know the actual size of a 1 carat diamond on a hand? Use our diamond size chart to understand the millimeter (mm) size of each diamond shape.</p>
+    </div>
+
+    <!-- Shape Selection Dropdown Bar (Matching User Image 1) -->
+    <div class="dsc-selector-bar">
+        <label for="diamondShapeSelect" class="dsc-select-label">Select your diamond shape:</label>
+        <select id="diamondShapeSelect" class="dsc-select-input" onchange="updateDiamondSizeChart(this.value)">
+            <option value="round" selected>Round</option>
+            <option value="cushion">Cushion</option>
+            <option value="oval">Oval</option>
+            <option value="emerald">Emerald</option>
+            <option value="radiant">Radiant</option>
+            <option value="pear">Pear</option>
+            <option value="marquise">Marquise</option>
+            <option value="princess">Princess</option>
+            <option value="asscher">Asscher</option>
+        </select>
+    </div>
+
+    <!-- Dynamic Section Title & Subtitle -->
+    <div class="dsc-dynamic-header">
+        <h2 id="dynamicShapeTitle" class="dsc-dynamic-title">Round Diamond Size Chart</h2>
+        <p class="dsc-dynamic-subtext">Want to know the actual size of a 1 carat diamond on a hand? Use our diamond size chart to understand the millimeter (mm) size of each diamond shape.</p>
+    </div>
+
+    <!-- 2-Column Content: Left Table & Right Hand Visual Diagram (Matching User Images 1 & 2) -->
+    <div class="dsc-content-container">
+        <div class="dsc-grid-layout">
+            <!-- Left Column: MM Size vs Carat Weight Table -->
+            <div class="dsc-table-col">
+                <div class="dsc-table-card">
+                    <table class="dsc-table">
+                        <thead>
+                            <tr>
+                                <th>MM Size</th>
+                                <th>Carat Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dscTableBody">
+                            <!-- Dynamic Table Rows Injected Here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right Column: Hand Carat Size Visual Diagram (Matching User Images 1 & 2) -->
+            <div class="dsc-visual-col">
+                <div class="dsc-visual-card">
+                    <div class="dsc-hand-container">
+                        <img src="/assets/size_step1.jpg" alt="Diamond Size On Hand Visual" class="dsc-hand-base-img" />
+                        <div class="dsc-overlay-layer">
+                            <div class="dsc-visual-badge title-badge">Hand Carat Scale Visual</div>
+                            
+                            <!-- Overlaid Diamond Carat Indicators -->
+                            <div class="dsc-carat-marker m-050">
+                                <span class="marker-dot"></span>
+                                <span class="marker-label">1/2 carat (5.0 mm)</span>
+                            </div>
+                            <div class="dsc-carat-marker m-100">
+                                <span class="marker-dot"></span>
+                                <span class="marker-label">1 carat (6.5 mm)</span>
+                            </div>
+                            <div class="dsc-carat-marker m-150">
+                                <span class="marker-dot"></span>
+                                <span class="marker-label">1.50 carat (7.3 mm)</span>
+                            </div>
+                            <div class="dsc-carat-marker m-200">
+                                <span class="marker-dot"></span>
+                                <span class="marker-label">2 carat (8.0 mm)</span>
+                            </div>
+                            <div class="dsc-carat-marker m-300">
+                                <span class="marker-dot"></span>
+                                <span class="marker-label">3 carat (9.1 mm)</span>
+                            </div>
+                            <div class="dsc-carat-marker m-500">
+                                <span class="marker-dot"></span>
+                                <span class="marker-label">5 carat (11.0 mm)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dsc-page-wrap {
+        background-color: #ffffff;
+        color: #1a1a1a;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        padding-bottom: 80px;
+    }
+
+    .dsc-header-section {
+        text-align: center;
+        padding: 50px 20px 24px;
+        background: #faf8f5;
+    }
+
+    .dsc-breadcrumb {
+        font-size: 0.88rem;
+        color: #6b7280;
+        margin-bottom: 12px;
+    }
+
+    .dsc-breadcrumb a {
+        color: #111827;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .dsc-main-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 2.6rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 10px;
+    }
+
+    .dsc-main-subtitle {
+        font-size: 1.02rem;
+        color: #6b7280;
+        max-width: 760px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Dropdown Bar */
+    .dsc-selector-bar {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: #ffffff;
+        padding: 24px 20px;
+        border-bottom: 1px solid #f0ede6;
+    }
+
+    .dsc-select-label {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #111827;
+    }
+
+    .dsc-select-input {
+        background: #ffffff;
+        border: 1px solid #94a3b8;
+        border-radius: 6px;
+        padding: 8px 36px 8px 14px;
+        font-size: 1rem;
+        font-weight: 500;
+        color: #1e293b;
+        cursor: pointer;
+        outline: none;
+        min-width: 180px;
+    }
+
+    .dsc-select-input:focus {
+        border-color: #0f172a;
+    }
+
+    /* Dynamic Header */
+    .dsc-dynamic-header {
+        text-align: center;
+        padding: 40px 20px 20px;
+    }
+
+    .dsc-dynamic-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 2.1rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 10px;
+    }
+
+    .dsc-dynamic-subtext {
+        font-size: 0.95rem;
+        color: #6b7280;
+        max-width: 760px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* 2-Column Grid Layout */
+    .dsc-content-container {
+        max-width: 1200px;
+        margin: 30px auto 0;
+        padding: 0 24px;
+    }
+
+    .dsc-grid-layout {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 36px;
+        align-items: start;
+    }
+
+    /* Table Styling */
+    .dsc-table-card {
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+
+    .dsc-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        background: #ffffff;
+        font-size: 0.95rem;
+    }
+
+    .dsc-table th {
+        background: #f1f5f9;
+        color: #0f172a;
+        padding: 14px 20px;
+        font-weight: 700;
+        font-size: 0.92rem;
+        border-bottom: 1px solid #cbd5e1;
+    }
+
+    .dsc-table td {
+        padding: 12px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+
+    .dsc-table tbody tr:nth-child(even) {
+        background: #faf8f5;
+    }
+
+    .dsc-table tbody tr:hover {
+        background: #fef3c7;
+    }
+
+    /* Visual Hand Diagram */
+    .dsc-visual-card {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+        background: #e0f2fe;
+    }
+
+    .dsc-hand-container {
+        position: relative;
+        width: 100%;
+        min-height: 520px;
+    }
+
+    .dsc-hand-base-img {
+        width: 100%;
+        height: 100%;
+        min-height: 520px;
+        object-fit: cover;
+        display: block;
+    }
+
+    .dsc-overlay-layer {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(14, 165, 233, 0.25) 0%, rgba(15, 23, 42, 0.6) 100%);
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .title-badge {
+        align-self: flex-start;
+        background: rgba(15, 23, 42, 0.85);
+        color: #ffffff;
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 20px;
+        letter-spacing: 0.5px;
+        backdrop-filter: blur(4px);
+    }
+
+    .dsc-carat-marker {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .marker-dot {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 3px solid #0284c7;
+        box-shadow: 0 0 10px rgba(255,255,255,0.8);
+    }
+
+    .marker-label {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #ffffff;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+        background: rgba(15, 23, 42, 0.65);
+        padding: 4px 14px;
+        border-radius: 6px;
+        backdrop-filter: blur(4px);
+    }
+
+    @@media (max-width: 992px) {
+        .dsc-grid-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    const diamondChartData = {
+        round: {
+            title: "Round Diamond Size Chart",
+            rows: [
+                ["4.0 mm", "0.25 ct"],
+                ["5.0 mm", "0.50 ct"],
+                ["5.75 mm", "0.75 ct"],
+                ["6.5 mm", "1.00 ct"],
+                ["6.8 mm", "1.25 ct"],
+                ["7.3 mm", "1.50 ct"],
+                ["7.75 mm", "1.75 ct"],
+                ["8.0 mm", "2.00 ct"],
+                ["8.7 mm", "2.50 ct"],
+                ["9.1 mm", "3.00 ct"],
+                ["9.75 mm", "3.50 ct"],
+                ["10.25 mm", "4.00 ct"],
+                ["10.75 mm", "4.50 ct"],
+                ["11.0 mm", "5.00 ct"]
+            ]
+        },
+        cushion: {
+            title: "Cushion Diamond Size Chart",
+            rows: [
+                ["4.5 x 4.5 mm", "0.50 ct"],
+                ["5.5 x 5.5 mm", "0.75 ct"],
+                ["6.0 x 6.0 mm", "1.00 ct"],
+                ["6.5 x 6.5 mm", "1.25 ct"],
+                ["7.0 x 7.0 mm", "1.50 ct"],
+                ["7.5 x 7.5 mm", "2.00 ct"],
+                ["8.0 x 8.0 mm", "2.50 ct"],
+                ["8.5 x 8.5 mm", "3.00 ct"],
+                ["9.5 x 9.5 mm", "4.00 ct"],
+                ["10.0 x 10.0 mm", "5.00 ct"]
+            ]
+        },
+        oval: {
+            title: "Oval Diamond Size Chart",
+            rows: [
+                ["6.0 x 4.0 mm", "0.50 ct"],
+                ["7.0 x 5.0 mm", "0.75 ct"],
+                ["7.7 x 5.7 mm", "1.00 ct"],
+                ["8.2 x 6.0 mm", "1.25 ct"],
+                ["8.5 x 6.5 mm", "1.50 ct"],
+                ["9.0 x 7.0 mm", "2.00 ct"],
+                ["10.0 x 7.5 mm", "2.50 ct"],
+                ["10.5 x 7.5 mm", "3.00 ct"],
+                ["11.5 x 8.5 mm", "4.00 ct"],
+                ["12.0 x 9.0 mm", "5.00 ct"]
+            ]
+        },
+        emerald: {
+            title: "Emerald Diamond Size Chart",
+            rows: [
+                ["5.5 x 3.5 mm", "0.50 ct"],
+                ["6.5 x 4.5 mm", "0.75 ct"],
+                ["7.0 x 5.0 mm", "1.00 ct"],
+                ["7.5 x 5.2 mm", "1.25 ct"],
+                ["8.0 x 5.5 mm", "1.50 ct"],
+                ["8.5 x 6.5 mm", "2.00 ct"],
+                ["9.5 x 7.0 mm", "2.50 ct"],
+                ["10.0 x 7.0 mm", "3.00 ct"],
+                ["11.0 x 8.0 mm", "4.00 ct"],
+                ["12.0 x 9.0 mm", "5.00 ct"]
+            ]
+        },
+        radiant: {
+            title: "Radiant Diamond Size Chart",
+            rows: [
+                ["5.5 x 4.0 mm", "0.50 ct"],
+                ["6.5 x 4.5 mm", "0.75 ct"],
+                ["7.0 x 5.0 mm", "1.00 ct"],
+                ["7.5 x 5.5 mm", "1.25 ct"],
+                ["8.0 x 6.0 mm", "1.50 ct"],
+                ["8.5 x 6.5 mm", "2.00 ct"],
+                ["9.5 x 7.0 mm", "2.50 ct"],
+                ["10.0 x 7.5 mm", "3.00 ct"],
+                ["11.0 x 8.0 mm", "4.00 ct"],
+                ["12.0 x 9.0 mm", "5.00 ct"]
+            ]
+        },
+        pear: {
+            title: "Pear Diamond Size Chart",
+            rows: [
+                ["6.5 x 4.2 mm", "0.50 ct"],
+                ["7.5 x 5.0 mm", "0.75 ct"],
+                ["8.6 x 5.5 mm", "1.00 ct"],
+                ["9.2 x 5.8 mm", "1.25 ct"],
+                ["9.8 x 6.2 mm", "1.50 ct"],
+                ["10.5 x 6.8 mm", "2.00 ct"],
+                ["11.5 x 7.2 mm", "2.50 ct"],
+                ["12.0 x 7.8 mm", "3.00 ct"],
+                ["13.5 x 8.5 mm", "4.00 ct"],
+                ["14.5 x 9.0 mm", "5.00 ct"]
+            ]
+        },
+        marquise: {
+            title: "Marquise Diamond Size Chart",
+            rows: [
+                ["7.5 x 4.0 mm", "0.50 ct"],
+                ["8.5 x 4.5 mm", "0.75 ct"],
+                ["10.0 x 5.0 mm", "1.00 ct"],
+                ["10.5 x 5.5 mm", "1.25 ct"],
+                ["11.5 x 5.8 mm", "1.50 ct"],
+                ["12.5 x 6.5 mm", "2.00 ct"],
+                ["13.5 x 7.0 mm", "2.50 ct"],
+                ["14.5 x 7.5 mm", "3.00 ct"],
+                ["16.0 x 8.0 mm", "4.00 ct"],
+                ["17.0 x 8.5 mm", "5.00 ct"]
+            ]
+        },
+        princess: {
+            title: "Princess Diamond Size Chart",
+            rows: [
+                ["4.4 x 4.4 mm", "0.50 ct"],
+                ["5.0 x 5.0 mm", "0.75 ct"],
+                ["5.5 x 5.5 mm", "1.00 ct"],
+                ["6.0 x 6.0 mm", "1.25 ct"],
+                ["6.4 x 6.4 mm", "1.50 ct"],
+                ["7.0 x 7.0 mm", "2.00 ct"],
+                ["7.5 x 7.5 mm", "2.50 ct"],
+                ["8.0 x 8.0 mm", "3.00 ct"],
+                ["9.0 x 9.0 mm", "4.00 ct"],
+                ["9.5 x 9.5 mm", "5.00 ct"]
+            ]
+        },
+        asscher: {
+            title: "Asscher Diamond Size Chart",
+            rows: [
+                ["4.5 x 4.5 mm", "0.50 ct"],
+                ["5.0 x 5.0 mm", "0.75 ct"],
+                ["5.5 x 5.5 mm", "1.00 ct"],
+                ["6.0 x 6.0 mm", "1.25 ct"],
+                ["6.5 x 6.5 mm", "1.50 ct"],
+                ["7.2 x 7.2 mm", "2.00 ct"],
+                ["7.8 x 7.8 mm", "2.50 ct"],
+                ["8.2 x 8.2 mm", "3.00 ct"],
+                ["9.0 x 9.0 mm", "4.00 ct"],
+                ["9.8 x 9.8 mm", "5.00 ct"]
+            ]
+        }
+    };
+
+    function updateDiamondSizeChart(shapeKey) {
+        const data = diamondChartData[shapeKey];
+        if (!data) return;
+
+        document.getElementById('dynamicShapeTitle').innerText = data.title;
+
+        const tbody = document.getElementById('dscTableBody');
+        tbody.innerHTML = '';
+        data.rows.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td style="font-weight:700;">${r[0]}</td><td>${r[1]}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateDiamondSizeChart('round');
+    });
+</script>

@@ -696,34 +696,34 @@
       display: block;
     }
 
-    /* You Might Also Like Grid (2-Col Mobile / 4-Col Desktop) */
-    .you-might-like-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-      margin-bottom: 50px;
+    /* You Might Also Like Track (Scrollable Horizontal Carousel) */
+    .you-might-like-track {
+      display: flex !important;
+      gap: 16px !important;
+      overflow-x: auto !important;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 12px;
+      margin-bottom: 40px;
     }
-    @@media (max-width: 960px) {
-      .you-might-like-grid {
-        display: grid !important;
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 12px !important;
-      }
-    }
-    @@media (min-width: 961px) {
-      .you-might-like-grid {
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
-        gap: 20px !important;
-      }
+    .you-might-like-track::-webkit-scrollbar {
+      display: none;
     }
     .rec-card-mob {
+      flex: 0 0 250px !important;
+      scroll-snap-align: start;
       background: #08111e;
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 10px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+    }
+    @@media (max-width: 600px) {
+      .rec-card-mob {
+        flex: 0 0 200px !important;
+      }
     }
     .rec-card-img-wrap {
       position: relative;
@@ -910,7 +910,10 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 24px;
-      margin-bottom: 80px;
+      margin-bottom: 30px;
+    }
+    .sat-footer {
+      padding-bottom: 12px !important;
     }
     @@media (max-width: 900px) {
       .testi-grid { grid-template-columns: 1fr; }
@@ -1059,9 +1062,12 @@
         <button type="button" class="sat-icon-link" onclick="toggleMenu()" title="Menu"><i class="fa-solid fa-bars"></i></button>
         <button type="button" class="sat-icon-link" onclick="location.href='/Product'" title="Search"><i class="fa-solid fa-magnifying-glass"></i></button>
       </div>
-      <a href="/" class="sat-nav-brand">
-        <span class="brand-title">SAT <span class="gold-text">LUXURY</span></span>
-        <span class="brand-tagline">Crafted To Shine</span>
+      <a href="/" class="sat-nav-brand" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+        <img src="~/assets/sat_emblem_clean.png" asp-append-version="true" style="height:32px; width:auto; object-fit:contain;" alt="SAT Jewels Logo" />
+        <div style="display:flex; flex-direction:column; justify-content:center;">
+          <span style="font-family:var(--font-serif); font-size:16px; font-weight:700; color:#ffffff; letter-spacing:0.04em; line-height:1; white-space:nowrap;">SAT <span class="sat-brand-script" style="margin-left:3px; color:var(--champagne-gold);">Jewel</span></span>
+          <span style="font-size:7.5px; font-weight:600; color:rgba(255,255,255,0.75); letter-spacing:0.14em; text-transform:uppercase; margin-top:2px;">Fine Jewelry</span>
+        </div>
       </a>
       <div class="sat-nav-right">
         <a href="/Product/Cart" class="sat-cart-btn" title="Bag">
@@ -1075,9 +1081,9 @@
   <!-- Desktop Header Navbar (Desktop Only - Classic Desktop View) -->
   <nav class="navbar mobile-hidden" style="position:relative; background:#08111e; border-bottom:1px solid rgba(212,178,112,0.3);">
     <div class="container nav-inner" style="padding:14px 20px;">
-      <a href="/" style="display:flex; align-items:center; gap:4px; text-decoration:none; color:#ffffff;">
-        <img src="~/assets/sat_logo_transparent.png" asp-append-version="true" style="height:36px; width:auto; object-fit:contain;" alt="SAT Jewels Logo" />
-        <div style="display:flex; flex-direction:column; margin-left:2px;">
+      <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:#ffffff;">
+        <img src="~/assets/sat_emblem_clean.png" asp-append-version="true" style="height:38px; width:auto; object-fit:contain;" alt="SAT Jewels Logo" />
+        <div style="display:flex; flex-direction:column; justify-content:center;">
           <span style="font-family:var(--font-serif); font-size:20px; font-weight:700; color:#ffffff; letter-spacing:0.04em; line-height:1; white-space:nowrap;">SAT <span class="sat-brand-script" style="margin-left:4px;">Jewel</span></span>
           <span style="font-size:8.5px; font-weight:600; color:rgba(255,255,255,0.75); letter-spacing:0.16em; text-transform:uppercase; margin-top:2px;">Fine Jewelry</span>
         </div>
@@ -1163,6 +1169,79 @@
             <img src="@(galleryList.Count > 2 ? galleryList[2] : mainImage)" alt="@Model.Name View 3" />
           </div>
         </div>
+
+        <!-- Product Specifications Accordions (Task 3 - Placed Below Image Gallery in Left Column - Matching Image 3) -->
+        <div class="pd-accordions-group" style="margin-top: 28px;">
+          <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              <span>Overview</span>
+              <i class="fa-solid fa-chevron-down acc-chevron"></i>
+            </div>
+            <div class="acc-body">
+              This bespoke @Model.Name features precision GIA-certified craftsmanship, hand-set micro-pave lab grown diamonds, and a polished luxury finish.
+            </div>
+          </div>
+
+          <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              <span>Clarity & Color</span>
+              <i class="fa-solid fa-chevron-down acc-chevron"></i>
+            </div>
+            <div class="acc-body">
+              Diamond Color: E Color (Colorless) | Diamond Clarity: VVS2 Clarity (Very Very Slightly Included) | Cut: Super Ideal Cut.
+            </div>
+          </div>
+
+          <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              <span>Diamonds Details</span>
+              <i class="fa-solid fa-chevron-down acc-chevron"></i>
+            </div>
+            <div class="acc-body">
+              Center Stone: 1.50 to 3.00 CT Lab Grown Diamond | Side Stones: Round Brilliant Cut Diamonds | Setting: Bezel Set with Hidden Halo.
+            </div>
+          </div>
+
+          <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              <span>Metal Details</span>
+              <i class="fa-solid fa-chevron-down acc-chevron"></i>
+            </div>
+            <div class="acc-body">
+              Available Solid Gold purities: 10K, 14K, 18K Yellow/Rose/White Gold, 925 Sterling Silver, and Platinum 950. Stamped with official hallmark authenticity.
+            </div>
+          </div>
+
+          <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              <span>Ring Size</span>
+              <i class="fa-solid fa-chevron-down acc-chevron"></i>
+            </div>
+            <div class="acc-body">
+              Standard US Sizes 5.0 to 9.0 available. Complimentary custom sizing upon request.
+            </div>
+          </div>
+
+          <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              <span>Jewelry Certification</span>
+              <i class="fa-solid fa-chevron-down acc-chevron"></i>
+            </div>
+            <div class="acc-body">
+              Includes official IGI / GIA Physical Certificate of Authenticity and 3D Laser Inscription verification code.
+            </div>
+          </div>
+
+          <div class="acc-item">
+            <div class="acc-header" onclick="toggleAcc(this)">
+              <span>Shipping & Disclaimer</span>
+              <i class="fa-solid fa-chevron-down acc-chevron"></i>
+            </div>
+            <div class="acc-body">
+              Includes 100% Insured Express Shipping worldwide with discrete signature-required delivery. 30-Day Money-Back Guarantee.
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Right Column: Product Customizer Panel -->
@@ -1201,32 +1280,50 @@
         {
           <!-- Metal Type Swatches (Loaded 100% Dynamically from Database Table) -->
           <div class="pd-opt-label">Metal Type: <span id="lblMetal" style="color:var(--champagne-gold);">@(metalList.FirstOrDefault()?.Name ?? "")</span></div>
-          <div class="metal-swatch-list">
+          <div class="metal-swatch-list" style="display:flex; flex-wrap:wrap; gap:8px;">
             @foreach (var metal in metalList)
             {
               var isDefault = metal == metalList.First();
-              var bgStyle = metal.Name.Contains("Silver") ? "linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%)"
-                          : metal.Name.Contains("Rose") ? "linear-gradient(135deg, #fbcfe8 0%, #f43f5e 100%)"
+              var bgStyle = metal.Name.Contains("Rose") ? "linear-gradient(135deg, #fbcfe8 0%, #f43f5e 100%)"
                           : metal.Name.Contains("White") ? "linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%)"
                           : metal.Name.Contains("Platinum") ? "linear-gradient(135deg, #e2e8f0 0%, #64748b 100%)"
                           : "linear-gradient(135deg, #fef08a 0%, #d97706 100%)";
-              var abbr = metal.Name.Contains("Silver") ? "SL" : metal.Name.Contains("10K") ? "10K" : metal.Name.Contains("14K") ? "14K" : metal.Name.Contains("18K") ? "18K" : metal.Name.Contains("22K") ? "22K" : metal.Name.Contains("24K") ? "24K" : "PT";
               
-              <button type="button" class="metal-swatch-btn @(isDefault ? "active" : "")" style="background: @bgStyle;" onclick="setMetal('@metal.Name', this)" title="@metal.Name">@abbr</button>
+              var colorTag = metal.Name.Contains("Yellow") ? "Y" : metal.Name.Contains("White") ? "W" : metal.Name.Contains("Rose") ? "R" : "";
+              var karats = metal.Name.Contains("10K") ? "10K" : metal.Name.Contains("14K") ? "14K" : metal.Name.Contains("18K") ? "18K" : "PT";
+              var abbr = karats + (string.IsNullOrEmpty(colorTag) ? "" : " " + colorTag);
+              
+              <button type="button" class="metal-swatch-btn @(isDefault ? "active" : "")" style="background: @bgStyle; font-size:11px; padding:6px 10px; width:auto; border-radius:6px;" onclick="setMetal('@metal.Name', this)" title="@metal.Name">@abbr</button>
             }
           </div>
         }
 
         @if (caratList.Count > 0)
         {
+          var titleText = Model.Name ?? "";
+          var titleCaratMatch = System.Text.RegularExpressions.Regex.Match(titleText, @"(\d+(\.\d+)?)\s*CT", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+          
+          var defaultCaratObj = caratList.FirstOrDefault();
+          if (titleCaratMatch.Success && decimal.TryParse(titleCaratMatch.Groups[1].Value, out decimal titleCaratVal))
+          {
+              var matched = caratList.FirstOrDefault(c => {
+                  var numPart = System.Text.RegularExpressions.Regex.Match(c.Label, @"(\d+(\.\d+)?)");
+                  return numPart.Success && decimal.TryParse(numPart.Groups[1].Value, out decimal cVal) && Math.Abs(cVal - titleCaratVal) < 0.05m;
+              });
+              if (matched != null)
+              {
+                  defaultCaratObj = matched;
+              }
+          }
+
           <!-- Diamond Size Selector (Loaded 100% Dynamically from Database Table) -->
-          <div class="pd-opt-label">Select Diamond Size: <span id="lblCarat" style="color:var(--champagne-gold);">@(caratList.FirstOrDefault()?.Label ?? "")</span></div>
-          <div class="carat-btn-list">
+          <div class="pd-opt-label" style="margin-top:16px;">Select Diamond Size: <span id="lblCarat" style="color:var(--champagne-gold);">@(defaultCaratObj?.Label ?? "")</span></div>
+          <div class="carat-btn-list" style="display:flex; flex-wrap:wrap; gap:8px;">
             @foreach (var carat in caratList)
             {
-              var isDefault = carat == caratList.First();
+              var isDefault = carat == defaultCaratObj;
               var displayLabel = carat.Label.Replace(" CT", "").Replace("ct GIA", "").Trim();
-              <button type="button" class="carat-btn @(isDefault ? "active" : "")" onclick="setCarat('@carat.Label', this)">@displayLabel</button>
+              <button type="button" class="carat-btn @(isDefault ? "active" : "")" style="padding:6px 12px; border-radius:6px;" onclick="setCarat('@carat.Label', this)">@displayLabel CT</button>
             }
           </div>
         }
@@ -1249,7 +1346,7 @@
           <option>US 8.0 (18.2mm)</option>
         </select>
 
-        <!-- Primary Action Buttons (Add to Cart & Buy It Now) -->
+        <!-- Primary Action Buttons (Add to Cart & Buy It Now & Save to Wishlist) -->
         <div class="pd-main-action-buttons">
           <button type="button" class="btn-add-cart-main" onclick="addToCartDetailed('@Model.Id', '@Model.Name', @Model.Price, '@mainImage')">
             <i class="fa-solid fa-bag-shopping" style="margin-right:8px;"></i> Add to Cart
@@ -1257,6 +1354,9 @@
           <a href="/Product/Cart" class="btn-buy-now-main">
             <i class="fa-solid fa-bolt" style="margin-right:8px;"></i> Buy It Now
           </a>
+          <button type="button" class="btn-wishlist-toggle-main" id="btnWishlistToggle" onclick="toggleWishlistProduct('@Model.Id', '@Model.Name', @Model.Price, '@mainImage')" title="Save to Wishlist">
+            <i class="fa-regular fa-heart" id="wishlistHeartIcon" style="font-size: 1.2rem;"></i>
+          </button>
         </div>
 
         <!-- Virtual Consultation Link (Screenshot 1) -->
@@ -1303,170 +1403,145 @@
       </div>
     </div>
 
-    <!-- Product Specifications Accordions (Matching Screenshot 2) -->
-    <div class="pd-accordions-group">
-      <div class="acc-item">
-        <div class="acc-header" onclick="toggleAcc(this)">
-          <span>Overview</span>
-          <i class="fa-solid fa-chevron-down acc-chevron"></i>
-        </div>
-        <div class="acc-body">
-          This bespoke @Model.Name features precision GIA-certified craftsmanship, hand-set micro-pave lab grown diamonds, and a polished luxury finish.
-        </div>
-      </div>
+    <!-- How Our Products Are Made Section (Exact 5-Column Grid Layout Matching ivevar.com) -->
+    <div class="sat-craft-process-section" style="margin-top: 60px; margin-bottom: 60px; padding: 40px 0; background: #ffffff;">
+      <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 2.2rem; font-weight: 700; color: #111827; text-align: center; margin-bottom: 36px; letter-spacing: -0.5px;">How Our Products Are Made</h2>
 
-      <div class="acc-item">
-        <div class="acc-header" onclick="toggleAcc(this)">
-          <span>Clarity & Color</span>
-          <i class="fa-solid fa-chevron-down acc-chevron"></i>
+      <div class="sat-craft-steps-grid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px;">
+        <!-- Step 1: Design & Selection -->
+        <div class="craft-step-card" style="background: transparent; border: none; display: flex; flex-direction: column;">
+          <div style="width: 100%; aspect-ratio: 1/1; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+            <img src="/assets/ivevar/WhatsApp_Image_2025-05-20_at_17.44.00_dbad525b.jpg" alt="Design & Selection" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <h4 style="font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 6px; font-family: 'Plus Jakarta Sans', sans-serif;">Design &amp; Selection</h4>
+          <p style="font-size: 13px; color: #4b5563; line-height: 1.45; margin: 0 0 10px; flex: 1;">Meticulously designed, from custom creations to ready-to-ship...</p>
+          <a href="/Home/OrderProcess" style="font-size: 13px; font-weight: 700; color: #111827; text-decoration: underline;">View More</a>
         </div>
-        <div class="acc-body">
-          Diamond Color: E Color (Colorless) | Diamond Clarity: VVS2 Clarity (Very Very Slightly Included) | Cut: Super Ideal Cut.
-        </div>
-      </div>
 
-      <div class="acc-item">
-        <div class="acc-header" onclick="toggleAcc(this)">
-          <span>Ring Diamonds Details</span>
-          <i class="fa-solid fa-chevron-down acc-chevron"></i>
+        <!-- Step 2: Cad Design -->
+        <div class="craft-step-card" style="background: transparent; border: none; display: flex; flex-direction: column;">
+          <div style="width: 100%; aspect-ratio: 1/1; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+            <img src="/assets/ivevar/WhatsApp_Image_2025-05-20_at_17.44.17_46484c0f.jpg" alt="Cad Design" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <h4 style="font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 6px; font-family: 'Plus Jakarta Sans', sans-serif;">Cad Design</h4>
+          <p style="font-size: 13px; color: #4b5563; line-height: 1.45; margin: 0 0 10px; flex: 1;">Turning concepts into precise 3D models before they're ever made...</p>
+          <a href="/Home/OrderProcess" style="font-size: 13px; font-weight: 700; color: #111827; text-decoration: underline;">View More</a>
         </div>
-        <div class="acc-body">
-          Center Stone: 1.50 to 3.00 CT Lab Grown Diamond | Side Stones: Round Brilliant Cut Diamonds | Setting: Bezel Set with Hidden Halo.
-        </div>
-      </div>
 
-      <div class="acc-item">
-        <div class="acc-header" onclick="toggleAcc(this)">
-          <span>Metal Details</span>
-          <i class="fa-solid fa-chevron-down acc-chevron"></i>
+        <!-- Step 3: Finest Diamond Crafting -->
+        <div class="craft-step-card" style="background: transparent; border: none; display: flex; flex-direction: column;">
+          <div style="width: 100%; aspect-ratio: 1/1; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+            <img src="/assets/ivevar/WhatsApp_Image_2025-05-20_at_17.47.10_360eb60d.jpg" alt="Finest Diamond Crafting" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <h4 style="font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 6px; font-family: 'Plus Jakarta Sans', sans-serif;">Finest Diamond Crafting</h4>
+          <p style="font-size: 13px; color: #4b5563; line-height: 1.45; margin: 0 0 10px; flex: 1;">Where precision craftsmanship transforms a diamond's potential...</p>
+          <a href="/Home/OrderProcess" style="font-size: 13px; font-weight: 700; color: #111827; text-decoration: underline;">View More</a>
         </div>
-        <div class="acc-body">
-          Available Solid Gold purities: 10K, 14K, 18K Yellow/Rose/White Gold, 925 Sterling Silver, and Platinum 950. Stamped with official hallmark authenticity.
-        </div>
-      </div>
 
-      <div class="acc-item">
-        <div class="acc-header" onclick="toggleAcc(this)">
-          <span>Ring Size</span>
-          <i class="fa-solid fa-chevron-down acc-chevron"></i>
+        <!-- Step 4: Casting Jewellery -->
+        <div class="craft-step-card" style="background: transparent; border: none; display: flex; flex-direction: column;">
+          <div style="width: 100%; aspect-ratio: 1/1; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+            <img src="/assets/ivevar/WhatsApp_Image_2025-05-20_at_17.47.26_29434563.jpg" alt="Casting Jewellery" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <h4 style="font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 6px; font-family: 'Plus Jakarta Sans', sans-serif;">Casting Jewellery</h4>
+          <p style="font-size: 13px; color: #4b5563; line-height: 1.45; margin: 0 0 10px; flex: 1;">Sat Jewels' in-house casting guarantees superior quality and...</p>
+          <a href="/Home/OrderProcess" style="font-size: 13px; font-weight: 700; color: #111827; text-decoration: underline;">View More</a>
         </div>
-        <div class="acc-body">
-          Standard US Sizes 5.0 to 9.0 available. Complimentary custom sizing upon request.
-        </div>
-      </div>
 
-      <div class="acc-item">
-        <div class="acc-header" onclick="toggleAcc(this)">
-          <span>Jewelry Certification</span>
-          <i class="fa-solid fa-chevron-down acc-chevron"></i>
+        <!-- Step 5: Stone Setting -->
+        <div class="craft-step-card" style="background: transparent; border: none; display: flex; flex-direction: column;">
+          <div style="width: 100%; aspect-ratio: 1/1; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+            <img src="/assets/ivevar/WhatsApp_Image_2025-05-20_at_17.47.41_8134efe8.jpg" alt="Stone Setting" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <h4 style="font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 6px; font-family: 'Plus Jakarta Sans', sans-serif;">Stone Setting</h4>
+          <p style="font-size: 13px; color: #4b5563; line-height: 1.45; margin: 0 0 10px; flex: 1;">Diamonds are expertly set and polished for maximum brilliance...</p>
+          <a href="/Home/OrderProcess" style="font-size: 13px; font-weight: 700; color: #111827; text-decoration: underline;">View More</a>
         </div>
-        <div class="acc-body">
-          Includes official IGI / GIA Physical Certificate of Authenticity and 3D Laser Inscription verification code.
-        </div>
-      </div>
 
-      <div class="acc-item">
-        <div class="acc-header" onclick="toggleAcc(this)">
-          <span>Shipping & Disclaimer</span>
-          <i class="fa-solid fa-chevron-down acc-chevron"></i>
+        <!-- Step 6: Polishing Jewellery -->
+        <div class="craft-step-card" style="background: transparent; border: none; display: flex; flex-direction: column;">
+          <div style="width: 100%; aspect-ratio: 1/1; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+            <img src="/assets/ivevar/WhatsApp_Image_2025-05-20_at_17.47.49_a9b3aeb3.jpg" alt="Polishing Jewellery" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <h4 style="font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 6px; font-family: 'Plus Jakarta Sans', sans-serif;">Polishing Jewellery</h4>
+          <p style="font-size: 13px; color: #4b5563; line-height: 1.45; margin: 0 0 10px; flex: 1;">Diamonds are expertly set and polished for maximum brilliance...</p>
+          <a href="/Home/OrderProcess" style="font-size: 13px; font-weight: 700; color: #111827; text-decoration: underline;">View More</a>
         </div>
-        <div class="acc-body">
-          Includes 100% Insured Express Shipping worldwide with discrete signature-required delivery. 30-Day Money-Back Guarantee.
+
+        <!-- Step 7: Rhodium Process -->
+        <div class="craft-step-card" style="background: transparent; border: none; display: flex; flex-direction: column;">
+          <div style="width: 100%; aspect-ratio: 1/1; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+            <img src="/assets/ivevar/WhatsApp_Image_2025-05-20_at_17.48.58_aba9b2ed.jpg" alt="Rhodium Process" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <h4 style="font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 6px; font-family: 'Plus Jakarta Sans', sans-serif;">Rhodium Process</h4>
+          <p style="font-size: 13px; color: #4b5563; line-height: 1.45; margin: 0 0 10px; flex: 1;">The secret to brilliant white jewelry that never fades its luster...</p>
+          <a href="/Home/OrderProcess" style="font-size: 13px; font-weight: 700; color: #111827; text-decoration: underline;">View More</a>
+        </div>
+
+        <!-- Step 8: Quality Check & Packaging -->
+        <div class="craft-step-card" style="background: transparent; border: none; display: flex; flex-direction: column;">
+          <div style="width: 100%; aspect-ratio: 1/1; border-radius: 4px; overflow: hidden; margin-bottom: 12px;">
+            <img src="/assets/ivevar/WhatsApp_Image_2025-05-20_at_17.49.05_468e8b70.jpg" alt="Quality Check & Packaging" style="width: 100%; height: 100%; object-fit: cover;" />
+          </div>
+          <h4 style="font-size: 15px; font-weight: 700; color: #111827; margin: 0 0 6px; font-family: 'Plus Jakarta Sans', sans-serif;">Quality Check &amp; Packaging</h4>
+          <p style="font-size: 13px; color: #4b5563; line-height: 1.45; margin: 0 0 10px; flex: 1;">Passing a strict, final quality control assessment, each ring is then...</p>
+          <a href="/Home/OrderProcess" style="font-size: 13px; font-weight: 700; color: #111827; text-decoration: underline;">View More</a>
         </div>
       </div>
     </div>
 
     <!-- "You Might Also Like" Section (2-Column Mobile Image 3 / 4-Column Laptop Image 4) -->
-    <h2 class="sec-header">You Might Also Like</h2>
-    <div class="you-might-like-grid">
-      <!-- Item 1 -->
-      <div class="rec-card-mob">
-        <a href="/Product/Details?id=sat-prod-441" style="text-decoration:none;">
-          <div class="rec-card-img-wrap">
-            <img src="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" alt="Sunburst Round Cut" />
-            <span class="rec-badge-sub">Lab Grown</span>
-          </div>
-        </a>
-        <div class="rec-card-body">
-          <a href="/Product/Details?id=sat-prod-441" style="text-decoration:none;">
-            <div class="rec-card-title">Sunburst Round Cut Lab...</div>
+    <!-- "You Might Also Like" Section (Scrollable Horizontal Carousel) -->
+    <div style="display:flex; align-items:center; justify-space-between; margin-bottom:16px;">
+      <h2 class="sec-header" style="margin-bottom:0;">You Might Also Like</h2>
+      <div style="display:flex; gap:8px;">
+        <button type="button" onclick="document.getElementById('recTrack').scrollBy({left:-280, behavior:'smooth'})" aria-label="Scroll left" style="background:#08111e; border:1px solid rgba(255,255,255,0.2); color:#fff; width:36px; height:36px; border-radius:50%; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;"><i class="fa-solid fa-chevron-left"></i></button>
+        <button type="button" onclick="document.getElementById('recTrack').scrollBy({left:280, behavior:'smooth'})" aria-label="Scroll right" style="background:#08111e; border:1px solid rgba(255,255,255,0.2); color:#fff; width:36px; height:36px; border-radius:50%; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </div>
+    
+    <div id="recTrack" class="you-might-like-track">
+      @{
+        var relatedList = ViewBag.RelatedItems as List<CatalogItem> ?? new List<CatalogItem>();
+        if (relatedList.Count == 0)
+        {
+          relatedList = new List<CatalogItem>
+          {
+            new CatalogItem { Id="sat-prod-441", Name="Sunburst Round Cut Lab Diamond Ring", PriceUSD=2538, ImageUrl="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" },
+            new CatalogItem { Id="sat-prod-442", Name="Round Sunburst Halo Lab Diamond Ring", PriceUSD=1578, ImageUrl="/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png" },
+            new CatalogItem { Id="sat-prod-443", Name="Round Cut Sunburst Halo Setting Ring", PriceUSD=1839, ImageUrl="/assets/ivevar/VI1_1044_c2ee2b37-dd07-4fed-90fd-1f9be2b8ffed.jpg" },
+            new CatalogItem { Id="sat-prod-444", Name="Round Sunburst Halo Moissanite Ring", PriceUSD=257, ImageUrl="/assets/ivevar/Moissanite_Solitaire_Ring_800x800.jpg" }
+          };
+        }
+        int itemIndex = 1;
+      }
+      @foreach (var item in relatedList)
+      {
+        var origPrice = Math.Floor(item.PriceUSD * 1.15m);
+        var reviewCount = (itemIndex * 3 + 4) % 15 + 3;
+        itemIndex++;
+        <div class="rec-card-mob">
+          <a href="/Product/Details?id=@item.Id" style="text-decoration:none;">
+            <div class="rec-card-img-wrap">
+              <img src="@item.ImageUrl" alt="@item.Name" loading="lazy" />
+              <span class="rec-badge-sub">Lab Grown</span>
+            </div>
           </a>
-          <div class="rec-card-price">
-            <span>$2,538</span>
-            <span class="rec-card-orig">$2,995</span>
-            <span class="rec-save-tag">Save 15%</span>
-          </div>
-          <div class="rec-rating-line">
-            <span class="star-icon">★</span> 10 reviews
+          <div class="rec-card-body">
+            <a href="/Product/Details?id=@item.Id" style="text-decoration:none;">
+              <div class="rec-card-title" title="@item.Name">@item.Name</div>
+            </a>
+            <div class="rec-card-price">
+              <span>$@item.PriceUSD.ToString("N0")</span>
+              <span class="rec-card-orig">$@origPrice.ToString("N0")</span>
+              <span class="rec-save-tag">Save 15%</span>
+            </div>
+            <div class="rec-rating-line">
+              <span class="star-icon">★</span> @reviewCount reviews
+            </div>
           </div>
         </div>
-      </div>
-      <!-- Item 2 -->
-      <div class="rec-card-mob">
-        <a href="/Product/Details?id=sat-prod-442" style="text-decoration:none;">
-          <div class="rec-card-img-wrap">
-            <img src="/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png" alt="Round Sunburst Halo" />
-            <span class="rec-badge-sub">Lab Grown</span>
-          </div>
-        </a>
-        <div class="rec-card-body">
-          <a href="/Product/Details?id=sat-prod-442" style="text-decoration:none;">
-            <div class="rec-card-title">Round Sunburst Halo Lab...</div>
-          </a>
-          <div class="rec-card-price">
-            <span>$1,578</span>
-            <span class="rec-card-orig">$1,862</span>
-            <span class="rec-save-tag">Save 15%</span>
-          </div>
-          <div class="rec-rating-line">
-            <span class="star-icon">★</span> 6 reviews
-          </div>
-        </div>
-      </div>
-      <!-- Item 3 -->
-      <div class="rec-card-mob">
-        <a href="/Product/Details?id=sat-prod-443" style="text-decoration:none;">
-          <div class="rec-card-img-wrap">
-            <img src="/assets/ivevar/VI1_1044_c2ee2b37-dd07-4fed-90fd-1f9be2b8ffed.jpg" alt="Round Cut Sunburst Halo" />
-            <span class="rec-badge-sub">Lab Grown</span>
-          </div>
-        </a>
-        <div class="rec-card-body">
-          <a href="/Product/Details?id=sat-prod-443" style="text-decoration:none;">
-            <div class="rec-card-title">Round Cut Sunburst Halo...</div>
-          </a>
-          <div class="rec-card-price">
-            <span>$1,839</span>
-            <span class="rec-card-orig">$2,170</span>
-            <span class="rec-save-tag">Save 15%</span>
-          </div>
-          <div class="rec-rating-line">
-            <span class="star-icon">★</span> 4 reviews
-          </div>
-        </div>
-      </div>
-      <!-- Item 4 -->
-      <div class="rec-card-mob">
-        <a href="/Product/Details?id=sat-prod-444" style="text-decoration:none;">
-          <div class="rec-card-img-wrap">
-            <img src="/assets/ivevar/Moissanite_Solitaire_Ring_800x800.jpg" alt="Round Sunburst Halo Moissanite" />
-            <span class="rec-badge-sub">Moissanite</span>
-          </div>
-        </a>
-        <div class="rec-card-body">
-          <a href="/Product/Details?id=sat-prod-444" style="text-decoration:none;">
-            <div class="rec-card-title">Round Sunburst Halo...</div>
-          </a>
-          <div class="rec-card-price">
-            <span>$257</span>
-            <span class="rec-card-orig">$303</span>
-            <span class="rec-save-tag">Save 15%</span>
-          </div>
-          <div class="rec-rating-line">
-            <span class="star-icon">★</span> 17 reviews
-          </div>
-        </div>
-      </div>
+      }
     </div>
 
     <!-- "Faq's Have Any Questions?" Section (Screenshot 4) -->
@@ -1708,7 +1783,79 @@
         console.error(e);
       }
     }
+
+    async function toggleWishlistProduct(id, name, price, img) {
+      try {
+        const res = await fetch('/api/WishlistApi/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ catalogItemId: id, productName: name, priceUSD: price, imageUrl: img })
+        });
+
+        if (res.status === 401) {
+          if (confirm('Please sign in to save items to your Wishlist. Would you like to sign in now?')) {
+            window.location.href = `/Account/SignIn?returnUrl=${encodeURIComponent(window.location.pathname)}`;
+          }
+          return;
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          const heart = document.getElementById('wishlistHeartIcon');
+          const btn = document.getElementById('btnWishlistToggle');
+          if (data.isSaved) {
+            if (heart) { heart.className = 'fa-solid fa-heart'; heart.style.color = '#e11d48'; }
+            if (btn) btn.classList.add('saved');
+            alert('Saved to your Wishlist!');
+          } else {
+            if (heart) { heart.className = 'fa-regular fa-heart'; heart.style.color = ''; }
+            if (btn) btn.classList.remove('saved');
+            alert('Removed from your Wishlist.');
+          }
+        }
+      } catch (e) {
+        alert('Could not update Wishlist.');
+      }
+    }
+
+    (async function checkWishlistStatus() {
+      try {
+        const res = await fetch('/api/WishlistApi/my-wishlist');
+        const data = await res.json();
+        if (data.success && data.isAuthenticated && data.items) {
+          const isSaved = data.items.some(i => i.catalogItemId === '@Model.Id');
+          if (isSaved) {
+            const heart = document.getElementById('wishlistHeartIcon');
+            const btn = document.getElementById('btnWishlistToggle');
+            if (heart) { heart.className = 'fa-solid fa-heart'; heart.style.color = '#e11d48'; }
+            if (btn) btn.classList.add('saved');
+          }
+        }
+      } catch (_) {}
+    })();
   </script>
+
+  <style>
+    .btn-wishlist-toggle-main {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      background: #ffffff;
+      color: #64748b;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      flex-shrink: 0;
+    }
+    .btn-wishlist-toggle-main:hover, .btn-wishlist-toggle-main.saved {
+      border-color: #f43f5e;
+      background: #fff1f2;
+      color: #e11d48;
+    }
+  </style>
 
   <!-- SAT Jewel Footer -->
   <partial name="_Footer" />

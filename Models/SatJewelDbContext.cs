@@ -7,6 +7,9 @@ namespace SAT1.Models
         public SatJewelDbContext(DbContextOptions<SatJewelDbContext> options) : base(options) { }
 
         public DbSet<Category> Categories { get; set; } = null!;
+        public DbSet<DiamondShape> DiamondShapes { get; set; } = null!;
+        public DbSet<Metal> Metals { get; set; } = null!;
+        public DbSet<CaratOption> CaratOptions { get; set; } = null!;
         public DbSet<CatalogItem> CatalogItems { get; set; } = null!;
         public DbSet<Product> Products { get; set; } = null!;
         public DbSet<ProductVariant> ProductVariants { get; set; } = null!;
@@ -17,31 +20,68 @@ namespace SAT1.Models
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<UserAddress> UserAddresses { get; set; } = null!;
         public DbSet<MetalOption> MetalOptions { get; set; } = null!;
-        public DbSet<CaratOption> CaratOptions { get; set; } = null!;
+        public DbSet<WishlistItem> WishlistItems { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Keep Admin & Sample VIP Customer accounts
+            // Configure Indexes & Relationships for clean performance
+            modelBuilder.Entity<Product>()
+                .HasIndex(p => p.CategoryId);
+
+            modelBuilder.Entity<Product>()
+                .HasIndex(p => p.DiamondShapeId);
+
+            modelBuilder.Entity<Product>()
+                .HasIndex(p => new { p.CategoryId, p.DiamondShapeId });
+
+            modelBuilder.Entity<ProductImage>()
+                .HasIndex(pi => pi.ProductId);
+
+            modelBuilder.Entity<ProductVariant>()
+                .HasIndex(pv => pv.ProductId);
+
+            modelBuilder.Entity<ProductVariant>()
+                .HasIndex(pv => pv.MetalId);
+
+            modelBuilder.Entity<ProductVariant>()
+                .HasIndex(pv => pv.CaratId);
+
+            modelBuilder.Entity<ProductVariant>()
+                .HasIndex(pv => new { pv.ProductId, pv.MetalId, pv.CaratId });
+
+            // Seed Admin Users
             modelBuilder.Entity<User>().HasData(
                 new User
                 {
-                    Id = "user_admin",
+                    Id = "user_admin_01",
                     FullName = "SAT Administrator",
-                    Email = "admin@satjewels.com",
-                    Phone = "+18005557285",
-                    Password = "admin",
-                    Role = "Admin"
+                    Email = "admin@satjewel.com",
+                    Phone = "+91 76987 27798",
+                    Password = "AEt7jWRBQ8tWWyQ9pfdeqth4t26Lwq8NID6cCWMxJFo=",
+                    Role = "Admin",
+                    CreatedAt = DateTime.UtcNow
                 },
                 new User
                 {
-                    Id = "user_vip_client",
-                    FullName = "Eleanor Vance",
-                    Email = "client@satjewels.com",
-                    Phone = "+12125550199",
-                    Password = "password123",
-                    Role = "VIP"
+                    Id = "user_admin_02",
+                    FullName = "Dharmik (Founder & Lead Designer)",
+                    Email = "admin@satjewels.com",
+                    Phone = "+91 76987 27798",
+                    Password = "AEt7jWRBQ8tWWyQ9pfdeqth4t26Lwq8NID6cCWMxJFo=",
+                    Role = "Admin",
+                    CreatedAt = DateTime.UtcNow
+                },
+                new User
+                {
+                    Id = "user_admin_03",
+                    FullName = "SAT Support Admin",
+                    Email = "satjewels31@gmail.com",
+                    Phone = "+91 76987 27798",
+                    Password = "AEt7jWRBQ8tWWyQ9pfdeqth4t26Lwq8NID6cCWMxJFo=",
+                    Role = "Admin",
+                    CreatedAt = DateTime.UtcNow
                 }
             );
         }

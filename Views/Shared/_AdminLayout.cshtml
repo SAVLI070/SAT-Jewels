@@ -16,6 +16,10 @@
 
   <link rel="stylesheet" href="~/css/admin_layout.css" />
   <link rel="stylesheet" href="~/css/style.css" />
+  
+  <!-- SweetAlert2 CDN for Bottom-Right Toast Alerts -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
   <!-- Blocking Script to prevent sidebar reload flash on Desktop only -->
   <script>
@@ -29,110 +33,183 @@
   </script>
 
   <style>
-    /* Full Glassmorphic Transparency Theme matching Navbar (Image 2) */
+    /* Ultra-Clean Modern Light Theme & Layout Architecture */
+    :root {
+      --adm-bg: #f8fafc;
+      --adm-card-bg: #ffffff;
+      --adm-border: #e2e8f0;
+      --adm-border-hover: #cbd5e1;
+      --adm-text: #0f172a;
+      --adm-text-muted: #64748b;
+      --adm-accent: #b45309;
+      --adm-accent-light: rgba(180, 83, 9, 0.08);
+      --adm-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     html, body {
-      background: #050b14 !important;
-      background-image: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%) !important;
-      background-attachment: fixed !important;
-      color: #f8fafc !important;
-      font-family: var(--font-sans);
+      background: var(--adm-bg) !important;
+      background-image: none !important;
+      color: var(--adm-text) !important;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
       margin: 0;
       padding: 0;
       min-height: 100vh;
+      width: 100%;
     }
 
     #farmbridgeAdminPortal {
-      background: transparent !important;
+      background: var(--adm-bg) !important;
       min-height: 100vh;
     }
 
-    /* Fully Transparent Glassmorphic Sidebar */
-    .adm-sidebar {
-      background: rgba(10, 20, 36, 0.45) !important;
-      backdrop-filter: blur(25px) !important;
-      -webkit-backdrop-filter: blur(25px) !important;
-      border-right: 1px solid rgba(212, 178, 112, 0.25) !important;
-      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease !important;
-      box-shadow: 10px 0 35px rgba(0, 0, 0, 0.5) !important;
+    .adm-layout {
+      display: flex;
+      min-height: 100vh;
+      width: 100%;
+      background: var(--adm-bg);
     }
 
-    /* Fully Transparent Glassmorphic Topbar */
-    .adm-topbar {
-      background: rgba(10, 20, 36, 0.45) !important;
-      backdrop-filter: blur(25px) !important;
-      -webkit-backdrop-filter: blur(25px) !important;
-      border-bottom: 1px solid rgba(212, 178, 112, 0.25) !important;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    /* Crisp Light Mode Sidebar */
+    .adm-sidebar {
+      width: 260px;
+      min-width: 260px;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff !important;
+      border-right: 1px solid #e2e8f0 !important;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease !important;
+      box-shadow: 4px 0 20px rgba(0, 0, 0, 0.03) !important;
+      position: relative;
+      z-index: 100;
+    }
+
+    .adm-sidebar-head {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    .adm-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .adm-main {
-      background: transparent !important;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      background: var(--adm-bg) !important;
+    }
+
+    /* Crisp Light Mode Topbar */
+    .adm-topbar {
+      height: 70px;
+      padding: 0 28px !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03) !important;
+    }
+
+    .adm-toggle-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .adm-content {
-      background: transparent !important;
+      flex: 1;
+      padding: 28px;
+      background: var(--adm-bg) !important;
     }
 
     .adm-page-title {
-      font-family: var(--font-serif);
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 22px;
       font-weight: 700;
-      color: #ffffff !important;
+      color: #0f172a !important;
+      margin: 0;
     }
 
     .adm-sidebar-name {
-      font-family: var(--font-serif);
+      font-family: 'Playfair Display', Georgia, serif;
       font-size: 20px;
-      font-weight: 700;
-      color: #ffffff !important;
+      font-weight: 800;
+      color: #0f172a !important;
     }
 
     .adm-sidebar-name span {
-      color: #fbbf24 !important;
+      color: #b45309 !important;
     }
 
     .adm-role-badge {
-      background: rgba(212, 178, 112, 0.18) !important;
-      border: 1px solid #d4b270 !important;
-      color: #fbbf24 !important;
+      display: inline-block;
+      background: rgba(180, 83, 9, 0.1) !important;
+      border: 1px solid #b45309 !important;
+      color: #b45309 !important;
       font-weight: 700;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 2px;
     }
 
     .adm-nav-link {
-      color: #cbd5e1 !important;
+      color: #475569 !important;
       font-size: 14px !important;
       font-weight: 600 !important;
-      transition: all 0.25s ease !important;
+      transition: all 0.2s ease !important;
       border-radius: 12px !important;
       padding: 12px 16px !important;
-      position: relative !important;
       display: flex;
       align-items: center;
       gap: 12px;
+      text-decoration: none;
     }
 
     .adm-nav-link:hover {
-      background: rgba(255, 255, 255, 0.08) !important;
-      color: #ffffff !important;
+      background: #f1f5f9 !important;
+      color: #0f172a !important;
     }
 
     .adm-nav-link.active {
-      background: linear-gradient(135deg, rgba(212, 178, 112, 0.22) 0%, rgba(180, 83, 9, 0.22) 100%) !important;
-      border: 1px solid #d4b270 !important;
-      color: #fbbf24 !important;
-      box-shadow: 0 4px 18px rgba(212, 178, 112, 0.25) !important;
+      background: rgba(180, 83, 9, 0.08) !important;
+      border: 1px solid #b45309 !important;
+      color: #b45309 !important;
+      box-shadow: 0 2px 10px rgba(180, 83, 9, 0.15) !important;
       font-weight: 700 !important;
     }
 
     .adm-nav-link.active i {
-      color: #fbbf24 !important;
+      color: #b45309 !important;
     }
 
     .adm-avatar {
-      background: rgba(212, 178, 112, 0.2) !important;
-      border: 1px solid #d4b270 !important;
-      color: #fbbf24 !important;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: rgba(180, 83, 9, 0.1) !important;
+      border: 1px solid #b45309 !important;
+      color: #b45309 !important;
       font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     /* DESKTOP-ONLY COLLAPSED SIDEBAR RULES (width > 900px) */
@@ -140,6 +217,7 @@
       html.sidebar-is-collapsed .adm-sidebar,
       .adm-sidebar.collapsed {
         width: 72px !important;
+        min-width: 72px !important;
         padding: 24px 10px !important;
       }
 
@@ -152,245 +230,219 @@
       .adm-sidebar.collapsed .adm-nav-link span,
       .adm-sidebar.collapsed .adm-sidebar-foot span {
         display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+      }
+
+      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-head,
+      .adm-sidebar.collapsed .adm-sidebar-head {
+        justify-content: center !important;
+        padding-bottom: 20px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        margin-bottom: 20px !important;
+      }
+
+      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-logo,
+      .adm-sidebar.collapsed .adm-sidebar-logo {
+        margin: 0 auto !important;
+        display: block !important;
       }
 
       html.sidebar-is-collapsed .adm-sidebar .adm-nav-link,
       .adm-sidebar.collapsed .adm-nav-link {
         justify-content: center !important;
-        padding: 12px !important;
+        padding: 12px 0 !important;
+        width: 100% !important;
       }
 
-      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-logo,
-      .adm-sidebar.collapsed .adm-sidebar-logo {
-        justify-content: center !important;
-      }
-
-      /* Floating Tooltip ONLY when Sidebar is Collapsed on DESKTOP */
-      @@keyframes fadeInTooltip {
-        from { opacity: 0; transform: translateY(-50%) translateX(-6px); }
-        to { opacity: 1; transform: translateY(-50%) translateX(0); }
-      }
-
-      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link:hover::after,
-      .adm-sidebar.collapsed .adm-nav-link:hover::after {
-        content: attr(data-tooltip);
-        position: absolute;
-        left: calc(100% + 14px);
-        top: 50%;
-        transform: translateY(-50%);
-        background: rgba(8, 16, 32, 0.95);
-        border: 1px solid #d4b270;
-        border-radius: 8px;
-        color: #fbbf24;
-        padding: 6px 14px;
-        font-size: 12px;
-        font-weight: 700;
-        white-space: nowrap;
-        box-shadow: 0 6px 22px rgba(0, 0, 0, 0.7), 0 0 14px rgba(212, 178, 112, 0.35);
-        pointer-events: none;
-        z-index: 999999;
-        animation: fadeInTooltip 0.2s ease-out forwards;
-      }
-
-      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link:hover::before,
-      .adm-sidebar.collapsed .adm-nav-link:hover::before {
-        content: "";
-        position: absolute;
-        left: calc(100% + 6px);
-        top: 50%;
-        transform: translateY(-50%);
-        border-width: 5px;
-        border-style: solid;
-        border-color: transparent #d4b270 transparent transparent;
-        pointer-events: none;
-        z-index: 999999;
-        animation: fadeInTooltip 0.2s ease-out forwards;
+      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link i,
+      .adm-sidebar.collapsed .adm-nav-link i {
+        margin: 0 !important;
+        font-size: 18px !important;
       }
     }
 
-    /* MOBILE-ONLY SIDEBAR OVERRIDES (width <= 900px) */
+    /* MOBILE & TABLET SLIDE-OVER SIDEBAR RULES (width <= 900px) */
     @@media (max-width: 900px) {
-      html.sidebar-is-collapsed .adm-sidebar,
-      .adm-sidebar.collapsed,
       .adm-sidebar {
-        width: 280px !important;
-        max-width: 82vw !important;
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
-        height: 100vh !important;
-        height: 100dvh !important;
-        z-index: 10050 !important;
+        bottom: 0 !important;
+        z-index: 9999 !important;
+        width: 280px !important;
+        min-width: 280px !important;
         transform: translateX(-100%) !important;
-        padding: 24px 16px !important;
-        background: rgba(10, 20, 36, 0.96) !important;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        box-shadow: 15px 0 40px rgba(0, 0, 0, 0.15) !important;
+        display: flex !important;
+        flex-direction: column !important;
       }
 
-      html.sidebar-is-collapsed .adm-sidebar.open,
-      .adm-sidebar.collapsed.open,
-      .adm-sidebar.open {
+      .adm-sidebar.mobile-open {
         transform: translateX(0) !important;
       }
 
-      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-name,
-      html.sidebar-is-collapsed .adm-sidebar .adm-role-badge,
-      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link span,
-      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-foot span,
-      .adm-sidebar.collapsed .adm-sidebar-name,
-      .adm-sidebar.collapsed .adm-role-badge,
-      .adm-sidebar.collapsed .adm-nav-link span,
-      .adm-sidebar.collapsed .adm-sidebar-foot span {
-        display: inline-block !important;
+      .adm-mobile-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(4px);
+        z-index: 9998;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
       }
 
-      html.sidebar-is-collapsed .adm-sidebar .adm-nav-link,
-      .adm-sidebar.collapsed .adm-nav-link {
-        justify-content: flex-start !important;
+      .adm-mobile-backdrop.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .adm-topbar {
         padding: 12px 16px !important;
       }
-
-      html.sidebar-is-collapsed .adm-sidebar .adm-sidebar-logo,
-      .adm-sidebar.collapsed .adm-sidebar-logo {
-        justify-content: flex-start !important;
-      }
-    }
-
-    .adm-collapse-btn {
-      background: rgba(212, 178, 112, 0.15);
-      border: 1px solid rgba(212, 178, 112, 0.4);
-      color: #fbbf24;
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s ease;
-      margin-right: 14px;
-    }
-
-    .adm-collapse-btn:hover {
-      background: #fbbf24;
-      color: #060d0a;
-      box-shadow: 0 0 14px rgba(251, 191, 36, 0.5);
     }
   </style>
 </head>
 
 <body>
 
-  <!-- Mobile Backdrop Overlay -->
-  <div class="adm-backdrop" id="admBackdrop" onclick="toggleAdmDrawer(event)"></div>
+  <div class="adm-mobile-backdrop" id="admMobileBackdrop" onclick="closeAdminMobileSidebar()"></div>
 
-  <div id="farmbridgeAdminPortal" class="show" style="position:relative; opacity:1; visibility:visible;">
-    <!-- Left Sidebar (`adm-sidebar`) -->
+  <div id="farmbridgeAdminPortal" class="adm-layout show">
+    
+    <!-- Sidebar Navigation -->
     <aside class="adm-sidebar" id="admSidebar">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom: 14px;">
-        <a href="/Admin/Dashboard" class="adm-sidebar-logo" style="margin-bottom:0;text-decoration:none;">
-          <div class="sat-logo-emblem" style="width:38px;height:38px;background:#0f172a;border-color:#b45309;">
-            <img src="~/assets/sat_emblem_clean.png" class="official-sat-logo-img" alt="SAT Logo Emblem" />
+      <div class="adm-sidebar-head">
+        <a href="/Admin/Index" style="text-decoration:none; display:flex; align-items:center; gap:10px;">
+          <img src="~/assets/sat_emblem_clean.png" alt="SAT" class="adm-sidebar-logo" style="width:36px; height:auto;" />
+          <div>
+            <div class="adm-sidebar-name">SAT <span>Jewel</span></div>
+            <div class="adm-role-badge">VIP ADMIN</div>
           </div>
-          <span class="adm-sidebar-name">SAT <span>Jewel</span></span>
         </a>
-        <button class="adm-sidebar-close-btn" onclick="toggleAdmDrawer(event)" title="Close Menu">&times;</button>
       </div>
 
-      <div class="adm-role-badge">Admin</div>
+      <nav class="adm-nav">
+        @{
+            var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+            var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+        }
 
-      <ul class="adm-nav">
-        <li>
-          <a href="/Admin/Dashboard" data-tooltip="Overview" class="adm-nav-link @(Context.Request.Path.Value?.ToLower().Contains("dashboard") == true || Context.Request.Path.Value?.ToLower() == "/admin" ? "active" : "")" onclick="closeAdmOnMobile()">
-            <i class="fa-solid fa-chart-pie"></i> <span>Overview</span>
-          </a>
-        </li>
-        <li>
-          <a href="/Admin/Categories" data-tooltip="Manage Categories" class="adm-nav-link @(Context.Request.Path.Value?.ToLower().Contains("categories") == true ? "active" : "")" onclick="closeAdmOnMobile()">
-            <i class="fa-solid fa-layer-group"></i> <span>Manage Categories</span>
-          </a>
-        </li>
-        <li>
-          <a href="/Admin/Catalog" data-tooltip="Jewelry Catalog" class="adm-nav-link @(Context.Request.Path.Value?.ToLower().Contains("catalog") == true ? "active" : "")" onclick="closeAdmOnMobile()">
-            <i class="fa-solid fa-gem"></i> <span>Jewelry Catalog</span>
-          </a>
-        </li>
-      </ul>
+        <a href="/Admin/Index" class="adm-nav-link @(currentAction == "Index" ? "active" : "")">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Overview</span>
+        </a>
 
-      <div class="adm-sidebar-foot">
-        <a href="/" data-tooltip="Exit to Storefront" class="adm-nav-link adm-logout" style="color:#fca5a5 !important;">
-          <i class="fa-solid fa-right-from-bracket"></i> <span>Exit to Storefront</span>
+        <a href="/Admin/Categories" class="adm-nav-link @(currentAction == "Categories" ? "active" : "")">
+          <i class="fa-solid fa-layer-group"></i>
+          <span>Manage Categories</span>
+        </a>
+
+        <a href="/Admin/Catalog" class="adm-nav-link @(currentAction == "Catalog" ? "active" : "")">
+          <i class="fa-solid fa-gem"></i>
+          <span>Jewelry Catalog</span>
+        </a>
+
+        <a href="/Admin/AddProduct" class="adm-nav-link @(currentAction == "AddProduct" ? "active" : "")">
+          <i class="fa-solid fa-plus-circle"></i>
+          <span>Publish New Item</span>
+        </a>
+      </nav>
+
+      <div class="adm-sidebar-foot" style="margin-top:auto; padding-top:20px; border-top:1px solid #e2e8f0;">
+        <a href="/" class="adm-nav-link" style="color:#ef4444 !important;">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          <span>Exit to Storefront</span>
         </a>
       </div>
     </aside>
 
-    <!-- Main Content Area (`adm-main`) -->
+    <!-- Main Content Area -->
     <div class="adm-main">
       <header class="adm-topbar">
-        <div class="adm-topbar-left" style="display:flex;align-items:center;">
-          <!-- Sidebar Collapse/Expand Toggle Button (Desktop only) -->
-          <button class="adm-collapse-btn" id="sidebarCollapseToggleBtn" onclick="toggleSidebarCollapse()" title="Collapse / Expand Sidebar">
-            <i class="fa-solid fa-bars-staggered" id="sidebarCollapseIcon"></i>
+        <div style="display:flex; align-items:center; gap:16px;">
+          <button type="button" class="adm-toggle-btn" onclick="toggleAdminSidebar()" title="Toggle Sidebar">
+            <i class="fa-solid fa-bars" style="color:#0f172a;"></i>
           </button>
-          <button class="adm-menu-btn" onclick="toggleAdmDrawer(event)" aria-label="Toggle Menu">
-            <i class="fa-solid fa-bars"></i>
-          </button>
-          <h1 class="adm-page-title" style="margin:0;">@title</h1>
+          <h1 class="adm-page-title">@title</h1>
         </div>
-        <div class="adm-topbar-right" style="display:flex;align-items:center;gap:12px;">
-          <span style="font-size:12px;color:#fbbf24;font-weight:600;"><i class="fa-solid fa-user-shield"></i> VIP Admin</span>
-          <a href="/Account/Logout" style="font-size:12px;color:#cbd5e1;text-decoration:none;font-weight:600;"><i class="fa-solid fa-sign-out"></i> Logout</a>
-          <div class="adm-avatar">A</div>
+
+        <div style="display:flex; align-items:center; gap:16px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="adm-avatar">A</div>
+            <div style="display:none; @@media (min-width: 640px) { display:block; }">
+              <div style="font-size:13px; font-weight:700; color:#0f172a;">VIP Admin</div>
+              <div style="font-size:11px; color:#64748b;">admin@satjewel.com</div>
+            </div>
+          </div>
+          <a href="/Account/Logout" style="color:#ef4444; text-decoration:none; font-size:13px; font-weight:700;">
+            <i class="fa-solid fa-sign-out-alt"></i> Logout
+          </a>
         </div>
       </header>
 
-      <main class="adm-content" style="padding:32px 24px;">
+      <main class="adm-content">
         @RenderBody()
       </main>
     </div>
+
   </div>
 
-  <script src="~/js/script.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
+    function toggleAdminSidebar() {
       const sidebar = document.getElementById('admSidebar');
-      const isCollapsed = window.innerWidth > 900 && localStorage.getItem('sat_admin_sidebar_collapsed') === 'true';
-      if (sidebar) {
+      const backdrop = document.getElementById('admMobileBackdrop');
+
+      if (window.innerWidth <= 900) {
+        sidebar.classList.toggle('mobile-open');
+        backdrop.classList.toggle('active');
+      } else {
+        sidebar.classList.toggle('collapsed');
+        const isCollapsed = sidebar.classList.contains('collapsed');
         if (isCollapsed) {
-          sidebar.classList.add('collapsed');
           document.documentElement.classList.add('sidebar-is-collapsed');
+          localStorage.setItem('sat_admin_sidebar_collapsed', 'true');
         } else {
-          sidebar.classList.remove('collapsed');
           document.documentElement.classList.remove('sidebar-is-collapsed');
+          localStorage.setItem('sat_admin_sidebar_collapsed', 'false');
         }
       }
-      const icon = document.getElementById('sidebarCollapseIcon');
-      if (icon) {
-        icon.className = isCollapsed ? 'fa-solid fa-indent' : 'fa-solid fa-bars-staggered';
-      }
-    });
-
-    function toggleSidebarCollapse() {
-      if (window.innerWidth <= 900) return; // Desktop only toggle
-      const sidebar = document.getElementById('admSidebar');
-      if (!sidebar) return;
-      
-      const isCollapsed = sidebar.classList.toggle('collapsed');
-      if (isCollapsed) {
-        document.documentElement.classList.add('sidebar-is-collapsed');
-      } else {
-        document.documentElement.classList.remove('sidebar-is-collapsed');
-      }
-      
-      localStorage.setItem('sat_admin_sidebar_collapsed', isCollapsed ? 'true' : 'false');
-      
-      const icon = document.getElementById('sidebarCollapseIcon');
-      if (icon) {
-        icon.className = isCollapsed ? 'fa-solid fa-indent' : 'fa-solid fa-bars-staggered';
-      }
     }
+
+    function closeAdminMobileSidebar() {
+      document.getElementById('admSidebar')?.classList.remove('mobile-open');
+      document.getElementById('admMobileBackdrop')?.classList.remove('active');
+    }
+
+    // Task 1: Global Bottom-Right SweetAlert2 Toast Helper
+    window.showToast = function (message, type = 'warning', title = '') {
+      if (typeof Swal !== 'undefined') {
+        Swal.fire({
+          toast: true,
+          position: 'bottom-end',
+          icon: type, // 'success', 'warning', 'error', 'info'
+          title: title || message,
+          text: title ? message : '',
+          showConfirmButton: false,
+          timer: 3500,
+          timerProgressBar: true,
+          background: '#ffffff',
+          color: '#0f172a',
+          customClass: {
+            popup: 'colored-toast-popup'
+          }
+        });
+      } else {
+        alert(message);
+      }
+    };
   </script>
-  @RenderSection("Scripts", required: false)
+  @await RenderSectionAsync("Scripts", required: false)
 </body>
 
 </html>

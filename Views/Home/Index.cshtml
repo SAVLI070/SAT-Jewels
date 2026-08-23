@@ -43,15 +43,12 @@
 <!-- Navbar — Single Horizontal Line -->
 <nav class="navbar" id="navbar">
   <div class="container nav-inner">
-    <!-- Navbar Brand Wrap: Shop Logo Emblem + Shop Name -->
-    <a href="/" class="sat-nav-brand-wrap" style="display: flex; align-items: center; gap: 4px; text-decoration: none;">
-      <img src="~/assets/sat_logo_transparent.png" asp-append-version="true" class="official-sat-logo-nav" alt="SAT Jewels Official Logo" style="height: 36px; width: auto; object-fit: contain;" />
-      <div class="nav-logo-slot" style="display: flex; flex-direction: column; margin-left: 2px;">
-        <div class="sat-logo-brand" style="font-family: var(--font-serif, 'Playfair Display', serif); font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: 0.04em; line-height: 1; white-space: nowrap; display: flex; align-items: center;">
-          <span>SAT</span>
-          <span class="sat-brand-script" style="margin-left: 4px; color: var(--champagne-gold, #d4b270);">Jewel</span>
-        </div>
-        <div class="sat-logo-tagline" style="font-size: 8.5px; font-weight: 600; color: rgba(255, 255, 255, 0.75); letter-spacing: 0.16em; text-transform: uppercase; margin-top: 2px;">Fine Jewelry</div>
+    <!-- Navbar Brand Wrap: Shop Logo Emblem + Shop Name (GoDaddy-Style Icon + Name Layout) -->
+    <a href="/" class="sat-nav-brand-wrap" style="display: flex; align-items: center; gap: 10px; text-decoration: none;">
+      <img src="~/assets/sat_emblem_clean.png" asp-append-version="true" class="official-sat-logo-nav" alt="SAT Jewels Official Logo" style="height: 38px; width: auto; object-fit: contain;" />
+      <div class="nav-logo-slot" style="display: flex; flex-direction: column; justify-content: center;">
+        <span style="font-family: var(--font-serif, 'Playfair Display', serif); font-size: 20px; font-weight: 700; color: #ffffff; letter-spacing: 0.04em; line-height: 1; white-space: nowrap; display: flex; align-items: center;">SAT <span class="sat-brand-script" style="margin-left: 4px; color: var(--champagne-gold, #d4b270);">Jewel</span></span>
+        <span style="font-size: 8.5px; font-weight: 600; color: rgba(255, 255, 255, 0.75); letter-spacing: 0.16em; text-transform: uppercase; margin-top: 2px;">Fine Jewelry</span>
       </div>
     </a>
 

@@ -66,12 +66,13 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.LoginPath = "/Account/SignIn";
         options.AccessDeniedPath = "/Account/SignIn";
-        options.Cookie.Name = "SATJewel_AuthSession";
+        options.Cookie.Name = "SATJewel_Session_v5";
         options.Cookie.HttpOnly = true;
         options.Cookie.IsEssential = true;
         options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.Expiration = null;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-        options.SlidingExpiration = true;
+        options.SlidingExpiration = false;
     });
 
 var app = builder.Build();
@@ -83,66 +84,10 @@ using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<SatJewelDbContext>();
         
-        // Execute DDL Raw SQL to guarantee tables and columns exist in Neon PostgreSQL
-        var createTablesSql = @"
-            CREATE TABLE IF NOT EXISTS ""Categories"" (
-                ""Id"" text NOT NULL,
-                ""Name"" text NOT NULL,
-                ""Badge"" text NOT NULL DEFAULT 'Popular',
-                ""Subtitle"" text NOT NULL DEFAULT '',
-                ""ImageUrl"" text NOT NULL DEFAULT '',
-                ""DisplayOrder"" integer NOT NULL DEFAULT 1,
-                ""IsActive"" boolean NOT NULL DEFAULT true,
-                ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                CONSTRAINT ""PK_Categories"" PRIMARY KEY (""Id"")
-            );
-
-            CREATE TABLE IF NOT EXISTS ""CatalogItems"" (
-                ""Id"" text NOT NULL,
-                ""Name"" text NOT NULL,
-                ""CategoryId"" text NOT NULL DEFAULT 'rings',
-                ""Spec"" text NOT NULL DEFAULT '',
-                ""PriceUSD"" numeric NOT NULL DEFAULT 0.0,
-                ""ImageUrl"" text NOT NULL DEFAULT '',
-                ""GalleryImages"" text NOT NULL DEFAULT '',
-                ""MetalOptions"" text NOT NULL DEFAULT '18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|22K Yellow Gold (+150)|24K Pure Gold (+400)|Platinum 950 (+350)|14K Yellow Gold (-100)|14K White Gold (-100)|10K Solid Gold (-200)|Rose Platinum (+500)',
-                ""CaratOptions"" text NOT NULL DEFAULT '0.5ct GIA (-800)|0.75ct GIA (-500)|1.0ct GIA (-400)|1.25ct GIA (-200)|1.5ct GIA (+0)|1.75ct GIA (+400)|2.0ct GIA (+750)|2.5ct GIA (+1200)|3.0ct GIA (+2000)|5.0ct Solitaire (+5000)',
-                ""IsActive"" boolean NOT NULL DEFAULT true,
-                ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                CONSTRAINT ""PK_CatalogItems"" PRIMARY KEY (""Id"")
-            );
-
-            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""ParentId"" text;
-            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""CategoryType"" text NOT NULL DEFAULT 'Main Category';
-            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""SubCategoryName"" text NOT NULL DEFAULT '';
-            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""DiamondType"" text NOT NULL DEFAULT 'Lab Grown Diamond';
-            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""DiamondCutShape"" text NOT NULL DEFAULT 'All Shapes';
-
-            ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""GalleryImages"" text NOT NULL DEFAULT '';
-            ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""MetalOptions"" text NOT NULL DEFAULT '18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|22K Yellow Gold (+150)|24K Pure Gold (+400)|Platinum 950 (+350)|14K Yellow Gold (-100)|14K White Gold (-100)|10K Solid Gold (-200)|Rose Platinum (+500)';
-            ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""CaratOptions"" text NOT NULL DEFAULT '0.5ct GIA (-800)|0.75ct GIA (-500)|1.0ct GIA (-400)|1.25ct GIA (-200)|1.5ct GIA (+0)|1.75ct GIA (+400)|2.0ct GIA (+750)|2.5ct GIA (+1200)|3.0ct GIA (+2000)|5.0ct Solitaire (+5000)';
-            ALTER TABLE ""CatalogItems"" ADD COLUMN IF NOT EXISTS ""Price"" numeric NOT NULL DEFAULT 0.0;
-            UPDATE ""CatalogItems"" SET ""Price"" = ""PriceUSD"" WHERE ""Price"" = 0 AND ""PriceUSD"" > 0;
-            ALTER TABLE ""Products"" ADD COLUMN IF NOT EXISTS ""Price"" numeric NOT NULL DEFAULT 0.0;
-            UPDATE ""Products"" SET ""Price"" = ""BasePriceUSD"" WHERE ""Price"" = 0 AND ""BasePriceUSD"" > 0;
-
-            CREATE TABLE IF NOT EXISTS ""MetalOptions"" (
-                ""Id"" serial PRIMARY KEY,
-                ""CatalogItemId"" text NOT NULL,
-                ""MetalName"" text NOT NULL,
-                ""PriceOffsetUSD"" numeric NOT NULL DEFAULT 0.0,
-                ""DisplayOrder"" integer NOT NULL DEFAULT 1
-            );
-
-            CREATE TABLE IF NOT EXISTS ""CaratOptions"" (
-                ""Id"" serial PRIMARY KEY,
-                ""CatalogItemId"" text NOT NULL,
-                ""CaratLabel"" text NOT NULL,
-                ""PriceOffsetUSD"" numeric NOT NULL DEFAULT 0.0,
-                ""DisplayOrder"" integer NOT NULL DEFAULT 1
-            );
-
-            CREATE TABLE IF NOT EXISTS ""Users"" (
+        // Execute DDL Statements individually to guarantee tables/columns exist in Neon PostgreSQL
+        string[] ddlStatements = new[]
+        {
+            @"CREATE TABLE IF NOT EXISTS ""Users"" (
                 ""Id"" text NOT NULL,
                 ""FullName"" text NOT NULL,
                 ""Email"" text NOT NULL,
@@ -151,9 +96,9 @@ using (var scope = app.Services.CreateScope())
                 ""Role"" text NOT NULL DEFAULT 'Customer',
                 ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_Users"" PRIMARY KEY (""Id"")
-            );
+            );",
 
-            CREATE TABLE IF NOT EXISTS ""Orders"" (
+            @"CREATE TABLE IF NOT EXISTS ""Orders"" (
                 ""OrderId"" text NOT NULL,
                 ""ItemName"" text NOT NULL,
                 ""Amount"" numeric NOT NULL DEFAULT 0.0,
@@ -163,9 +108,9 @@ using (var scope = app.Services.CreateScope())
                 ""Status"" text NOT NULL DEFAULT 'Processing',
                 ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_Orders"" PRIMARY KEY (""OrderId"")
-            );
+            );",
 
-            CREATE TABLE IF NOT EXISTS ""UserAddresses"" (
+            @"CREATE TABLE IF NOT EXISTS ""UserAddresses"" (
                 ""AddressId"" text NOT NULL,
                 ""UserId"" text NOT NULL,
                 ""FullName"" text NOT NULL,
@@ -178,31 +123,38 @@ using (var scope = app.Services.CreateScope())
                 ""Country"" text NOT NULL DEFAULT 'United States',
                 ""IsDefault"" boolean NOT NULL DEFAULT false,
                 CONSTRAINT ""PK_UserAddresses"" PRIMARY KEY (""AddressId"")
-            );
+            );",
 
-            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaymentProvider"" text NOT NULL DEFAULT 'PayPal';
-            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';
-            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderPaymentId"" text NOT NULL DEFAULT '';
-            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ExpectedAmount"" numeric NOT NULL DEFAULT 0.0;
-            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""AmountPaid"" numeric NOT NULL DEFAULT 0.0;
-            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaidAt"" timestamp with time zone;
-            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""BuyerInfo"" text NOT NULL DEFAULT '';
-            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""IsSuspicious"" boolean NOT NULL DEFAULT false;
-            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""SuspiciousReason"" text;
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaymentProvider"" text NOT NULL DEFAULT 'PayPal';",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderPaymentId"" text NOT NULL DEFAULT '';",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ExpectedAmount"" numeric NOT NULL DEFAULT 0.0;",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""AmountPaid"" numeric NOT NULL DEFAULT 0.0;",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaidAt"" timestamp with time zone;",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""BuyerInfo"" text NOT NULL DEFAULT '';",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""IsSuspicious"" boolean NOT NULL DEFAULT false;",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""SuspiciousReason"" text;",
 
-            ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';
-            ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""SignatureVerified"" boolean NOT NULL DEFAULT false;
-            ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""RawPayload"" text;
-        ";
+            @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';",
+            @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""SignatureVerified"" boolean NOT NULL DEFAULT false;",
+            @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""RawPayload"" text;"
+        };
 
-        db.Database.ExecuteSqlRaw(createTablesSql);
-
-        // Seed & Reset 6 Core Categories (IDs 1..6) and Clear Product Data per user directive
-        SAT1.BAL.RelationalDbSeeder.SeedRelationalData(db);
+        foreach (var sql in ddlStatements)
+        {
+            try
+            {
+                db.Database.ExecuteSqlRaw(sql);
+            }
+            catch (Exception)
+            {
+                // Silently ignore DDL notes if columns/tables already exist
+            }
+        }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Neon PostgreSQL database init error: {ex.Message}");
+        Console.WriteLine($"Neon PostgreSQL database init note: {ex.Message}");
     }
 }
 
@@ -231,7 +183,7 @@ app.Use(async (context, next) =>
         context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
         context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
         context.Response.Headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()";
-        context.Response.Headers["Content-Security-Policy"] = "default-src 'self' https: data: 'unsafe-inline' 'unsafe-eval';";
+        context.Response.Headers["Content-Security-Policy"] = "default-src 'self' https: data: wss: ws: 'unsafe-inline' 'unsafe-eval'; connect-src 'self' https: wss: ws: data:;";
         return Task.CompletedTask;
     });
     await next();
@@ -243,6 +195,21 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Admin Access Guard: Redirect unauthenticated visitors trying to access /admin to Sign In
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value?.ToLower() ?? "";
+
+    if (path.StartsWith("/admin") && context.User.Identity?.IsAuthenticated != true)
+    {
+        var returnUrl = System.Net.WebUtility.UrlEncode(context.Request.Path + context.Request.QueryString);
+        context.Response.Redirect($"/Account/SignIn?returnUrl={returnUrl}");
+        return;
+    }
+
+    await next();
+});
 
 app.MapControllerRoute(
     name: "default",

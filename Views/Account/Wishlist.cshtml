@@ -1,0 +1,357 @@
+@model List<SAT1.Models.WishlistItem>
+@{
+    ViewData["Title"] = "My Saved Wishlist — SAT Jewel";
+}
+
+<div class="wishlist-page-wrap">
+    <!-- Header Banner -->
+    <div class="wishlist-header-section">
+        <div class="wishlist-breadcrumb">
+            <a href="/">Home</a> &rsaquo; <a href="/Account/MyAccount">My Account</a> &rsaquo; <span>Wishlist</span>
+        </div>
+        <h1 class="wishlist-main-title"><i class="fa-solid fa-heart" style="color: #e11d48; margin-right: 8px;"></i> My Saved Wishlist</h1>
+        <p class="wishlist-subtitle">Your personal collection of favorite SAT Jewel diamond &amp; moissanite creations.</p>
+    </div>
+
+    <div class="wishlist-container">
+        @if (Model == null || Model.Count == 0)
+        {
+            <div class="wishlist-empty-card">
+                <div class="empty-icon-wrap">
+                    <i class="fa-regular fa-heart"></i>
+                </div>
+                <h3 class="empty-title">Your Wishlist is currently empty</h3>
+                <p class="empty-text">Explore our certified Lab-Grown Diamond and Moissanite collections to save your dream jewelry pieces.</p>
+                <a href="/Catalog" class="btn-wishlist-explore">
+                    <i class="fa-solid fa-gem"></i> Explore Jewelry Collections
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="wishlist-grid">
+                @foreach (var item in Model)
+                {
+                    <div class="wishlist-item-card" id="wishlist-card-@item.CatalogItemId">
+                        <div class="wishlist-img-box">
+                            <img src="@(string.IsNullOrWhiteSpace(item.ImageUrl) ? "/assets/categories/cat_engagement_rings.png" : item.ImageUrl)" alt="@item.ProductName" />
+                            <button type="button" class="wishlist-remove-btn" title="Remove from Wishlist" onclick="removeWishlistItem('@item.CatalogItemId')">
+                                &times;
+                            </button>
+                        </div>
+                        <div class="wishlist-info-box">
+                            <h3 class="item-name">@item.ProductName</h3>
+                            <div class="item-price">$@item.PriceUSD.ToString("N0")</div>
+                            <div class="wishlist-actions">
+                                <a href="/Product/Details/@item.CatalogItemId" class="btn-wishlist-view">
+                                    View Details
+                                </a>
+                                <button type="button" class="btn-wishlist-cart" onclick="addWishlistItemToCart('@item.CatalogItemId', '@item.ProductName', @item.PriceUSD, '@item.ImageUrl')">
+                                    <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+    .wishlist-page-wrap {
+        background-color: #faf8f5;
+        color: #111827;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        min-height: 80vh;
+        padding-bottom: 80px;
+    }
+
+    .wishlist-header-section {
+        text-align: center;
+        padding: 50px 20px 30px;
+        background: #ffffff;
+        border-bottom: 1px solid #f0ede6;
+    }
+
+    .wishlist-breadcrumb {
+        font-size: 0.88rem;
+        color: #6b7280;
+        margin-bottom: 12px;
+    }
+
+    .wishlist-breadcrumb a {
+        color: #111827;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .wishlist-main-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 10px;
+    }
+
+    .wishlist-subtitle {
+        font-size: 1.02rem;
+        color: #6b7280;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .wishlist-container {
+        max-width: 1200px;
+        margin: 40px auto 0;
+        padding: 0 24px;
+    }
+
+    /* Empty Card */
+    .wishlist-empty-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 60px 24px;
+        text-align: center;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .empty-icon-wrap {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: #fff1f2;
+        color: #e11d48;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        margin: 0 auto 20px;
+    }
+
+    .empty-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 10px;
+    }
+
+    .empty-text {
+        font-size: 0.98rem;
+        color: #6b7280;
+        margin-bottom: 28px;
+        line-height: 1.6;
+    }
+
+    .btn-wishlist-explore {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #111827;
+        color: #ffffff;
+        padding: 14px 32px;
+        border-radius: 30px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-wishlist-explore:hover {
+        background: #0f172a;
+        box-shadow: 0 6px 20px rgba(15,23,42,0.3);
+    }
+
+    /* Wishlist Grid */
+    .wishlist-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 28px;
+    }
+
+    .wishlist-item-card {
+        background: #ffffff;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s ease;
+    }
+
+    .wishlist-item-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    }
+
+    .wishlist-img-box {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1/1;
+        overflow: hidden;
+        background: #f8fafc;
+    }
+
+    .wishlist-img-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .wishlist-remove-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        color: #e11d48;
+        border: none;
+        font-size: 1.4rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: background 0.2s ease;
+    }
+
+    .wishlist-remove-btn:hover {
+        background: #e11d48;
+        color: #ffffff;
+    }
+
+    .wishlist-info-box {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+
+    .item-name {
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: #111827;
+        margin: 0 0 6px;
+        line-height: 1.35;
+    }
+
+    .item-price {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #b45309;
+        margin-bottom: 16px;
+    }
+
+    .wishlist-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: auto;
+    }
+
+    .btn-wishlist-view {
+        width: 100%;
+        text-align: center;
+        padding: 10px;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        color: #334155;
+        text-decoration: none;
+        font-size: 0.88rem;
+        font-weight: 700;
+        transition: all 0.2s ease;
+    }
+
+    .btn-wishlist-view:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
+
+    .btn-wishlist-cart {
+        width: 100%;
+        padding: 10px;
+        background: #111827;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        transition: background 0.2s ease;
+    }
+
+    .btn-wishlist-cart:hover {
+        background: #0f172a;
+    }
+
+    @@media (max-width: 992px) {
+        .wishlist-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 560px) {
+        .wishlist-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<script>
+    async function removeWishlistItem(itemId) {
+        if (!confirm('Remove this item from your Wishlist?')) return;
+        try {
+            const res = await fetch('/api/WishlistApi/toggle', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ catalogItemId: itemId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const card = document.getElementById(`wishlist-card-${itemId}`);
+                if (card) card.remove();
+                if (document.querySelectorAll('.wishlist-item-card').length === 0) {
+                    window.location.reload();
+                }
+            }
+        } catch (err) {
+            alert('Failed to remove item.');
+        }
+    }
+
+    function addWishlistItemToCart(id, name, price, img) {
+        try {
+            let cart = JSON.parse(localStorage.getItem('sat_shopping_cart_usd') || '[]');
+            const existing = cart.find(x => x.id === id);
+            if (existing) {
+                existing.quantity = (existing.quantity || 1) + 1;
+            } else {
+                cart.push({
+                    id: id,
+                    title: name,
+                    priceUSD: price,
+                    quantity: 1,
+                    image: img,
+                    selectedMetal: '14k White Gold',
+                    selectedCarat: '1.50 ct'
+                });
+            }
+            localStorage.setItem('sat_shopping_cart_usd', JSON.stringify(cart));
+            alert(`"${name}" added to your cart!`);
+            window.location.href = '/Product/Cart';
+        } catch (e) {
+            alert('Error adding item to cart.');
+        }
+    }
+</script>

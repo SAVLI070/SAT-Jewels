@@ -1,0 +1,525 @@
+@{
+    ViewData["Title"] = "Moissanite vs Diamond Size Chart — SAT Jewel";
+}
+
+<div class="moiss-chart-page">
+    <!-- Header Section (Matching User Image 1) -->
+    <div class="moiss-header-section">
+        <div class="moiss-breadcrumb"><a href="/">Home</a> &rsaquo; <span>Moissanite vs Diamond Size Chart</span></div>
+        <h1 class="moiss-main-title">Moissanite vs Diamond Size Chart</h1>
+        <p class="moiss-subtitle">Select your desired diamond shape below to explore exact millimeter sizes and carat weight comparisons.</p>
+    </div>
+
+    <!-- Interactive Shape Selector Tabs (Matching User Image 1) -->
+    <div class="moiss-tabs-container">
+        <div class="moiss-tabs-scroll">
+            <button type="button" class="moiss-tab-btn active" onclick="switchShape('round', this)">
+                <svg viewBox="0 0 100 100" class="shape-svg"><circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="3"/><path d="M50 6 L50 94 M6 50 L94 50 M19 19 L81 81 M81 19 L19 81" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                <span>Round</span>
+            </button>
+            <button type="button" class="moiss-tab-btn" onclick="switchShape('cushion', this)">
+                <svg viewBox="0 0 100 100" class="shape-svg"><rect x="10" y="10" width="80" height="80" rx="20" fill="none" stroke="currentColor" stroke-width="3"/><path d="M10 50 L90 50 M50 10 L50 90 M24 24 L76 76 M76 24 L24 76" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                <span>Cushion</span>
+            </button>
+            <button type="button" class="moiss-tab-btn" onclick="switchShape('oval', this)">
+                <svg viewBox="0 0 100 100" class="shape-svg"><ellipse cx="50" cy="50" rx="36" ry="44" fill="none" stroke="currentColor" stroke-width="3"/><path d="M50 6 L50 94 M14 50 L86 50 M24 18 L76 82 M76 18 L24 82" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                <span>Oval</span>
+            </button>
+            <button type="button" class="moiss-tab-btn" onclick="switchShape('emerald', this)">
+                <svg viewBox="0 0 100 100" class="shape-svg"><rect x="16" y="8" width="68" height="84" rx="6" fill="none" stroke="currentColor" stroke-width="3"/><rect x="28" y="20" width="44" height="60" fill="none" stroke="currentColor" stroke-width="2"/><line x1="16" y1="8" x2="28" y2="20" stroke="currentColor" stroke-width="2"/><line x1="84" y1="8" x2="72" y2="20" stroke="currentColor" stroke-width="2"/><line x1="16" y1="92" x2="28" y2="80" stroke="currentColor" stroke-width="2"/><line x1="84" y1="92" x2="72" y2="80" stroke="currentColor" stroke-width="2"/></svg>
+                <span>Emerald</span>
+            </button>
+            <button type="button" class="moiss-tab-btn" onclick="switchShape('radiant', this)">
+                <svg viewBox="0 0 100 100" class="shape-svg"><path d="M24 6 L76 6 L94 24 L94 76 L76 94 L24 94 L6 76 L6 24 Z" fill="none" stroke="currentColor" stroke-width="3"/><path d="M6 50 L94 50 M50 6 L50 94 M24 24 L76 76 M76 24 L24 76" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                <span>Radiant</span>
+            </button>
+            <button type="button" class="moiss-tab-btn" onclick="switchShape('pear', this)">
+                <svg viewBox="0 0 100 100" class="shape-svg"><path d="M50 6 C74 36 86 60 86 72 C86 86 70 94 50 94 C30 94 14 86 14 72 C14 60 26 36 50 6 Z" fill="none" stroke="currentColor" stroke-width="3"/><line x1="50" y1="6" x2="50" y2="94" stroke="currentColor" stroke-width="2"/></svg>
+                <span>Pear</span>
+            </button>
+            <button type="button" class="moiss-tab-btn" onclick="switchShape('marquise', this)">
+                <svg viewBox="0 0 100 100" class="shape-svg"><path d="M50 6 C84 32 84 68 50 94 C16 68 16 32 50 6 Z" fill="none" stroke="currentColor" stroke-width="3"/><line x1="50" y1="6" x2="50" y2="94" stroke="currentColor" stroke-width="2"/><line x1="18" y1="50" x2="82" y2="50" stroke="currentColor" stroke-width="2"/></svg>
+                <span>Marquise</span>
+            </button>
+            <button type="button" class="moiss-tab-btn" onclick="switchShape('princess', this)">
+                <svg viewBox="0 0 100 100" class="shape-svg"><rect x="10" y="10" width="80" height="80" fill="none" stroke="currentColor" stroke-width="3"/><path d="M10 10 L90 90 M90 10 L10 90 M50 10 L50 90 M10 50 L90 50" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                <span>Princess</span>
+            </button>
+            <button type="button" class="moiss-tab-btn" onclick="switchShape('asscher', this)">
+                <svg viewBox="0 0 100 100" class="shape-svg"><path d="M26 8 L74 8 L92 26 L92 74 L74 92 L26 92 L8 74 L8 26 Z" fill="none" stroke="currentColor" stroke-width="3"/><rect x="24" y="24" width="52" height="52" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" y1="8" x2="24" y2="24" stroke="currentColor" stroke-width="2"/><line x1="92" y1="8" x2="76" y2="24" stroke="currentColor" stroke-width="2"/><line x1="8" y1="92" x2="24" y2="76" stroke="currentColor" stroke-width="2"/><line x1="92" y1="92" x2="76" y2="76" stroke="currentColor" stroke-width="2"/></svg>
+                <span>Asscher</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Dynamic Content & Table Section (Matching User Image 2) -->
+    <div class="moiss-content-container">
+        <div class="moiss-center-icon">
+            <svg id="activeShapeSvg" viewBox="0 0 100 100" width="80" height="80"><circle cx="50" cy="50" r="44" fill="none" stroke="#1e293b" stroke-width="3"/><path d="M50 6 L50 94 M6 50 L94 50 M19 19 L81 81 M81 19 L19 81" stroke="#1e293b" stroke-width="2" fill="none"/></svg>
+        </div>
+
+        <h2 id="activeShapeTitle" class="moiss-table-heading">Round Cut Moissanite vs Diamond Size Chart</h2>
+        <p class="moiss-table-subtext">"When comparing the carat weight of a moissanite gemstone to a diamond of the same size, the moissanite will weigh slightly less. Therefore, we use millimeter (mm) measurements to accurately compare moissanite and diamond sizes to their equivalent carat weights."</p>
+
+        <!-- Conversion Table -->
+        <div class="moiss-table-wrap">
+            <table class="moiss-table">
+                <thead>
+                    <tr>
+                        <th>Size (mm)</th>
+                        <th>Moissanite Average Weight (ct)</th>
+                        <th>Diamond Equivalent Weight (DEW)</th>
+                    </tr>
+                </thead>
+                <tbody id="moissTableBody">
+                    <!-- Dynamic Data Injected via JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- 4 Core Values & Durability Cards (Verbatim copy from media_1787461024024.md) -->
+    <div class="moiss-values-section">
+        <div class="moiss-values-container">
+            <div class="moiss-values-grid">
+                <!-- Card 1 -->
+                <div class="moiss-val-card">
+                    <div class="moiss-val-icon"><i class="fa-solid fa-award"></i></div>
+                    <h3 class="moiss-val-title">Our Journey & Ethical Promise</h3>
+                    <p class="moiss-val-desc">At Sat Jewels, we have intentionally dedicated our craftsmanship toward lab-grown diamonds and moissanite. Driven by environmental consciousness and ethical integrity, our focus centers on delivering 100% conflict-free, eco-conscious fine jewelry. We take pride in adopting sustainable practices that protect our planet while actively supporting social causes and community welfare initiatives.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="moiss-val-card">
+                    <div class="moiss-val-icon"><i class="fa-solid fa-gem"></i></div>
+                    <h3 class="moiss-val-title">Craftsmanship Standards</h3>
+                    <p class="moiss-val-desc">To deliver maximum brilliance across various carat weights, our master diamond cutters meticulously examine and cut every individual lab-grown diamond and moissanite stone. By blending traditional lapidary artistry with modern precision, we maximize each gem's internal light performance, ensuring your jewelry radiates incomparable fire and sparkle.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="moiss-val-card">
+                    <div class="moiss-val-icon"><i class="fa-solid fa-seedling"></i></div>
+                    <h3 class="moiss-val-title">Sustainable & Conflict-Free</h3>
+                    <p class="moiss-val-desc">In addition to offering a size chart for reference, we take immense pride in stating that our lab-grown diamonds and moissanite are ethical, sustainable, and conflict-free, cultivated without soil erosion or carbon-heavy mining footprints.</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="moiss-val-card">
+                    <div class="moiss-val-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <h3 class="moiss-val-title">Uncompromising Durability & Hardness</h3>
+                    <p class="moiss-val-desc">Both lab-grown diamonds (10/10 Mohs scale) and moissanite (9.25–9.50 Mohs scale) are exceptionally resilient gemstones crafted for daily elegance and lifetime wear, offering supreme scratch resistance against daily wear.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Have Any Questions FAQ Accordion (From media_1787461024024.md) -->
+    <div style="max-width: 1000px; margin: 60px auto 40px; padding: 0 24px;">
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; text-align: center; color: #111827; margin-bottom: 32px;">Have Any Questions?</h2>
+
+        <div style="background: #ffffff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin: 0 0 10px;">Why do Moissanite and Lab-Grown Diamonds differ in weight for the same dimensions?</h3>
+            <p style="color: #4b5563; font-size: 0.95rem; line-height: 1.6; margin: 0;">
+                Moissanite and diamonds have distinct physical densities. Moissanite is composed of silicon carbide, making it approximately 10–12% lighter in density than a carbon-based diamond. Consequently, two stones with the exact same millimeter dimensions will vary in carat weight. To maintain clarity for our customers, Sat Jewels lists moissanite sizes by both millimeter measurements and Diamond Equivalent Weight (DEW).
+            </p>
+        </div>
+
+        <div style="background: #ffffff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin: 0 0 10px;">Does Moissanite display a strong rainbow fire effect?</h3>
+            <p style="color: #4b5563; font-size: 0.95rem; line-height: 1.6; margin: 0;">
+                Because moissanite has a higher refractive index than diamond, it naturally disperses brilliant spectral colors. However, at Sat Jewels, our master gem cutters utilize specialized precision-cut techniques designed to minimize excess rainbow fire, giving our moissanite a refined, elegant, and diamond-like luster.
+            </p>
+        </div>
+
+        <div style="background: #ffffff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin: 0 0 10px;">Moissanite vs. Lab-Grown Diamond: Which should I choose?</h3>
+            <p style="color: #4b5563; font-size: 0.95rem; line-height: 1.6; margin-bottom: 10px;">
+                Both offer exceptional beauty, so the ideal selection depends on your priorities:
+            </p>
+            <ul style="color: #4b5563; font-size: 0.95rem; line-height: 1.7; padding-left: 20px; margin: 0;">
+                <li><strong>Moissanite:</strong> Highly durable, budget-friendly, and offers maximum sparkle and brilliance.</li>
+                <li><strong>Lab-Grown Diamonds:</strong> Chemically, physically, and optically identical to mined diamonds, offering timeless prestige, classic luster, and a 10/10 hardness rating.</li>
+            </ul>
+        </div>
+
+        <div style="background: #ffffff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin: 0 0 10px;">Are Lab-Grown Diamonds real diamonds?</h3>
+            <p style="color: #4b5563; font-size: 0.95rem; line-height: 1.6; margin: 0;">
+                Yes, absolutely. Lab-grown diamonds possess the exact chemical composition, crystal structure, and optical properties as mined diamonds. The only distinction is their origin—they are cultivated in technologically advanced environments rather than extracted from the earth.
+            </p>
+        </div>
+
+        <div style="background: #ffffff; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); border: 1px solid #e2e8f0;">
+            <h3 style="font-size: 1.15rem; font-weight: 700; color: #111827; margin: 0 0 10px;">Can I wear a Lab-Grown Diamond as my official birthstone?</h3>
+            <p style="color: #4b5563; font-size: 0.95rem; line-height: 1.6; margin: 0;">
+                Definitely. Since lab-grown diamonds are authentic diamonds, they serve as a perfect April birthstone option. They provide identical optical elegance and physical strength while offering a completely ethical, sustainable choice.
+            </p>
+        </div>
+    </div>
+</div>
+
+<style>
+    .moiss-chart-page {
+        background-color: #ffffff;
+        color: #1a1a1a;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        padding-bottom: 80px;
+    }
+
+    .moiss-header-section {
+        text-align: center;
+        padding: 50px 20px 30px;
+        background: #faf8f5;
+    }
+
+    .moiss-breadcrumb {
+        font-size: 0.88rem;
+        color: #6b7280;
+        margin-bottom: 12px;
+    }
+
+    .moiss-breadcrumb a {
+        color: #111827;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .moiss-main-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 2.6rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 10px;
+    }
+
+    .moiss-subtitle {
+        font-size: 1.02rem;
+        color: #6b7280;
+        max-width: 650px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    /* Tabs Bar */
+    .moiss-tabs-container {
+        background: #f4efe6;
+        padding: 20px 24px;
+    }
+
+    .moiss-tabs-scroll {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+        overflow-x: auto;
+        padding-bottom: 6px;
+    }
+
+    .moiss-tab-btn {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 22px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        min-width: 96px;
+        transition: all 0.25s ease;
+    }
+
+    .moiss-tab-btn:hover {
+        border-color: #111827;
+        transform: translateY(-2px);
+    }
+
+    .moiss-tab-btn.active {
+        border: 2px solid #111827;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    }
+
+    .shape-svg {
+        width: 32px;
+        height: 32px;
+        color: #1e293b;
+    }
+
+    .moiss-tab-btn span {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    /* Main Table Section */
+    .moiss-content-container {
+        max-width: 1000px;
+        margin: 50px auto 70px;
+        padding: 0 24px;
+        text-align: center;
+    }
+
+    .moiss-center-icon {
+        margin-bottom: 20px;
+    }
+
+    .moiss-table-heading {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 2.1rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 14px;
+    }
+
+    .moiss-table-subtext {
+        font-size: 0.95rem;
+        color: #6b7280;
+        max-width: 780px;
+        margin: 0 auto 36px;
+        line-height: 1.65;
+        font-style: italic;
+    }
+
+    .moiss-table-wrap {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+    }
+
+    .moiss-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
+        background: #ffffff;
+        font-size: 0.95rem;
+    }
+
+    .moiss-table th {
+        background: #faf8f5;
+        color: #111827;
+        padding: 16px 20px;
+        font-weight: 700;
+        font-size: 0.92rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .moiss-table td {
+        padding: 14px 20px;
+        border-bottom: 1px solid #f1f5f9;
+        color: #334155;
+    }
+
+    .moiss-table tbody tr:nth-child(even) {
+        background: #faf8f5;
+    }
+
+    .moiss-table tbody tr:hover {
+        background: #fef3c7;
+    }
+
+    /* Values Section */
+    .moiss-values-section {
+        background: #faf8f5;
+        padding: 60px 24px;
+    }
+
+    .moiss-values-container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    .moiss-values-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 40px;
+        text-align: center;
+    }
+
+    .moiss-val-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        max-width: 480px;
+        margin: 0 auto;
+    }
+
+    .moiss-val-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background: #ffffff;
+        color: #b45309;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        margin-bottom: 18px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        border: 1px solid #f0ede6;
+    }
+
+    .moiss-val-title {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 12px;
+    }
+
+    .moiss-val-desc {
+        font-size: 0.93rem;
+        color: #4b5563;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    @@media (max-width: 768px) {
+        .moiss-values-grid {
+            grid-template-columns: 1fr;
+            gap: 32px;
+        }
+    }
+</style>
+
+<script>
+    const shapeData = {
+        round: {
+            title: "Round Cut Moissanite vs Diamond Size Chart",
+            svg: `<circle cx="50" cy="50" r="44" fill="none" stroke="#1e293b" stroke-width="3"/><path d="M50 6 L50 94 M6 50 L94 50 M19 19 L81 81 M81 19 L19 81" stroke="#1e293b" stroke-width="2" fill="none"/>`,
+            rows: [
+                ["3.0 mm", "0.11 Carat", "0.11 DEW"],
+                ["3.5 mm", "0.17 Carat", "0.18 DEW"],
+                ["4.0 mm", "0.24 Carat", "0.25 DEW"],
+                ["4.5 mm", "0.31 Carat", "0.33 DEW"],
+                ["5.0 mm", "0.48 Carat", "0.50 DEW"],
+                ["5.5 mm", "0.56 Carat", "0.60 DEW"],
+                ["6.0 mm", "0.75 Carat", "0.80 DEW"],
+                ["6.5 mm", "0.88 Carat", "1.00 DEW"],
+                ["7.0 mm", "1.10 Carat", "1.25 DEW"],
+                ["7.5 mm", "1.32 Carat", "1.50 DEW"],
+                ["8.0 mm", "1.76 Carat", "2.00 DEW"],
+                ["8.5 mm", "2.20 Carat", "2.50 DEW"],
+                ["9.0 mm", "2.64 Carat", "3.00 DEW"],
+                ["10.0 mm", "3.52 Carat", "4.00 DEW"]
+            ]
+        },
+        cushion: {
+            title: "Cushion Cut Moissanite vs Diamond Size Chart",
+            svg: `<rect x="10" y="10" width="80" height="80" rx="20" fill="none" stroke="#1e293b" stroke-width="3"/><path d="M10 50 L90 50 M50 10 L50 90 M24 24 L76 76 M76 24 L24 76" stroke="#1e293b" stroke-width="2" fill="none"/>`,
+            rows: [
+                ["4.0 x 4.0 mm", "0.30 Carat", "0.30 DEW"],
+                ["5.0 x 5.0 mm", "0.60 Carat", "0.65 DEW"],
+                ["6.0 x 6.0 mm", "1.10 Carat", "1.20 DEW"],
+                ["6.5 x 6.5 mm", "1.30 Carat", "1.45 DEW"],
+                ["7.0 x 7.0 mm", "1.70 Carat", "1.85 DEW"],
+                ["7.5 x 7.5 mm", "2.00 Carat", "2.25 DEW"],
+                ["8.0 x 8.0 mm", "2.40 Carat", "2.70 DEW"],
+                ["9.0 x 9.0 mm", "3.50 Carat", "3.90 DEW"]
+            ]
+        },
+        oval: {
+            title: "Oval Cut Moissanite vs Diamond Size Chart",
+            svg: `<ellipse cx="50" cy="50" rx="36" ry="44" fill="none" stroke="#1e293b" stroke-width="3"/><path d="M50 6 L50 94 M14 50 L86 50 M24 18 L76 82 M76 18 L24 82" stroke="#1e293b" stroke-width="2" fill="none"/>`,
+            rows: [
+                ["6.0 x 4.0 mm", "0.50 Carat", "0.55 DEW"],
+                ["7.0 x 5.0 mm", "0.90 Carat", "1.00 DEW"],
+                ["8.0 x 6.0 mm", "1.50 Carat", "1.65 DEW"],
+                ["9.0 x 7.0 mm", "2.10 Carat", "2.35 DEW"],
+                ["10.0 x 8.0 mm", "3.00 Carat", "3.30 DEW"],
+                ["11.0 x 9.0 mm", "4.20 Carat", "4.60 DEW"]
+            ]
+        },
+        emerald: {
+            title: "Emerald Cut Moissanite vs Diamond Size Chart",
+            svg: `<rect x="16" y="8" width="68" height="84" rx="6" fill="none" stroke="#1e293b" stroke-width="3"/><rect x="28" y="20" width="44" height="60" fill="none" stroke="#1e293b" stroke-width="2"/><line x1="16" y1="8" x2="28" y2="20" stroke="#1e293b" stroke-width="2"/><line x1="84" y1="8" x2="72" y2="20" stroke="#1e293b" stroke-width="2"/><line x1="16" y1="92" x2="28" y2="80" stroke="#1e293b" stroke-width="2"/><line x1="84" y1="92" x2="72" y2="80" stroke="#1e293b" stroke-width="2"/>`,
+            rows: [
+                ["6.0 x 4.0 mm", "0.60 Carat", "0.65 DEW"],
+                ["7.0 x 5.0 mm", "1.00 Carat", "1.10 DEW"],
+                ["8.0 x 6.0 mm", "1.75 Carat", "1.90 DEW"],
+                ["9.0 x 7.0 mm", "2.50 Carat", "2.75 DEW"],
+                ["10.0 x 8.0 mm", "3.50 Carat", "3.85 DEW"]
+            ]
+        },
+        radiant: {
+            title: "Radiant Cut Moissanite vs Diamond Size Chart",
+            svg: `<path d="M24 6 L76 6 L94 24 L94 76 L76 94 L24 94 L6 76 L6 24 Z" fill="none" stroke="#1e293b" stroke-width="3"/><path d="M6 50 L94 50 M50 6 L50 94 M24 24 L76 76 M76 24 L24 76" stroke="#1e293b" stroke-width="2" fill="none"/>`,
+            rows: [
+                ["6.0 x 4.0 mm", "0.55 Carat", "0.60 DEW"],
+                ["7.0 x 5.0 mm", "1.00 Carat", "1.15 DEW"],
+                ["8.0 x 6.0 mm", "1.70 Carat", "1.85 DEW"],
+                ["9.0 x 7.0 mm", "2.60 Carat", "2.85 DEW"],
+                ["10.0 x 8.0 mm", "3.60 Carat", "3.95 DEW"]
+            ]
+        },
+        pear: {
+            title: "Pear Cut Moissanite vs Diamond Size Chart",
+            svg: `<path d="M50 6 C74 36 86 60 86 72 C86 86 70 94 50 94 C30 94 14 86 14 72 C14 60 26 36 50 6 Z" fill="none" stroke="#1e293b" stroke-width="3"/><line x1="50" y1="6" x2="50" y2="94" stroke="#1e293b" stroke-width="2"/>`,
+            rows: [
+                ["6.0 x 4.0 mm", "0.45 Carat", "0.50 DEW"],
+                ["7.0 x 5.0 mm", "0.80 Carat", "0.90 DEW"],
+                ["8.0 x 5.0 mm", "1.00 Carat", "1.10 DEW"],
+                ["9.0 x 6.0 mm", "1.60 Carat", "1.75 DEW"],
+                ["10.0 x 7.0 mm", "2.30 Carat", "2.55 DEW"]
+            ]
+        },
+        marquise: {
+            title: "Marquise Cut Moissanite vs Diamond Size Chart",
+            svg: `<path d="M50 6 C84 32 84 68 50 94 C16 68 16 32 50 6 Z" fill="none" stroke="#1e293b" stroke-width="3"/><line x1="50" y1="6" x2="50" y2="94" stroke="#1e293b" stroke-width="2"/><line x1="18" y1="50" x2="82" y2="50" stroke="#1e293b" stroke-width="2"/>`,
+            rows: [
+                ["6.0 x 3.0 mm", "0.35 Carat", "0.40 DEW"],
+                ["8.0 x 4.0 mm", "0.75 Carat", "0.85 DEW"],
+                ["10.0 x 5.0 mm", "1.35 Carat", "1.50 DEW"],
+                ["12.0 x 6.0 mm", "2.20 Carat", "2.40 DEW"]
+            ]
+        },
+        princess: {
+            title: "Princess Cut Moissanite vs Diamond Size Chart",
+            svg: `<rect x="10" y="10" width="80" height="80" fill="none" stroke="#1e293b" stroke-width="3"/><path d="M10 10 L90 90 M90 10 L10 90 M50 10 L50 90 M10 50 L90 50" stroke="#1e293b" stroke-width="2" fill="none"/>`,
+            rows: [
+                ["4.0 x 4.0 mm", "0.40 Carat", "0.45 DEW"],
+                ["5.0 x 5.0 mm", "0.75 Carat", "0.85 DEW"],
+                ["6.0 x 6.0 mm", "1.20 Carat", "1.35 DEW"],
+                ["6.5 x 6.5 mm", "1.50 Carat", "1.65 DEW"],
+                ["7.0 x 7.0 mm", "2.00 Carat", "2.20 DEW"],
+                ["8.0 x 8.0 mm", "3.00 Carat", "3.30 DEW"]
+            ]
+        },
+        asscher: {
+            title: "Asscher Cut Moissanite vs Diamond Size Chart",
+            svg: `<path d="M26 8 L74 8 L92 26 L92 74 L74 92 L26 92 L8 74 L8 26 Z" fill="none" stroke="#1e293b" stroke-width="3"/><rect x="24" y="24" width="52" height="52" fill="none" stroke="#1e293b" stroke-width="2"/><line x1="8" y1="8" x2="24" y2="24" stroke="#1e293b" stroke-width="2"/><line x1="92" y1="8" x2="76" y2="24" stroke="#1e293b" stroke-width="2"/><line x1="8" y1="92" x2="24" y2="76" stroke="#1e293b" stroke-width="2"/><line x1="92" y1="92" x2="76" y2="76" stroke="#1e293b" stroke-width="2"/>`,
+            rows: [
+                ["4.5 x 4.5 mm", "0.50 Carat", "0.55 DEW"],
+                ["5.5 x 5.5 mm", "1.00 Carat", "1.10 DEW"],
+                ["6.5 x 6.5 mm", "1.60 Carat", "1.75 DEW"],
+                ["7.5 x 7.5 mm", "2.50 Carat", "2.75 DEW"],
+                ["8.5 x 8.5 mm", "3.60 Carat", "3.95 DEW"]
+            ]
+        }
+    };
+
+    function switchShape(shapeKey, btnEl) {
+        document.querySelectorAll('.moiss-tab-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+
+        const data = shapeData[shapeKey];
+        if (!data) return;
+
+        document.getElementById('activeShapeTitle').innerText = data.title;
+        document.getElementById('activeShapeSvg').innerHTML = data.svg;
+
+        const tbody = document.getElementById('moissTableBody');
+        tbody.innerHTML = '';
+        data.rows.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td style="font-weight:700;">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        switchShape('round', document.querySelector('.moiss-tab-btn.active'));
+    });
+</script>

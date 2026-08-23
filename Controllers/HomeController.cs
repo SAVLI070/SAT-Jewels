@@ -20,7 +20,6 @@ namespace SAT1.Controllers
             var dbCounts = new Dictionary<long, int>();
             try
             {
-                // Query exact product count per numeric CategoryId directly from Neon PostgreSQL DB
                 dbCounts = await _context.Products
                     .Where(p => p.IsAvailable)
                     .GroupBy(p => p.CategoryId)
@@ -37,6 +36,41 @@ namespace SAT1.Controllers
         }
 
         [HttpGet]
+        public IActionResult About()
+        {
+            ViewData["Title"] = "About Us & Our Story — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult Faq()
+        {
+            ViewData["Title"] = "Frequently Asked Questions — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult PaymentPolicy()
+        {
+            ViewData["Title"] = "Payment Policy — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult PrivacyPolicy()
+        {
+            ViewData["Title"] = "Privacy Policy — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult RefundPolicy()
+        {
+            ViewData["Title"] = "Refund & Return Policy — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult CustomRings()
         {
             ViewData["Title"] = "Design Your Own Custom Engagement Ring — SAT Jewel Sanctuary";
@@ -47,6 +81,55 @@ namespace SAT1.Controllers
         public IActionResult CraftProcess()
         {
             return RedirectToAction("CustomRings");
+        }
+
+        [HttpGet]
+        public IActionResult Blog()
+        {
+            ViewData["Title"] = "Jewelry Education & Lab Diamond Insights — SAT Jewel Blog";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult RingSizeGuide()
+        {
+            ViewData["Title"] = "Find Your Ring Size Guide — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult JewelryCare()
+        {
+            ViewData["Title"] = "Fine Jewelry Care & Cleaning Guide — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult OrderProcess()
+        {
+            ViewData["Title"] = "Custom Order & Crafting Process — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult DiamondSizeChart()
+        {
+            ViewData["Title"] = "Carat Weight & Diamond Size Chart — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult MoissaniteVsDiamondSizeChart()
+        {
+            ViewData["Title"] = "Moissanite vs Diamond Size Chart — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult DiamondComparisonGuide()
+        {
+            ViewData["Title"] = "Moissanite vs Lab Grown Diamond vs Mined Diamond — SAT Jewel";
+            return View();
         }
 
         [HttpGet]

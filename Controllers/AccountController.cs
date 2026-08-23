@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SAT1.BAL;
 using SAT1.Models;
 
@@ -11,10 +12,30 @@ namespace SAT1.Controllers
     public class AccountController : Controller
     {
         private readonly AuthBal _authBal;
+        private readonly SatJewelDbContext _context;
 
-        public AccountController(AuthBal authBal)
+        public AccountController(AuthBal authBal, SatJewelDbContext context)
         {
             _authBal = authBal;
+            _context = context;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Wishlist()
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Redirect("/Account/SignIn?returnUrl=/Account/Wishlist");
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name ?? "";
+            var items = await _context.WishlistItems
+                .AsNoTracking()
+                .Where(w => w.UserId == userId)
+                .OrderByDescending(w => w.AddedAt)
+                .ToListAsync();
+
+            return View(items);
         }
 
         [HttpGet]
@@ -66,12 +87,9 @@ namespace SAT1.Controllers
 
             var authProperties = new AuthenticationProperties
             {
-                IsPersistent = rememberMe
+                IsPersistent = false,
+                ExpiresUtc = null
             };
-            if (rememberMe)
-            {
-                authProperties.ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7);
-            }
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
 
@@ -179,6 +197,10 @@ namespace SAT1.Controllers
             {
                 Response.Cookies.Delete(cookie);
             }
+
+            Response.Cookies.Delete("SATJewel_AuthSession");
+            Response.Cookies.Delete("SATJewel_AuthSession_v2");
+            Response.Cookies.Delete("SATJewel_AuthSession_v3");
 
             Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0, private";
             Response.Headers["Pragma"] = "no-cache";

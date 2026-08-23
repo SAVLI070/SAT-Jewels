@@ -1,4 +1,7 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SAT1.Models
 {
@@ -18,6 +21,7 @@ namespace SAT1.Models
         [Required]
         public decimal Price { get; set; }
 
+        [NotMapped]
         public decimal PriceUSD 
         { 
             get => Price; 
@@ -36,7 +40,10 @@ namespace SAT1.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        [NotMapped]
         public virtual ICollection<MetalOption> MetalOptionList { get; set; } = new List<MetalOption>();
+
+        [NotMapped]
         public virtual ICollection<CaratOption> CaratOptionList { get; set; } = new List<CaratOption>();
     }
 }

@@ -35,8 +35,8 @@ namespace SAT1.DAL
                         CategoryId = prod.CategoryId.ToString(),
                         Spec = $"{prod.DefaultMetalType} | {prod.DefaultCaratWeight}ct",
                         PriceUSD = prod.BasePriceUSD,
-                        ImageUrl = prod.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl ?? "/assets/ring_1.jpg",
-                        IsActive = prod.IsAvailable
+                        ImageUrl = prod.Images.OrderBy(i => i.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg",
+                        IsActive = true
                     };
                 }
             }

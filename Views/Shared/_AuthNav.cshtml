@@ -20,8 +20,19 @@
 }
 
 <div class="auth-nav-cluster">
+  <!-- Search Bar Trigger Button -->
+  <button type="button" class="btn-auth-nav sat-search-trigger-btn" onclick="openSatGlobalSearch(event)" title="Search Fine Jewelry">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span>Search</span>
+  </button>
   @if (isAuthenticated)
   {
+    <!-- Wishlist Badge Button -->
+    <a href="/Account/Wishlist" class="btn-auth-nav auth-nav-wishlist" title="My Saved Wishlist">
+      <i class="fa-regular fa-heart"></i>
+      <span>Wishlist</span>
+    </a>
+
     <!-- Cart Badge Button -->
     <a href="/Product/Cart" class="btn-auth-nav auth-nav-cart" title="Shopping Cart">
       <i class="fa-solid fa-bag-shopping"></i>
@@ -49,6 +60,9 @@
         </a>
         <a href="/Account/MyAccount" class="account-menu-item" role="menuitem">
           <i class="fa-regular fa-user"></i> My Account
+        </a>
+        <a href="/Account/Wishlist" class="account-menu-item" role="menuitem">
+          <i class="fa-regular fa-heart"></i> My Wishlist
         </a>
         <a href="/Account/Orders" class="account-menu-item" role="menuitem">
           <i class="fa-solid fa-box"></i> My Orders

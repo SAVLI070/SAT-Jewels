@@ -74,6 +74,402 @@
   <!-- Global SAT Jewel Mega Menu & Mobile Drawer -->
   <partial name="_MegaMenu" />
 
+  <!-- Global Floating SAT Jewel WhatsApp Chat Widget (Matching Reference Screenshot) -->
+  <div class="sat-floating-whatsapp-wrap" id="satWhatsappWidget">
+    <div class="sat-wa-badge-popup">
+      <span>We Are Here! 👋</span>
+      <button type="button" class="sat-wa-close-btn" onclick="dismissWaWidget(event)">&times;</button>
+    </div>
+    <a href="https://wa.me/918320972779?text=Hello%20SAT%20Jewel%20Team!%20I%20am%20interested%20in%20your%20custom%20Lab-Grown%20Diamonds%20%26%20Moissanite%20Jewelry.%20Could%20you%20please%20assist%20me%3F" target="_blank" rel="noopener" class="sat-wa-float-btn" aria-label="Chat with SAT Jewel on WhatsApp">
+      <i class="fa-brands fa-whatsapp"></i>
+    </a>
+  </div>
+
+  <style>
+    .sat-floating-whatsapp-wrap {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+
+    .sat-wa-badge-popup {
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 20px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      animation: waBounce 2.5s infinite ease-in-out;
+    }
+
+    .sat-wa-close-btn {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0 2px;
+    }
+
+    .sat-wa-close-btn:hover {
+      color: #ffffff;
+    }
+
+    .sat-wa-float-btn {
+      width: 58px;
+      height: 58px;
+      background: #25D366;
+      color: #ffffff;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      box-shadow: 0 6px 20px rgba(37, 211, 102, 0.45);
+      text-decoration: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .sat-wa-float-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 28px rgba(37, 211, 102, 0.65);
+      color: #ffffff;
+    }
+
+    @@keyframes waBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+  </style>
+
+  <!-- Global SAT Jewel Live Search Modal / Overlay -->
+  <div class="sat-search-modal-backdrop" id="satSearchModal" onclick="closeSatGlobalSearch(event)">
+    <div class="sat-search-modal-card" onclick="event.stopPropagation()">
+      <div class="sat-search-input-box">
+        <i class="fa-solid fa-magnifying-glass sat-search-input-icon"></i>
+        <input type="text" id="satSearchInput" placeholder="Search engagement rings, lab diamonds, moissanite, bracelets..." oninput="handleSatLiveSearch(this.value)" autocomplete="off" />
+        <button type="button" class="sat-search-close-btn" onclick="closeSatGlobalSearch(event)">&times;</button>
+      </div>
+
+      <!-- Quick Filter Chips -->
+      <div class="sat-search-chips-row">
+        <span class="sat-chip-title">Popular:</span>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Engagement Ring')">Engagement Rings</button>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Round')">Round Cut</button>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Oval')">Oval Cut</button>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Emerald')">Emerald Cut</button>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Moissanite')">Moissanite</button>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Bracelet')">Bracelets</button>
+      </div>
+
+      <!-- Live Auto-complete Search Results Container -->
+      <div class="sat-search-results-wrap" id="satSearchResults">
+        <div class="sat-search-empty-state">
+          <i class="fa-solid fa-gem" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 8px;"></i>
+          <p>Type to search SAT Jewel's fine jewelry collection...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Search Modal Styles */
+    .sat-search-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(8px);
+      z-index: 9999999;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding-top: 80px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .sat-search-modal-backdrop.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sat-search-modal-card {
+      width: 100%;
+      max-width: 720px;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      transform: translateY(-20px);
+      transition: transform 0.3s ease;
+      margin: 0 16px;
+    }
+
+    .sat-search-modal-backdrop.open .sat-search-modal-card {
+      transform: translateY(0);
+    }
+
+    .sat-search-input-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 12px 18px;
+    }
+
+    .sat-search-input-box:focus-within {
+      border-color: #111827;
+      background: #ffffff;
+    }
+
+    .sat-search-input-icon {
+      font-size: 1.2rem;
+      color: #64748b;
+    }
+
+    #satSearchInput {
+      width: 100%;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 1.05rem;
+      font-weight: 500;
+      color: #0f172a;
+    }
+
+    .sat-search-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.6rem;
+      color: #94a3b8;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .sat-search-close-btn:hover {
+      color: #0f172a;
+    }
+
+    /* Chips */
+    .sat-search-chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+      margin-bottom: 20px;
+    }
+
+    .sat-chip-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #64748b;
+    }
+
+    .sat-search-chip {
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .sat-search-chip:hover {
+      background: #111827;
+      color: #ffffff;
+      border-color: #111827;
+    }
+
+    /* Results */
+    .sat-search-results-wrap {
+      max-height: 420px;
+      overflow-y: auto;
+      border-top: 1px solid #f1f5f9;
+      padding-top: 16px;
+    }
+
+    .sat-search-empty-state {
+      text-align: center;
+      padding: 30px 20px;
+      color: #64748b;
+      font-size: 0.95rem;
+    }
+
+    .sat-search-items-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+    }
+
+    .sat-search-item-card {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid #f1f5f9;
+      text-decoration: none;
+      background: #ffffff;
+      transition: all 0.2s ease;
+    }
+
+    .sat-search-item-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transform: translateY(-2px);
+    }
+
+    .sat-search-item-img {
+      width: 54px;
+      height: 54px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .sat-search-item-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sat-search-item-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin: 0 0 2px;
+      line-height: 1.3;
+    }
+
+    .sat-search-item-cat {
+      font-size: 0.78rem;
+      color: #64748b;
+    }
+
+    .sat-search-item-price {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #b45309;
+      margin-top: 4px;
+    }
+
+    @@media (max-width: 600px) {
+      .sat-search-items-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <script>
+    let satSearchDebounceTimer = null;
+
+    function openSatGlobalSearch(e) {
+      if (e) e.preventDefault();
+      const modal = document.getElementById('satSearchModal');
+      if (modal) {
+        modal.classList.add('open');
+        const input = document.getElementById('satSearchInput');
+        if (input) {
+          input.focus();
+          if (input.value.trim()) {
+            handleSatLiveSearch(input.value);
+          }
+        }
+      }
+    }
+
+    function closeSatGlobalSearch(e) {
+      if (e) e.preventDefault();
+      const modal = document.getElementById('satSearchModal');
+      if (modal) {
+        modal.classList.remove('open');
+      }
+    }
+
+    function applySearchQuery(query) {
+      const input = document.getElementById('satSearchInput');
+      if (input) {
+        input.value = query;
+        handleSatLiveSearch(query);
+      }
+    }
+
+    function handleSatLiveSearch(val) {
+      clearTimeout(satSearchDebounceTimer);
+      const container = document.getElementById('satSearchResults');
+      if (!container) return;
+
+      if (!val || val.trim().length < 2) {
+        container.innerHTML = `
+          <div class="sat-search-empty-state">
+            <i class="fa-solid fa-gem" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 8px;"></i>
+            <p>Type to search SAT Jewel's fine jewelry collection...</p>
+          </div>`;
+        return;
+      }
+
+      satSearchDebounceTimer = setTimeout(async () => {
+        container.innerHTML = `<div class="sat-search-empty-state"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.8rem; color: #d4b270;"></i><p>Searching collections...</p></div>`;
+        try {
+          const res = await fetch(`/api/CatalogApi/search?q=${encodeURIComponent(val.trim())}`);
+          const data = await res.json();
+
+          if (data.success && data.results && data.results.length > 0) {
+            let html = '<div class="sat-search-items-grid">';
+            data.results.forEach(item => {
+              const price = item.priceUSD ? `$${item.priceUSD.toLocaleString()}` : '$1,299';
+              const img = item.imageUrl || '/assets/categories/cat_engagement_rings.png';
+              html += `
+                <a href="/Product/Details/${item.id}" class="sat-search-item-card">
+                  <img src="${img}" alt="${item.name}" class="sat-search-item-img" />
+                  <div class="sat-search-item-info">
+                    <h5 class="sat-search-item-title">${item.name}</h5>
+                    <span class="sat-search-item-cat">${item.categoryName || 'Fine Jewelry'}</span>
+                    <span class="sat-search-item-price">${price}</span>
+                  </div>
+                </a>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+          } else {
+            container.innerHTML = `
+              <div class="sat-search-empty-state">
+                <i class="fa-solid fa-face-frown" style="font-size: 2rem; color: #94a3b8; margin-bottom: 8px;"></i>
+                <p>No products found matching "${val}". Try searching "Rings", "Moissanite", or "Oval".</p>
+              </div>`;
+          }
+        } catch (err) {
+          container.innerHTML = `<div class="sat-search-empty-state"><p style="color:#ef4444;">Search request failed. Please try again.</p></div>`;
+        }
+      }, 300);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openSatGlobalSearch();
+      } else if (e.key === 'Escape') {
+        closeSatGlobalSearch();
+      }
+    });
+  </script>
+
   <script src="~/js/script.js"></script>
   @RenderSection("Scripts", required: false)
 </body>

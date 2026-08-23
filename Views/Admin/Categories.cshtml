@@ -4,16 +4,14 @@
 }
 
 <style>
-  /* Dark Luxury Glassmorphism Panel */
+  /* Clean Light Theme Panel */
   .cat-card-panel {
-    background: rgba(8, 17, 34, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(212, 178, 112, 0.3);
-    border-radius: var(--radius-xl);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
     padding: 28px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-    color: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    color: #0f172a;
   }
 
   .cat-form-group {
@@ -24,7 +22,7 @@
     display: block;
     font-size: 13px;
     font-weight: 700;
-    color: var(--champagne-gold);
+    color: #0f172a;
     margin-bottom: 6px;
   }
 
@@ -32,10 +30,10 @@
     width: 100%;
     box-sizing: border-box;
     padding: 12px 16px;
-    background: rgba(10, 20, 38, 0.95);
-    border: 1px solid rgba(212, 178, 112, 0.4);
-    border-radius: var(--radius-md);
-    color: #ffffff;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    color: #0f172a;
     font-size: 14px;
     font-weight: 500;
     outline: none;
@@ -43,22 +41,23 @@
   }
 
   .cat-form-input:focus {
-    border-color: var(--champagne-gold);
-    box-shadow: 0 0 16px rgba(212, 178, 112, 0.4);
+    border-color: #b45309;
+    box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.15);
+    background: #ffffff;
   }
 
   .cat-form-input option {
-    background: #081122;
-    color: #ffffff;
+    background: #ffffff;
+    color: #0f172a;
   }
 
   /* Category Image Upload Dropzone */
   .cat-upload-dropzone {
-    border: 2px dashed rgba(212, 178, 112, 0.4);
-    border-radius: var(--radius-lg);
+    border: 2px dashed #cbd5e1;
+    border-radius: 12px;
     padding: 22px;
     text-align: center;
-    background: rgba(10, 20, 38, 0.6);
+    background: #f8fafc;
     cursor: pointer;
     transition: all 0.3s ease;
   }
@@ -186,11 +185,11 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
   }
 
-  /* Hierarchical Badges */
+  /* Hierarchical Badges for Light Mode */
   .badge-hierarchy-parent {
-    background: rgba(212, 178, 112, 0.15);
-    border: 1px solid var(--champagne-gold);
-    color: var(--champagne-gold);
+    background: rgba(180, 83, 9, 0.08);
+    border: 1px solid #b45309;
+    color: #b45309;
     font-size: 10px;
     font-weight: 800;
     padding: 3px 8px;
@@ -198,9 +197,9 @@
     text-transform: uppercase;
   }
   .badge-hierarchy-sub {
-    background: rgba(56, 189, 248, 0.15);
-    border: 1px solid #38bdf8;
-    color: #38bdf8;
+    background: #f0f9ff;
+    border: 1px solid #0284c7;
+    color: #0284c7;
     font-size: 10px;
     font-weight: 800;
     padding: 3px 8px;
@@ -208,38 +207,48 @@
     text-transform: uppercase;
   }
   .badge-diamond-type {
-    background: rgba(254, 240, 138, 0.15);
-    border: 1px solid #fef08a;
-    color: #fef08a;
+    background: #fefce8;
+    border: 1px solid #ca8a04;
+    color: #a16207;
     font-size: 10px;
     font-weight: 800;
     padding: 3px 8px;
     border-radius: 4px;
   }
 
-  /* Dark Luxury Admin Table */
+  /* Clean Light Theme Admin Table (Task 3 Fix) */
   .admin-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
+    font-size: 13px;
+    background: #ffffff !important;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
   }
 
   .admin-table th {
-    background: rgba(10, 20, 38, 0.95) !important;
-    color: var(--champagne-gold) !important;
+    background: #f8fafc !important;
+    color: #475569 !important;
     font-weight: 700;
     padding: 14px;
-    font-size: 12px;
+    font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border-bottom: 1px solid rgba(212, 178, 112, 0.3) !important;
+    border-bottom: 1px solid #cbd5e1 !important;
   }
 
   .admin-table td {
     padding: 14px;
-    color: #ffffff !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border-bottom: 1px solid #f1f5f9 !important;
     font-size: 13px;
+  }
+
+  .admin-table tr:hover td {
+    background: #f8fafc !important;
   }
 
   .cat-main-grid {
@@ -261,95 +270,56 @@
   <!-- Header Title Banner -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
     <div>
-      <h1 style="font-family:var(--font-serif);color:#ffffff;margin:0 0 6px;font-size:28px;">Jewelry Category & Sub-Category Management</h1>
-      <p style="color:var(--taupe-beige);font-size:14px;margin:0;">Organize Main Categories, Sub-Categories, and Diamond / Gemstone Cuts with real-time storefront synchronization.</p>
+      <h1 style="font-family:var(--font-serif);color:#0f172a;margin:0 0 6px;font-size:28px;font-weight:800;">Jewelry Category &amp; Sub-Category Management</h1>
+      <p style="color:#64748b;font-size:14px;margin:0;">Organize Main Categories, Sub-Categories, and Diamond / Gemstone Cuts with real-time storefront synchronization.</p>
     </div>
   </div>
 
   <div class="cat-main-grid">
     <!-- LEFT: Add / Edit Category Form Panel -->
     <div class="cat-card-panel">
-      <h3 style="font-family:var(--font-serif);color:#ffffff;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;">
-        <i class="fa-solid fa-folder-plus" style="color:var(--champagne-gold);"></i> Create Category / Sub-Category
+      <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;font-weight:700;">
+        <i class="fa-solid fa-folder-plus" style="color:#b45309;"></i> Create Category / Sub-Category
       </h3>
       
       <form id="addCategoryForm" onsubmit="handleAddNewCategory(event)">
-        <!-- Hierarchy Level Selection -->
+        <!-- Task 2: Category Hierarchy Level Selection -->
         <div class="cat-form-group">
-          <label class="cat-form-label">Category Hierarchy Level *</label>
+          <label class="cat-form-label">Category Level / Hierarchy *</label>
           <select id="adminCategoryType" class="cat-form-input" onchange="onCategoryTypeChange(this.value)">
             <option value="Main Category" selected>🏢 Main Category (Root Level)</option>
-            <option value="Sub Category">📁 Sub-Category (Nested under Main)</option>
-            <option value="Diamond Cut / Stone Type">💎 Diamond Cut / Stone Category</option>
+            <option value="Sub Category">📁 Sub-Category (Nested under Parent)</option>
           </select>
         </div>
 
-        <!-- Parent Category Selector (Shown for Sub-Category or Diamond Cut) -->
+        <!-- Task 2: Parent Category Selector Dropdown -->
         <div class="cat-form-group" id="parentSelectGroup" style="display:none;">
           <label class="cat-form-label">Select Parent Main Category *</label>
           <select id="adminParentId" class="cat-form-input">
             <option value="">-- Select Parent Category --</option>
-            <option value="rings">Diamond Rings Collection</option>
-            <option value="necklaces">Necklaces & Pendants</option>
-            <option value="earrings">Earrings & Studs</option>
-            <option value="bracelets">Bracelets & Bangles</option>
-            <option value="fine-jewelry">Fine Jewelry</option>
-            <option value="hiphop">Hip Hop Jewelry</option>
+            <option value="rings">Engagement Rings &amp; Solitaires</option>
+            <option value="wedding-rings">Wedding Rings &amp; Bands</option>
+            <option value="necklaces">Necklaces &amp; Pendants</option>
+            <option value="earrings">Earrings &amp; Studs</option>
+            <option value="bracelets">Bracelets &amp; Bangles</option>
           </select>
         </div>
 
         <div class="cat-form-group">
-          <label class="cat-form-label">Category Unique Key / Code *</label>
-          <input type="text" id="adminCatId" class="cat-form-input" placeholder="e.g. lab-diamond-anniversary-ring" required />
-          <small style="color:var(--taupe-beige);font-size:11px;margin-top:4px;display:block;">Lowercase slug (e.g. engagement-rings, rose-cut-rings)</small>
+          <label class="cat-form-label">Category Title / Name *</label>
+          <input type="text" id="adminCatName" class="cat-form-input" placeholder="e.g. Lab Diamond Anniversary Rings" required />
         </div>
 
         <div class="cat-form-group">
-          <label class="cat-form-label">Category Title *</label>
-          <input type="text" id="adminCatName" class="cat-form-input" placeholder="e.g. Lab Diamond Anniversary Ring" required />
-        </div>
-
-        <div class="cat-form-group">
-          <label class="cat-form-label">Sub-Category Name</label>
-          <input type="text" id="adminSubCategoryName" class="cat-form-input" placeholder="e.g. Anniversary Ring, Solitaire, Halo" />
-        </div>
-
-        <!-- Diamond / Gemstone Type Filter -->
-        <div class="cat-form-group">
-          <label class="cat-form-label">Diamond / Stone Type</label>
-          <select id="adminDiamondType" class="cat-form-input">
-            <option value="Lab Grown Diamond" selected>Lab Grown Diamond</option>
-            <option value="Moissanite">Moissanite Diamond</option>
-            <option value="Natural Diamond">Natural GIA Diamond</option>
-            <option value="Both">Lab Grown & Moissanite Both</option>
-          </select>
-        </div>
-
-        <!-- Diamond Cut Shape Filter -->
-        <div class="cat-form-group">
-          <label class="cat-form-label">Diamond Cut Shape</label>
-          <select id="adminDiamondCutShape" class="cat-form-input">
-            <option value="All Shapes" selected>All Shapes</option>
-            <option value="Rose Cut">Rose Cut</option>
-            <option value="Radiant Cut">Radiant Cut</option>
-            <option value="Asscher Cut">Asscher Cut</option>
-            <option value="Oval Cut">Oval Cut</option>
-            <option value="Emerald Cut">Emerald Cut</option>
-            <option value="Round Cut">Round Cut</option>
-            <option value="Marquise Cut">Marquise Cut</option>
-            <option value="Princess Cut">Princess Cut</option>
-            <option value="Cushion Cut">Cushion Cut</option>
-            <option value="Pear Cut">Pear Cut</option>
-            <option value="Kite Cut">Kite Cut</option>
-            <option value="Triangle Cut">Triangle Cut</option>
-          </select>
+          <label class="cat-form-label">Subtitle Description *</label>
+          <input type="text" id="adminCatSub" class="cat-form-input" placeholder="e.g. Handcrafted Lab Diamonds &amp; Eternity Bands" required />
         </div>
 
         <div class="cat-form-group">
           <label class="cat-form-label">Badge Tag</label>
           <select id="adminCatBadge" class="cat-form-input">
-            <option value="Top Selling">Top Selling</option>
             <option value="Popular" selected>Popular</option>
+            <option value="Top Selling">Top Selling</option>
             <option value="Trending">Trending</option>
             <option value="Featured">Featured</option>
             <option value="New Arrival">New Arrival</option>
@@ -357,18 +327,13 @@
           </select>
         </div>
 
-        <div class="cat-form-group">
-          <label class="cat-form-label">Subtitle Description *</label>
-          <input type="text" id="adminCatSub" class="cat-form-input" placeholder="e.g. Handcrafted Lab Diamonds & Eternity Bands" required />
-        </div>
-
         <!-- COVER IMAGE FILE UPLOAD ZONE -->
         <div class="cat-form-group">
           <label class="cat-form-label">Cover Image File Upload *</label>
           <div class="cat-upload-dropzone" onclick="document.getElementById('adminCatFileInput').click()">
-            <i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:var(--champagne-gold);margin-bottom:6px;"></i>
-            <div style="font-weight:700;color:#ffffff;font-size:13px;">Click to Upload Cover Image</div>
-            <div style="font-size:11px;color:var(--taupe-beige);">PNG, JPG, WebP (Max 10MB)</div>
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#b45309;margin-bottom:6px;"></i>
+            <div style="font-weight:700;color:#0f172a;font-size:13px;">Click to Upload Cover Image</div>
+            <div style="font-size:11px;color:#64748b;">PNG, JPG, WebP (Max 10MB)</div>
             <input type="file" id="adminCatFileInput" accept="image/*" style="display:none;" onchange="previewCatUploadFile(this)" />
           </div>
 
@@ -383,16 +348,16 @@
           <input type="text" id="adminCatImg" class="cat-form-input" placeholder="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" />
         </div>
 
-        <button type="submit" class="cat-btn-submit" id="btnSaveCategory">
-          <i class="fa-solid fa-cloud-arrow-up"></i> Save Category & Sub-Categories
+        <button type="submit" class="cat-btn-submit" id="btnSaveCategory" style="background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#ffffff; margin-top:8px;">
+          <i class="fa-solid fa-plus-circle"></i> Save &amp; Publish New Category
         </button>
       </form>
     </div>
 
     <!-- RIGHT: Active Category & Sub-Category Tree Listing Table -->
     <div class="cat-card-panel">
-      <h3 style="font-family:var(--font-serif);color:#ffffff;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;">
-        <i class="fa-solid fa-sitemap" style="color:var(--champagne-gold);"></i> Categories & Sub-Categories Tree
+      <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;font-weight:700;">
+        <i class="fa-solid fa-sitemap" style="color:#b45309;"></i> Categories &amp; Sub-Categories Tree
       </h3>
       
       <div class="table-responsive">
@@ -486,22 +451,22 @@
 
         const diamondBadge = `<span class="badge-diamond-type">${c.diamondType || 'Lab Grown'}</span>`;
         const cutBadge = c.diamondCutShape && c.diamondCutShape !== 'All Shapes'
-          ? `<span style="font-size:11px; color:var(--champagne-gold); font-weight:700;">${c.diamondCutShape}</span>`
-          : '<span style="font-size:11px; color:rgba(255,255,255,0.5);">All Shapes</span>';
+          ? `<span style="font-size:11px; color:#b45309; font-weight:700;">${c.diamondCutShape}</span>`
+          : '<span style="font-size:11px; color:#64748b;">All Shapes</span>';
 
         return `
           <tr>
-            <td><img src="${cleanImg}" class="cat-table-img" alt="${c.name}" /></td>
+            <td style="text-align:center;"><img src="${cleanImg}" class="cat-table-img" alt="${c.name}" /></td>
             <td>
-              <div style="font-weight:700;font-size:14px;color:#ffffff;">${c.name}</div>
-              <div style="font-size:12px;color:var(--champagne-gold);margin-top:2px;">
+              <div style="font-weight:700;font-size:14px;color:#0f172a;">${c.name}</div>
+              <div style="font-size:12px;color:#b45309;margin-top:2px;font-weight:600;">
                 ${c.subCategoryName ? 'Sub: ' + c.subCategoryName : (c.subtitle || c.id)}
               </div>
             </td>
             <td>
               <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">
                 ${typeBadge}
-                <span class="status-tag-active" style="background:rgba(212,178,112,0.15); color:var(--champagne-gold); font-size:10px;">${c.badge || 'Popular'}</span>
+                <span class="status-tag-active" style="background:rgba(180,83,9,0.08); color:#b45309; border:1px solid rgba(180,83,9,0.2); font-size:10px;">${c.badge || 'Popular'}</span>
               </div>
             </td>
             <td>
@@ -522,7 +487,7 @@
               </div>
             </td>
             <td>
-              <button type="button" onclick="editCategory('${c.id}', '${c.name.replace(/'/g, "\\'")}')" style="background:rgba(212,178,112,0.15); border:1px solid var(--champagne-gold); color:var(--champagne-gold); padding:6px 12px; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px;">
+              <button type="button" onclick="editCategory('${c.id}', '${c.name.replace(/'/g, "\\'")}')" style="background:#fef3c7; border:1px solid #d97706; color:#b45309; padding:6px 12px; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; transition:all 0.2s;">
                 <i class="fa-solid fa-pen-to-square"></i> Edit
               </button>
             </td>
@@ -536,15 +501,26 @@
 
   async function toggleCategoryActive(id, isActive) {
     try {
-      const res = await fetch(`/api/catalogapi/categories/${id}/toggle-visibility?active=${isActive}`, { method: 'POST' });
+      const res = await fetch(`/api/catalogapi/categories/${encodeURIComponent(id)}/toggle-visibility?active=${isActive}`, { method: 'POST' });
       const data = await res.json();
       if (data.success) {
+        if (typeof showToast === 'function') {
+          showToast(`Category visibility updated to ${isActive ? 'Visible' : 'Hidden'} on storefront. Products remain safe in DB!`, isActive ? 'success' : 'info', 'Visibility Updated');
+        }
         loadAdminCategoriesTable();
       } else {
-        alert(data.message || 'Error updating category visibility');
+        if (typeof showToast === 'function') {
+          showToast(data.message || 'Error updating category visibility', 'error');
+        } else {
+          alert(data.message || 'Error updating category visibility');
+        }
       }
     } catch (e) {
-      alert('Network error updating category visibility');
+      if (typeof showToast === 'function') {
+        showToast('Network error updating category visibility', 'error');
+      } else {
+        alert('Network error updating category visibility');
+      }
     }
   }
 
@@ -574,16 +550,21 @@
         finalImgUrl = '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';
       }
 
+      const catName = document.getElementById('adminCatName').value.trim();
+      const generatedSlug = catName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const catType = document.getElementById('adminCategoryType').value;
+      const parentId = catType === 'Sub Category' ? (document.getElementById('adminParentId').value || null) : null;
+
       const categoryPayload = {
-        id: document.getElementById('adminCatId').value.trim(),
-        name: document.getElementById('adminCatName').value.trim(),
-        parentId: document.getElementById('adminParentId').value || null,
-        categoryType: document.getElementById('adminCategoryType').value,
-        subCategoryName: document.getElementById('adminSubCategoryName').value.trim() || document.getElementById('adminCatName').value.trim(),
-        diamondType: document.getElementById('adminDiamondType').value,
-        diamondCutShape: document.getElementById('adminDiamondCutShape').value,
+        id: generatedSlug || ('cat-' + Date.now()),
+        name: catName,
+        parentId: parentId,
+        categoryType: catType,
+        subCategoryName: catName,
+        diamondType: 'Lab Grown Diamond',
+        diamondCutShape: 'All Shapes',
         badge: document.getElementById('adminCatBadge').value,
-        subtitle: document.getElementById('adminCatSub').value.trim(),
+        subtitle: document.getElementById('adminCatSub').value.trim() || 'Fine Jewelry Collection',
         imageUrl: finalImgUrl,
         displayOrder: 1,
         isActive: true
@@ -597,19 +578,19 @@
 
       const saveData = await saveRes.json();
       if (saveRes.ok) {
-        alert('🎉 Category & Sub-Category saved successfully!');
+        showToast(`Category "${catName}" published to Neon DB!`, 'success', 'Saved Successfully');
         document.getElementById('addCategoryForm').reset();
         document.getElementById('catPreviewBox').style.display = 'none';
         selectedCategoryFile = null;
         loadAdminCategoriesTable();
       } else {
-        alert('Error saving category: ' + (saveData.message || 'Check database validation'));
+        showToast(saveData.message || 'Error saving category', 'error');
       }
     } catch (e) {
-      alert('Error connecting to database endpoint.');
+      showToast('Error connecting to database endpoint.', 'error');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Save Category & Sub-Categories';
+      btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Save &amp; Publish New Category';
     }
   }
 

@@ -401,7 +401,7 @@ a {
   white-space: nowrap;
 }
 
-.sat-logo-brand span, .sat-brand-script {
+.sat-brand-script {
   color: var(--champagne-gold, #d4b270) !important;
   font-family: var(--font-serif, 'Playfair Display', Georgia, serif) !important;
   font-size: 1em !important;
@@ -410,7 +410,7 @@ a {
   letter-spacing: 0.06em !important;
   line-height: 1 !important;
   display: inline-block !important;
-  margin-left: 5px !important;
+  margin-left: 4px !important;
   text-transform: none !important;
   vertical-align: baseline !important;
 }
@@ -2008,16 +2008,14 @@ a {
    FARMBRIDGE-STYLE FULL ADMIN PORTAL SYSTEM — CLEAN WHITE THEME
    ========================================================================== */
 #farmbridgeAdminPortal {
-  position: fixed;
-  inset: 0;
-  z-index: 15000;
-  background: #f8fafc; /* Clean crisp white/light background */
-  color: #0f172a; /* Dark slate text */
+  position: relative;
+  min-height: 100vh;
+  z-index: 100;
+  background: #f8fafc;
+  color: #0f172a;
   display: flex;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
-  overflow: hidden;
+  opacity: 1 !important;
+  visibility: visible !important;
   font-family: var(--font-display);
 }
 
@@ -3257,5 +3255,25 @@ a {
   .cat-card-title-label {
     font-size: 13.5px;
     margin-top: 10px;
+  }
+}
+
+/* Mobile Responsive Navigation Bar Buttons (Icons Only for Search & Sign In) */
+@media (max-width: 768px) {
+  .btn-auth-nav span:not(.auth-nav-cart-count) {
+    display: none !important;
+  }
+  
+  .btn-auth-nav {
+    padding: 8px 12px !important;
+    gap: 0 !important;
+    font-size: 15px !important;
+    border-radius: 20px !important;
+    min-width: 40px !important;
+    justify-content: center !important;
+  }
+
+  .auth-nav-cluster {
+    gap: 8px !important;
   }
 }

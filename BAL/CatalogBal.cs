@@ -47,10 +47,10 @@ namespace SAT1.BAL
         // PUBLIC STOREFRONT CATEGORIES: Returns ONLY categories where IsActive == true
         public async Task<List<CategoryAdminDto>> GetPublicCategoriesAsync()
         {
-            var categories = await _context.Categories
+            var rawCategories = await _context.Categories
                 .Where(c => c.IsActive)
-                .OrderBy(c => c.DisplayOrder)
                 .ToListAsync();
+            var categories = rawCategories.OrderBy(c => c.CategoryId).ToList();
 
             var items = await _context.CatalogItems.Where(i => i.IsActive).ToListAsync();
 
@@ -77,10 +77,10 @@ namespace SAT1.BAL
         // PUBLIC FULL STORE DATA: Returns ONLY categories where IsActive == true
         public async Task<List<PublicCategoryStoreDto>> GetFullStoreAsync()
         {
-            var categories = await _context.Categories
+            var rawCategories = await _context.Categories
                 .Where(c => c.IsActive)
-                .OrderBy(c => c.DisplayOrder)
                 .ToListAsync();
+            var categories = rawCategories.OrderBy(c => c.CategoryId).ToList();
 
             var items = await _context.CatalogItems.Where(i => i.IsActive).ToListAsync();
 
@@ -107,9 +107,8 @@ namespace SAT1.BAL
         // ADMIN CATEGORIES: Returns ALL categories (Active + Hidden)
         public async Task<List<CategoryAdminDto>> GetAdminCategoriesAsync()
         {
-            var categories = await _context.Categories
-                .OrderBy(c => c.DisplayOrder)
-                .ToListAsync();
+            var rawCategories = await _context.Categories.ToListAsync();
+            var categories = rawCategories.OrderBy(c => c.CategoryId).ToList();
 
             var items = await _context.CatalogItems.ToListAsync();
 
@@ -163,7 +162,16 @@ namespace SAT1.BAL
 
         public async Task<bool> ToggleCategoryVisibilityAsync(string id, bool active)
         {
-            var cat = await _context.Categories.FindAsync(id.ToLower());
+            if (string.IsNullOrWhiteSpace(id)) return false;
+
+            var cleanId = id.Trim().ToLower();
+            var cat = await _context.Categories.FirstOrDefaultAsync(c => c.Id.ToLower() == cleanId || c.Name.ToLower() == cleanId);
+
+            if (cat == null && int.TryParse(cleanId, out int numericId))
+            {
+                cat = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == numericId);
+            }
+
             if (cat == null) return false;
 
             cat.IsActive = active;
@@ -173,7 +181,16 @@ namespace SAT1.BAL
 
         public async Task<bool> DeleteCategoryAsync(string id)
         {
-            var cat = await _context.Categories.FindAsync(id.ToLower());
+            if (string.IsNullOrWhiteSpace(id)) return false;
+
+            var cleanId = id.Trim().ToLower();
+            var cat = await _context.Categories.FirstOrDefaultAsync(c => c.Id.ToLower() == cleanId || c.Name.ToLower() == cleanId);
+
+            if (cat == null && int.TryParse(cleanId, out int numericId))
+            {
+                cat = await _context.Categories.FirstOrDefaultAsync(c => c.CategoryId == numericId);
+            }
+
             if (cat == null) return false;
 
             _context.Categories.Remove(cat);
@@ -191,13 +208,19 @@ namespace SAT1.BAL
 
             var cleanKey = categoryQuery.Trim().ToLower().Replace("-", "_").Replace(" ", "_");
 
-            // 1. If "all", return all active products dynamically
+            // Fetch active category IDs
+            var activeCatIds = await _context.Categories
+                .Where(c => c.IsActive)
+                .Select(c => c.Id.ToLower())
+                .ToListAsync();
+
+            // 1. If "all", return active products belonging ONLY to active categories on customer storefront
             if (cleanKey == "all")
             {
                 try
                 {
                     var allDb = await _context.CatalogItems
-                        .Where(i => i.IsActive)
+                        .Where(i => i.IsActive && activeCatIds.Contains(i.CategoryId.ToLower()))
                         .OrderByDescending(i => i.CreatedAt)
                         .ToListAsync();
 
@@ -208,7 +231,15 @@ namespace SAT1.BAL
                 return LocalStore.GetLocalCategoryProducts("all", webRootPath);
             }
 
-            // 2. Dynamic Query Database via EF Core LINQ parameterized SQL matching any CategoryId, Name, or Subcategory Slug
+            // 2. Check if specific requested category is active
+            var categoryObj = await _context.Categories.FirstOrDefaultAsync(c => c.Id.ToLower() == cleanKey || c.Name.ToLower() == cleanKey.Replace("_", " "));
+            if (categoryObj != null && !categoryObj.IsActive)
+            {
+                // Category is hidden by admin -> return empty list for storefront UI without deleting products
+                return new List<CatalogItem>();
+            }
+
+            // 3. Dynamic Query Database via EF Core LINQ parameterized SQL
             try
             {
                 var dbProducts = await _context.CatalogItems
@@ -228,7 +259,7 @@ namespace SAT1.BAL
             }
             catch { }
 
-            // 3. Dynamic LocalStore provider matching whichever category the user clicked
+            // 4. Dynamic LocalStore provider fallback
             return LocalStore.GetLocalCategoryProducts(categoryQuery, webRootPath);
         }
 
@@ -236,14 +267,12 @@ namespace SAT1.BAL
         public async Task<List<CatalogItem>> GetProductsByEnumCategoryAsync(RingCategoryEnum categoryEnum, string webRootPath)
         {
             long numericId = (long)categoryEnum;
-            var subcategorySlug = categoryEnum.ToString().ToLower();
 
-            // 1. Query Products table by numeric long CategoryId
             try
             {
                 var relationalProducts = await _context.Products
                     .Include(p => p.Images)
-                    .Where(p => p.IsAvailable && (p.CategoryId == numericId || p.ProductSlug.Contains(subcategorySlug)))
+                    .Where(p => p.CategoryId == numericId)
                     .OrderByDescending(p => p.CreatedAt)
                     .ToListAsync();
 
@@ -256,16 +285,82 @@ namespace SAT1.BAL
                         CategoryId = p.CategoryId.ToString(),
                         Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}",
                         PriceUSD = p.BasePriceUSD,
-                        ImageUrl = p.Images.FirstOrDefault(img => img.IsMainImage)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl ?? "/assets/ring_1.jpg",
-                        GalleryImages = string.Join(",", p.Images.Select(img => img.ImageUrl)),
-                        IsActive = p.IsAvailable,
+                        ImageUrl = p.Images.OrderBy(img => img.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg",
+                        GalleryImages = string.Join(",", p.Images.Select(img => img.ImagePath)),
+                        IsActive = true,
                         CreatedAt = p.CreatedAt
                     }).ToList();
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetProductsByEnumCategoryAsync Error]: {ex.Message}");
+            }
 
             return await GetProductsByCategoryIdAsync(categoryEnum.ToString(), webRootPath);
+        }
+
+        // Overload accepting numeric long categoryId & shape from UI click
+        public async Task<List<CatalogItem>> GetProductsByCategoryAndShapeAsync(long categoryId, string? shape, string webRootPath)
+        {
+            try
+            {
+                var query = _context.Products
+                    .Include(p => p.Images)
+                    .Where(p => p.CategoryId == categoryId);
+
+                if (!string.IsNullOrWhiteSpace(shape) && shape.ToLower() != "all")
+                {
+                    var cleanShape = shape.Trim().ToLower();
+                    long? targetShapeId = cleanShape switch
+                    {
+                        "round" or "1" => 1,
+                        "oval" or "2" => 2,
+                        "emerald" or "3" => 3,
+                        "marquise" or "4" => 4,
+                        "pear" or "5" => 5,
+                        "princess" or "6" => 6,
+                        "cushion" or "7" => 7,
+                        "radiant" or "8" => 8,
+                        "asscher" or "9" => 9,
+                        "heart" or "10" => 10,
+                        _ => null
+                    };
+
+                    if (targetShapeId.HasValue)
+                    {
+                        query = query.Where(p => p.DiamondShapeId == targetShapeId.Value);
+                    }
+                    else
+                    {
+                        query = query.Where(p => p.Title.ToLower().Contains(cleanShape));
+                    }
+                }
+
+                var dbItems = await query.OrderByDescending(p => p.CreatedAt).ToListAsync();
+
+                if (dbItems.Count > 0)
+                {
+                    return dbItems.Select(p => new CatalogItem
+                    {
+                        Id = $"sat-prod-{p.ProductId}",
+                        Name = p.ProductName,
+                        CategoryId = p.CategoryId.ToString(),
+                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA VVS1",
+                        PriceUSD = p.BasePriceUSD,
+                        ImageUrl = p.Images.OrderBy(img => img.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg",
+                        GalleryImages = string.Join(",", p.Images.Select(i => i.ImagePath)),
+                        IsActive = true,
+                        CreatedAt = p.CreatedAt
+                    }).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetProductsByCategoryAndShapeAsync Error]: {ex.Message}");
+            }
+
+            return await GetProductsByNumericIdAsync(categoryId, webRootPath);
         }
 
         // Overload accepting numeric long categoryId from UI click
@@ -276,12 +371,11 @@ namespace SAT1.BAL
                 return await GetProductsByEnumCategoryAsync((RingCategoryEnum)categoryId, webRootPath);
             }
 
-            // Directly query DB by numeric long CategoryId
             try
             {
                 var dbItems = await _context.Products
                     .Include(p => p.Images)
-                    .Where(p => p.IsAvailable && p.CategoryId == categoryId)
+                    .Where(p => p.CategoryId == categoryId)
                     .OrderByDescending(p => p.CreatedAt)
                     .ToListAsync();
 
@@ -294,20 +388,50 @@ namespace SAT1.BAL
                         CategoryId = p.CategoryId.ToString(),
                         Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity}",
                         PriceUSD = p.BasePriceUSD,
-                        ImageUrl = p.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl ?? "/assets/ring_1.jpg",
-                        GalleryImages = string.Join(",", p.Images.Select(i => i.ImageUrl)),
-                        IsActive = p.IsAvailable,
+                        ImageUrl = p.Images.OrderBy(img => img.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg",
+                        GalleryImages = string.Join(",", p.Images.Select(i => i.ImagePath)),
+                        IsActive = true,
                         CreatedAt = p.CreatedAt
                     }).ToList();
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetProductsByNumericIdAsync Error]: {ex.Message}");
+            }
 
             return await GetProductsByCategoryIdAsync(categoryId.ToString(), webRootPath);
         }
 
         public async Task<List<CatalogItem>> GetAllCatalogItemsAsync()
         {
+            try
+            {
+                var products = await _context.Products
+                    .Include(p => p.Images)
+                    .OrderByDescending(p => p.CreatedAt)
+                    .ToListAsync();
+
+                if (products.Count > 0)
+                {
+                    return products.Select(p => new CatalogItem
+                    {
+                        Id = p.ProductId.ToString(),
+                        Name = p.ProductName,
+                        CategoryId = p.CategoryId.ToString(),
+                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct | {p.ProductName}",
+                        PriceUSD = p.BasePriceUSD,
+                        ImageUrl = p.Images.FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg",
+                        IsActive = true,
+                        CreatedAt = p.CreatedAt
+                    }).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetAllCatalogItemsAsync Error]: {ex.Message}");
+            }
+
             return await _context.CatalogItems
                 .Where(i => i.IsActive)
                 .OrderByDescending(i => i.CreatedAt)
@@ -316,42 +440,60 @@ namespace SAT1.BAL
 
         public async Task<CatalogItem?> GetProductByNumericIdAsync(long productId)
         {
-            var p = await _context.Products
-                .Include(p => p.Images)
-                .Include(p => p.Variants)
-                .FirstOrDefaultAsync(p => p.ProductId == productId && p.IsAvailable);
-
-            if (p != null)
+            try
             {
-                var mainImg = p.Images.FirstOrDefault(i => i.IsMainImage)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl ?? "/assets/ring_1.jpg";
-                var allImgs = p.Images.Select(i => i.ImageUrl).ToList();
+                var p = await _context.Products
+                    .Include(p => p.Images)
+                    .Include(p => p.Variants!).ThenInclude(v => v.Metal)
+                    .Include(p => p.Variants!).ThenInclude(v => v.Carat)
+                    .FirstOrDefaultAsync(p => p.ProductId == productId);
 
-                var metalVariants = p.Variants
-                    .Where(v => !string.IsNullOrEmpty(v.MetalType))
-                    .Select(v => $"{v.MetalType} ({(v.PriceAdjustmentUSD >= 0 ? "+" : "")}{v.PriceAdjustmentUSD:F0})")
-                    .Distinct()
-                    .ToList();
-
-                var caratVariants = p.Variants
-                    .Where(v => v.CaratWeight > 0)
-                    .Select(v => $"{v.CaratWeight:F2} CT ({(v.PriceAdjustmentUSD >= 0 ? "+" : "")}{v.PriceAdjustmentUSD:F0})")
-                    .Distinct()
-                    .ToList();
-
-                return new CatalogItem
+                if (p != null)
                 {
-                    Id = $"sat-prod-{p.ProductId}",
-                    Name = p.ProductName,
-                    CategoryId = p.CategoryId.ToString(),
-                    Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}",
-                    PriceUSD = p.BasePriceUSD,
-                    ImageUrl = mainImg,
-                    GalleryImages = string.Join(",", allImgs),
-                    MetalOptions = metalVariants.Count > 0 ? string.Join("|", metalVariants) : string.Empty,
-                    CaratOptions = caratVariants.Count > 0 ? string.Join("|", caratVariants) : string.Empty,
-                    IsActive = p.IsAvailable,
-                    CreatedAt = p.CreatedAt
-                };
+                    var mainImg = p.Images.OrderBy(i => i.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg";
+                    var allImgs = p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImagePath).ToList();
+
+                    var metalVariants = p.Variants
+                        .Where(v => v.Metal != null && !string.IsNullOrWhiteSpace(v.Metal.Name))
+                        .Select(v => v.Metal!.Name)
+                        .Distinct()
+                        .ToList();
+
+                    if (metalVariants.Count == 0)
+                    {
+                        metalVariants = await _context.Metals.OrderBy(m => m.Id).Select(m => m.Name).ToListAsync();
+                    }
+
+                    var caratVariants = p.Variants
+                        .Where(v => v.Carat != null && !string.IsNullOrWhiteSpace(v.Carat.Label))
+                        .Select(v => v.Carat!.Label)
+                        .Distinct()
+                        .ToList();
+
+                    if (caratVariants.Count == 0)
+                    {
+                        caratVariants = await _context.CaratOptions.OrderBy(c => c.Id).Select(c => c.Label).ToListAsync();
+                    }
+
+                    return new CatalogItem
+                    {
+                        Id = $"sat-prod-{p.ProductId}",
+                        Name = p.ProductName,
+                        CategoryId = p.CategoryId.ToString(),
+                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}",
+                        PriceUSD = p.BasePriceUSD,
+                        ImageUrl = mainImg,
+                        GalleryImages = string.Join(",", allImgs),
+                        MetalOptions = string.Join("|", metalVariants),
+                        CaratOptions = string.Join("|", caratVariants),
+                        IsActive = true,
+                        CreatedAt = p.CreatedAt
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetProductByNumericIdAsync Error]: {ex.Message}");
             }
 
             return null;
@@ -371,24 +513,39 @@ namespace SAT1.BAL
 
             // 2. Query CatalogItems table by primary key ID
             var catalogItem = await _context.CatalogItems.FirstOrDefaultAsync(i => i.Id == id);
+            if (catalogItem == null)
+            {
+                // 3. Query CatalogItems by Product Name or URL Slug from Neon PostgreSQL
+                var slugClean = id.Replace("-", " ").Replace("_", " ").Trim().ToLower();
+                catalogItem = await _context.CatalogItems.FirstOrDefaultAsync(i => 
+                    i.IsActive && (
+                        i.Name.ToLower() == id.ToLower() ||
+                        i.Name.ToLower() == slugClean ||
+                        i.Name.ToLower().Replace(" ", "-") == id.ToLower() ||
+                        i.Name.ToLower().Contains(slugClean)
+                    ));
+            }
+
             if (catalogItem != null)
             {
                 // Query dedicated MetalOptions and CaratOptions database tables
-                var dbMetals = await _context.MetalOptions
+                var dbMetals = (await _context.MetalOptions
                     .Where(m => m.CatalogItemId == catalogItem.Id)
+                    .ToListAsync())
                     .OrderBy(m => m.DisplayOrder)
-                    .ToListAsync();
+                    .ToList();
 
-                var dbCarats = await _context.CaratOptions
+                var dbCarats = (await _context.CaratOptions
                     .Where(c => c.CatalogItemId == catalogItem.Id)
+                    .ToListAsync())
                     .OrderBy(c => c.DisplayOrder)
-                    .ToListAsync();
+                    .ToList();
 
-                if (dbMetals.Count > 0)
+                if (dbMetals.Any())
                 {
                     catalogItem.MetalOptions = string.Join("|", dbMetals.Select(m => $"{m.MetalName} ({(m.PriceOffsetUSD >= 0 ? "+" : "")}{m.PriceOffsetUSD:F0})"));
                 }
-                if (dbCarats.Count > 0)
+                if (dbCarats.Any())
                 {
                     catalogItem.CaratOptions = string.Join("|", dbCarats.Select(c => $"{c.CaratLabel} ({(c.PriceOffsetUSD >= 0 ? "+" : "")}{c.PriceOffsetUSD:F0})"));
                 }
@@ -453,6 +610,28 @@ namespace SAT1.BAL
             }
 
             return 0;
+        }
+
+        public async Task<List<CatalogItem>> SearchProductsAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return await GetAllCatalogItemsAsync();
+            }
+
+            var q = query.Trim().ToLower();
+            var items = await _context.CatalogItems
+                .Where(i => i.IsActive && (
+                    i.Name.ToLower().Contains(q) ||
+                    (i.Spec != null && i.Spec.ToLower().Contains(q)) ||
+                    (i.CategoryId != null && i.CategoryId.ToLower().Contains(q)) ||
+                    (i.MetalOptions != null && i.MetalOptions.ToLower().Contains(q))
+                ))
+                .OrderByDescending(i => i.CreatedAt)
+                .Take(20)
+                .ToListAsync();
+
+            return items;
         }
     }
 }

@@ -112,20 +112,12 @@ namespace SAT1.Controllers
             ViewBag.CategoryEnum = enumVal;
             ViewBag.CategoryName = categoryDisplayName;
 
-            // Fetch products strictly by numeric long CategoryId
-            List<CatalogItem> products = await _catalogBal.GetProductsByNumericIdAsync(categoryId, _env.WebRootPath);
+            // Fetch products strictly by numeric long CategoryId and Diamond Shape
+            List<CatalogItem> products = await _catalogBal.GetProductsByCategoryAndShapeAsync(categoryId, shape, _env.WebRootPath);
 
             ViewBag.SelectedShape = shape ?? "All";
             ViewBag.SelectedSort = sort ?? SortOptionEnum.Bestselling.ToString().ToLower();
             ViewBag.DiamondType = diamondType ?? DiamondTypeEnum.LabGrown.GetDisplayName();
-
-            // Filter by Shape if specified
-            if (!string.IsNullOrWhiteSpace(shape) && shape.ToLower() != "all")
-            {
-                var shapeTerm = shape.ToLower();
-                var filtered = products.Where(p => p.Name.ToLower().Contains(shapeTerm) || p.Spec.ToLower().Contains(shapeTerm) || p.ImageUrl.ToLower().Contains(shapeTerm)).ToList();
-                if (filtered.Count > 0) products = filtered;
-            }
 
             // Apply Enum-based Sorting
             switch (sort?.ToLower())
@@ -209,9 +201,10 @@ namespace SAT1.Controllers
             }
             ViewBag.CategoryBadge = "GIA Certified";
 
-            var relatedItems = (await _catalogBal.GetProductsByNumericIdAsync(long.TryParse(product.CategoryId, out long cId) ? cId : 2, _env.WebRootPath))
+            var catIdToQuery = long.TryParse(product.CategoryId, out long cId) ? cId : 1;
+            var relatedItems = (await _catalogBal.GetProductsByCategoryAndShapeAsync(catIdToQuery, null, _env.WebRootPath))
                 .Where(i => i.Id != product.Id)
-                .Take(4)
+                .Take(12)
                 .ToList();
 
             ViewBag.RelatedItems = relatedItems;

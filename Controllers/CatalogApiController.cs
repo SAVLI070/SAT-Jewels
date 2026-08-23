@@ -12,11 +12,13 @@ namespace SAT1.Controllers
     public class CatalogApiController : ControllerBase
     {
         private readonly CatalogBal _catalogBal;
+        private readonly AdminBal _adminBal;
         private readonly IConfiguration _configuration;
 
-        public CatalogApiController(CatalogBal catalogBal, IConfiguration configuration)
+        public CatalogApiController(CatalogBal catalogBal, AdminBal adminBal, IConfiguration configuration)
         {
             _catalogBal = catalogBal;
+            _adminBal = adminBal;
             _configuration = configuration;
         }
 
@@ -166,6 +168,36 @@ namespace SAT1.Controllers
 
             var saved = await _catalogBal.AddCatalogItemAsync(item);
             return Ok(new { success = true, message = $"Catalog product item '{saved.Name}' published!", item = saved });
+        }
+
+        // 4B. CREATE FULL PRODUCT WITH VARIANTS & IMAGES - Protected (OWASP A01)
+        [HttpPost("create-full-product")]
+        public async Task<IActionResult> CreateFullProduct([FromBody] CreateProductDto dto)
+        {
+            if (!IsAdminUser())
+            {
+                return StatusCode(403, new { success = false, message = "Access Denied: Admin authorization required." });
+            }
+
+            if (dto == null || string.IsNullOrWhiteSpace(dto.Title))
+            {
+                return BadRequest(new { success = false, message = "Invalid product data payload." });
+            }
+
+            try
+            {
+                var createdProduct = await _adminBal.CreateProductWithVariantsAsync(dto);
+                return Ok(new
+                {
+                    success = true,
+                    message = $"Product '{createdProduct.Title}' and variants published successfully to database!",
+                    productId = createdProduct.ProductId
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, error = ex.Message });
+            }
         }
 
         // 5. DELETE CATALOG ITEM - Protected (OWASP A01)
@@ -325,6 +357,22 @@ namespace SAT1.Controllers
             }
 
             return Ok(new { success = true, count = savedUrls.Count, urls = savedUrls });
+        }
+
+        // 6. SEARCH PRODUCTS API FOR LIVE STOREFRONT SEARCH BAR
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchProducts([FromQuery] string? q)
+        {
+            try
+            {
+                var queryStr = q ?? "";
+                var items = await _catalogBal.SearchProductsAsync(queryStr);
+                return Ok(new { success = true, query = queryStr, count = items.Count, results = items });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, error = ex.Message });
+            }
         }
     }
 

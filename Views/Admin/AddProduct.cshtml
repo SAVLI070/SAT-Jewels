@@ -4,368 +4,906 @@
 }
 
 <style>
-  .add-prod-panel {
-    max-width: 920px;
+  .add-prod-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 28px;
+    max-width: 1240px;
     margin: 0 auto;
-    background: rgba(8, 17, 34, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(212, 178, 112, 0.3);
-    border-radius: var(--radius-xl);
-    padding: 36px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-    color: #ffffff;
+    color: #0f172a;
   }
 
-  .form-group {
-    margin-bottom: 22px;
+  @@media (max-width: 992px) {
+    .add-prod-layout { grid-template-columns: 1fr; }
   }
 
-  .form-label {
-    display: block;
+  .add-prod-panel {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Wizard Steps Indicator Bar */
+  .wizard-steps-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .wizard-step-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 13px;
     font-weight: 700;
-    color: var(--champagne-gold);
-    margin-bottom: 6px;
-  }
-
-  .form-input, .form-select {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 12px 16px;
-    background: rgba(10, 20, 38, 0.95);
-    border: 1px solid rgba(212, 178, 112, 0.4);
-    border-radius: var(--radius-md);
-    color: #ffffff;
-    font-size: 14px;
-    font-weight: 500;
-    outline: none;
+    color: #64748b;
+    cursor: pointer;
     transition: all 0.25s ease;
   }
 
-  .form-input:focus, .form-select:focus {
-    border-color: var(--champagne-gold);
-    box-shadow: 0 0 16px rgba(212, 178, 112, 0.4);
+  .wizard-step-item.active {
+    color: #b45309;
   }
 
-  .form-select option {
-    background: #081122;
+  .wizard-step-num {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+  }
+
+  .wizard-step-item.active .wizard-step-num {
+    background: #b45309;
     color: #ffffff;
   }
 
-  /* Upload Dropzone Box */
-  .upload-dropzone {
-    border: 2px dashed rgba(212, 178, 112, 0.4);
-    border-radius: var(--radius-lg);
-    padding: 28px;
-    text-align: center;
-    background: rgba(10, 20, 38, 0.6);
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-
-  .upload-dropzone:hover {
-    border-color: var(--champagne-gold);
-    background: rgba(212, 178, 112, 0.12);
-  }
-
-  .upload-icon {
-    font-size: 32px;
-    color: var(--champagne-gold);
-    margin-bottom: 10px;
-  }
-
-  .upload-preview-grid {
+  /* Collection Cards Grid */
+  .cat-cards-grid {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
-    margin-top: 16px;
+    margin-top: 8px;
   }
 
-  .upload-preview-card {
-    height: 90px;
+  @@media (max-width: 600px) {
+    .cat-cards-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .cat-select-card {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: #0f172a;
+  }
+
+  .cat-select-card:hover, .cat-select-card.active {
+    border-color: #b45309;
+    background: rgba(180, 83, 9, 0.08);
+    box-shadow: 0 4px 14px rgba(180, 83, 9, 0.15);
+  }
+
+  .cat-select-card i {
+    font-size: 20px;
+    color: #b45309;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .cat-select-card span {
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  /* Shape Chips */
+  .shape-chips-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .shape-chip-btn {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    padding: 6px 14px;
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.25s ease;
+  }
+
+  .shape-chip-btn:hover, .shape-chip-btn.active {
+    border-color: #b45309;
+    background: rgba(180, 83, 9, 0.08);
+    color: #b45309;
+  }
+
+  /* Metal Swatch Buttons (Task 5 Redesign) */
+  .metal-swatch-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .metal-pill-btn {
+    padding: 10px 16px;
     border-radius: 10px;
-    border: 1px solid var(--border-gold-soft);
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border: 1.5px solid #cbd5e1;
+    background: #f8fafc;
+    color: #475569;
+    transition: all 0.25s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
   }
 
-  .upload-preview-card img {
+  .metal-pill-btn:hover {
+    border-color: #b45309;
+    color: #0f172a;
+    background: #ffffff;
+  }
+
+  .metal-pill-btn.active {
+    border-color: #b45309 !important;
+    background: #b45309 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(180, 83, 9, 0.35) !important;
+    transform: scale(1.03);
+  }
+
+  /* Carat Size Badges (Task 5 Redesign) */
+  .carat-badge-picker {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .carat-pill-btn {
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 10px 16px;
+    color: #475569;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  }
+
+  .carat-pill-btn:hover {
+    border-color: #b45309;
+    color: #0f172a;
+    background: #ffffff;
+  }
+
+  .carat-pill-btn.active {
+    border-color: #b45309 !important;
+    background: #b45309 !important;
+  /* Matrix Table Styling - Compact Fit Without Horizontal Scroll */
+  .matrix-table-wrap {
+    overflow-x: auto;
+    margin-top: 16px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    max-width: 100%;
+  }
+
+  .matrix-table {
+    width: 100%;
+    table-layout: auto;
+    border-collapse: collapse;
+    font-size: 11px;
+    color: #0f172a;
+    text-align: center;
+  }
+
+  .matrix-table th {
+    background: #f8fafc;
+    color: #475569;
+    padding: 8px 4px;
+    border-bottom: 1px solid #e2e8f0;
+    font-weight: 700;
+    white-space: nowrap;
+    font-size: 10.5px;
+  }
+
+  .matrix-table td {
+    padding: 6px 2px;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .matrix-table td.metal-name-td {
+    text-align: left;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: nowrap;
+    background: #f8fafc;
+    font-size: 11px;
+    padding: 6px 8px;
+  }
+
+  /* Compact Toggle Switch */
+  .switch-toggle {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 18px;
+  }
+
+  .switch-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .slider-round {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 20px;
+  }
+
+  .slider-round:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+  }
+
+  input:checked + .slider-round {
+    background-color: #16a34a;
+  }
+
+  input:checked + .slider-round:before {
+    transform: translateX(16px);
+  }
+
+  /* Live Storefront Preview Card Sidebar */
+  .live-preview-card {
+    position: sticky;
+    top: 100px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+  }
+
+  .preview-stage {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f8fafc;
+    position: relative;
+    margin-bottom: 14px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .preview-stage img {
     width: 100%;
     height: 100%;
     object-fit: cover;
   }
-
-  .btn-submit-item {
-    padding: 14px 36px;
-    background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
-    border: none;
-    border-radius: var(--radius-full);
-    color: #060d0a;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    box-shadow: 0 4px 20px rgba(212, 178, 112, 0.35);
-    transition: all 0.3s ease;
-  }
-
-  .btn-submit-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(212, 178, 112, 0.6);
-    background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
-  }
 </style>
 
-<div class="add-prod-panel">
-  <div style="display:flex;align-items:center;gap:14px;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid rgba(255, 255, 255, 0.1);">
-    <div style="width:48px;height:48px;border-radius:12px;background:rgba(212,178,112,0.15);border:1px solid var(--border-gold);color:var(--champagne-gold);display:flex;align-items:center;justify-content:center;font-size:22px;">
-      <i class="fa-solid fa-gem"></i>
+<div class="add-prod-layout">
+  <!-- Left Column: Admin Form Wizard -->
+  <div class="add-prod-panel">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+      <h2 style="font-family:var(--font-serif); margin:0; font-size:22px; color:#0f172a;">Publish New Fine Jewelry Item</h2>
+      <span style="font-size:12px; color:#b45309; font-weight:700;"><i class="fa-solid fa-database"></i> Live Neon DB Sync</span>
     </div>
-    <div>
-      <h2 style="font-family:var(--font-serif);color:#ffffff;margin:0 0 4px;font-size:24px;">+ Publish New Item to Live Store</h2>
-      <p style="color:var(--taupe-beige);font-size:13px;margin:0;">Item will immediately be active and available for luxury buyers on the storefront.</p>
+
+    <!-- Wizard Steps Indicator -->
+    <div class="wizard-steps-bar">
+      <div class="wizard-step-item active" onclick="switchWizardStep(1)">
+        <div class="wizard-step-num">1</div> <span>Details &amp; Category</span>
+      </div>
+      <div class="wizard-step-item" onclick="switchWizardStep(2)">
+        <div class="wizard-step-num">2</div> <span>Photo Studio</span>
+      </div>
+      <div class="wizard-step-item" onclick="switchWizardStep(3)">
+        <div class="wizard-step-num">3</div> <span>Metals &amp; Carats</span>
+      </div>
+      <div class="wizard-step-item" onclick="switchWizardStep(4)">
+        <div class="wizard-step-num">4</div> <span>Availability Matrix</span>
+      </div>
     </div>
+
+    <form id="adminAddProductForm" onsubmit="handlePublishProduct(event)">
+      
+      <!-- STEP 1: Details & Category -->
+      <div id="wStep1" class="wizard-content-step">
+        <div style="margin-bottom:20px;">
+          <label style="font-size:13px; font-weight:700; color:var(--champagne-gold); display:block; margin-bottom:6px;">Select Main Collection Category *</label>
+          <div class="cat-cards-grid">
+            <div class="cat-select-card active" onclick="setCategory(1, 'Engagement Rings', this)">
+              <i class="fa-solid fa-gem"></i> <span>1. Engagement Rings</span>
+            </div>
+            <div class="cat-select-card" onclick="setCategory(2, 'Wedding Rings', this)">
+              <i class="fa-solid fa-ring"></i> <span>2. Wedding Rings</span>
+            </div>
+            <div class="cat-select-card" onclick="setCategory(3, 'Bridal Sets', this)">
+              <i class="fa-solid fa-heart"></i> <span>3. Bridal Sets</span>
+            </div>
+            <div class="cat-select-card" onclick="setCategory(4, 'Earrings', this)">
+              <i class="fa-solid fa-sparkles"></i> <span>4. Earrings</span>
+            </div>
+            <div class="cat-select-card" onclick="setCategory(5, 'Bracelets', this)">
+              <i class="fa-solid fa-link"></i> <span>5. Bracelets</span>
+            </div>
+            <div class="cat-select-card" onclick="setCategory(6, 'Necklaces', this)">
+              <i class="fa-solid fa-crown"></i> <span>6. Necklaces</span>
+            </div>
+          </div>
+          <input type="hidden" id="adminCategoryId" value="1" />
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+          <div>
+            <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Item Title / Name *</label>
+            <input type="text" id="adminTitle" class="form-input" placeholder="e.g. Royal Solitaire Oval Cut Ring" required oninput="updateLivePreview()" style="width:100%; box-sizing:border-box; padding:12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; color:#0f172a;" />
+          </div>
+          <div>
+            <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Base Price ($ USD) *</label>
+            <input type="number" id="adminPrice" class="form-input" placeholder="2713" min="1" required oninput="updateLivePreview()" style="width:100%; box-sizing:border-box; padding:12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; color:#0f172a;" />
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Select Diamond Cut Shape *</label>
+          <div class="shape-chips-wrap">
+            <button type="button" class="shape-chip-btn active" onclick="setShape(1, 'Round', this)"><i class="fa-regular fa-circle"></i> Round</button>
+            <button type="button" class="shape-chip-btn" onclick="setShape(2, 'Oval', this)"><i class="fa-solid fa-egg"></i> Oval</button>
+            <button type="button" class="shape-chip-btn" onclick="setShape(3, 'Emerald', this)"><i class="fa-regular fa-square"></i> Emerald</button>
+            <button type="button" class="shape-chip-btn" onclick="setShape(4, 'Marquise', this)"><i class="fa-solid fa-diamond"></i> Marquise</button>
+            <button type="button" class="shape-chip-btn" onclick="setShape(5, 'Pear', this)"><i class="fa-solid fa-droplet"></i> Pear</button>
+            <button type="button" class="shape-chip-btn" onclick="setShape(6, 'Princess', this)"><i class="fa-solid fa-stop"></i> Princess</button>
+            <button type="button" class="shape-chip-btn" onclick="setShape(7, 'Cushion', this)"><i class="fa-solid fa-square-full"></i> Cushion</button>
+            <button type="button" class="shape-chip-btn" onclick="setShape(8, 'Radiant', this)"><i class="fa-solid fa-border-all"></i> Radiant</button>
+            <button type="button" class="shape-chip-btn" onclick="setShape(9, 'Asscher', this)"><i class="fa-solid fa-gem"></i> Asscher</button>
+            <button type="button" class="shape-chip-btn" onclick="setShape(10, 'Heart', this)"><i class="fa-solid fa-heart"></i> Heart</button>
+          </div>
+          <input type="hidden" id="adminShapeId" value="1" />
+        </div>
+
+        <div style="text-align:right; margin-top:24px;">
+          <button type="button" class="btn-submit-item" onclick="switchWizardStep(2)" style="padding:10px 24px; font-size:13.5px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Next: Photo Studio &gt;</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Photo Studio -->
+      <div id="wStep2" class="wizard-content-step" style="display:none;">
+        <div style="margin-bottom:20px;">
+          <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Upload Product Images (Cloudinary CDN Auto Sync)</label>
+          <div class="upload-dropzone" onclick="document.getElementById('adminUploadFiles').click()" style="border:2px dashed #cbd5e1; border-radius:12px; padding:28px; text-align:center; background:#f8fafc; cursor:pointer;">
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px; color:#b45309; margin-bottom:8px; display:block;"></i>
+            <div style="font-weight:700; font-size:14px; margin-bottom:4px; color:#0f172a;">Click to Browse or Drag &amp; Drop High-Res Photos</div>
+            <div style="font-size:12px; color:#64748b;">Files will upload directly to Cloudinary and return HTTPS image links.</div>
+            <input type="file" id="adminUploadFiles" multiple accept="image/*" style="display:none;" onchange="handleFileSelect(this)" />
+          </div>
+          <div id="uploadStatusText" style="font-size:12px; font-weight:700; color:var(--champagne-gold); margin-top:8px;"></div>
+          <div id="uploadPreviewGrid" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:10px; margin-top:14px;"></div>
+        </div>
+
+        <div style="margin-bottom:20px;">
+          <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Or Choose Preset Studio Photo (Optional)</label>
+          <select id="presetImageSelect" class="form-select" onchange="usePresetImage(this.value)" style="width:100%; padding:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; color:#0f172a;">
+            <option value="/assets/ring_1.jpg">Default Solitaire (/assets/ring_1.jpg)</option>
+            <option value="/assets/ring_main.png">Royal Solitaire Ring (/assets/ring_main.png)</option>
+            <option value="/assets/hero_1.jpg">Studio Ring Showcase 1 (/assets/hero_1.jpg)</option>
+            <option value="/assets/hero_2.jpg">Studio Ring Showcase 2 (/assets/hero_2.jpg)</option>
+            <option value="/assets/hero_3.jpg">Studio Ring Showcase 3 (/assets/hero_3.jpg)</option>
+          </select>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:24px;">
+          <button type="button" onclick="switchWizardStep(1)" style="background:#ffffff; border:1px solid #cbd5e1; color:#0f172a; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;">&lt; Back</button>
+          <button type="button" class="btn-submit-item" onclick="switchWizardStep(3)" style="padding:10px 24px; font-size:13.5px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Next: Metals &amp; Carats &gt;</button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Metals & Carats -->
+      <div id="wStep3" class="wizard-content-step" style="display:none;">
+        <div style="margin-bottom:24px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <label style="font-size:13px; font-weight:700; color:#0f172a;">Select Available Metal Types *</label>
+            <button type="button" onclick="toggleAllMetals(true)" style="background:none; border:none; color:#b45309; font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;">Select All Metals</button>
+          </div>
+          <div class="metal-swatch-picker">
+            <button type="button" class="metal-pill-btn" data-id="1" onclick="toggleMetalPill(this)">10K Yellow</button>
+            <button type="button" class="metal-pill-btn" data-id="2" onclick="toggleMetalPill(this)">10K White</button>
+            <button type="button" class="metal-pill-btn" data-id="3" onclick="toggleMetalPill(this)">10K Rose</button>
+            <button type="button" class="metal-pill-btn" data-id="4" onclick="toggleMetalPill(this)">14K Yellow</button>
+            <button type="button" class="metal-pill-btn" data-id="5" onclick="toggleMetalPill(this)">14K White</button>
+            <button type="button" class="metal-pill-btn" data-id="6" onclick="toggleMetalPill(this)">14K Rose</button>
+            <button type="button" class="metal-pill-btn" data-id="7" onclick="toggleMetalPill(this)">18K Yellow</button>
+            <button type="button" class="metal-pill-btn" data-id="8" onclick="toggleMetalPill(this)">18K White</button>
+            <button type="button" class="metal-pill-btn" data-id="9" onclick="toggleMetalPill(this)">18K Rose</button>
+            <button type="button" class="metal-pill-btn" data-id="10" onclick="toggleMetalPill(this)">950 Platinum</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <label style="font-size:13px; font-weight:700; color:#0f172a;">Select Diamond Carats &amp; MM Sizes *</label>
+            <button type="button" onclick="toggleAllCarats(true)" style="background:none; border:none; color:#b45309; font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;">Select All Carats</button>
+          </div>
+          <div class="carat-badge-picker">
+            <button type="button" class="carat-pill-btn" data-id="1" data-label="0.50 CT (5.2mm)" onclick="toggleCaratPill(this)">0.50 CT (5.2mm)</button>
+            <button type="button" class="carat-pill-btn" data-id="2" data-label="0.75 CT (6.0mm)" onclick="toggleCaratPill(this)">0.75 CT (6.0mm)</button>
+            <button type="button" class="carat-pill-btn" data-id="3" data-label="1.00 CT (6.5mm)" onclick="toggleCaratPill(this)">1.00 CT (6.5mm)</button>
+            <button type="button" class="carat-pill-btn" data-id="4" data-label="1.25 CT (7.0mm)" onclick="toggleCaratPill(this)">1.25 CT (7.0mm)</button>
+            <button type="button" class="carat-pill-btn" data-id="5" data-label="1.50 CT (7.5mm)" onclick="toggleCaratPill(this)">1.50 CT (7.5mm)</button>
+            <button type="button" class="carat-pill-btn" data-id="6" data-label="2.00 CT (8.0mm)" onclick="toggleCaratPill(this)">2.00 CT (8.0mm)</button>
+            <button type="button" class="carat-pill-btn" data-id="7" data-label="3.00 CT (9.0mm)" onclick="toggleCaratPill(this)">3.00 CT (9.0mm)</button>
+            <button type="button" class="carat-pill-btn" data-id="8" data-label="4.00 CT (10.0mm)" onclick="toggleCaratPill(this)">4.00 CT (10.0mm)</button>
+            <button type="button" class="carat-pill-btn" data-id="9" data-label="5.00 CT (11.0mm)" onclick="toggleCaratPill(this)">5.00 CT (11.0mm)</button>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:24px;">
+          <button type="button" onclick="switchWizardStep(2)" style="background:#ffffff; border:1px solid #cbd5e1; color:#0f172a; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;">&lt; Back</button>
+          <button type="button" class="btn-submit-item" onclick="buildMatrixGrid(); switchWizardStep(4);" style="padding:10px 24px; font-size:13.5px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Generate Matrix &gt;</button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Availability Matrix -->
+      <div id="wStep4" class="wizard-content-step" style="display:none;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+          <div>
+            <h3 style="font-size:16px; font-weight:700; color:#0f172a; margin:0 0 4px;">Metal × Diamond Size Availability Matrix</h3>
+            <p style="font-size:12px; color:#64748b; margin:0;">Toggle ON/OFF to specify exact diamond size availability per metal type.</p>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button type="button" onclick="toggleAllMatrix(true)" style="background:rgba(34,197,94,0.1); border:1px solid #22c55e; color:#16a34a; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">⚡ Enable All</button>
+            <button type="button" onclick="toggleAllMatrix(false)" style="background:rgba(239,68,68,0.1); border:1px solid #ef4444; color:#ef4444; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Clear All</button>
+          </div>
+        </div>
+
+        <!-- Dynamic Matrix Table Container -->
+        <div class="matrix-table-wrap" id="matrixContainer">
+          <!-- Rendered dynamically by JavaScript -->
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:28px;">
+          <button type="button" onclick="switchWizardStep(3)" style="background:#ffffff; border:1px solid #cbd5e1; color:#0f172a; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;">&lt; Back</button>
+          <button type="submit" class="btn-submit-item" id="btnPublishItem" style="padding:12px 28px; font-size:14px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#fff; border:none; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 16px rgba(180,83,9,0.25);">
+            <i class="fa-solid fa-paper-plane"></i> Save &amp; Publish to Neon DB
+          </button>
+        </div>
+      </div>
+
+    </form>
   </div>
 
-  <form id="adminAddProductForm" onsubmit="handleAddNewProduct(event)">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-      <div class="form-group">
-        <label class="form-label">Target Main Collection Category *</label>
-        <select id="adminProdCat" class="form-select" required onchange="updateSubCatDropdown(this.value)">
-          <option value="rings" selected>Rings Collection</option>
-          <option value="necklaces">Necklaces Section</option>
-          <option value="earrings">Earrings Section</option>
-          <option value="bracelets">Bracelets Section</option>
-          <option value="fine-jewelry">Fine Jewelry</option>
-          <option value="hiphop">Hip Hop Jewelry</option>
-        </select>
+  <!-- Right Column: Live Storefront Preview Sidebar -->
+  <div>
+    <div class="live-preview-card">
+      <div style="font-size:11px; font-weight:800; color:#b45309; text-transform:uppercase; letter-spacing:1px; margin-bottom:12px; text-align:center;">
+        <i class="fa-solid fa-eye"></i> Real-Time Storefront Preview
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Item Title / Name *</label>
-        <input type="text" id="adminProdName" class="form-input" placeholder="e.g. Royal Solitaire Emerald Cut Ring" required />
-      </div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-      <div class="form-group">
-        <label class="form-label">Diamond / Stone Type Filter</label>
-        <select id="adminProdDiamondType" class="form-select">
-          <option value="Lab Grown Diamond" selected>Lab Grown Diamond</option>
-          <option value="Moissanite">Moissanite Diamond</option>
-          <option value="Natural GIA Diamond">Natural GIA Diamond</option>
-        </select>
+      <div class="preview-stage">
+        <span style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.8); color:#fff; font-size:9.5px; font-weight:700; padding:3px 6px; border-radius:4px; z-index:2;">Lab Grown</span>
+        <img id="prevImg" src="/assets/ring_1.jpg" alt="Preview" />
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Diamond Cut Shape</label>
-        <select id="adminProdCutShape" class="form-select">
-          <option value="Rose Cut">Rose Cut</option>
-          <option value="Radiant Cut">Radiant Cut</option>
-          <option value="Asscher Cut">Asscher Cut</option>
-          <option value="Oval Cut">Oval Cut</option>
-          <option value="Emerald Cut">Emerald Cut</option>
-          <option value="Round Cut" selected>Round Cut</option>
-          <option value="Marquise Cut">Marquise Cut</option>
-          <option value="Princess Cut">Princess Cut</option>
-          <option value="Cushion Cut">Cushion Cut</option>
-          <option value="Pear Cut">Pear Cut</option>
-          <option value="Kite Cut">Kite Cut</option>
-          <option value="Triangle Cut">Triangle Cut</option>
-        </select>
-      </div>
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Metal & Diamond Specifications *</label>
-      <input type="text" id="adminProdSpec" class="form-input" placeholder="e.g. 18K Yellow Gold | 2.0ct GIA VVS1 | Brilliant Cut" required />
-    </div>
-
-    <div class="form-group">
-      <label class="form-label">Price in USD ($) *</label>
-      <input type="number" id="adminProdPriceUSD" class="form-input" placeholder="e.g. 2200" min="1" required />
-    </div>
-
-    <!-- MULTI-IMAGE UPLOAD ZONE (Cloudinary CDN Powered) -->
-    <div class="form-group">
-      <label class="form-label">Upload High-Res Product Photos (Cloudinary CDN Enabled) *</label>
-      
-      <div class="upload-dropzone" onclick="document.getElementById('adminUploadFiles').click()">
-        <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
-        <div style="font-weight:700;color:#ffffff;font-size:15px;margin-bottom:4px;">Click or Drag & Drop Product Images</div>
-        <div style="font-size:12px;color:var(--taupe-beige);">Uploaded images will automatically store in Cloudinary (ktznlodb) and save secure URLs to your PostgreSQL DB.</div>
-        <input type="file" id="adminUploadFiles" multiple accept="image/*" style="display:none;" onchange="previewUploadFiles(this)" />
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+        <span id="prevCategory" style="font-size:11px; font-weight:700; color:#b45309;">1. Engagement Rings</span>
+        <span style="font-size:11px; color:#d97706;">★ 5.0</span>
       </div>
 
-      <div id="uploadStatusText" style="font-size:12px;font-weight:600;color:var(--champagne-gold);margin-top:8px;"></div>
-      <div class="upload-preview-grid" id="uploadPreviewGrid"></div>
-    </div>
+      <div id="prevTitle" style="font-family:var(--font-serif); font-size:16px; font-weight:700; color:#0f172a; line-height:1.3; margin-bottom:8px;">
+        Royal Solitaire Oval Cut Ring
+      </div>
 
-    <!-- PRESET ASSETS FALLBACK -->
-    <div class="form-group">
-      <label class="form-label">Or Choose Preset AI Studio Image Asset (Optional Fallback)</label>
-      <select id="adminProdImgSelect" class="form-select">
-        <option value="">-- None (Use Uploaded Images Above) --</option>
-        <option value="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg">Exclusive Regal Star Ring (/assets/ivevar/exclusive_regal_star_diamond_ring.jpg)</option>
-        <option value="assets/ring_main.png">Royal Solitaire Ring (assets/ring_main.png)</option>
-        <option value="assets/ring_angle.png">Halo Cushion Ring (assets/ring_angle.png)</option>
-        <option value="assets/necklace_main.png">Imperial Diamond Necklace (assets/necklace_main.png)</option>
-        <option value="assets/necklace_detail.png">Floral Diamond Detail (assets/necklace_detail.png)</option>
-        <option value="assets/earring_main.png">Chandelier Earrings (assets/earring_main.png)</option>
-        <option value="assets/bracelet_main.png">Tennis Bracelet (assets/bracelet_main.png)</option>
-        <option value="assets/ring_whitegold.png">Platinum White Gold (assets/ring_whitegold.png)</option>
-        <option value="assets/ring_rosegold.png">Rose Gold Solitaire (assets/ring_rosegold.png)</option>
-      </select>
-    </div>
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+        <span id="prevPrice" style="font-size:18px; font-weight:800; color:#b45309;">$2,713 USD</span>
+        <span style="font-size:11px; background:#16a34a; color:#fff; padding:2px 6px; border-radius:4px; font-weight:700;">Save 15%</span>
+      </div>
 
-    <div style="margin-top:32px;text-align:right;">
-      <button type="submit" class="btn-submit-item" id="btnSubmitItem">
-        <i class="fa-solid fa-paper-plane"></i> Save to AWS RDS DB & Publish Live
+      <div style="font-size:11px; color:#64748b; margin-bottom:6px;">Selected Metals:</div>
+      <div id="prevMetalList" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:12px;">
+        <span style="font-size:9.5px; background:#f1f5f9; color:#0f172a; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">14K W</span>
+        <span style="font-size:9.5px; background:#f1f5f9; color:#0f172a; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">18K Y</span>
+      </div>
+
+      <div style="font-size:11px; color:#64748b; margin-bottom:6px;">Selected Carats:</div>
+      <div id="prevCaratList" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:16px;">
+        <span style="font-size:9.5px; background:rgba(180,83,9,0.1); color:#b45309; padding:2px 6px; border-radius:4px; font-weight:700;">1.00 CT</span>
+        <span style="font-size:9.5px; background:rgba(180,83,9,0.1); color:#b45309; padding:2px 6px; border-radius:4px; font-weight:700;">2.00 CT</span>
+      </div>
+
+      <button type="button" style="width:100%; padding:10px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); border:none; border-radius:8px; color:#fff; font-weight:700; font-size:12.5px; cursor:default;">
+        <i class="fa-solid fa-bag-shopping"></i> Add to Cart (Mockup)
       </button>
     </div>
-  </form>
+  </div>
 </div>
 
 <script>
-  let selectedFiles = [];
+  let currentUploadedUrls = [];
+  const metalNameMap = {
+    1: '10K Yellow Gold', 2: '10K White Gold', 3: '10K Rose Gold',
+    4: '14K Yellow Gold', 5: '14K White Gold', 6: '14K Rose Gold',
+    7: '18K Yellow Gold', 8: '18K White Gold', 9: '18K Rose Gold',
+    10: '950 Platinum'
+  };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const catParam = urlParams.get('categoryId');
-    if (catParam) {
-      const catSelect = document.getElementById('adminProdCat');
-      if (catSelect) catSelect.value = catParam.toLowerCase();
+  function switchWizardStep(step) {
+    if (step > 1) {
+      const title = document.getElementById('adminTitle').value.trim();
+      const price = parseFloat(document.getElementById('adminPrice').value);
+      if (!title) {
+        showToast('Item Title / Name is required before proceeding to Photo Studio.', 'warning');
+        document.getElementById('adminTitle').focus();
+        return;
+      }
+      if (isNaN(price) || price <= 0) {
+        showToast('Please enter a valid Base Price ($ USD) greater than 0.', 'warning');
+        document.getElementById('adminPrice').focus();
+        return;
+      }
     }
-  });
 
-  function previewUploadFiles(input) {
+    if (step > 2) {
+      const presetSelect = document.getElementById('presetImageSelect');
+      const presetVal = presetSelect ? presetSelect.value : '';
+      if ((!currentUploadedUrls || currentUploadedUrls.length === 0) && presetVal) {
+        currentUploadedUrls = [presetVal];
+      }
+      if (!currentUploadedUrls || currentUploadedUrls.length === 0) {
+        showToast('Product Image is required! Please upload a photo or select a preset studio photo.', 'warning');
+        return;
+      }
+    }
+
+    if (step > 3) {
+      const activeMetals = document.querySelectorAll('.metal-pill-btn.active');
+      const activeCarats = document.querySelectorAll('.carat-pill-btn.active');
+      if (activeMetals.length === 0) {
+        showToast('Please select at least one Metal Type before generating the matrix.', 'warning');
+        return;
+      }
+      if (activeCarats.length === 0) {
+        showToast('Please select at least one Diamond Carat size before generating the matrix.', 'warning');
+        return;
+      }
+    }
+
+    document.querySelectorAll('.wizard-content-step').forEach(el => el.style.display = 'none');
+    document.getElementById(`wStep${step}`).style.display = 'block';
+
+    const items = document.querySelectorAll('.wizard-step-item');
+    items.forEach((item, idx) => {
+      if (idx + 1 === step) item.classList.add('active');
+      else item.classList.remove('active');
+    });
+  }
+
+  function setCategory(id, name, element) {
+    document.getElementById('adminCategoryId').value = id;
+    document.querySelectorAll('.cat-select-card').forEach(c => c.classList.remove('active'));
+    element.classList.add('active');
+    document.getElementById('prevCategory').textContent = `${id}. ${name}`;
+  }
+
+  function setShape(id, name, element) {
+    document.getElementById('adminShapeId').value = id;
+    document.querySelectorAll('.shape-chip-btn').forEach(c => c.classList.remove('active'));
+    element.classList.add('active');
+  }
+
+  function toggleMetalPill(btn) {
+    btn.classList.toggle('active');
+    updateLivePreview();
+  }
+
+  function toggleCaratPill(btn) {
+    btn.classList.toggle('active');
+    updateLivePreview();
+  }
+
+  function toggleAllMetals(select) {
+    document.querySelectorAll('.metal-pill-btn').forEach(btn => {
+      if (select) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+    updateLivePreview();
+  }
+
+  function toggleAllCarats(select) {
+    document.querySelectorAll('.carat-pill-btn').forEach(btn => {
+      if (select) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+    updateLivePreview();
+  }
+
+  function updateLivePreview() {
+    const titleVal = document.getElementById('adminTitle').value.trim() || 'Royal Solitaire Ring';
+    const priceVal = parseFloat(document.getElementById('adminPrice').value) || 2713;
+
+    document.getElementById('prevTitle').textContent = titleVal;
+    document.getElementById('prevPrice').textContent = `$${priceVal.toLocaleString('en-US')} USD`;
+
+    const activeMetals = Array.from(document.querySelectorAll('.metal-pill-btn.active')).map(b => b.textContent);
+    const activeCarats = Array.from(document.querySelectorAll('.carat-pill-btn.active')).map(b => b.dataset.label.split(' ')[0] + ' ' + b.dataset.label.split(' ')[1]);
+
+    document.getElementById('prevMetalList').innerHTML = activeMetals.map(m => `<span style="font-size:9.5px; background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">${m}</span>`).join('');
+    document.getElementById('prevCaratList').innerHTML = activeCarats.map(c => `<span style="font-size:9.5px; background:rgba(212,178,112,0.2); color:var(--champagne-gold); padding:2px 6px; border-radius:4px;">${c}</span>`).join('');
+  }
+
+  function usePresetImage(url) {
+    if (url) {
+      currentUploadedUrls = [url];
+      document.getElementById('prevImg').src = url;
+    }
+  }
+
+  async function handleFileSelect(input) {
     const files = Array.from(input.files);
+    if (files.length === 0) return;
+
     const statusText = document.getElementById('uploadStatusText');
     const previewGrid = document.getElementById('uploadPreviewGrid');
 
-    if (files.length > 10) {
-      alert('Maximum 10 images allowed per item.');
-      input.value = '';
+    statusText.textContent = `Uploading ${files.length} file(s) to Cloudinary...`;
+
+    const formData = new FormData();
+    files.forEach(f => formData.append('files', f));
+
+    try {
+      const res = await fetch('/api/catalogapi/upload-images', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && data.urls) {
+        currentUploadedUrls = data.urls;
+        statusText.textContent = `Successfully uploaded ${data.urls.length} photo(s)!`;
+        document.getElementById('prevImg').src = data.urls[0];
+
+        previewGrid.innerHTML = data.urls.map((u, i) => `
+          <div style="height:70px; border-radius:8px; overflow:hidden; border:1px solid var(--champagne-gold);">
+            <img src="${u}" style="width:100%; height:100%; object-fit:cover;" alt="Uploaded ${i+1}" />
+          </div>
+        `).join('');
+      } else {
+        alert(data.message || 'Upload failed');
+      }
+    } catch (err) {
+      statusText.textContent = 'Upload error: ' + err.message;
+    }
+  }
+
+  function buildMatrixGrid() {
+    const activeMetals = Array.from(document.querySelectorAll('.metal-pill-btn.active')).map(b => ({
+      id: parseInt(b.dataset.id),
+      name: metalNameMap[b.dataset.id] || b.textContent
+    }));
+
+    const activeCarats = Array.from(document.querySelectorAll('.carat-pill-btn.active')).map(b => ({
+      id: parseInt(b.dataset.id),
+      label: b.dataset.label
+    }));
+
+    const container = document.getElementById('matrixContainer');
+    if (activeMetals.length === 0 || activeCarats.length === 0) {
+      container.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Please select at least 1 Metal and 1 Carat size in Step 3!</div>';
       return;
     }
 
-    const maxFileSize = 10 * 1024 * 1024; // 10MB
-    for (let f of files) {
-      if (f.size > maxFileSize) {
-        alert(`File "${f.name}" exceeds the 10 MB limit. Please select smaller files.`);
-        input.value = '';
-        return;
-      }
-    }
+    let html = `
+      <table class="matrix-table">
+        <thead>
+          <tr>
+            <th style="text-align:left;">Selected Metal Type</th>
+            ${activeCarats.map(c => {
+              const parts = c.label.split(' ');
+              const shortLabel = parts.length >= 2 ? `${parts[0]} ${parts[1]}` : c.label;
+              return `<th title="${c.label}">${shortLabel}</th>`;
+            }).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${activeMetals.map(m => `
+            <tr>
+              <td class="metal-name-td">${m.name}</td>
+              ${activeCarats.map(c => `
+                <td>
+                  <label class="switch-toggle">
+                    <input type="checkbox" class="matrix-chk" data-metal-id="${m.id}" data-carat-id="${c.id}" checked />
+                    <span class="slider-round"></span>
+                  </label>
+                </td>
+              `).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
 
-    selectedFiles = files;
-    const totalMB = (files.reduce((sum, f) => sum + f.size, 0) / (1024 * 1024)).toFixed(1);
-    statusText.textContent = `Selected ${files.length} image(s) — Total Payload Size: ${totalMB} MB`;
-
-    previewGrid.innerHTML = files.map((file, i) => {
-      const src = URL.createObjectURL(file);
-      return `
-        <div class="upload-preview-card" title="${file.name}">
-          <img src="${src}" alt="Preview ${i + 1}" />
-        </div>
-      `;
-    }).join('');
+    container.innerHTML = html;
   }
 
-  async function handleAddNewProduct(e) {
+  function toggleAllMatrix(checked) {
+    document.querySelectorAll('.matrix-chk').forEach(chk => chk.checked = checked);
+  }
+
+  let editingProductId = null;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const editId = urlParams.get('editId') || urlParams.get('productId');
+    if (editId) {
+      editingProductId = editId;
+      loadProductForEditing(editId);
+    }
+  });
+
+  async function loadProductForEditing(id) {
+    try {
+      const res = await fetch(`/api/catalogapi/items/${encodeURIComponent(id)}`);
+      if (!res.ok) throw new Error('Product not found');
+      const item = await res.json();
+
+      // Step 1: Basic Info
+      document.getElementById('adminTitle').value = item.name || item.title || '';
+      document.getElementById('adminPrice').value = item.priceUSD || item.price || 0;
+      
+      if (item.categoryId) {
+        const catCard = document.querySelector(`.cat-select-card[onclick*="'${item.categoryId}'"]`);
+        if (catCard) setCategory(item.categoryId, item.categoryId, catCard);
+      }
+
+      // Step 2: Photo Studio
+      if (item.imageUrl) {
+        currentUploadedUrls = [item.imageUrl];
+        if (item.galleryImages) {
+          currentUploadedUrls = item.galleryImages.split(',').map(s => s.trim()).filter(Boolean);
+        }
+        document.getElementById('prevImg').src = item.imageUrl;
+      }
+
+      // Step 3: Metals & Carats
+      if (item.metalOptions) {
+        const metalArr = item.metalOptions.split('|').map(m => m.toLowerCase());
+        document.querySelectorAll('.metal-pill-btn').forEach(btn => {
+          const btnTxt = btn.textContent.toLowerCase();
+          if (metalArr.some(m => m.includes(btnTxt) || btnTxt.includes(m))) {
+            btn.classList.add('active');
+          }
+        });
+      }
+
+      if (item.caratOptions) {
+        const caratArr = item.caratOptions.split('|').map(c => c.toLowerCase());
+        document.querySelectorAll('.carat-pill-btn').forEach(btn => {
+          const btnTxt = (btn.dataset.label || btn.textContent).toLowerCase();
+          if (caratArr.some(c => c.includes(btnTxt) || btnTxt.includes(c))) {
+            btn.classList.add('active');
+          }
+        });
+      }
+
+      updateLivePreview();
+      if (typeof showToast === 'function') {
+        showToast(`Loaded product "${item.name || 'item'}" for editing`, 'info', 'Edit Mode Active');
+      }
+    } catch (err) {
+      console.error('Error loading item for edit:', err);
+    }
+  }
+
+  async function handlePublishProduct(e) {
     e.preventDefault();
 
-    const categoryId = document.getElementById('adminProdCat').value;
-    const name = document.getElementById('adminProdName').value.trim();
-    const spec = document.getElementById('adminProdSpec').value.trim();
-    const priceUSD = parseFloat(document.getElementById('adminProdPriceUSD').value) || 0;
-    const selectedPreset = document.getElementById('adminProdImgSelect').value;
-    const submitBtn = document.getElementById('btnSubmitItem');
+    const title = document.getElementById('adminTitle').value.trim();
+    const priceUSD = parseFloat(document.getElementById('adminPrice').value) || 0;
+    const categoryId = parseInt(document.getElementById('adminCategoryId').value) || 1;
+    const shapeId = parseInt(document.getElementById('adminShapeId').value) || 1;
 
-    let uploadedUrls = [];
+    if (!title || priceUSD <= 0) {
+      showToast('Please fill out Title and Base Price.', 'warning');
+      return;
+    }
 
-    if (selectedFiles && selectedFiles.length > 0) {
-      submitBtn.disabled = true;
-      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading Product Images...';
-
-      const formData = new FormData();
-      selectedFiles.forEach(f => formData.append('files', f));
-
-      try {
-        const uploadRes = await fetch('/api/catalogapi/upload-images', {
-          method: 'POST',
-          body: formData
+    const enabledVariants = [];
+    document.querySelectorAll('.matrix-chk').forEach(chk => {
+      if (chk.checked) {
+        enabledVariants.push({
+          metalId: parseInt(chk.dataset.metalId),
+          caratId: parseInt(chk.dataset.caratId),
+          priceOverrideUSD: priceUSD,
+          isEnabled: true
         });
-
-        const uploadData = await uploadRes.json();
-        if (uploadData.success && uploadData.urls) {
-          uploadedUrls = uploadData.urls;
-        } else {
-          alert(`Image Upload Error: ${uploadData.message || 'Failed to upload images'}`);
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to AWS RDS DB & Publish Live';
-          return;
-        }
-      } catch (err) {
-        console.error('Error uploading images:', err);
-        alert('Network error uploading images.');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to AWS RDS DB & Publish Live';
-        return;
       }
+    });
+
+    if (enabledVariants.length === 0) {
+      showToast('Please enable at least 1 Metal x Carat variant in the matrix!', 'warning');
+      return;
     }
 
-    let mainImageUrl = '';
-    let galleryImages = '';
-
-    if (uploadedUrls.length > 0) {
-      mainImageUrl = uploadedUrls[0];
-      galleryImages = uploadedUrls.join(',');
-    } else if (selectedPreset) {
-      mainImageUrl = selectedPreset;
-      galleryImages = `${selectedPreset},/assets/ivevar/exclusive_regal_star_diamond_ring.jpg`;
-    } else {
-      mainImageUrl = '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';
-      galleryImages = '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg,assets/ring_angle.png,assets/ring_clarity.png,assets/ring_model.png';
-    }
+    const imageUrls = currentUploadedUrls.length > 0 ? currentUploadedUrls : ['/assets/ring_1.jpg'];
 
     const payload = {
-      categoryId,
-      name,
-      spec,
+      editId: editingProductId || '',
+      title,
       priceUSD,
-      imageUrl: mainImageUrl,
-      galleryImages: galleryImages,
-      isActive: true
+      categoryId,
+      diamondShapeId: shapeId,
+      diamondType: 'Lab Grown Diamond',
+      imageUrls,
+      enabledVariants
     };
 
-    try {
-      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to AWS RDS DB...';
+    const submitBtn = document.getElementById('btnPublishItem');
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Neon DB...';
 
-      const res = await fetch('/api/catalogapi/items', {
+    try {
+      const res = await fetch('/api/catalogapi/create-full-product', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
 
       const data = await res.json();
-      if (data.success || res.ok) {
-        alert(`✨ Success! Product "${name}" published with ${uploadedUrls.length || 1} image(s).`);
-        window.location.href = '/Admin/Catalog';
+      if (data.success) {
+        if (typeof showToast === 'function') {
+          showToast(editingProductId ? `Updated product "${title}" successfully!` : `Published product "${title}" to Neon DB!`, 'success', 'Saved Successfully');
+        } else {
+          alert(`Success! Product "${title}" saved to Neon DB!`);
+        }
+        setTimeout(() => {
+          window.location.href = '/Admin/Catalog';
+        }, 1200);
       } else {
-        alert('Failed to publish product item.');
+        showToast(data.message || data.error || 'Saving failed', 'error');
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to AWS RDS DB & Publish Live';
+        submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save &amp; Publish to Neon DB';
       }
     } catch (err) {
-      console.error('Error publishing product:', err);
-      alert('Network error publishing item.');
+      showToast('Error saving item: ' + err.message, 'error');
       submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save to AWS RDS DB & Publish Live';
+      submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Save &amp; Publish to Neon DB';
     }
   }
 </script>

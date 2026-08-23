@@ -3,37 +3,75 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SAT1.Models
 {
-    [Table("ProductVariants")]
+    [Table("product_variants")]
     public class ProductVariant
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column("id")]
         public long VariantId { get; set; }
 
+        [NotMapped]
+        public long Id => VariantId;
+
         [Required(ErrorMessage = "Product ID reference is required.")]
+        [Column("product_id")]
         public long ProductId { get; set; }
 
-        [Required(ErrorMessage = "Ring Size is required.")]
-        [MaxLength(20, ErrorMessage = "Ring Size cannot exceed 20 characters.")]
-        public string RingSize { get; set; } = "7.0";
+        [Required(ErrorMessage = "Metal ID reference is required.")]
+        [Column("metal_id")]
+        public long MetalId { get; set; }
 
-        [Required(ErrorMessage = "Metal Type is required.")]
-        [MaxLength(50, ErrorMessage = "Metal Type cannot exceed 50 characters.")]
-        public string MetalType { get; set; } = "18K Yellow Gold";
+        [Column("carat_id")]
+        public long? CaratId { get; set; }
 
-        [Required(ErrorMessage = "Carat Weight is required.")]
-        [Column(TypeName = "numeric(6,2)")]
-        public decimal CaratWeight { get; set; } = 1.50m;
+        [Required(ErrorMessage = "SKU is required.")]
+        [MaxLength(100)]
+        [Column("sku")]
+        public string SKU { get; set; } = string.Empty;
 
-        [Column(TypeName = "numeric(18,2)")]
-        public decimal PriceAdjustmentUSD { get; set; } = 0.00m;
+        [Required(ErrorMessage = "Price is required.")]
+        [Column("price", TypeName = "numeric(18,2)")]
+        public decimal Price { get; set; }
 
-        [Range(0, 10000, ErrorMessage = "Stock Quantity cannot be negative.")]
+        [Column("stock_quantity")]
         public int StockQuantity { get; set; } = 10;
 
+        [MaxLength(500)]
+        [Column("variant_image_path")]
+        public string VariantImagePath { get; set; } = string.Empty;
+
+        [Column("is_available")]
         public bool IsAvailable { get; set; } = true;
 
         [ForeignKey("ProductId")]
         public virtual Product? Product { get; set; }
+
+        [ForeignKey("MetalId")]
+        public virtual Metal? Metal { get; set; }
+
+        [ForeignKey("CaratId")]
+        public virtual CaratOption? Carat { get; set; }
+
+        // Legacy / Helper Properties
+        [NotMapped]
+        public string RingSize { get; set; } = "7.0";
+
+        [NotMapped]
+        public string MetalType => Metal != null ? Metal.Name : "14K Yellow Gold";
+
+        [NotMapped]
+        public decimal CaratWeight
+        {
+            get => Carat != null ? Carat.CaratWeight : 1.50m;
+            set { }
+        }
+
+        [NotMapped]
+        public decimal PriceAdjustmentUSD
+        {
+            get => Price - (Product != null ? Product.Price : 0m);
+            set { }
+        }
     }
 }
