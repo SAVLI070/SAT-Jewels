@@ -242,9 +242,9 @@ namespace SAT1.Controllers
             });
         }
 
-        // OWASP A08: SECURE MULTI-IMAGE FILE UPLOAD (WITH CLOUDINARY SUPPORT)
+        // OWASP A08: DIRECT-TO-CLOUDINARY IMAGE FILE UPLOAD
         [HttpPost("upload-images")]
-        public async Task<IActionResult> UploadImages([FromForm] List<IFormFile> files)
+        public async Task<IActionResult> UploadImages([FromForm] List<IFormFile> files, [FromQuery] long? productId)
         {
             if (!IsAdminUser())
             {
@@ -258,10 +258,10 @@ namespace SAT1.Controllers
 
             if (files.Count > 10)
             {
-                return BadRequest(new { success = false, message = "Maximum 10 images allowed per item." });
+                return BadRequest(new { success = false, message = "Maximum 10 images allowed per upload batch." });
             }
 
-            const long maxFileSizeBytes = 10 * 1024 * 1024;
+            const long maxFileSizeBytes = 10 * 1024 * 1024; // 10 MB limit
             var allowedExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" };
             var allowedMimeTypes = new HashSet<string> { "image/jpeg", "image/png", "image/webp" };
 
@@ -269,20 +269,16 @@ namespace SAT1.Controllers
             var apiKey = _configuration["Cloudinary:ApiKey"];
             var apiSecret = _configuration["Cloudinary:ApiSecret"];
 
-            CloudinaryDotNet.Cloudinary? cloudinary = null;
-            if (!string.IsNullOrWhiteSpace(cloudName) && !string.IsNullOrWhiteSpace(apiKey) && !string.IsNullOrWhiteSpace(apiSecret))
+            if (string.IsNullOrWhiteSpace(cloudName) || string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(apiSecret))
             {
-                var account = new CloudinaryDotNet.Account(cloudName, apiKey, apiSecret);
-                cloudinary = new CloudinaryDotNet.Cloudinary(account);
+                return StatusCode(500, new { success = false, message = "Cloudinary service configuration is missing. Please check API credentials." });
             }
 
-            var uploadFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-            if (!Directory.Exists(uploadFolder))
-            {
-                Directory.CreateDirectory(uploadFolder);
-            }
+            var account = new CloudinaryDotNet.Account(cloudName, apiKey, apiSecret);
+            var cloudinary = new CloudinaryDotNet.Cloudinary(account);
 
             var savedUrls = new List<string>();
+            var folderName = productId.HasValue && productId.Value > 0 ? $"sat_jewels/{productId.Value}" : "sat_jewels/catalog_uploads";
 
             foreach (var file in files)
             {
@@ -319,41 +315,30 @@ namespace SAT1.Controllers
                     }
                 }
 
-                if (cloudinary != null)
+                try
                 {
-                    try
+                    using var fileStream = file.OpenReadStream();
+                    var uploadParams = new ImageUploadParams()
                     {
-                        using var fileStream = file.OpenReadStream();
-                        var uploadParams = new ImageUploadParams()
-                        {
-                            File = new FileDescription(file.FileName, fileStream),
-                            Folder = "sat_jewels_catalog",
-                            PublicId = $"item_{Guid.NewGuid():N}"
-                        };
+                        File = new FileDescription(file.FileName, fileStream),
+                        Folder = folderName,
+                        Overwrite = true
+                    };
 
-                        var uploadResult = await cloudinary.UploadAsync(uploadParams);
-                        if (uploadResult != null && uploadResult.SecureUrl != null)
-                        {
-                            savedUrls.Add(uploadResult.SecureUrl.ToString());
-                            continue;
-                        }
-                    }
-                    catch (Exception ex)
+                    var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                    if (uploadResult != null && uploadResult.SecureUrl != null)
                     {
-                        Console.WriteLine($"Cloudinary upload warning: {ex.Message}");
+                        savedUrls.Add(uploadResult.SecureUrl.ToString());
+                    }
+                    else
+                    {
+                        return StatusCode(500, new { success = false, message = $"Cloudinary upload failed for '{file.FileName}': {uploadResult?.Error?.Message ?? "Unknown error"}" });
                     }
                 }
-
-                // Fallback to local uploads directory if Cloudinary API key is not configured
-                var uniqueFileName = $"item_{Guid.NewGuid():N}{ext}";
-                var filePath = Path.Combine(uploadFolder, uniqueFileName);
-
-                using (var destStream = new FileStream(filePath, FileMode.Create))
+                catch (Exception ex)
                 {
-                    await file.CopyToAsync(destStream);
+                    return StatusCode(500, new { success = false, message = $"Cloudinary upload exception for '{file.FileName}': {ex.Message}" });
                 }
-
-                savedUrls.Add($"/uploads/{uniqueFileName}");
             }
 
             return Ok(new { success = true, count = savedUrls.Count, urls = savedUrls });
