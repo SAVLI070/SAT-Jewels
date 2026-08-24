@@ -43,6 +43,13 @@ namespace SAT1.Controllers
         }
 
         [HttpGet]
+        public IActionResult Experience()
+        {
+            ViewData["Title"] = "Interactive 3D Scrollable World — SAT Jewels";
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult Faq()
         {
             ViewData["Title"] = "Frequently Asked Questions — SAT Jewel";
