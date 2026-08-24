@@ -3,3 +3,8 @@ obj/
 *.db
 .DS_Store
 wwwroot/assets/ivevar/*
+wwwroot/assets/products/
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json.template
+
