@@ -264,23 +264,63 @@
 
     /* MOBILE & TABLET SLIDE-OVER SIDEBAR RULES (width <= 900px) */
     @@media (max-width: 900px) {
+      body.admin-mobile-active {
+        overflow: hidden !important;
+      }
+
       .adm-sidebar {
         position: fixed !important;
         top: 0 !important;
         left: 0 !important;
         bottom: 0 !important;
-        z-index: 9999 !important;
-        width: 280px !important;
-        min-width: 280px !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        z-index: 10000 !important;
+        width: 285px !important;
+        min-width: 285px !important;
+        max-width: 85vw !important;
+        background: #ffffff !important;
+        border-right: 1px solid #e2e8f0 !important;
         transform: translateX(-100%) !important;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
         box-shadow: 15px 0 40px rgba(0, 0, 0, 0.15) !important;
         display: flex !important;
         flex-direction: column !important;
+        padding: 20px 16px !important;
       }
 
-      .adm-sidebar.mobile-open {
+      .adm-sidebar.mobile-open,
+      .adm-sidebar.open {
         transform: translateX(0) !important;
+      }
+
+      .adm-sidebar-head {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        margin-bottom: 20px !important;
+        padding-bottom: 16px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+      }
+
+      .adm-sidebar-close-btn {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 34px !important;
+        height: 34px !important;
+        border-radius: 8px !important;
+        background: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #475569 !important;
+        cursor: pointer !important;
+        font-size: 16px !important;
+        transition: all 0.2s ease !important;
+      }
+
+      .adm-sidebar-close-btn:hover {
+        background: #e2e8f0 !important;
+        color: #0f172a !important;
       }
 
       .adm-mobile-backdrop {
@@ -289,7 +329,7 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(15, 23, 42, 0.4);
+        background: rgba(15, 23, 42, 0.5);
         backdrop-filter: blur(4px);
         z-index: 9998;
         opacity: 0;
@@ -325,6 +365,9 @@
             <div class="adm-role-badge">VIP ADMIN</div>
           </div>
         </a>
+        <button type="button" class="adm-sidebar-close-btn" onclick="closeAdminMobileSidebar()" title="Close Sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
       </div>
 
       <nav class="adm-nav">
@@ -400,7 +443,13 @@
 
       if (window.innerWidth <= 900) {
         sidebar.classList.toggle('mobile-open');
+        sidebar.classList.toggle('open');
         backdrop.classList.toggle('active');
+        if (sidebar.classList.contains('open') || sidebar.classList.contains('mobile-open')) {
+          document.body.classList.add('admin-mobile-active');
+        } else {
+          document.body.classList.remove('admin-mobile-active');
+        }
       } else {
         sidebar.classList.toggle('collapsed');
         const isCollapsed = sidebar.classList.contains('collapsed');
@@ -415,8 +464,11 @@
     }
 
     function closeAdminMobileSidebar() {
-      document.getElementById('admSidebar')?.classList.remove('mobile-open');
-      document.getElementById('admMobileBackdrop')?.classList.remove('active');
+      const sidebar = document.getElementById('admSidebar');
+      const backdrop = document.getElementById('admMobileBackdrop');
+      sidebar?.classList.remove('mobile-open', 'open');
+      backdrop?.classList.remove('active');
+      document.body.classList.remove('admin-mobile-active');
     }
 
     // Task 1: Global Bottom-Right SweetAlert2 Toast Helper
