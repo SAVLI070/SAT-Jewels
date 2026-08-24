@@ -44,6 +44,7 @@ builder.Services.AddDbContext<SatJewelDbContext>(options =>
             maxRetryCount: 5,
             maxRetryDelay: TimeSpan.FromSeconds(10),
             errorCodesToAdd: null);
+        npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     }));
 
 // Add Controllers and Views
