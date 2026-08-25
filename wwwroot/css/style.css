@@ -2782,7 +2782,7 @@ a {
     max-width: 85vw !important;
     height: 100vh !important;
     height: 100dvh !important;
-    z-index: 10000 !important;
+    z-index: 999999 !important;
     transform: translateX(-100%) !important;
     transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
     box-shadow: 10px 0 40px rgba(0, 0, 0, 0.15) !important;
