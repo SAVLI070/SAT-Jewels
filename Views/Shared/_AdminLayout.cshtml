@@ -275,15 +275,16 @@
         bottom: 0 !important;
         height: 100vh !important;
         height: 100dvh !important;
-        z-index: 999999 !important;
+        z-index: 9999999 !important;
         width: 285px !important;
         min-width: 285px !important;
         max-width: 85vw !important;
         background: #ffffff !important;
+        background-color: #ffffff !important;
         border-right: 1px solid #e2e8f0 !important;
         transform: translateX(-100%) !important;
         transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        box-shadow: 15px 0 40px rgba(0, 0, 0, 0.15) !important;
+        box-shadow: 15px 0 40px rgba(0, 0, 0, 0.2) !important;
         display: flex !important;
         flex-direction: column !important;
         padding: 20px 16px !important;
@@ -340,7 +341,7 @@
         -webkit-backdrop-filter: none !important;
         filter: none !important;
         -webkit-filter: none !important;
-        z-index: 999990 !important;
+        z-index: 9999990 !important;
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s ease;
@@ -360,9 +361,7 @@
 
 <body>
 
-  <div class="adm-mobile-backdrop" id="admMobileBackdrop" onclick="closeAdminMobileSidebar()"></div>
-
-  <div id="farmbridgeAdminPortal" class="adm-layout show">
+  <div id="farmbridgeAdminPortal" class="adm-layout show" style="position: relative;">
     
     <!-- Sidebar Navigation -->
     <aside class="adm-sidebar" id="admSidebar">
@@ -413,6 +412,9 @@
         </a>
       </div>
     </aside>
+
+    <!-- Mobile Backdrop Overlay -->
+    <div id="admMobileBackdrop" class="adm-mobile-backdrop" onclick="closeAdminMobileSidebar()"></div>
 
     <!-- Main Content Area -->
     <div class="adm-main">
