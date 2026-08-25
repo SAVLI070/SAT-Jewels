@@ -7,4 +7,3 @@ wwwroot/assets/products/
 appsettings.*.json
 !appsettings.json
 !appsettings.Development.json.template
-
