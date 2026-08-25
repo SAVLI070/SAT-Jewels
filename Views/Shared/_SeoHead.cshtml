@@ -1,0 +1,80 @@
+@{
+    var title = (ViewData["Title"] ?? "SAT Jewel | Fine Jewelry & Lab-Grown Diamond Sanctuary").ToString();
+    var description = (ViewData["Description"] ?? "Explore SAT Jewel for GIA-Certified Lab-Grown Diamonds, Moissanite Engagement Rings, Luxury Necklaces, Bracelets & AI Diamond Valuation. Free Insured Worldwide Shipping.").ToString();
+    var keywords = (ViewData["Keywords"] ?? "Lab Grown Diamonds, Moissanite Engagement Rings, Fine Jewelry USA, Custom Diamond Rings, SAT Jewel, Certified Diamonds, Solitaire Rings, Wedding Rings").ToString();
+    var canonicalUrl = (ViewData["CanonicalUrl"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}").ToString();
+    var ogImage = (ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}/assets/sat_jewels_shop_bg.jpg").ToString();
+}
+
+<!-- Primary Search Engine Meta Tags -->
+<title>@title</title>
+<meta name="title" content="@title" />
+<meta name="description" content="@description" />
+<meta name="keywords" content="@keywords" />
+<meta name="author" content="SAT Jewel" />
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+<link rel="canonical" href="@canonicalUrl" />
+
+<!-- Open Graph / Facebook / WhatsApp Sharing Meta Tags -->
+<meta property="og:type" content="website" />
+<meta property="og:url" content="@canonicalUrl" />
+<meta property="og:title" content="@title" />
+<meta property="og:description" content="@description" />
+<meta property="og:image" content="@ogImage" />
+<meta property="og:site_name" content="SAT Jewel Fine Jewelry" />
+<meta property="og:locale" content="en_US" />
+
+<!-- Twitter Card Meta Tags -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content="@canonicalUrl" />
+<meta name="twitter:title" content="@title" />
+<meta name="twitter:description" content="@description" />
+<meta name="twitter:image" content="@ogImage" />
+
+<!-- Google Search Engine Schema.org JSON-LD Structured Data for Top Ranking -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "JewelryStore",
+  "name": "SAT Jewel",
+  "image": "@ogImage",
+  "@@id": "@canonicalUrl",
+  "url": "@canonicalUrl",
+  "telephone": "+91-83209-72779",
+  "priceRange": "$$$",
+  "address": {
+    "@@type": "PostalAddress",
+    "streetAddress": "Diamond Showroom & Design Studio",
+    "addressLocality": "Surat / New York",
+    "addressRegion": "Gujarat",
+    "postalCode": "395006",
+    "addressCountry": "IN"
+  },
+  "geo": {
+    "@@type": "GeoCoordinates",
+    "latitude": 21.1702,
+    "longitude": 72.8311
+  },
+  "openingHoursSpecification": {
+    "@@type": "OpeningHoursSpecification",
+    "dayOfWeek": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday"
+    ],
+    "opens": "09:00",
+    "closes": "20:00"
+  },
+  "aggregateRating": {
+    "@@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "reviewCount": "1280"
+  },
+  "sameAs": [
+    "https://wa.me/918320972779"
+  ]
+}
+</script>

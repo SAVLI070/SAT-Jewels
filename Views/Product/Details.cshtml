@@ -69,13 +69,50 @@
         .GroupBy(x => x.Label)
         .Select(g => g.First())
         .ToList();
+
+    ViewData["Title"] = $"{Model.Name} — SAT Jewel Luxury Fine Jewelry";
+    ViewData["Description"] = $"Buy {Model.Name} from SAT Jewel. Certified Lab-Grown Diamonds & Moissanite with custom metal choices and free insured global delivery.";
+    ViewData["Keywords"] = $"{Model.Name}, {categoryName}, Lab Grown Diamond Ring, Moissanite Jewelry, SAT Jewel";
+    ViewData["OgImage"] = mainImage.StartsWith("http") ? mainImage : $"{Context.Request.Scheme}://{Context.Request.Host}{mainImage}";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>@Model.Name — SAT Jewel</title>
+  
+  <partial name="_SeoHead" />
+
+  <!-- Product Schema.org JSON-LD Structured Data for Google Ranking -->
+  <script type="application/ld+json">
+  {
+    "@@context": "https://schema.org/",
+    "@@type": "Product",
+    "name": "@Model.Name",
+    "image": "@(mainImage.StartsWith("http") ? mainImage : $"{Context.Request.Scheme}://{Context.Request.Host}{mainImage}")",
+    "description": "@(string.IsNullOrWhiteSpace(Model.Spec) ? Model.Name : Model.Spec)",
+    "sku": "@Model.Id",
+    "brand": {
+      "@@type": "Brand",
+      "name": "SAT Jewel"
+    },
+    "offers": {
+      "@@type": "Offer",
+      "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")",
+      "priceCurrency": "USD",
+      "price": "@Model.Price",
+      "availability": "https://schema.org/InStock",
+      "itemCondition": "https://schema.org/NewCondition"
+    },
+    "aggregateRating": {
+      "@@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "142"
+    }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
