@@ -285,20 +285,17 @@
           </div>
 
           <div id="paypalContainerBox" class="paypal-box-wrap" style="opacity: 0.5; pointer-events: none;">
-            <!-- Option 1: Official PayPal Express & Direct PayPal.Me Gateway -->
-            <div style="margin-bottom: 16px;">
-              <div style="font-size:12px; color:var(--taupe-beige); font-weight:700; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Option 1: Pay with PayPal</div>
-              <button type="button" id="btnPayPalDirect" onclick="payWithPayPalMe()" style="width:100%; padding:14px 20px; background:linear-gradient(135deg, #ffc439 0%, #e0a800 100%); color:#003087; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(255,196,57,0.35); transition:all 0.3s ease; margin-bottom:12px;">
-                <i class="fa-brands fa-paypal" style="font-size:22px; color:#003087;"></i> Pay with PayPal (<span id="paypalBtnAmountDisplay">$0 USD</span>)
-              </button>
+            <!-- Option 1: Official PayPal Express Checkout (In-Page Popup SDK) -->
+            <div style="margin-bottom: 20px;">
+              <div style="font-size:12px; color:var(--taupe-beige); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Option 1: Pay with PayPal</div>
               <div id="paypal-button-container"></div>
             </div>
 
-            <!-- Option 2: Razorpay Independent Card Gateway (No PayPal Prompt, Embedded Modal) -->
-            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px dashed rgba(212, 178, 112, 0.3);">
+            <!-- Option 2: Razorpay Independent Card Gateway (Embedded Modal Overlay) -->
+            <div style="margin-top: 20px; padding-top: 18px; border-top: 1px dashed rgba(212, 178, 112, 0.3);">
               <div style="font-size:12px; color:var(--taupe-beige); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Option 2: Pay with Credit / Debit Card (Razorpay)</div>
               <button type="button" id="btnRazorpayCard" class="btn-razorpay-card" onclick="payWithRazorpay()" style="width:100%; padding:14px 20px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color:#ffffff; border:1px solid rgba(212, 178, 112, 0.5); border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(0,0,0,0.3); transition:all 0.3s ease;">
-                <i class="fa-solid fa-credit-card" style="color:var(--champagne-gold); font-size:18px;"></i> Pay with Card (No PayPal Required)
+                <i class="fa-solid fa-credit-card" style="color:var(--champagne-gold); font-size:18px;"></i> Pay with Card (No PayPal Account Required)
               </button>
             </div>
           </div>
@@ -567,6 +564,18 @@
       } catch (e) {}
     }
 
+    function showPaymentProcessing(msg) {
+      const el = document.getElementById('paymentProcessingOverlay');
+      const msgEl = document.getElementById('processingOverlayMessage');
+      if (msgEl && msg) msgEl.textContent = msg;
+      if (el) el.style.display = 'flex';
+    }
+
+    function hidePaymentProcessing() {
+      const el = document.getElementById('paymentProcessingOverlay');
+      if (el) el.style.display = 'none';
+    }
+
     function initPayPalButtons() {
       if (typeof paypal === 'undefined') return;
 
@@ -602,8 +611,10 @@
           }
 
           // Security Rule: Never send price/amount! Pass only productId & quantity to server
-          const firstItemId = window.cartItems && window.cartItems.length > 0 ? window.cartItems[0].id : 'sat-prod-441';
-          const qty = window.cartItems && window.cartItems.length > 0 ? (window.cartItems[0].qty || 1) : 1;
+          const savedCart = localStorage.getItem('sat_shopping_cart_usd');
+          const cartItems = savedCart ? JSON.parse(savedCart) : [];
+          const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-441') : 'sat-prod-441';
+          const qty = cartItems.length > 0 ? (Number(cartItems[0].quantity) || 1) : 1;
 
           try {
             const res = await fetch('/api/payment/create-order', {
@@ -636,7 +647,7 @@
         },
 
         onApprove: function(data, actions) {
-          // Verify payment server-side via GET API (Never trust frontend completion signal alone)
+          showPaymentProcessing("Confirming PayPal payment authorization with server-authoritative verification. Please do not close this window...");
           return fetch('/api/payment/verify', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -644,25 +655,24 @@
           })
           .then(res => res.json())
           .then(result => {
+            hidePaymentProcessing();
             if (result.success) {
               localStorage.removeItem('sat_shopping_cart_usd');
-              if (typeof showPaymentSuccessModal === 'function') {
-                showPaymentSuccessModal(result.orderId);
-              } else {
-                alert('🎉 Order Placed Successfully! Order ID: ' + result.orderId);
-                window.location.href = '/Account/Orders';
-              }
+              alert('🎉 Order Verified & Placed Successfully! Order ID: ' + (result.orderId || data.orderID));
+              window.location.href = '/Account/Orders';
             } else {
               alert('⚠️ PayPal Verification Warning: ' + result.message);
             }
           })
           .catch(err => {
+            hidePaymentProcessing();
             console.error('PayPal Verify Error:', err);
             alert('Payment received. Order is being processed under Order ID: ' + data.orderID);
           });
         },
 
         onError: function(err) {
+          hidePaymentProcessing();
           console.error('PayPal Checkout Error:', err);
           alert('An error occurred during PayPal checkout. Please ensure all shipping details are entered and try again.');
         }
@@ -684,8 +694,10 @@
         return;
       }
 
-      const firstItemId = window.cartItems && window.cartItems.length > 0 ? window.cartItems[0].id : 'sat-prod-441';
-      const qty = window.cartItems && window.cartItems.length > 0 ? (window.cartItems[0].qty || 1) : 1;
+      const savedCart = localStorage.getItem('sat_shopping_cart_usd');
+      const cartItems = savedCart ? JSON.parse(savedCart) : [];
+      const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-441') : 'sat-prod-441';
+      const qty = cartItems.length > 0 ? (Number(cartItems[0].quantity) || 1) : 1;
 
       try {
         // Step 1: Server calculates price & creates Razorpay Order
@@ -721,28 +733,32 @@
           image: '/assets/ring_1.jpg',
           order_id: data.razorpayOrderId,
           handler: async function (response) {
-            // Step 3: Server-side HMAC Signature Verification
-            const verifyRes = await fetch('/api/payment/razorpay/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                razorpayOrderId: response.razorpay_order_id,
-                razorpayPaymentId: response.razorpay_payment_id,
-                razorpaySignature: response.razorpay_signature
-              })
-            });
+            showPaymentProcessing("Verifying Razorpay card HMAC signature server-side. Please do not close this window...");
+            try {
+              // Step 3: Server-side HMAC Signature Verification
+              const verifyRes = await fetch('/api/payment/razorpay/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  razorpayOrderId: response.razorpay_order_id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature
+                })
+              });
 
-            const verifyResult = await verifyRes.json();
-            if (verifyResult.success) {
-              localStorage.removeItem('sat_shopping_cart_usd');
-              if (typeof showPaymentSuccessModal === 'function') {
-                showPaymentSuccessModal(verifyResult.orderId);
-              } else {
-                alert('🎉 Razorpay Card Order Placed Successfully! Order ID: ' + verifyResult.orderId);
+              const verifyResult = await verifyRes.json();
+              hidePaymentProcessing();
+
+              if (verifyResult.success) {
+                localStorage.removeItem('sat_shopping_cart_usd');
+                alert('🎉 Razorpay Card Order Verified and Confirmed! Order ID: ' + (verifyResult.orderId || response.razorpay_order_id));
                 window.location.href = '/Account/Orders';
+              } else {
+                alert('⚠️ Razorpay Signature Verification Alert: ' + verifyResult.message);
               }
-            } else {
-              alert('⚠️ Razorpay Signature Verification Alert: ' + verifyResult.message);
+            } catch (err) {
+              hidePaymentProcessing();
+              alert('Error verifying Razorpay payment signature.');
             }
           },
           prefill: {
@@ -757,11 +773,36 @@
         const rzp = new Razorpay(options);
         rzp.open();
       } catch (err) {
+        hidePaymentProcessing();
         console.error('Razorpay Checkout Exception:', err);
         alert('An error occurred during Razorpay card checkout. Please try again.');
       }
     }
   </script>
+
+  <!-- In-Page Payment Processing & Verification Modal Overlay -->
+  <div id="paymentProcessingOverlay" style="position:fixed; inset:0; background:rgba(5, 11, 20, 0.88); backdrop-filter:blur(12px); z-index:999999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px;">
+    <div style="background:rgba(13, 27, 42, 0.95); border:1px solid rgba(212, 178, 112, 0.4); border-radius:24px; padding:40px 32px; max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.7);">
+      <div style="font-size:48px; color:var(--champagne-gold); margin-bottom:16px; animation:spinDiamond 3s infinite linear;">
+        <i class="fa-solid fa-gem"></i>
+      </div>
+      <h3 style="font-family:var(--font-serif); font-size:22px; color:#ffffff; margin:0 0 10px;">Verifying Payment Security...</h3>
+      <p id="processingOverlayMessage" style="color:var(--taupe-beige); font-size:14px; margin:0 0 20px; line-height:1.6;">
+        Confirming payment with server-authoritative pricing. Please do not close or refresh this window.
+      </p>
+      <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; background:rgba(212, 178, 112, 0.15); border:1px solid rgba(212, 178, 112, 0.3); border-radius:20px; color:#fbbf24; font-size:12px; font-weight:700;">
+        <i class="fa-solid fa-shield-halved"></i> 256-Bit TLS Encrypted Verification
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @@keyframes spinDiamond {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.1); }
+      100% { transform: rotate(360deg) scale(1); }
+    }
+  </style>
 
   <!-- SAT Jewel Footer -->
   <partial name="_Footer" />
