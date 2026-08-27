@@ -482,14 +482,17 @@
         </div>
       </div>
 
-      <!-- STEP 4: Availability Matrix -->
+      <!-- STEP 4: Availability & Dynamic Pricing Matrix -->
       <div id="wStep4" class="wizard-content-step" style="display:none;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
           <div>
-            <h3 style="font-size:16px; font-weight:700; color:#0f172a; margin:0 0 4px;">Metal × Diamond Size Availability Matrix</h3>
-            <p style="font-size:12px; color:#64748b; margin:0;">Toggle ON/OFF to specify exact diamond size availability per metal type.</p>
+            <h3 style="font-size:16px; font-weight:700; color:#0f172a; margin:0 0 4px;">Metal × Diamond Size Dynamic Pricing Matrix</h3>
+            <p style="font-size:12px; color:#64748b; margin:0;">Customize exact pricing for each metal type and diamond carat combination (editable for both new products &amp; editing).</p>
           </div>
-          <div style="display:flex; gap:8px;">
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" onclick="autoCalculateBiancaChiaraPricing()" style="background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#ffffff; border:none; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; box-shadow:0 2px 8px rgba(180,83,9,0.2);">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> ⚡ Auto-Price (Bianca Chiara Tiers)
+            </button>
             <button type="button" onclick="toggleAllMatrix(true)" style="background:rgba(34,197,94,0.1); border:1px solid #22c55e; color:#16a34a; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">⚡ Enable All</button>
             <button type="button" onclick="toggleAllMatrix(false)" style="background:rgba(239,68,68,0.1); border:1px solid #ef4444; color:#ef4444; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:700; cursor:pointer;">Clear All</button>
           </div>
@@ -712,7 +715,53 @@
     }
   }
 
+  let loadedExistingVariants = [];
+
+  function getBiancaChiaraPrice(basePrice, metalName, caratLabel) {
+    let metalOffset = 0;
+    const m = (metalName || '').toLowerCase();
+    if (m.includes('14k')) metalOffset = 180;
+    else if (m.includes('18k')) metalOffset = 480;
+    else if (m.includes('platinum') || m.includes('950')) metalOffset = 850;
+
+    let caratOffset = 0;
+    const numMatch = (caratLabel || '').match(/(\d+(\.\d+)?)/);
+    if (numMatch) {
+      const ct = parseFloat(numMatch[1]);
+      if (ct >= 5.0) caratOffset = 6000;
+      else if (ct >= 4.0) caratOffset = 4200;
+      else if (ct >= 3.0) caratOffset = 2600;
+      else if (ct >= 2.5) caratOffset = 1800;
+      else if (ct >= 2.0) caratOffset = 1100;
+      else if (ct >= 1.75) caratOffset = 750;
+      else if (ct >= 1.5) caratOffset = 450;
+      else if (ct >= 1.25) caratOffset = 250;
+      else caratOffset = 0;
+    }
+
+    return Math.round(basePrice + metalOffset + caratOffset);
+  }
+
+  function autoCalculateBiancaChiaraPricing() {
+    const basePrice = parseFloat(document.getElementById('adminPrice').value) || 2020;
+    
+    document.querySelectorAll('.matrix-price-input').forEach(input => {
+      const metalId = input.dataset.metalId;
+      const metalName = metalNameMap[metalId] || '';
+      const caratLabel = input.dataset.caratLabel || '';
+      
+      const newPrice = getBiancaChiaraPrice(basePrice, metalName, caratLabel);
+      input.value = newPrice;
+    });
+
+    if (typeof showToast === 'function') {
+      showToast('Calculated dynamic variant prices based on Bianca Chiara industry tiers (+14K, +18K, +Platinum, +Carats)!', 'success', 'Auto-Pricing Applied');
+    }
+  }
+
   function buildMatrixGrid() {
+    const basePrice = parseFloat(document.getElementById('adminPrice').value) || 2020;
+
     const activeMetals = Array.from(document.querySelectorAll('.metal-pill-btn.active')).map(b => ({
       id: parseInt(b.dataset.id),
       name: metalNameMap[b.dataset.id] || b.textContent
@@ -730,29 +779,47 @@
     }
 
     let html = `
-      <table class="matrix-table">
+      <table class="matrix-table" style="width:100%; border-collapse:collapse;">
         <thead>
           <tr>
-            <th style="text-align:left;">Selected Metal Type</th>
+            <th style="text-align:left; padding:12px; background:#f8fafc; border-bottom:2px solid #e2e8f0; font-size:13px; font-weight:700; color:#0f172a;">Metal Option</th>
             ${activeCarats.map(c => {
               const parts = c.label.split(' ');
               const shortLabel = parts.length >= 2 ? `${parts[0]} ${parts[1]}` : c.label;
-              return `<th title="${c.label}">${shortLabel}</th>`;
+              return `<th title="${c.label}" style="padding:12px; background:#f8fafc; border-bottom:2px solid #e2e8f0; font-size:13px; font-weight:700; color:#0f172a; text-align:center;">${shortLabel}</th>`;
             }).join('')}
           </tr>
         </thead>
         <tbody>
           ${activeMetals.map(m => `
-            <tr>
-              <td class="metal-name-td">${m.name}</td>
-              ${activeCarats.map(c => `
-                <td>
-                  <label class="switch-toggle">
-                    <input type="checkbox" class="matrix-chk" data-metal-id="${m.id}" data-carat-id="${c.id}" checked />
-                    <span class="slider-round"></span>
-                  </label>
-                </td>
-              `).join('')}
+            <tr style="border-bottom:1px solid #f1f5f9;">
+              <td class="metal-name-td" style="padding:12px; font-weight:700; font-size:13px; color:#0f172a;">${m.name}</td>
+              ${activeCarats.map(c => {
+                // Check if existing variant price was loaded
+                const existing = loadedExistingVariants.find(v => v.metalId === m.id && (v.caratId === c.id || !v.caratId));
+                const cellPrice = existing && existing.priceOverrideUSD > 0 
+                  ? existing.priceOverrideUSD 
+                  : getBiancaChiaraPrice(basePrice, m.name, c.label);
+                const isChecked = existing ? existing.isEnabled : true;
+
+                return `
+                  <td style="padding:10px 8px; text-align:center;">
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:6px;">
+                      <label class="switch-toggle" style="transform:scale(0.85);">
+                        <input type="checkbox" class="matrix-chk" data-metal-id="${m.id}" data-carat-id="${c.id}" ${isChecked ? 'checked' : ''} />
+                        <span class="slider-round"></span>
+                      </label>
+                      <div style="display:flex; align-items:center; gap:2px;">
+                        <span style="font-size:11px; font-weight:700; color:#64748b;">$</span>
+                        <input type="number" step="1" min="1" class="matrix-price-input" 
+                               data-metal-id="${m.id}" data-carat-id="${c.id}" data-carat-label="${c.label}" 
+                               value="${cellPrice}" 
+                               style="width:84px; padding:4px 6px; font-size:12px; font-weight:700; border:1px solid #cbd5e1; border-radius:6px; color:#b45309; text-align:center; background:#ffffff;" />
+                      </div>
+                    </div>
+                  </td>
+                `;
+              }).join('')}
             </tr>
           `).join('')}
         </tbody>
@@ -802,29 +869,47 @@
       }
 
       // Step 3: Metals & Carats
-      if (item.metalOptions) {
-        const metalArr = item.metalOptions.split('|').map(m => m.toLowerCase());
-        document.querySelectorAll('.metal-pill-btn').forEach(btn => {
-          const btnTxt = btn.textContent.toLowerCase();
-          if (metalArr.some(m => m.includes(btnTxt) || btnTxt.includes(m))) {
-            btn.classList.add('active');
-          }
-        });
-      }
+      if (item.variants && item.variants.length > 0) {
+        loadedExistingVariants = item.variants;
+        const savedMetalIds = item.variants.map(v => v.metalId);
+        const savedCaratIds = item.variants.map(v => v.caratId);
 
-      if (item.caratOptions) {
-        const caratArr = item.caratOptions.split('|').map(c => c.toLowerCase());
-        document.querySelectorAll('.carat-pill-btn').forEach(btn => {
-          const btnTxt = (btn.dataset.label || btn.textContent).toLowerCase();
-          if (caratArr.some(c => c.includes(btnTxt) || btnTxt.includes(c))) {
+        document.querySelectorAll('.metal-pill-btn').forEach(btn => {
+          if (savedMetalIds.includes(parseInt(btn.dataset.id))) {
             btn.classList.add('active');
           }
         });
+
+        document.querySelectorAll('.carat-pill-btn').forEach(btn => {
+          if (savedCaratIds.includes(parseInt(btn.dataset.id))) {
+            btn.classList.add('active');
+          }
+        });
+      } else {
+        if (item.metalOptions) {
+          const metalArr = item.metalOptions.split('|').map(m => m.toLowerCase());
+          document.querySelectorAll('.metal-pill-btn').forEach(btn => {
+            const btnTxt = btn.textContent.toLowerCase();
+            if (metalArr.some(m => m.includes(btnTxt) || btnTxt.includes(m))) {
+              btn.classList.add('active');
+            }
+          });
+        }
+
+        if (item.caratOptions) {
+          const caratArr = item.caratOptions.split('|').map(c => c.toLowerCase());
+          document.querySelectorAll('.carat-pill-btn').forEach(btn => {
+            const btnTxt = (btn.dataset.label || btn.textContent).toLowerCase();
+            if (caratArr.some(c => c.includes(btnTxt) || btnTxt.includes(c))) {
+              btn.classList.add('active');
+            }
+          });
+        }
       }
 
       updateLivePreview();
       if (typeof showToast === 'function') {
-        showToast(`Loaded product "${item.name || 'item'}" for editing`, 'info', 'Edit Mode Active');
+        showToast(`Loaded product "${item.name || 'item'}" with custom variant prices for editing`, 'info', 'Edit Mode Active');
       }
     } catch (err) {
       console.error('Error loading item for edit:', err);
@@ -847,10 +932,15 @@
     const enabledVariants = [];
     document.querySelectorAll('.matrix-chk').forEach(chk => {
       if (chk.checked) {
+        const mId = parseInt(chk.dataset.metalId);
+        const cId = parseInt(chk.dataset.caratId);
+        const priceInput = document.querySelector(`.matrix-price-input[data-metal-id="${mId}"][data-carat-id="${cId}"]`);
+        const varPrice = priceInput && parseFloat(priceInput.value) > 0 ? parseFloat(priceInput.value) : priceUSD;
+
         enabledVariants.push({
-          metalId: parseInt(chk.dataset.metalId),
-          caratId: parseInt(chk.dataset.caratId),
-          priceOverrideUSD: priceUSD,
+          metalId: mId,
+          caratId: cId,
+          priceOverrideUSD: varPrice,
           isEnabled: true
         });
       }

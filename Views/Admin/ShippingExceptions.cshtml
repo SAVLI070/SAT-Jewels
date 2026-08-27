@@ -1,0 +1,58 @@
+@model List<SAT1.Models.OrderTrackingHistory>
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div style="padding: 24px; max-width: 1400px; margin: 0 auto;">
+
+  <div style="margin-bottom: 24px;">
+    <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">Shipping Alerts & Carrier Exceptions</h1>
+    <p style="font-size: 14px; color: #64748b; margin: 4px 0 0;">Automated exception monitor for failed carrier bookings, customs delays, or address delivery errors.</p>
+  </div>
+
+  @if (Model.Count == 0)
+  {
+    <div style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 48px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+      <div style="width: 60px; height: 60px; border-radius: 50%; background: #ecfdf5; color: #059669; font-size: 26px; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px;">
+        <i class="fa-solid fa-shield-check"></i>
+      </div>
+      <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 6px;">All Shipments Operational</h3>
+      <p style="font-size: 13px; color: #64748b; margin: 0;">Zero active carrier exceptions or customs clearance failures detected.</p>
+    </div>
+  }
+  else
+  {
+    <div style="background: #ffffff; border-radius: 16px; border: 1px solid #fee2e2; overflow: hidden;">
+      <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+        <thead>
+          <tr style="background: #fef2f2; border-bottom: 1px solid #fecaca; color: #991b1b; font-weight: 700; font-size: 11px; text-transform: uppercase;">
+            <th style="padding: 16px 20px;">Timestamp</th>
+            <th style="padding: 16px 20px;">Order ID</th>
+            <th style="padding: 16px 20px;">Carrier</th>
+            <th style="padding: 16px 20px;">Exception Details</th>
+            <th style="padding: 16px 20px; text-align: right;">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          @foreach (var exc in Model)
+          {
+            <tr style="border-bottom: 1px solid #fee2e2;">
+              <td style="padding: 16px 20px; color: #64748b;">@exc.CreatedAt.ToString("MMM dd, yyyy HH:mm")</td>
+              <td style="padding: 16px 20px; font-weight: 700; color: #0f172a;">
+                <a href="/Admin/Orders?q=@exc.OrderId" style="color: #b45309; text-decoration: none;">@exc.OrderId</a>
+              </td>
+              <td style="padding: 16px 20px; font-weight: 600;">@exc.CarrierName</td>
+              <td style="padding: 16px 20px; color: #dc2626; font-weight: 600;">@exc.StatusNote</td>
+              <td style="padding: 16px 20px; text-align: right;">
+                <a href="/Admin/Orders?q=@exc.OrderId" style="background: #0f172a; color: #ffffff; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700;">
+                  Inspect Order
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+</div>

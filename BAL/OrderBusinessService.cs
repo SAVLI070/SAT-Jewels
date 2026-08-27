@@ -10,12 +10,18 @@ namespace SAT1.BAL
         private readonly OrderRepository _orderRepo;
         private readonly PayPalService _payPalService;
         private readonly RazorpayService _razorpayService;
+        private readonly OrderTrackingService _orderTrackingService;
 
-        public OrderBusinessService(OrderRepository orderRepo, PayPalService payPalService, RazorpayService razorpayService)
+        public OrderBusinessService(
+            OrderRepository orderRepo, 
+            PayPalService payPalService, 
+            RazorpayService razorpayService,
+            OrderTrackingService orderTrackingService)
         {
             _orderRepo = orderRepo;
             _payPalService = payPalService;
             _razorpayService = razorpayService;
+            _orderTrackingService = orderTrackingService;
         }
 
         // DTO for Shipping Details
@@ -121,6 +127,12 @@ namespace SAT1.BAL
                 return (false, "Payment confirmation failed or flagged as suspicious.", updatedOrder);
             }
 
+            // Automatic Amazon/Flipkart-Style Shipment Booking (No Admin Manual Step Required)
+            if (updatedOrder != null)
+            {
+                _ = Task.Run(() => _orderTrackingService.BookShipmentAsync(updatedOrder.OrderId));
+            }
+
             return (true, wasAlreadyPaid ? "Order already verified and completed." : "PayPal payment verified and order marked as Paid!", updatedOrder);
         }
 
@@ -224,6 +236,12 @@ namespace SAT1.BAL
             if (!isPaid)
             {
                 return (false, "Razorpay payment processing failed or flagged as suspicious.", updatedOrder);
+            }
+
+            // Automatic Amazon/Flipkart-Style Shipment Booking (No Admin Manual Step Required)
+            if (updatedOrder != null)
+            {
+                _ = Task.Run(() => _orderTrackingService.BookShipmentAsync(updatedOrder.OrderId));
             }
 
             return (true, wasAlreadyPaid ? "Order already verified and completed." : "Razorpay payment verified and order marked as Paid!", updatedOrder);

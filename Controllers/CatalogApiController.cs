@@ -123,13 +123,30 @@ namespace SAT1.Controllers
             return Ok(new { success = true, message = $"Category '{id}' deleted from database." });
         }
 
-        // 2. GET ALL CATALOG ITEMS
+        // 2. GET ALL CATALOG ITEMS (With optional category filter for high performance)
         [HttpGet("items")]
-        public async Task<IActionResult> GetCatalogItems()
+        public async Task<IActionResult> GetCatalogItems([FromQuery] string? categoryId = null)
         {
             try
             {
-                var items = await _catalogBal.GetAllCatalogItemsAsync();
+                var items = string.IsNullOrWhiteSpace(categoryId) || categoryId == "all"
+                    ? await _catalogBal.GetAllCatalogItemsAsync()
+                    : await _catalogBal.GetCatalogItemsByCategoryAsync(categoryId);
+                return Ok(items);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        // 2B. GET CATEGORY ITEMS ON-DEMAND (Ultra-fast accordion loading)
+        [HttpGet("category-items/{categoryId}")]
+        public async Task<IActionResult> GetCategoryItems(string categoryId)
+        {
+            try
+            {
+                var items = await _catalogBal.GetCatalogItemsByCategoryAsync(categoryId);
                 return Ok(items);
             }
             catch (Exception ex)

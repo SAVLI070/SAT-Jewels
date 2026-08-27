@@ -368,5 +368,76 @@ namespace SAT1.Controllers
                 }
             });
         }
+
+        // =========================================================================
+        // 6. GET /api/products/pricing-rules
+        // Returns the dynamic database-backed metal & carat price increments
+        // =========================================================================
+        [HttpGet("pricing-rules")]
+        public async Task<IActionResult> GetPricingRules()
+        {
+            var rules = await _context.DynamicPricingRules
+                .AsNoTracking()
+                .Where(r => r.IsActive)
+                .OrderBy(r => r.RuleType)
+                .ThenBy(r => r.DisplayOrder)
+                .Select(r => new
+                {
+                    r.Id,
+                    r.RuleType,
+                    r.Code,
+                    r.DisplayName,
+                    r.PriceOffsetUSD,
+                    r.DisplayOrder
+                })
+                .ToListAsync();
+
+            return Ok(new { success = true, rules });
+        }
+
+        // =========================================================================
+        // 7. GET /api/products/{id}/reviews
+        // Returns reviews summary, average rating, star breakdown, and approved reviews
+        // =========================================================================
+        [HttpGet("{id}/reviews")]
+        public async Task<IActionResult> GetProductReviews([FromServices] BAL.ReviewBal reviewBal, string id)
+        {
+            var summary = await reviewBal.GetApprovedReviewsForProductAsync(id);
+            return Ok(new { success = true, data = summary });
+        }
+
+        // =========================================================================
+        // 8. POST /api/products/{id}/reviews
+        // Submit customer product review
+        // =========================================================================
+        public class SubmitReviewDto
+        {
+            public string ProductName { get; set; } = string.Empty;
+            public string CustomerName { get; set; } = string.Empty;
+            public string CustomerEmail { get; set; } = string.Empty;
+            public int Rating { get; set; } = 5;
+            public string ReviewTitle { get; set; } = string.Empty;
+            public string ReviewText { get; set; } = string.Empty;
+        }
+
+        [HttpPost("{id}/reviews")]
+        public async Task<IActionResult> SubmitProductReview([FromServices] BAL.ReviewBal reviewBal, string id, [FromBody] SubmitReviewDto dto)
+        {
+            var (success, message, review) = await reviewBal.SubmitCustomerReviewAsync(
+                id,
+                dto.ProductName,
+                dto.CustomerName,
+                dto.CustomerEmail,
+                dto.Rating,
+                dto.ReviewTitle,
+                dto.ReviewText);
+
+            if (!success)
+            {
+                return BadRequest(new { success = false, message });
+            }
+
+            return Ok(new { success = true, message, review });
+        }
     }
 }

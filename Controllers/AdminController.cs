@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using SAT1.BAL;
+using SAT1.Models;
 
 namespace SAT1.Controllers
 {
@@ -74,6 +75,89 @@ namespace SAT1.Controllers
             }
             ViewBag.Title = "Publish New Collection Item";
             return View();
+        }
+
+        [HttpGet("orders")]
+        public async Task<IActionResult> Orders(string? status, string? q)
+        {
+            if (!CheckAccess()) return HandleUnauthorized();
+            ViewBag.Title = "Customer Orders & Live Tracking";
+            var orders = await _adminBal.GetAllOrdersWithTrackingAsync(status, q);
+            ViewBag.StatusFilter = status ?? "All";
+            ViewBag.SearchQuery = q ?? "";
+            return View(orders);
+        }
+
+        [HttpGet("users")]
+        public async Task<IActionResult> Users()
+        {
+            if (!CheckAccess()) return HandleUnauthorized();
+            ViewBag.Title = "Customer Accounts & Directory";
+            var users = await _adminBal.GetAllUsersWithStatsAsync();
+            return View(users);
+        }
+
+        [HttpGet("pricing")]
+        public async Task<IActionResult> Pricing()
+        {
+            if (!CheckAccess()) return HandleUnauthorized();
+            ViewBag.Title = "Metal & Carat Dynamic Pricing Rules";
+            var rules = await _adminBal.GetDynamicPricingRulesAsync();
+            return View(rules);
+        }
+
+        [HttpGet("reviews")]
+        public async Task<IActionResult> Reviews([FromServices] ReviewBal reviewBal, string? status)
+        {
+            if (!CheckAccess()) return HandleUnauthorized();
+            ViewBag.Title = "Product Customer Reviews Moderation";
+            var reviews = await reviewBal.GetAllReviewsAsync(status);
+            ViewBag.StatusFilter = status ?? "All";
+            return View(reviews);
+        }
+
+        [HttpGet("shippingexceptions")]
+        public async Task<IActionResult> ShippingExceptions([FromServices] SAT1.DAL.OrderTrackingRepository trackingRepo)
+        {
+            if (!CheckAccess()) return HandleUnauthorized();
+            ViewBag.Title = "Shipping Alerts & Carrier Exceptions";
+            var exceptions = await trackingRepo.GetShippingExceptionsAsync();
+            return View(exceptions);
+        }
+
+        // ==========================================
+        // ADMIN AJAX POST ENDPOINTS
+        // ==========================================
+        [HttpPost("api/pricing/save")]
+        public async Task<IActionResult> SavePricing([FromBody] List<DynamicPricingRuleDto> rules)
+        {
+            if (!CheckAccess()) return Unauthorized(new { success = false, message = "Admin privileges required." });
+            var success = await _adminBal.SaveDynamicPricingRulesAsync(rules);
+            return Json(new { success, message = success ? "Dynamic pricing rules updated successfully across store!" : "Failed to save pricing." });
+        }
+
+        [HttpPost("api/pricing/add")]
+        public async Task<IActionResult> AddPricingRule([FromBody] DynamicPricingRule rule)
+        {
+            if (!CheckAccess()) return Unauthorized(new { success = false, message = "Admin privileges required." });
+            var success = await _adminBal.AddPricingRuleAsync(rule);
+            return Json(new { success, message = success ? "New pricing rule added successfully!" : "Failed to add rule." });
+        }
+
+        [HttpPost("api/reviews/update-status")]
+        public async Task<IActionResult> UpdateReviewStatus([FromServices] ReviewBal reviewBal, [FromForm] long reviewId, [FromForm] string newStatus)
+        {
+            if (!CheckAccess()) return Unauthorized(new { success = false, message = "Admin privileges required." });
+            var success = await reviewBal.UpdateReviewStatusAsync(reviewId, newStatus);
+            return Json(new { success, message = success ? $"Review status changed to {newStatus}!" : "Failed to update review status." });
+        }
+
+        [HttpPost("api/reviews/delete")]
+        public async Task<IActionResult> DeleteReview([FromServices] ReviewBal reviewBal, [FromForm] long reviewId)
+        {
+            if (!CheckAccess()) return Unauthorized(new { success = false, message = "Admin privileges required." });
+            var success = await reviewBal.DeleteReviewAsync(reviewId);
+            return Json(new { success, message = success ? "Review deleted successfully." : "Failed to delete review." });
         }
     }
 }

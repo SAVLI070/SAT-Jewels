@@ -55,9 +55,14 @@ builder.Services.AddHttpClient();
 
 // Register BAL & DAL Payment Services
 builder.Services.AddScoped<SAT1.DAL.OrderRepository>();
+builder.Services.AddScoped<SAT1.DAL.OrderTrackingRepository>();
 builder.Services.AddScoped<SAT1.BAL.CatalogBal>();
 builder.Services.AddScoped<SAT1.BAL.AdminBal>();
 builder.Services.AddScoped<SAT1.BAL.AuthBal>();
+builder.Services.AddScoped<SAT1.BAL.ReviewBal>();
+builder.Services.AddScoped<SAT1.BAL.EmailNotificationService>();
+builder.Services.AddScoped<SAT1.BAL.Shipping.IShippingProviderService, SAT1.BAL.Shipping.DefaultShippingProviderService>();
+builder.Services.AddScoped<SAT1.BAL.OrderTrackingService>();
 builder.Services.AddScoped<SAT1.BAL.PayPalService>();
 builder.Services.AddScoped<SAT1.BAL.RazorpayService>();
 builder.Services.AddScoped<SAT1.BAL.OrderBusinessService>();
@@ -126,6 +131,48 @@ using (var scope = app.Services.CreateScope())
                 CONSTRAINT ""PK_UserAddresses"" PRIMARY KEY (""AddressId"")
             );",
 
+            @"CREATE TABLE IF NOT EXISTS ""dynamic_pricing_rules"" (
+                ""id"" bigserial NOT NULL,
+                ""rule_type"" text NOT NULL DEFAULT 'Metal',
+                ""code"" text NOT NULL,
+                ""display_name"" text NOT NULL,
+                ""price_offset_usd"" numeric(18,2) NOT NULL DEFAULT 0.00,
+                ""display_order"" integer NOT NULL DEFAULT 1,
+                ""is_active"" boolean NOT NULL DEFAULT true,
+                ""updated_at"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT ""PK_dynamic_pricing_rules"" PRIMARY KEY (""id"")
+            );",
+
+            @"CREATE TABLE IF NOT EXISTS ""order_tracking_history"" (
+                ""id"" bigserial NOT NULL,
+                ""order_id"" text NOT NULL,
+                ""status"" text NOT NULL DEFAULT 'OrderPlaced',
+                ""status_note"" text NOT NULL DEFAULT '',
+                ""carrier_name"" text NOT NULL DEFAULT 'DHL Express',
+                ""tracking_number"" text NOT NULL DEFAULT '',
+                ""tracking_url"" text NOT NULL DEFAULT '',
+                ""location"" text NOT NULL DEFAULT '',
+                ""source"" text NOT NULL DEFAULT 'System',
+                ""created_at"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT ""PK_order_tracking_history"" PRIMARY KEY (""id"")
+            );",
+
+            @"CREATE TABLE IF NOT EXISTS ""product_reviews"" (
+                ""id"" bigserial NOT NULL,
+                ""product_id"" text NOT NULL,
+                ""product_name"" text NOT NULL DEFAULT '',
+                ""user_id"" text,
+                ""customer_name"" text NOT NULL,
+                ""customer_email"" text NOT NULL,
+                ""rating"" integer NOT NULL DEFAULT 5,
+                ""review_title"" text NOT NULL,
+                ""review_text"" text NOT NULL,
+                ""is_verified_buyer"" boolean NOT NULL DEFAULT true,
+                ""status"" text NOT NULL DEFAULT 'Approved',
+                ""created_at"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT ""PK_product_reviews"" PRIMARY KEY (""id"")
+            );",
+
             @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaymentProvider"" text NOT NULL DEFAULT 'PayPal';",
             @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';",
             @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderPaymentId"" text NOT NULL DEFAULT '';",
@@ -135,6 +182,12 @@ using (var scope = app.Services.CreateScope())
             @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""BuyerInfo"" text NOT NULL DEFAULT '';",
             @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""IsSuspicious"" boolean NOT NULL DEFAULT false;",
             @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""SuspiciousReason"" text;",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""CurrentTrackingStatus"" text NOT NULL DEFAULT 'OrderPlaced';",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""TrackingNumber"" text NOT NULL DEFAULT '';",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""CarrierName"" text NOT NULL DEFAULT 'DHL Express';",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""TrackingUrl"" text NOT NULL DEFAULT '';",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""EstimatedDeliveryDate"" timestamp with time zone;",
+            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ShipmentBookedAt"" timestamp with time zone;",
 
             @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';",
             @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""SignatureVerified"" boolean NOT NULL DEFAULT false;",

@@ -95,7 +95,25 @@ namespace SAT1.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
+        // Shipping & Fulfillment Tracking Fields (Amazon/Flipkart Automatic Workflow)
+        [MaxLength(50)]
+        public string CurrentTrackingStatus { get; set; } = "OrderPlaced";
+
+        [MaxLength(100)]
+        public string TrackingNumber { get; set; } = string.Empty;
+
+        [MaxLength(100)]
+        public string CarrierName { get; set; } = "DHL Express";
+
+        [MaxLength(500)]
+        public string TrackingUrl { get; set; } = string.Empty;
+
+        public DateTime? EstimatedDeliveryDate { get; set; }
+
+        public DateTime? ShipmentBookedAt { get; set; }
+
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();
+        public virtual ICollection<OrderTrackingHistory> TrackingHistory { get; set; } = new List<OrderTrackingHistory>();
     }
 }

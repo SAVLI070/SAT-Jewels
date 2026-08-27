@@ -45,5 +45,8 @@ namespace SAT1.Models
 
         [NotMapped]
         public virtual ICollection<CaratOption> CaratOptionList { get; set; } = new List<CaratOption>();
+
+        [NotMapped]
+        public List<ProductVariantMatrixItemDto>? Variants { get; set; } = new List<ProductVariantMatrixItemDto>();
     }
 }

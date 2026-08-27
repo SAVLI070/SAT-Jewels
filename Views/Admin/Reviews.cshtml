@@ -1,0 +1,153 @@
+@model List<SAT1.Models.ProductReview>
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var statusFilter = ViewBag.StatusFilter as string ?? "All";
+}
+
+<div style="padding: 24px; max-width: 1400px; margin: 0 auto;">
+
+  <!-- Header & Tabs -->
+  <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px;">
+    <div>
+      <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">Customer Product Reviews Moderation</h1>
+      <p style="font-size: 14px; color: #64748b; margin: 4px 0 0;">Review feedback submitted by buyers across all products. Approve, hide, or delete reviews with 1 click.</p>
+    </div>
+
+    <!-- Status Tabs -->
+    <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <a href="/Admin/Reviews?status=All" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Reviews (@Model.Count)</a>
+      <a href="/Admin/Reviews?status=Approved" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Approved" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Approved</a>
+      <a href="/Admin/Reviews?status=Pending" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Pending" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Pending</a>
+      <a href="/Admin/Reviews?status=Rejected" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Rejected" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Rejected</a>
+    </div>
+  </div>
+
+  @if (Model.Count == 0)
+  {
+    <div style="background: #ffffff; border-radius: 16px; border: 1px dashed #cbd5e1; padding: 48px; text-align: center;">
+      <i class="fa-solid fa-star-half-stroke" style="font-size: 40px; color: #94a3b8; margin-bottom: 12px;"></i>
+      <h3 style="font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 6px;">No Customer Reviews Found</h3>
+      <p style="font-size: 13px; color: #64748b; margin: 0;">No product reviews match the selected status filter.</p>
+    </div>
+  }
+  else
+  {
+    <!-- Reviews Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 20px;">
+      @foreach (var review in Model)
+      {
+        <div style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 22px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: space-between; gap: 16px;">
+          
+          <div>
+            <!-- Top info: Product & Status -->
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+              <div>
+                <a href="/Product/Details/@review.ProductId" target="_blank" style="font-size: 13px; font-weight: 700; color: #b45309; text-decoration: none;">
+                  <i class="fa-solid fa-gem" style="margin-right: 4px;"></i> Product #@review.ProductId
+                </a>
+                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">@review.CreatedAt.ToString("MMM dd, yyyy HH:mm")</div>
+              </div>
+
+              <span style="padding: 3px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: @(review.Status == "Approved" ? "#ecfdf5; color:#059669;" : (review.Status == "Pending" ? "#fffbeb; color:#b45309;" : "#fee2e2; color:#dc2626;"))">
+                @review.Status
+              </span>
+            </div>
+
+            <!-- Star Rating -->
+            <div style="display: flex; align-items: center; gap: 4px; color: #f59e0b; font-size: 14px; margin-bottom: 8px;">
+              @for (int i = 1; i <= 5; i++)
+              {
+                if (i <= review.Rating)
+                {
+                  <i class="fa-solid fa-star"></i>
+                }
+                else
+                {
+                  <i class="fa-regular fa-star" style="color: #cbd5e1;"></i>
+                }
+              }
+              <span style="font-size: 12px; font-weight: 700; color: #0f172a; margin-left: 6px;">@review.Rating.0 / 5.0</span>
+              @if (review.IsVerifiedBuyer)
+              {
+                <span style="margin-left: 8px; font-size: 11px; background: #eff6ff; color: #2563eb; padding: 2px 6px; border-radius: 4px; font-weight: 600;">
+                  <i class="fa-solid fa-circle-check" style="font-size: 10px;"></i> Verified Buyer
+                </span>
+              }
+            </div>
+
+            <!-- Review Title & Feedback -->
+            <h4 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0 0 6px;">@review.ReviewTitle</h4>
+            <p style="font-size: 13px; color: #475569; line-height: 1.5; margin: 0;">@review.ReviewText</p>
+
+            <!-- Customer Signature -->
+            <div style="margin-top: 14px; padding-top: 10px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #64748b;">
+              <strong style="color: #0f172a;">@review.CustomerName</strong> &lt;@review.CustomerEmail&gt;
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display: flex; gap: 8px; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+            @if (review.Status != "Approved")
+            {
+              <button type="button" onclick="updateReviewStatus(@review.ReviewId, 'Approved')" style="flex: 1; background: #10b981; color: #ffffff; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                <i class="fa-solid fa-check"></i> Approve
+              </button>
+            }
+            @if (review.Status != "Rejected")
+            {
+              <button type="button" onclick="updateReviewStatus(@review.ReviewId, 'Rejected')" style="flex: 1; background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                <i class="fa-solid fa-ban"></i> Reject
+              </button>
+            }
+            <button type="button" onclick="deleteReview(@review.ReviewId)" style="background: #fee2e2; color: #dc2626; border: none; padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;" title="Delete Review">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+
+</div>
+
+<script>
+  function updateReviewStatus(reviewId, status) {
+    const fd = new FormData();
+    fd.append('reviewId', reviewId);
+    fd.append('newStatus', status);
+
+    fetch('/admin/api/reviews/update-status', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.message);
+      }
+    });
+  }
+
+  function deleteReview(reviewId) {
+    if (!confirm('Are you sure you want to permanently delete this customer review?')) return;
+
+    const fd = new FormData();
+    fd.append('reviewId', reviewId);
+
+    fetch('/admin/api/reviews/delete', {
+      method: 'POST',
+      body: fd
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        location.reload();
+      } else {
+        alert(data.message);
+      }
+    });
+  }
+</script>

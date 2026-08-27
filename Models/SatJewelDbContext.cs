@@ -21,6 +21,9 @@ namespace SAT1.Models
         public DbSet<UserAddress> UserAddresses { get; set; } = null!;
         public DbSet<MetalOption> MetalOptions { get; set; } = null!;
         public DbSet<WishlistItem> WishlistItems { get; set; } = null!;
+        public DbSet<DynamicPricingRule> DynamicPricingRules { get; set; } = null!;
+        public DbSet<OrderTrackingHistory> OrderTrackingHistory { get; set; } = null!;
+        public DbSet<ProductReview> ProductReviews { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

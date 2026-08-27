@@ -1,0 +1,233 @@
+@model List<SAT1.Models.Order>
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var statusFilter = ViewBag.StatusFilter as string ?? "All";
+    var searchQuery = ViewBag.SearchQuery as string ?? "";
+}
+
+<div style="padding: 24px; max-width: 1400px; margin: 0 auto;">
+
+  <!-- Header & Action Bar -->
+  <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px;">
+    <div>
+      <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">Customer Orders & Live Tracking</h1>
+      <p style="font-size: 14px; color: #64748b; margin: 4px 0 0;">View customer identity, payment receipts, and real-time shipping carrier tracking.</p>
+    </div>
+    
+    <!-- Filter Tabs -->
+    <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+      <a href="/Admin/Orders?status=All" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Orders (@Model.Count)</a>
+      <a href="/Admin/Orders?status=Paid" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Paid" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Paid</a>
+      <a href="/Admin/Orders?status=ShipmentBooked" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "ShipmentBooked" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Dispatched</a>
+      <a href="/Admin/Orders?status=InTransit" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "InTransit" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">In Transit</a>
+      <a href="/Admin/Orders?status=Delivered" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Delivered" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Delivered</a>
+    </div>
+  </div>
+
+  <!-- Search Box -->
+  <form method="get" action="/Admin/Orders" style="margin-bottom: 20px;">
+    <div style="display: flex; gap: 10px; max-width: 500px;">
+      <input type="text" name="q" value="@searchQuery" placeholder="Search by customer name, email, order # or tracking #..." 
+             style="flex: 1; padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; background: #ffffff;" />
+      <button type="submit" style="background: #0f172a; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+        <i class="fa-solid fa-magnifying-glass"></i> Search
+      </button>
+      @if (!string.IsNullOrWhiteSpace(searchQuery))
+      {
+        <a href="/Admin/Orders" style="display: flex; align-items: center; color: #64748b; text-decoration: none; font-size: 13px;">Clear</a>
+      }
+    </div>
+  </form>
+
+  @if (Model.Count == 0)
+  {
+    <div style="background: #ffffff; border-radius: 16px; border: 1px dashed #cbd5e1; padding: 48px; text-align: center;">
+      <i class="fa-solid fa-box-open" style="font-size: 40px; color: #94a3b8; margin-bottom: 12px;"></i>
+      <h3 style="font-size: 18px; font-weight: 700; color: #1e293b; margin: 0 0 6px;">No Orders Found</h3>
+      <p style="font-size: 13px; color: #64748b; margin: 0;">No placed orders match your current filter criteria.</p>
+    </div>
+  }
+  else
+  {
+    <!-- Orders Table -->
+    <div style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0,0,0,0.03); overflow: hidden;">
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 13px;">
+          <thead>
+            <tr style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; color: #475569; font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px;">
+              <th style="padding: 16px 20px;">Order #</th>
+              <th style="padding: 16px 20px;">Customer / Buyer</th>
+              <th style="padding: 16px 20px;">Items</th>
+              <th style="padding: 16px 20px;">Amount & Gateway</th>
+              <th style="padding: 16px 20px;">Tracking Status</th>
+              <th style="padding: 16px 20px;">Carrier & AWB</th>
+              <th style="padding: 16px 20px; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach (var o in Model)
+            {
+              <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.background='#fbfcfe'" onmouseout="this.style.background='transparent'">
+                
+                <!-- Order ID & Date -->
+                <td style="padding: 16px 20px; vertical-align: top;">
+                  <div style="font-weight: 800; color: #0f172a; font-family: monospace;">#@o.OrderNumber</div>
+                  <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">@o.CreatedAt.ToString("MMM dd, yyyy HH:mm")</div>
+                  <span style="display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: @(o.OrderStatus == "Paid" ? "#ecfdf5; color:#059669;" : "#fffbeb; color:#b45309;")">
+                    @o.OrderStatus
+                  </span>
+                </td>
+
+                <!-- Customer Details -->
+                <td style="padding: 16px 20px; vertical-align: top;">
+                  <div style="font-weight: 700; color: #0f172a;">@o.ShippingFullName</div>
+                  <div style="font-size: 12px; color: #64748b;">@o.CustomerEmail</div>
+                  <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
+                    <i class="fa-solid fa-location-dot" style="font-size: 10px; margin-right: 4px;"></i>
+                    @o.ShippingCity, @o.ShippingState, @o.ShippingCountry
+                  </div>
+                  @if (!string.IsNullOrWhiteSpace(o.ShippingPhone))
+                  {
+                    <div style="font-size: 11px; color: #94a3b8;"><i class="fa-solid fa-phone" style="font-size: 9px; margin-right: 4px;"></i>@o.ShippingPhone</div>
+                  }
+                </td>
+
+                <!-- Item Description -->
+                <td style="padding: 16px 20px; vertical-align: top; max-width: 220px;">
+                  <div style="font-weight: 600; color: #334155; line-height: 1.4;">@o.ItemName</div>
+                </td>
+
+                <!-- Financials -->
+                <td style="padding: 16px 20px; vertical-align: top;">
+                  <div style="font-size: 15px; font-weight: 800; color: #0f172a;">$@o.TotalAmountUSD.ToString("N2") USD</div>
+                  <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-top: 2px;">
+                    <i class="fa-brands @(o.PaymentProvider?.ToLower() == "paypal" ? "fa-paypal" : "fa-credit-card")" style="margin-right: 3px;"></i>
+                    @o.PaymentProvider
+                  </div>
+                </td>
+
+                <!-- Live Tracking Stage -->
+                <td style="padding: 16px 20px; vertical-align: top;">
+                  @{
+                    var badgeBg = "#f1f5f9";
+                    var badgeColor = "#475569";
+                    var icon = "fa-clock";
+                    switch(o.CurrentTrackingStatus)
+                    {
+                      case "ShipmentBooked": badgeBg = "#eff6ff"; badgeColor = "#2563eb"; icon = "fa-file-invoice"; break;
+                      case "InTransit": badgeBg = "#fef3c7"; badgeColor = "#d97706"; icon = "fa-plane-departure"; break;
+                      case "CustomsClearance": badgeBg = "#fae8ff"; badgeColor = "#a855f7"; icon = "fa-passport"; break;
+                      case "OutForDelivery": badgeBg = "#fef9c3"; badgeColor = "#ca8a04"; icon = "fa-truck-fast"; break;
+                      case "Delivered": badgeBg = "#dcfce7"; badgeColor = "#16a34a"; icon = "fa-circle-check"; break;
+                      case "Exception": badgeBg = "#fee2e2"; badgeColor = "#dc2626"; icon = "fa-triangle-exclamation"; break;
+                    }
+                  }
+                  <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: @badgeBg; color: @badgeColor;">
+                    <i class="fa-solid @icon" style="font-size: 10px;"></i>
+                    @o.CurrentTrackingStatus
+                  </span>
+                  @if (o.EstimatedDeliveryDate.HasValue)
+                  {
+                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
+                      Est: @o.EstimatedDeliveryDate.Value.ToString("MMM dd, yyyy")
+                    </div>
+                  }
+                </td>
+
+                <!-- Carrier & AWB -->
+                <td style="padding: 16px 20px; vertical-align: top;">
+                  @if (!string.IsNullOrWhiteSpace(o.TrackingNumber))
+                  {
+                    <div style="font-weight: 700; color: #0f172a; font-family: monospace;">@o.TrackingNumber</div>
+                    <div style="font-size: 11px; color: #64748b;">@o.CarrierName</div>
+                    @if (!string.IsNullOrWhiteSpace(o.TrackingUrl))
+                    {
+                      <a href="@o.TrackingUrl" target="_blank" style="display: inline-block; font-size: 11px; color: #2563eb; text-decoration: none; font-weight: 600; margin-top: 3px;">
+                        Track on Courier <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 9px;"></i>
+                      </a>
+                    }
+                  }
+                  else
+                  {
+                    <span style="color: #94a3b8; font-size: 12px; font-style: italic;">Auto-booking upon payment</span>
+                  }
+                </td>
+
+                <!-- Action Button -->
+                <td style="padding: 16px 20px; vertical-align: top; text-align: right;">
+                  <button type="button" onclick="openOrderTimeline('@o.OrderId', '@o.OrderNumber', '@o.CurrentTrackingStatus', '@o.TrackingNumber')" 
+                          style="background: #0f172a; color: #ffffff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
+                    <i class="fa-solid fa-timeline"></i> Timeline
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- Timeline Modal -->
+<div id="timelineModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: #ffffff; border-radius: 20px; max-width: 600px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); position: relative;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px;">
+      <div>
+        <h3 id="modalOrderTitle" style="margin: 0; font-size: 18px; font-weight: 800; color: #0f172a;">Order # Tracking Timeline</h3>
+        <p id="modalOrderSubtitle" style="margin: 4px 0 0; font-size: 12px; color: #64748b;">Carrier Status & Event Logs</p>
+      </div>
+      <button onclick="closeTimelineModal()" style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <div id="timelineEventsContainer">
+      <div style="text-align: center; padding: 30px; color: #94a3b8;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size: 24px;"></i>
+        <div style="margin-top: 8px; font-size: 13px;">Loading tracking logs...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openOrderTimeline(orderId, orderNumber, currentStatus, trackingNo) {
+    document.getElementById('modalOrderTitle').innerText = 'Order #' + orderNumber + ' Timeline';
+    document.getElementById('modalOrderSubtitle').innerText = 'Tracking Number: ' + (trackingNo || 'Pending') + ' • Status: ' + currentStatus;
+    document.getElementById('timelineModal').style.display = 'flex';
+
+    fetch('/api/orders/' + orderId + '/tracking')
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('timelineEventsContainer');
+        if (!data || !data.history || data.history.length === 0) {
+          container.innerHTML = '<div style="padding:20px; text-align:center; color:#64748b;">No detailed tracking events logged yet. Order is placed and in queue.</div>';
+          return;
+        }
+
+        let html = '<div style="display:flex; flex-direction:column; gap:16px; position:relative; padding-left:24px; border-left:2px solid #e2e8f0; margin-left:10px;">';
+        data.history.forEach(evt => {
+          html += `
+            <div style="position:relative;">
+              <div style="position:absolute; left:-31px; top:2px; width:12px; height:12px; border-radius:50%; background:#b45309; border:2px solid #ffffff;"></div>
+              <div style="font-size:13px; font-weight:700; color:#0f172a;">${evt.status}</div>
+              <div style="font-size:12px; color:#475569; margin-top:2px;">${evt.statusNote || 'Event registered.'}</div>
+              <div style="font-size:11px; color:#94a3b8; margin-top:3px;">
+                <i class="fa-regular fa-clock" style="margin-right:3px;"></i> ${new Date(evt.createdAt).toLocaleString()} 
+                ${evt.location ? ' • <i class="fa-solid fa-location-dot" style="margin-right:2px;"></i> ' + evt.location : ''}
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      })
+      .catch(err => {
+        document.getElementById('timelineEventsContainer').innerHTML = '<div style="color:#ef4444; padding:20px; text-align:center;">Failed to load tracking history.</div>';
+      });
+  }
+
+  function closeTimelineModal() {
+    document.getElementById('timelineModal').style.display = 'none';
+  }
+</script>

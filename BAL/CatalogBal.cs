@@ -408,23 +408,24 @@ namespace SAT1.BAL
             try
             {
                 var products = await _context.Products
-                    .Include(p => p.Images)
+                    .AsNoTracking()
                     .OrderByDescending(p => p.CreatedAt)
-                    .ToListAsync();
-
-                if (products.Count > 0)
-                {
-                    return products.Select(p => new CatalogItem
+                    .Select(p => new CatalogItem
                     {
                         Id = p.ProductId.ToString(),
                         Name = p.ProductName,
                         CategoryId = p.CategoryId.ToString(),
                         Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct | {p.ProductName}",
                         PriceUSD = p.BasePriceUSD,
-                        ImageUrl = p.Images.FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg",
+                        ImageUrl = p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImagePath).FirstOrDefault() ?? "/assets/ring_1.jpg",
                         IsActive = true,
                         CreatedAt = p.CreatedAt
-                    }).ToList();
+                    })
+                    .ToListAsync();
+
+                if (products.Count > 0)
+                {
+                    return products;
                 }
             }
             catch (Exception ex)
@@ -433,7 +434,60 @@ namespace SAT1.BAL
             }
 
             return await _context.CatalogItems
+                .AsNoTracking()
                 .Where(i => i.IsActive)
+                .OrderByDescending(i => i.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<CatalogItem>> GetCatalogItemsByCategoryAsync(string categoryId)
+        {
+            if (string.IsNullOrWhiteSpace(categoryId) || categoryId.ToLower() == "all")
+            {
+                return await GetAllCatalogItemsAsync();
+            }
+
+            var cleanCat = categoryId.Trim().ToLower();
+            long numericCatId = 0;
+            long.TryParse(cleanCat, out numericCatId);
+
+            try
+            {
+                var query = _context.Products.AsNoTracking();
+                if (numericCatId > 0)
+                {
+                    query = query.Where(p => p.CategoryId == numericCatId);
+                }
+                else
+                {
+                    query = query.Where(p => p.CategoryId.ToString() == cleanCat);
+                }
+
+                var prods = await query
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Select(p => new CatalogItem
+                    {
+                        Id = p.ProductId.ToString(),
+                        Name = p.ProductName,
+                        CategoryId = p.CategoryId.ToString(),
+                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct | {p.ProductName}",
+                        PriceUSD = p.BasePriceUSD,
+                        ImageUrl = p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImagePath).FirstOrDefault() ?? "/assets/ring_1.jpg",
+                        IsActive = true,
+                        CreatedAt = p.CreatedAt
+                    })
+                    .ToListAsync();
+
+                if (prods.Count > 0) return prods;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetCatalogItemsByCategoryAsync Error]: {ex.Message}");
+            }
+
+            return await _context.CatalogItems
+                .AsNoTracking()
+                .Where(i => i.IsActive && i.CategoryId.ToLower() == cleanCat)
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
         }
@@ -453,26 +507,60 @@ namespace SAT1.BAL
                     var mainImg = p.Images.OrderBy(i => i.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg";
                     var allImgs = p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImagePath).ToList();
 
-                    var metalVariants = p.Variants
-                        .Where(v => v.Metal != null && !string.IsNullOrWhiteSpace(v.Metal.Name))
-                        .Select(v => v.Metal!.Name)
-                        .Distinct()
-                        .ToList();
+                    var metalVariants = new List<string>();
+                    var caratVariants = new List<string>();
+                    var variantDtoList = new List<ProductVariantMatrixItemDto>();
+
+                    if (p.Variants != null && p.Variants.Any())
+                    {
+                        foreach (var v in p.Variants)
+                        {
+                            if (v.MetalId > 0)
+                            {
+                                variantDtoList.Add(new ProductVariantMatrixItemDto
+                                {
+                                    MetalId = v.MetalId,
+                                    CaratId = v.CaratId ?? 0,
+                                    PriceOverrideUSD = v.Price,
+                                    IsEnabled = v.IsAvailable
+                                });
+                            }
+                        }
+
+                        // Build Bianca Chiara format metal differential strings
+                        var distinctMetals = p.Variants.Where(v => v.Metal != null).Select(v => v.Metal!).GroupBy(m => m.Id).Select(g => g.First()).ToList();
+                        foreach (var m in distinctMetals)
+                        {
+                            var firstVar = p.Variants.FirstOrDefault(v => v.MetalId == m.Id);
+                            decimal offset = firstVar != null && firstVar.Price > 0 ? (firstVar.Price - p.BasePriceUSD) : 0m;
+                            metalVariants.Add(offset != 0 ? $"{m.Name} ({(offset >= 0 ? "+" : "")}{offset:F0} USD)" : m.Name);
+                        }
+
+                        var distinctCarats = p.Variants.Where(v => v.Carat != null).Select(v => v.Carat!).GroupBy(c => c.Id).Select(g => g.First()).ToList();
+                        foreach (var c in distinctCarats)
+                        {
+                            var firstVar = p.Variants.FirstOrDefault(v => v.CaratId == c.Id);
+                            decimal offset = firstVar != null && firstVar.Price > 0 ? (firstVar.Price - p.BasePriceUSD) : 0m;
+                            caratVariants.Add(offset != 0 ? $"{c.Label} ({(offset >= 0 ? "+" : "")}{offset:F0} USD)" : c.Label);
+                        }
+                    }
 
                     if (metalVariants.Count == 0)
                     {
-                        metalVariants = await _context.Metals.OrderBy(m => m.Id).Select(m => m.Name).ToListAsync();
+                        var defaultMetals = await _context.Metals.OrderBy(m => m.Id).ToListAsync();
+                        metalVariants = defaultMetals.Select(m => {
+                            decimal offset = m.Name.Contains("14K") ? 180 : m.Name.Contains("18K") ? 480 : m.Name.Contains("Platinum") ? 850 : 0;
+                            return offset != 0 ? $"{m.Name} (+{offset:F0} USD)" : m.Name;
+                        }).ToList();
                     }
-
-                    var caratVariants = p.Variants
-                        .Where(v => v.Carat != null && !string.IsNullOrWhiteSpace(v.Carat.Label))
-                        .Select(v => v.Carat!.Label)
-                        .Distinct()
-                        .ToList();
 
                     if (caratVariants.Count == 0)
                     {
-                        caratVariants = await _context.CaratOptions.OrderBy(c => c.Id).Select(c => c.Label).ToListAsync();
+                        var defaultCarats = await _context.CaratOptions.OrderBy(c => c.Id).ToListAsync();
+                        caratVariants = defaultCarats.Select(c => {
+                            decimal offset = c.Label.Contains("1.5") ? 450 : c.Label.Contains("2.0") ? 1100 : c.Label.Contains("2.5") ? 1800 : c.Label.Contains("3.0") ? 2600 : 0;
+                            return offset != 0 ? $"{c.Label} (+{offset:F0} USD)" : c.Label;
+                        }).ToList();
                     }
 
                     return new CatalogItem
@@ -487,7 +575,8 @@ namespace SAT1.BAL
                         MetalOptions = string.Join("|", metalVariants),
                         CaratOptions = string.Join("|", caratVariants),
                         IsActive = true,
-                        CreatedAt = p.CreatedAt
+                        CreatedAt = p.CreatedAt,
+                        Variants = variantDtoList
                     };
                 }
             }

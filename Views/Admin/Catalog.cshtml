@@ -280,6 +280,7 @@
 <script>
   let allCatalogItems = [];
   let allCategories = [];
+  const loadedCategoryItems = {};
 
   function fixImgUrl(path) {
     if (!path) return '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';
@@ -298,22 +299,33 @@
     if (!container) return;
 
     try {
-      const [catRes, itemRes] = await Promise.all([
-        fetch('/api/catalogapi/admin-categories'),
-        fetch('/api/catalogapi/items')
-      ]);
-
+      // Step 1: Instant load categories & real counts (<100ms)
+      const catRes = await fetch('/api/catalogapi/admin-categories');
       allCategories = await catRes.json();
-      allCatalogItems = await itemRes.json();
 
-      renderCatalogSections(allCategories, allCatalogItems);
+      renderInitialCategoryHeaders(allCategories);
+
+      // Step 2: Background prefetch items for instant search filtering
+      fetch('/api/catalogapi/items')
+        .then(res => res.json())
+        .then(items => {
+          allCatalogItems = items;
+          // Cache by category
+          items.forEach(it => {
+            const cId = (it.categoryId || '').toLowerCase();
+            if (!loadedCategoryItems[cId]) loadedCategoryItems[cId] = [];
+            loadedCategoryItems[cId].push(it);
+          });
+        })
+        .catch(e => console.warn('Background items prefetch error:', e));
+
     } catch (err) {
       console.error('Error loading grouped catalog:', err);
       container.innerHTML = '<div style="background:#ffffff;padding:32px;border-radius:16px;text-align:center;color:#ef4444;border:1px solid #e2e8f0;">Failed to load catalog data from Neon DB database.</div>';
     }
   }
 
-  function renderCatalogSections(categories, items) {
+  function renderInitialCategoryHeaders(categories) {
     const container = document.getElementById('catalogSectionsContainer');
     if (!container) return;
 
@@ -328,46 +340,8 @@
     };
 
     container.innerHTML = categories.map(cat => {
-      const catItems = items.filter(i => (i.categoryId || '').toLowerCase() === (cat.id || '').toLowerCase());
       const icon = iconMap[cat.id] || 'fa-gem';
-
-      let gridHtml = '';
-      if (catItems.length === 0) {
-        gridHtml = `
-          <div style="padding:24px;text-align:center;color:#64748b;font-size:14px;background:#ffffff;border-radius:12px;border:1px solid #e2e8f0;">
-            No jewelry items currently in this section. Click <strong style="color:#b45309;">+ Add Item to ${cat.name}</strong> to add one.
-          </div>
-        `;
-      } else {
-        gridHtml = `
-          <div class="product-square-grid">
-            ${catItems.map(item => `
-              <div class="product-square-card">
-                <div class="product-square-img-wrap">
-                  <img src="${fixImgUrl(item.imageUrl)}" class="product-square-img" onerror="this.src='/assets/ivevar/exclusive_regal_star_diamond_ring.jpg'" alt="${item.name}" />
-                </div>
-                
-                <h4 class="product-square-title" title="${item.name}">${item.name}</h4>
-                <div style="font-size:11.5px;color:#64748b;margin-bottom:10px;">${item.spec || cat.name}</div>
-                
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;border-top:1px solid #f1f5f9;">
-                  <span class="product-square-price">$${Number(item.priceUSD || item.price || 0).toLocaleString()} USD</span>
-                  <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">Active</span>
-                </div>
-
-                <div style="display:flex; gap:8px; margin-top:12px;">
-                  <a href="/Admin/AddProduct?editId=${item.id}" class="btn-card-edit" onclick="event.stopPropagation();">
-                    <i class="fa-solid fa-pen-to-square"></i> Edit
-                  </a>
-                  <button class="btn-card-delete" onclick="deleteCatalogItem('${item.id}', '${(item.name || '').replace(/'/g, "\\'")}', event)">
-                    <i class="fa-solid fa-trash"></i> Delete
-                  </button>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
+      const count = cat.itemCount || 0;
 
       return `
         <div class="cat-section-card" id="cat-card-${cat.id}">
@@ -378,7 +352,7 @@
                 <h3 class="cat-section-title">
                   <i class="fa-solid ${icon}" style="color:#b45309;"></i> ${cat.name}
                   <span style="font-size:11px;background:rgba(180,83,9,0.08);color:#b45309;padding:2px 8px;border-radius:4px;border:1px solid rgba(180,83,9,0.2);">${cat.badge || 'Popular'}</span>
-                  <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:12px;font-weight:700;">${catItems.length} items</span>
+                  <span style="font-size:11px;background:#f1f5f9;color:#475569;padding:2px 8px;border-radius:12px;font-weight:700;">${count} items</span>
                 </h3>
               </div>
             </div>
@@ -395,14 +369,59 @@
 
           <!-- COLLAPSED BY DEFAULT (Task 4) -->
           <div class="cat-accordion-body" id="cat-body-${cat.id}" style="display: none;">
-            ${gridHtml}
+            <div id="cat-grid-${cat.id}" style="padding:24px; text-align:center; color:#64748b;">
+              <i class="fa-solid fa-spinner fa-spin" style="color:#b45309;"></i> Loading ${cat.name} collection...
+            </div>
           </div>
         </div>
       `;
     }).join('');
   }
 
-  function toggleCategoryAccordion(catId) {
+  function renderCategoryItemsGrid(catId, catItems) {
+    const gridContainer = document.getElementById(`cat-grid-${catId}`);
+    if (!gridContainer) return;
+
+    if (!catItems || catItems.length === 0) {
+      gridContainer.innerHTML = `
+        <div style="padding:24px;text-align:center;color:#64748b;font-size:14px;background:#ffffff;border-radius:12px;border:1px solid #e2e8f0;">
+          No jewelry items currently in this section. Click <strong style="color:#b45309;">+ Add Item</strong> to publish one.
+        </div>
+      `;
+      return;
+    }
+
+    gridContainer.innerHTML = `
+      <div class="product-square-grid">
+        ${catItems.map(item => `
+          <div class="product-square-card">
+            <div class="product-square-img-wrap">
+              <img src="${fixImgUrl(item.imageUrl)}" class="product-square-img" onerror="this.src='/assets/ivevar/exclusive_regal_star_diamond_ring.jpg'" alt="${item.name}" />
+            </div>
+            
+            <h4 class="product-square-title" title="${item.name}">${item.name}</h4>
+            <div style="font-size:11.5px;color:#64748b;margin-bottom:10px;">${item.spec || ''}</div>
+            
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;border-top:1px solid #f1f5f9;">
+              <span class="product-square-price">$${Number(item.priceUSD || item.price || 0).toLocaleString()} USD</span>
+              <span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">Active</span>
+            </div>
+
+            <div style="display:flex; gap:8px; margin-top:12px;">
+              <a href="/Admin/AddProduct?editId=${item.id}" class="btn-card-edit" onclick="event.stopPropagation();">
+                <i class="fa-solid fa-pen-to-square"></i> Edit
+              </a>
+              <button class="btn-card-delete" onclick="deleteCatalogItem('${item.id}', '${(item.name || '').replace(/'/g, "\\'")}', event)">
+                <i class="fa-solid fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  async function toggleCategoryAccordion(catId) {
     const body = document.getElementById(`cat-body-${catId}`);
     const header = document.getElementById(`cat-header-${catId}`);
     const arrow = document.getElementById(`cat-arrow-${catId}`);
@@ -413,6 +432,21 @@
       body.style.display = 'block';
       header.classList.add('active');
       arrow.style.transform = 'rotate(90deg)';
+
+      // Fetch or render items on demand
+      const cKey = catId.toString().toLowerCase();
+      if (loadedCategoryItems[cKey]) {
+        renderCategoryItemsGrid(catId, loadedCategoryItems[cKey]);
+      } else {
+        try {
+          const res = await fetch(`/api/catalogapi/category-items/${catId}`);
+          const items = await res.json();
+          loadedCategoryItems[cKey] = items;
+          renderCategoryItemsGrid(catId, items);
+        } catch (e) {
+          console.error(e);
+        }
+      }
     } else {
       body.style.display = 'none';
       header.classList.remove('active');
@@ -431,13 +465,37 @@
     const selectedCat = document.getElementById('filterCategory').value.toLowerCase();
     const query = document.getElementById('searchCatalog').value.toLowerCase().trim();
 
-    const filteredItems = allCatalogItems.filter(item => {
-      const matchesCat = selectedCat === 'all' || (item.categoryId || '').toLowerCase() === selectedCat;
-      const matchesSearch = !query || (item.name || '').toLowerCase().includes(query) || (item.spec || '').toLowerCase().includes(query);
-      return matchesCat && matchesSearch;
-    });
+    if (!allCatalogItems || allCatalogItems.length === 0) return;
 
-    renderCatalogSections(allCategories, filteredItems);
+    allCategories.forEach(cat => {
+      const cKey = cat.id.toString().toLowerCase();
+      const catItems = allCatalogItems.filter(i => (i.categoryId || '').toLowerCase() === cKey);
+      const filtered = catItems.filter(item => {
+        const matchesCat = selectedCat === 'all' || cKey === selectedCat;
+        const matchesSearch = !query || (item.name || '').toLowerCase().includes(query) || (item.spec || '').toLowerCase().includes(query);
+        return matchesCat && matchesSearch;
+      });
+
+      const body = document.getElementById(`cat-body-${cat.id}`);
+      const header = document.getElementById(`cat-header-${cat.id}`);
+      const arrow = document.getElementById(`cat-arrow-${cat.id}`);
+
+      if (selectedCat !== 'all' || query) {
+        if (filtered.length > 0 && (selectedCat === 'all' || selectedCat === cKey)) {
+          if (body) body.style.display = 'block';
+          if (header) header.classList.add('active');
+          if (arrow) arrow.style.transform = 'rotate(90deg)';
+          renderCategoryItemsGrid(cat.id, filtered);
+        } else {
+          if (body) body.style.display = 'none';
+          if (header) header.classList.remove('active');
+          if (arrow) arrow.style.transform = 'rotate(0deg)';
+        }
+      } else {
+        renderCategoryItemsGrid(cat.id, catItems);
+      }
+    });
+  }
 
     // If searching or filtering, automatically expand matching accordions
     if (selectedCat !== 'all' || query) {

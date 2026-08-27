@@ -1385,8 +1385,8 @@
 
         <!-- Primary Action Buttons (Add to Cart & Buy It Now & Save to Wishlist) -->
         <div class="pd-main-action-buttons">
-          <button type="button" class="btn-add-cart-main" onclick="addToCartDetailed('@Model.Id', '@Model.Name', @Model.Price, '@mainImage')">
-            <i class="fa-solid fa-bag-shopping" style="margin-right:8px;"></i> Add to Cart
+          <button type="button" class="btn-add-cart-main" id="btnAddToCartMain" onclick="addToCartDetailed('@Model.Id', '@Model.Name', @Model.Price, '@mainImage')">
+            <i class="fa-solid fa-bag-shopping" style="margin-right:8px;"></i> ADD TO CART • $@Model.Price.ToString("N2")
           </button>
           <a href="/Product/Cart" class="btn-buy-now-main">
             <i class="fa-solid fa-bolt" style="margin-right:8px;"></i> Buy It Now
@@ -1632,26 +1632,91 @@
       </div>
     </div>
 
-    <!-- "What People Are Saying" Testimonials Section (Screenshot 5) -->
-    <h2 class="sec-header">What People Are Saying</h2>
-    <div class="testi-grid">
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <div class="testi-title">Beautiful Earrings, Fast Delivery</div>
-        <div class="testi-quote">"Beautiful earrings and great quality! The shipment arrived quickly and the packaging was classy. I'm happy with my purchase."</div>
-        <div class="testi-author">Anjali M.</div>
+    <!-- Customer Reviews & Ratings Section (Interactive & Managed by Admin) -->
+    <div id="productReviewsSection" style="margin-top: 70px; margin-bottom: 70px;">
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 30px;">
+        <div>
+          <h2 class="sec-header" style="margin: 0; text-align: left;">Customer Reviews &amp; Ratings</h2>
+          <p style="font-size: 14px; color: #94a3b8; margin: 4px 0 0;">Verified buyer feedback for @Model.Name</p>
+        </div>
+
+        <button type="button" onclick="openReviewModal()" style="background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; border: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(180, 83, 9, 0.25);">
+          <i class="fa-solid fa-pen-to-square"></i> Write a Review
+        </button>
       </div>
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <div class="testi-title">Stylish and Unique Bracelets</div>
-        <div class="testi-quote">"The bracelets here are unique and stylish. I bought one for myself and one as a birthday gift for my sister. Both loved them!"</div>
-        <div class="testi-author">Lucas W.</div>
+
+      <!-- Rating Summary Card -->
+      <div style="background: #0f172a; border-radius: 20px; padding: 32px; border: 1px solid #1e293b; color: #ffffff; display: flex; flex-wrap: wrap; gap: 32px; align-items: center; margin-bottom: 32px;">
+        <div style="text-align: center; min-width: 140px;">
+          <div id="reviewAvgScore" style="font-size: 48px; font-weight: 800; color: #d4b270; line-height: 1;">5.0</div>
+          <div style="color: #f59e0b; font-size: 18px; margin: 8px 0 4px;">★★★★★</div>
+          <div id="reviewTotalCount" style="font-size: 12px; color: #94a3b8;">Based on 2 reviews</div>
+        </div>
+
+        <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 8px;" id="ratingBreakdownBars">
+          <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: #cbd5e1;">
+            <span>5 Star</span>
+            <div style="flex: 1; height: 8px; background: #1e293b; border-radius: 4px; overflow: hidden;">
+              <div style="width: 100%; height: 100%; background: #d4b270;"></div>
+            </div>
+            <span>100%</span>
+          </div>
+        </div>
       </div>
-      <div class="testi-card">
-        <div class="testi-stars">★★★★★</div>
-        <div class="testi-title">Traditional with a Modern Twist</div>
-        <div class="testi-quote">"Lovely collection of jewelry with a modern twist! I bought a set for a wedding and got compliments. The team was very helpful."</div>
-        <div class="testi-author">Noah T.</div>
+
+      <!-- Reviews Feed List -->
+      <div id="reviewsFeedList" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;">
+        <!-- Loaded via JavaScript API -->
+      </div>
+    </div>
+
+    <!-- Write a Review Modal -->
+    <div id="writeReviewModal" style="display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
+      <div style="background: #0f172a; border: 1px solid #334155; border-radius: 20px; max-width: 520px; width: 100%; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); color: #ffffff;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #1e293b; padding-bottom: 14px;">
+          <h3 style="margin: 0; font-size: 20px; font-weight: 800; color: #d4b270;">Write a Customer Review</h3>
+          <button onclick="closeReviewModal()" style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <form id="submitReviewForm" onsubmit="handleReviewSubmit(event)">
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Overall Rating</label>
+            <div id="starPickerGroup" style="display: flex; gap: 8px; font-size: 24px; color: #f59e0b; cursor: pointer;">
+              <span onclick="setRatingValue(1)">★</span>
+              <span onclick="setRatingValue(2)">★</span>
+              <span onclick="setRatingValue(3)">★</span>
+              <span onclick="setRatingValue(4)">★</span>
+              <span onclick="setRatingValue(5)">★</span>
+            </div>
+            <input type="hidden" id="formRatingVal" value="5" />
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Your Name</label>
+              <input type="text" id="reviewAuthorName" required placeholder="e.g. Jessica S." style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #ffffff; font-size: 13px;" />
+            </div>
+            <div>
+              <label style="display: block; font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Your Email</label>
+              <input type="email" id="reviewAuthorEmail" required placeholder="name@domain.com" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #ffffff; font-size: 13px;" />
+            </div>
+          </div>
+
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Review Headline</label>
+            <input type="text" id="reviewFormTitle" required placeholder="e.g. Absolutely stunning diamond brilliance!" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #ffffff; font-size: 13px;" />
+          </div>
+
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #cbd5e1; margin-bottom: 6px;">Detailed Feedback</label>
+            <textarea id="reviewFormContent" required rows="4" placeholder="Share your experience with the craftsmanship, sparkle, certification, and packaging..." style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #334155; background: #1e293b; color: #ffffff; font-size: 13px;"></textarea>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" onclick="closeReviewModal()" style="background: #1e293b; color: #cbd5e1; border: 1px solid #334155; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer;">Cancel</button>
+            <button type="submit" id="btnSubmitReview" style="background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; cursor: pointer;">Post Review</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -1708,9 +1773,34 @@
     let selectedMetal = '@(metalList.FirstOrDefault()?.Name ?? "18K Yellow Gold")';
     let selectedCarat = '@(caratList.FirstOrDefault()?.Label ?? "1.50 CT")';
 
-    // Database Variant Price Adjustments (USD - Dynamically generated from Backend Database Model)
-    const metalAdjustments = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(metalList.ToDictionary(m => m.Name, m => m.Offset)));
-    const caratAdjustments = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(caratList.ToDictionary(c => c.Label, c => c.Offset)));
+    // Base Adjustments from Model
+    let metalAdjustments = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(metalList.ToDictionary(m => m.Name, m => m.Offset)));
+    let caratAdjustments = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(caratList.ToDictionary(c => c.Label, c => c.Offset)));
+
+    // Fetch dynamic database-backed pricing rules asynchronously to react to real-time Admin changes
+    fetch('/api/ProductApi/pricing-rules')
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.rules && data.rules.length > 0) {
+          data.rules.forEach(r => {
+            if (r.ruleType === 'Metal') {
+              for (let k in metalAdjustments) {
+                if (k.toLowerCase().includes(r.displayName.toLowerCase()) || r.displayName.toLowerCase().includes(k.toLowerCase())) {
+                  metalAdjustments[k] = r.priceOffsetUSD;
+                }
+              }
+            } else if (r.ruleType === 'Carat') {
+              for (let k in caratAdjustments) {
+                if (k.toLowerCase().includes(r.displayName.toLowerCase().replace(' ct','')) || r.displayName.toLowerCase().includes(k.toLowerCase())) {
+                  caratAdjustments[k] = r.priceOffsetUSD;
+                }
+              }
+            }
+          });
+          recalculateVariantPrice();
+        }
+      })
+      .catch(_ => {});
 
     function recalculateVariantPrice() {
       const metalAdj = metalAdjustments[selectedMetal] || 0;
@@ -1718,20 +1808,119 @@
 
       const currentPriceUSD = Math.max(100, basePriceUSD + metalAdj + caratAdj);
       const originalPriceUSD = Math.floor(currentPriceUSD * 1.15);
-      const monthlyInstallment = (currentPriceUSD / 4).toFixed(2);
+      const monthlyInstallment = (currentPriceUSD / 11.08).toFixed(2);
 
       // Update UI Elements dynamically
       const mainUsdEl = document.getElementById('displayPriceUSD');
       const origUsdEl = document.getElementById('displayPriceOrigUSD');
       const monthlyEl = document.getElementById('displayMonthlyInstallment');
       const stickyPriceEl = document.getElementById('stickyDisplayPrice');
+      const btnAddToCart = document.getElementById('btnAddToCartMain');
 
-      if (mainUsdEl) mainUsdEl.textContent = `$ ${currentPriceUSD.toLocaleString()} USD`;
-      if (origUsdEl) origUsdEl.textContent = `$ ${originalPriceUSD.toLocaleString()}`;
-      if (monthlyEl) monthlyEl.textContent = `$${monthlyInstallment}/mo`;
-      if (stickyPriceEl) stickyPriceEl.textContent = `$ ${currentPriceUSD.toLocaleString()} USD`;
+      if (mainUsdEl) mainUsdEl.textContent = `$ ${currentPriceUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD`;
+      if (origUsdEl) origUsdEl.textContent = `$ ${originalPriceUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      if (monthlyEl) monthlyEl.innerHTML = `$${monthlyInstallment}/mo</strong> with <span style="color:var(--champagne-gold); font-weight:700;">ShopPay</span> <i class="fa-solid fa-circle-question" style="font-size:11px; opacity:0.6;"></i>`;
+      if (stickyPriceEl) stickyPriceEl.textContent = `$ ${currentPriceUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} USD`;
+      if (btnAddToCart) {
+        btnAddToCart.innerHTML = `<i class="fa-solid fa-bag-shopping" style="margin-right:8px;"></i> ADD TO CART • $${currentPriceUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      }
 
       window.activeVariantPriceUSD = currentPriceUSD;
+    }
+
+    // ==========================================
+    // REVIEWS SYSTEM JAVASCRIPT
+    // ==========================================
+    function loadProductReviews() {
+      fetch('/api/ProductApi/@Model.Id/reviews')
+        .then(res => res.json())
+        .then(res => {
+          if (res.success && res.data) {
+            const data = res.data;
+            document.getElementById('reviewAvgScore').innerText = data.averageRating.toFixed(1);
+            document.getElementById('reviewTotalCount').innerText = 'Based on ' + data.totalReviews + ' reviews';
+
+            const feed = document.getElementById('reviewsFeedList');
+            if (data.reviews && data.reviews.length > 0) {
+              let html = '';
+              data.reviews.forEach(r => {
+                let stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                html += `
+                  <div style="background:#0f172a; border:1px solid #1e293b; border-radius:16px; padding:24px; color:#ffffff;">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+                      <div>
+                        <div style="color:#f59e0b; font-size:16px; margin-bottom:4px;">${stars}</div>
+                        <h4 style="font-size:15px; font-weight:800; margin:0; color:#ffffff;">${r.reviewTitle}</h4>
+                      </div>
+                      ${r.isVerifiedBuyer ? '<span style="font-size:11px; background:rgba(212,178,112,0.15); color:#d4b270; padding:3px 8px; border-radius:6px; font-weight:700;">Verified Buyer</span>' : ''}
+                    </div>
+                    <p style="font-size:13px; color:#cbd5e1; line-height:1.5; margin:0 0 14px;">"${r.reviewText}"</p>
+                    <div style="font-size:12px; color:#64748b;">— <strong style="color:#94a3b8;">${r.customerName}</strong> • ${new Date(r.createdAt).toLocaleDateString()}</div>
+                  </div>
+                `;
+              });
+              feed.innerHTML = html;
+            }
+          }
+        })
+        .catch(_ => {});
+    }
+
+    loadProductReviews();
+
+    function openReviewModal() {
+      document.getElementById('writeReviewModal').style.display = 'flex';
+    }
+
+    function closeReviewModal() {
+      document.getElementById('writeReviewModal').style.display = 'none';
+    }
+
+    function setRatingValue(val) {
+      document.getElementById('formRatingVal').value = val;
+      const spans = document.querySelectorAll('#starPickerGroup span');
+      spans.forEach((s, idx) => {
+        s.style.color = idx < val ? '#f59e0b' : '#334155';
+      });
+    }
+
+    function handleReviewSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitReview');
+      btn.disabled = true;
+      btn.innerText = 'Submitting...';
+
+      const payload = {
+        productName: '@Model.Name',
+        customerName: document.getElementById('reviewAuthorName').value.trim(),
+        customerEmail: document.getElementById('reviewAuthorEmail').value.trim(),
+        rating: parseInt(document.getElementById('formRatingVal').value) || 5,
+        reviewTitle: document.getElementById('reviewFormTitle').value.trim(),
+        reviewText: document.getElementById('reviewFormContent').value.trim()
+      };
+
+      fetch('/api/ProductApi/@Model.Id/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.innerText = 'Post Review';
+        if (data.success) {
+          alert('✨ Thank you! Your review has been recorded.');
+          closeReviewModal();
+          loadProductReviews();
+        } else {
+          alert(data.message);
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.innerText = 'Post Review';
+        alert('Network error submitting review.');
+      });
     }
 
     window.addEventListener('scroll', function() {
