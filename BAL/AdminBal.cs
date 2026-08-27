@@ -233,14 +233,15 @@ namespace SAT1.BAL
 
             if (rules.Count == 0)
             {
-                // Seed standard defaults matching Bianca Chiara luxury tiers
+                // Seed standard defaults matching Bianca Chiara luxury tiers + Silver
                 var defaultRules = new List<DynamicPricingRule>
                 {
                     // Metals
-                    new() { RuleType = "Metal", Code = "10k_gold", DisplayName = "10K Gold", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true },
-                    new() { RuleType = "Metal", Code = "14k_gold", DisplayName = "14K Gold", PriceOffsetUSD = 180, DisplayOrder = 2, IsActive = true },
-                    new() { RuleType = "Metal", Code = "18k_gold", DisplayName = "18K Gold", PriceOffsetUSD = 480, DisplayOrder = 3, IsActive = true },
-                    new() { RuleType = "Metal", Code = "platinum_950", DisplayName = "950 Platinum", PriceOffsetUSD = 850, DisplayOrder = 4, IsActive = true },
+                    new() { RuleType = "Metal", Code = "silver_925", DisplayName = "925 Sterling Silver", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true },
+                    new() { RuleType = "Metal", Code = "10k_gold", DisplayName = "10K Gold", PriceOffsetUSD = 50, DisplayOrder = 2, IsActive = true },
+                    new() { RuleType = "Metal", Code = "14k_gold", DisplayName = "14K Gold", PriceOffsetUSD = 180, DisplayOrder = 3, IsActive = true },
+                    new() { RuleType = "Metal", Code = "18k_gold", DisplayName = "18K Gold", PriceOffsetUSD = 480, DisplayOrder = 4, IsActive = true },
+                    new() { RuleType = "Metal", Code = "platinum_950", DisplayName = "950 Platinum", PriceOffsetUSD = 850, DisplayOrder = 5, IsActive = true },
                     // Carats
                     new() { RuleType = "Carat", Code = "1.00_ct", DisplayName = "1.00 CT", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true },
                     new() { RuleType = "Carat", Code = "1.25_ct", DisplayName = "1.25 CT", PriceOffsetUSD = 250, DisplayOrder = 2, IsActive = true },
@@ -256,6 +257,24 @@ namespace SAT1.BAL
                 _context.DynamicPricingRules.AddRange(defaultRules);
                 await _context.SaveChangesAsync();
                 return defaultRules;
+            }
+
+            // Ensure Silver rule exists in existing databases
+            if (!rules.Any(r => r.Code == "silver_925" || r.DisplayName.Contains("Silver", StringComparison.OrdinalIgnoreCase)))
+            {
+                var silverRule = new DynamicPricingRule
+                {
+                    RuleType = "Metal",
+                    Code = "silver_925",
+                    DisplayName = "925 Sterling Silver",
+                    PriceOffsetUSD = 0,
+                    DisplayOrder = 1,
+                    IsActive = true,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                _context.DynamicPricingRules.Add(silverRule);
+                await _context.SaveChangesAsync();
+                rules.Insert(0, silverRule);
             }
 
             return rules;

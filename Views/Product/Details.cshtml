@@ -70,44 +70,134 @@
         .Select(g => g.First())
         .ToList();
 
-    ViewData["Title"] = $"{Model.Name} — SAT Jewel Luxury Fine Jewelry";
-    ViewData["Description"] = $"Buy {Model.Name} from SAT Jewel. Certified Lab-Grown Diamonds & Moissanite with custom metal choices and free insured global delivery.";
-    ViewData["Keywords"] = $"{Model.Name}, {categoryName}, Lab Grown Diamond Ring, Moissanite Jewelry, SAT Jewel";
-    ViewData["OgImage"] = mainImage.StartsWith("http") ? mainImage : $"{Context.Request.Scheme}://{Context.Request.Host}{mainImage}";
+    var prodCanonical = $"{Context.Request.Scheme}://{Context.Request.Host}/Product/Details/{Model.Id}";
+    var absoluteImg = mainImage.StartsWith("http") ? mainImage : $"{Context.Request.Scheme}://{Context.Request.Host}{mainImage}";
+    var galleryAbsolute = galleryList.Select(g => g.StartsWith("http") ? g : $"{Context.Request.Scheme}://{Context.Request.Host}{g}").ToList();
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <partial name="_SeoHead" />
+  <title>@Model.Name — Buy Online in USA | SAT Jewel</title>
+  <meta name="title" content="@Model.Name — Buy Online in USA | SAT Jewel" />
+  <meta name="description" content="Shop @Model.Name at factory-direct value. 100% GIA/IGI certified lab-grown diamonds, customizable in 10K/14K/18K gold & 950 platinum with free worldwide insured delivery." />
+  <meta name="keywords" content="@Model.Name, @categoryName, Lab Grown Solitaire, Certified Diamond Ring, Custom Jewelry, SAT Jewel" />
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+  <link rel="canonical" href="@prodCanonical" />
 
-  <!-- Product Schema.org JSON-LD Structured Data for Google Ranking -->
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="product" />
+  <meta property="og:url" content="@prodCanonical" />
+  <meta property="og:title" content="@Model.Name — SAT Jewel" />
+  <meta property="og:description" content="Shop @Model.Name. 100% certified lab-grown diamonds and moissanite solitaires with free insured shipping." />
+  <meta property="og:image" content="@absoluteImg" />
+  <meta property="og:site_name" content="SAT Jewel" />
+  <meta property="product:price:amount" content="@Model.Price" />
+  <meta property="product:price:currency" content="USD" />
+  <meta property="product:availability" content="in stock" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="@Model.Name — SAT Jewel" />
+  <meta name="twitter:description" content="Shop @Model.Name. Certified lab diamonds with free insured worldwide shipping." />
+  <meta name="twitter:image" content="@absoluteImg" />
+
+  <!-- BreadcrumbList Schema -->
+  <script type="application/ld+json">
+  {
+    "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "@Context.Request.Scheme://@Context.Request.Host"
+      },
+      {
+        "@@type": "ListItem",
+        "position": 2,
+        "name": "@categoryName",
+        "item": "@Context.Request.Scheme://@Context.Request.Host/Product/Category?id=@Model.CategoryId"
+      },
+      {
+        "@@type": "ListItem",
+        "position": 3,
+        "name": "@Model.Name",
+        "item": "@prodCanonical"
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Rich Results Product Schema.org JSON-LD -->
   <script type="application/ld+json">
   {
     "@@context": "https://schema.org/",
     "@@type": "Product",
     "name": "@Model.Name",
-    "image": "@(mainImage.StartsWith("http") ? mainImage : $"{Context.Request.Scheme}://{Context.Request.Host}{mainImage}")",
-    "description": "@(string.IsNullOrWhiteSpace(Model.Spec) ? Model.Name : Model.Spec)",
-    "sku": "@Model.Id",
+    "image": [
+      @for (int idx = 0; idx < galleryAbsolute.Count; idx++)
+      {
+        <text>"@galleryAbsolute[idx]"@(idx < galleryAbsolute.Count - 1 ? "," : "")</text>
+      }
+    ],
+    "description": "@(string.IsNullOrWhiteSpace(Model.Spec) ? $"Handcrafted certified lab-grown diamond {Model.Name} with exceptional brilliance and conflict-free origin." : Model.Spec.Replace("\"", "\\\""))",
+    "sku": "SAT-@Model.Id",
+    "mpn": "SAT-RING-@Model.Id",
+    "category": "@categoryName",
     "brand": {
       "@@type": "Brand",
       "name": "SAT Jewel"
     },
     "offers": {
       "@@type": "Offer",
-      "url": "@($"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}")",
+      "url": "@prodCanonical",
       "priceCurrency": "USD",
       "price": "@Model.Price",
+      "priceValidUntil": "@DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd")",
       "availability": "https://schema.org/InStock",
-      "itemCondition": "https://schema.org/NewCondition"
+      "itemCondition": "https://schema.org/NewCondition",
+      "hasMerchantReturnPolicy": {
+        "@@type": "MerchantReturnPolicy",
+        "applicableCountry": "US",
+        "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+        "merchantReturnDays": 30,
+        "returnMethod": "https://schema.org/ReturnByMail",
+        "returnFees": "https://schema.org/FreeReturn"
+      },
+      "shippingDetails": {
+        "@@type": "OfferShippingDetails",
+        "shippingRate": {
+          "@@type": "MonetaryAmount",
+          "value": "0",
+          "currency": "USD"
+        },
+        "shippingDestination": {
+          "@@type": "DefinedRegion",
+          "addressCountry": "US"
+        },
+        "deliveryTime": {
+          "@@type": "ShippingDeliveryTime",
+          "handlingTime": {
+            "@@type": "QuantitativeValue",
+            "minValue": 1,
+            "maxValue": 3,
+            "unitCode": "d"
+          },
+          "transitTime": {
+            "@@type": "QuantitativeValue",
+            "minValue": 3,
+            "maxValue": 5,
+            "unitCode": "d"
+          }
+        }
+      }
     },
     "aggregateRating": {
       "@@type": "AggregateRating",
       "ratingValue": "4.9",
-      "reviewCount": "142"
+      "reviewCount": "142",
+      "bestRating": "5"
     }
   }
   </script>
@@ -1321,13 +1411,14 @@
             @foreach (var metal in metalList)
             {
               var isDefault = metal == metalList.First();
-              var bgStyle = metal.Name.Contains("Rose") ? "linear-gradient(135deg, #fbcfe8 0%, #f43f5e 100%)"
+              var bgStyle = metal.Name.Contains("Silver") ? "linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%)"
+                          : metal.Name.Contains("Rose") ? "linear-gradient(135deg, #fbcfe8 0%, #f43f5e 100%)"
                           : metal.Name.Contains("White") ? "linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%)"
                           : metal.Name.Contains("Platinum") ? "linear-gradient(135deg, #e2e8f0 0%, #64748b 100%)"
                           : "linear-gradient(135deg, #fef08a 0%, #d97706 100%)";
               
               var colorTag = metal.Name.Contains("Yellow") ? "Y" : metal.Name.Contains("White") ? "W" : metal.Name.Contains("Rose") ? "R" : "";
-              var karats = metal.Name.Contains("10K") ? "10K" : metal.Name.Contains("14K") ? "14K" : metal.Name.Contains("18K") ? "18K" : "PT";
+              var karats = metal.Name.Contains("Silver") ? "925" : metal.Name.Contains("10K") ? "10K" : metal.Name.Contains("14K") ? "14K" : metal.Name.Contains("18K") ? "18K" : "PT";
               var abbr = karats + (string.IsNullOrEmpty(colorTag) ? "" : " " + colorTag);
               
               <button type="button" class="metal-swatch-btn @(isDefault ? "active" : "")" style="background: @bgStyle; font-size:11px; padding:6px 10px; width:auto; border-radius:6px;" onclick="setMetal('@metal.Name', this)" title="@metal.Name">@abbr</button>

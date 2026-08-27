@@ -384,46 +384,55 @@
             var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
         }
 
+        <!-- 1. Overview -->
         <a href="/Admin/Index" class="adm-nav-link @(currentAction == "Index" ? "active" : "")">
           <i class="fa-solid fa-chart-line"></i>
           <span>Overview</span>
         </a>
 
-        <a href="/Admin/Orders" class="adm-nav-link @(currentAction == "Orders" ? "active" : "")">
-          <i class="fa-solid fa-box-open"></i>
-          <span>Orders & Tracking</span>
-        </a>
-
-        <a href="/Admin/Users" class="adm-nav-link @(currentAction == "Users" ? "active" : "")">
-          <i class="fa-solid fa-users"></i>
-          <span>Customer Directory</span>
-        </a>
-
+        <!-- 2. Jewelry Catalog -->
         <a href="/Admin/Catalog" class="adm-nav-link @(currentAction == "Catalog" ? "active" : "")">
           <i class="fa-solid fa-gem"></i>
           <span>Jewelry Catalog</span>
         </a>
 
+        <!-- 3. Publish New Item -->
         <a href="/Admin/AddProduct" class="adm-nav-link @(currentAction == "AddProduct" ? "active" : "")">
           <i class="fa-solid fa-plus-circle"></i>
           <span>Publish New Item</span>
         </a>
 
+        <!-- 4. Manage Categories -->
         <a href="/Admin/Categories" class="adm-nav-link @(currentAction == "Categories" ? "active" : "")">
           <i class="fa-solid fa-layer-group"></i>
           <span>Manage Categories</span>
         </a>
 
+        <!-- 5. Metal & Carat Pricing -->
         <a href="/Admin/Pricing" class="adm-nav-link @(currentAction == "Pricing" ? "active" : "")">
           <i class="fa-solid fa-scale-balanced"></i>
           <span>Metal & Carat Pricing</span>
         </a>
 
+        <!-- 6. Orders & Tracking -->
+        <a href="/Admin/Orders" class="adm-nav-link @(currentAction == "Orders" ? "active" : "")">
+          <i class="fa-solid fa-box-open"></i>
+          <span>Orders & Tracking</span>
+        </a>
+
+        <!-- 7. Customer Directory -->
+        <a href="/Admin/Users" class="adm-nav-link @(currentAction == "Users" ? "active" : "")">
+          <i class="fa-solid fa-users"></i>
+          <span>Customer Directory</span>
+        </a>
+
+        <!-- 8. Customer Reviews -->
         <a href="/Admin/Reviews" class="adm-nav-link @(currentAction == "Reviews" ? "active" : "")">
           <i class="fa-solid fa-star"></i>
           <span>Customer Reviews</span>
         </a>
 
+        <!-- 9. Shipping Alerts -->
         <a href="/Admin/ShippingExceptions" class="adm-nav-link @(currentAction == "ShippingExceptions" ? "active" : "")">
           <i class="fa-solid fa-triangle-exclamation"></i>
           <span>Shipping Alerts</span>

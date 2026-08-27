@@ -1,9 +1,10 @@
 @{
-    var title = (ViewData["Title"] ?? "SAT Jewel | Fine Jewelry & Lab-Grown Diamond Sanctuary").ToString();
-    var description = (ViewData["Description"] ?? "Explore SAT Jewel for GIA-Certified Lab-Grown Diamonds, Moissanite Engagement Rings, Luxury Necklaces, Bracelets & AI Diamond Valuation. Free Insured Worldwide Shipping.").ToString();
-    var keywords = (ViewData["Keywords"] ?? "Lab Grown Diamonds, Moissanite Engagement Rings, Fine Jewelry USA, Custom Diamond Rings, SAT Jewel, Certified Diamonds, Solitaire Rings, Wedding Rings").ToString();
+    var title = (ViewData["Title"] ?? "SAT Jewel | GIA-Certified Lab Grown Diamonds & Fine Jewelry USA").ToString();
+    var description = (ViewData["Description"] ?? "Buy certified lab-grown diamond engagement rings, solitaires, and luxury bespoke fine jewelry at factory-direct value. 100% GIA & IGI certified diamonds, free insured worldwide shipping.").ToString();
+    var keywords = (ViewData["Keywords"] ?? "Lab Grown Diamonds, Lab Grown Diamond Engagement Rings, Moissanite Engagement Rings, Solitaire Rings USA, Custom Engagement Rings, Certified Diamonds, GIA Certified Solitaires, SAT Jewel").ToString();
     var canonicalUrl = (ViewData["CanonicalUrl"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}").ToString();
     var ogImage = (ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}/assets/sat_jewels_shop_bg.jpg").ToString();
+    var siteUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
 }
 
 <!-- Primary Search Engine Meta Tags -->
@@ -13,7 +14,14 @@
 <meta name="keywords" content="@keywords" />
 <meta name="author" content="SAT Jewel" />
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+<meta name="theme-color" content="#050b14" />
 <link rel="canonical" href="@canonicalUrl" />
+
+<!-- Geo-Targeting Meta Tags -->
+<meta name="geo.region" content="US-NY" />
+<meta name="geo.placename" content="New York / Surat" />
+<meta name="geo.position" content="40.7128;-74.0060" />
+<meta name="ICBM" content="40.7128, -74.0060" />
 
 <!-- Open Graph / Facebook / WhatsApp Sharing Meta Tags -->
 <meta property="og:type" content="website" />
@@ -21,7 +29,7 @@
 <meta property="og:title" content="@title" />
 <meta property="og:description" content="@description" />
 <meta property="og:image" content="@ogImage" />
-<meta property="og:site_name" content="SAT Jewel Fine Jewelry" />
+<meta property="og:site_name" content="SAT Jewel" />
 <meta property="og:locale" content="en_US" />
 
 <!-- Twitter Card Meta Tags -->
@@ -31,22 +39,46 @@
 <meta name="twitter:description" content="@description" />
 <meta name="twitter:image" content="@ogImage" />
 
-<!-- Google Search Engine Schema.org JSON-LD Structured Data for Top Ranking -->
+<!-- Google Sitelinks Search Box & WebSite Schema -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "WebSite",
+  "name": "SAT Jewel",
+  "url": "@siteUrl",
+  "description": "Bespoke handcrafted lab-grown diamond engagement rings and fine jewelry sanctuary.",
+  "potentialAction": {
+    "@@type": "SearchAction",
+    "target": {
+      "@@type": "EntryPoint",
+      "urlTemplate": "@siteUrl/Product?search={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+<!-- Organization & JewelryStore (LocalBusiness) Schema Graph -->
 <script type="application/ld+json">
 {
   "@@context": "https://schema.org",
   "@@type": "JewelryStore",
+  "@@id": "@siteUrl/#organization",
   "name": "SAT Jewel",
+  "alternateName": "SAT Fine Jewelry LLC",
+  "url": "@siteUrl",
+  "logo": "@siteUrl/assets/sat_emblem_clean.png",
   "image": "@ogImage",
-  "@@id": "@canonicalUrl",
-  "url": "@canonicalUrl",
+  "description": "@description",
   "telephone": "+91-83209-72779",
   "priceRange": "$$$",
+  "currenciesAccepted": "USD, EUR, GBP, INR",
+  "paymentAccepted": "Credit Card, PayPal, Razorpay, Cash on Delivery",
   "address": {
     "@@type": "PostalAddress",
     "streetAddress": "Diamond Showroom & Design Studio",
     "addressLocality": "Surat / New York",
-    "addressRegion": "Gujarat",
+    "addressRegion": "Gujarat / NY",
     "postalCode": "395006",
     "addressCountry": "IN"
   },
@@ -55,26 +87,73 @@
     "latitude": 21.1702,
     "longitude": 72.8311
   },
-  "openingHoursSpecification": {
-    "@@type": "OpeningHoursSpecification",
-    "dayOfWeek": [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday"
-    ],
-    "opens": "09:00",
-    "closes": "20:00"
+  "openingHoursSpecification": [
+    {
+      "@@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      "opens": "09:00",
+      "closes": "20:00"
+    }
+  ],
+  "contactPoint": {
+    "@@type": "ContactPoint",
+    "telephone": "+91-83209-72779",
+    "contactType": "customer service",
+    "availableLanguage": ["English", "Hindi", "Gujarati"],
+    "areaServed": ["US", "CA", "GB", "IN", "AU"]
   },
   "aggregateRating": {
     "@@type": "AggregateRating",
     "ratingValue": "4.9",
-    "reviewCount": "1280"
+    "reviewCount": "1280",
+    "bestRating": "5"
   },
   "sameAs": [
-    "https://wa.me/918320972779"
+    "https://wa.me/918320972779",
+    "https://instagram.com/satjewels",
+    "https://pinterest.com/satjewels"
+  ]
+}
+</script>
+
+<!-- FAQPage Structured Schema (Extracted from Top Fine Jewelry SEO Patterns) -->
+<script type="application/ld+json">
+{
+  "@@context": "https://schema.org",
+  "@@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@@type": "Question",
+      "name": "Do lab-grown diamonds test as real diamonds?",
+      "acceptedAnswer": {
+        "@@type": "Answer",
+        "text": "Yes. Lab-grown diamonds possess the identical chemical, optical, and physical composition (100% pure crystallized carbon) as mined diamonds and test positive on all diamond testers."
+      }
+    },
+    {
+      "@@type": "Question",
+      "name": "Are SAT Jewel diamonds certified by GIA or IGI?",
+      "acceptedAnswer": {
+        "@@type": "Answer",
+        "text": "Every solitaire and center stone at SAT Jewel is 100% authenticated and accompanied by an official GIA or IGI gemological certificate verifying cut, color, clarity, and carat weight."
+      }
+    },
+    {
+      "@@type": "Question",
+      "name": "Is shipping insured and free worldwide?",
+      "acceptedAnswer": {
+        "@@type": "Answer",
+        "text": "Yes, SAT Jewel provides 100% complimentary, fully insured priority shipping worldwide for every bespoke jewelry piece."
+      }
+    },
+    {
+      "@@type": "Question",
+      "name": "Can I customize the metal and carat size of my ring?",
+      "acceptedAnswer": {
+        "@@type": "Answer",
+        "text": "Yes, our studio allows complete personalization across 10K, 14K, 18K Yellow/White/Rose Gold, 950 Platinum, and 925 Silver with customizable diamond carat sizes from 0.50ct to 5.00ct+."
+      }
+    }
   ]
 }
 </script>

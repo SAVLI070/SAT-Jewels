@@ -106,6 +106,39 @@ namespace SAT1.BAL
             return user;
         }
 
+        public async Task<User?> GetOrCreateUserByPhoneAsync(string phone, string? fullName = null)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+                return null;
+
+            var cleanPhone = phone.Trim().Replace(" ", "").Replace("-", "");
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Phone == cleanPhone || u.Phone == phone.Trim());
+            
+            if (user == null)
+            {
+                // Generate a friendly display name and email placeholder
+                var shortNumber = cleanPhone.Length >= 4 ? cleanPhone.Substring(cleanPhone.Length - 4) : "User";
+                var displayName = !string.IsNullOrWhiteSpace(fullName) ? fullName.Trim() : $"VIP Member ({shortNumber})";
+                var autoEmail = $"{cleanPhone.Replace("+", "")}@satjewel.client";
+
+                user = new User
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    FullName = displayName,
+                    Email = autoEmail,
+                    Phone = cleanPhone,
+                    Password = HashPassword("OTP_AUTH_" + Guid.NewGuid().ToString("N")),
+                    Role = "Client",
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+
+            return user;
+        }
+
         // =========================================================================
         // USER ADDRESS MANAGEMENT (ADD / EDIT / DELETE / LIST SAVED ADDRESSES)
         // =========================================================================

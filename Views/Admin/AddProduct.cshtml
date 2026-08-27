@@ -445,6 +445,7 @@
             <button type="button" onclick="toggleAllMetals(true)" style="background:none; border:none; color:#b45309; font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;">Select All Metals</button>
           </div>
           <div class="metal-swatch-picker">
+            <button type="button" class="metal-pill-btn" data-id="11" onclick="toggleMetalPill(this)">925 Silver</button>
             <button type="button" class="metal-pill-btn" data-id="1" onclick="toggleMetalPill(this)">10K Yellow</button>
             <button type="button" class="metal-pill-btn" data-id="2" onclick="toggleMetalPill(this)">10K White</button>
             <button type="button" class="metal-pill-btn" data-id="3" onclick="toggleMetalPill(this)">10K Rose</button>
@@ -562,6 +563,7 @@
 <script>
   let currentUploadedUrls = [];
   const metalNameMap = {
+    11: '925 Sterling Silver',
     1: '10K Yellow Gold', 2: '10K White Gold', 3: '10K Rose Gold',
     4: '14K Yellow Gold', 5: '14K White Gold', 6: '14K Rose Gold',
     7: '18K Yellow Gold', 8: '18K White Gold', 9: '18K Rose Gold',

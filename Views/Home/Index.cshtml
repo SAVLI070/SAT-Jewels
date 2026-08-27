@@ -82,18 +82,10 @@
     </div>
 
     <div class="nav-actions">
-      <!-- Dynamic Auth & Cart Nav Cluster -->
+      <!-- Dynamic Auth & Cart Nav Cluster (Search, User, Cart Icons) -->
       <partial name="_AuthNav" />
 
-      @if (User.Identity?.IsAuthenticated != true)
-      {
-        <!-- Single Clean Contact Us Button (Guests only) -->
-        <a href="#cta" class="btn-primary">
-          <i class="fa-solid fa-envelope"></i> Contact Us
-        </a>
-      }
-
-      <button class="hamburger" onclick="openSatMobileDrawer()" aria-label="Menu">
+      <button class="hamburger desktop-hidden" onclick="openSatMobileDrawer()" aria-label="Menu">
         <i class="fa-solid fa-bars"></i>
       </button>
     </div>
