@@ -65,13 +65,35 @@
       font-size: 14px;
     }
     .badge-status {
-      padding: 4px 12px;
+      padding: 5px 14px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 700;
       background: rgba(74, 222, 128, 0.15);
       border: 1px solid #4ade80;
       color: #4ade80;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-track-order {
+      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
+      color: #ffffff;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      font-weight: 700;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 12px rgba(180, 83, 9, 0.25);
+    }
+    .btn-track-order:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(180, 83, 9, 0.4);
+      color: #ffffff;
     }
   </style>
 </head>
@@ -81,8 +103,15 @@
       <a href="/" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back to Storefront</a>
     </div>
     <div class="ord-card">
-      <h1 class="ord-title">My Orders</h1>
-      <p class="ord-sub">Track your GIA certified jewelry purchases, shipping, and certificates.</p>
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;">
+        <div>
+          <h1 class="ord-title" style="margin: 0;">My Orders</h1>
+          <p class="ord-sub" style="margin: 4px 0 0;">Track your GIA certified jewelry purchases, shipping, and delivery status in real-time.</p>
+        </div>
+        <a href="/Order/Track" class="btn-primary" style="padding: 9px 18px; font-size: 13px; text-decoration: none; border-radius: 10px; display: inline-flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-magnifying-glass-location"></i> Direct Tracking Lookup
+        </a>
+      </div>
 
       @if (!orders.Any())
       {
@@ -99,11 +128,12 @@
           <table class="ord-table">
             <thead>
               <tr>
-                <th>Order ID</th>
+                <th>Order Reference</th>
                 <th>Item Purchased</th>
                 <th>Amount</th>
                 <th>Status</th>
-                <th>Date</th>
+                <th>Order Date</th>
+                <th style="text-align: right;">Live Tracking</th>
               </tr>
             </thead>
             <tbody>
@@ -113,8 +143,17 @@
                   <td style="font-weight:700; color:#fbbf24;">@o.OrderId</td>
                   <td>@o.ItemName</td>
                   <td style="font-weight:700;">$@o.Amount.ToString("N0") @o.Currency</td>
-                  <td><span class="badge-status">@o.Status</span></td>
+                  <td>
+                    <span class="badge-status">
+                      <i class="fa-solid fa-circle-check"></i> @o.Status
+                    </span>
+                  </td>
                   <td style="color:var(--taupe-beige); font-size:12px;">@o.CreatedAt.ToString("MMM dd, yyyy")</td>
+                  <td style="text-align: right;">
+                    <a href="/Order/Track?orderId=@Uri.EscapeDataString(o.OrderId)" class="btn-track-order">
+                      <i class="fa-solid fa-truck-fast"></i> Track Shipment
+                    </a>
+                  </td>
                 </tr>
               }
             </tbody>

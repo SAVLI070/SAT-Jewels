@@ -250,12 +250,32 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Admin Access Guard: Redirect unauthenticated visitors trying to access /admin to Sign In
+// Strict URL Route Guard & Navigation Security
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value?.ToLower() ?? "";
+    var isAuthenticated = context.User.Identity?.IsAuthenticated == true;
+    var userRole = context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
 
-    if (path.StartsWith("/admin") && context.User.Identity?.IsAuthenticated != true)
+    // 1. Admin Route Guard: Only /admin direct URL navigation is routed to Admin Portal (requires Admin role)
+    if (path.StartsWith("/admin"))
+    {
+        if (!isAuthenticated)
+        {
+            var returnUrl = System.Net.WebUtility.UrlEncode(context.Request.Path + context.Request.QueryString);
+            context.Response.Redirect($"/Account/SignIn?returnUrl={returnUrl}");
+            return;
+        }
+        else if (!string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            context.Response.Redirect("/Home/Restricted");
+            return;
+        }
+    }
+
+    // 2. Protected Customer Account Route Guard: Direct URL hopping to private account sections requires login
+    var protectedAccountPaths = new[] { "/account/myaccount", "/account/orders", "/account/wishlist", "/account/addresses", "/account/profile" };
+    if (protectedAccountPaths.Any(p => path.StartsWith(p)) && !isAuthenticated)
     {
         var returnUrl = System.Net.WebUtility.UrlEncode(context.Request.Path + context.Request.QueryString);
         context.Response.Redirect($"/Account/SignIn?returnUrl={returnUrl}");

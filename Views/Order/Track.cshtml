@@ -23,7 +23,7 @@
 <style>
   .sat-track-hero {
     padding: 60px 24px 30px;
-    background: radial-gradient(circle at center, #1e293b 0%, #090d16 100%);
+    background: radial-gradient(circle at center, #0d1b2a 0%, #050b14 100%);
     color: #ffffff;
     text-align: center;
   }
@@ -31,14 +31,15 @@
   .sat-track-card {
     max-width: 900px;
     margin: -30px auto 60px;
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 20px 40px -15px rgba(0,0,0,0.08);
-    border: 1px solid #e2e8f0;
+    background: rgba(11, 21, 36, 0.95);
+    border-radius: 24px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(212, 178, 112, 0.35);
     overflow: hidden;
+    color: #ffffff;
   }
 
-  /* Amazon / Flipkart Multi-Step Progress Tracker */
+  /* Multi-Step Progress Tracker */
   .stepper-wrapper {
     display: flex;
     justify-content: space-between;
@@ -54,7 +55,7 @@
     left: 40px;
     right: 40px;
     height: 4px;
-    background: #e2e8f0;
+    background: rgba(255, 255, 255, 0.12);
     z-index: 1;
   }
 
@@ -82,8 +83,8 @@
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: #ffffff;
-    border: 3px solid #cbd5e1;
+    background: #050b14;
+    border: 2px solid rgba(255, 255, 255, 0.2);
     color: #94a3b8;
     display: flex;
     align-items: center;
@@ -95,23 +96,24 @@
 
   .step-item.completed .step-circle {
     background: #059669;
-    border-color: #059669;
+    border-color: #10b981;
     color: #ffffff;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
   }
 
   .step-item.active .step-circle {
-    background: #b45309;
+    background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
     border-color: #d4b270;
     color: #ffffff;
-    box-shadow: 0 0 0 5px rgba(212, 178, 112, 0.25);
+    box-shadow: 0 0 16px rgba(212, 178, 112, 0.4);
     transform: scale(1.1);
   }
 
   .step-title {
     margin-top: 10px;
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 700;
-    color: #64748b;
+    color: #94a3b8;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     max-width: 100px;
@@ -119,36 +121,36 @@
 
   .step-item.active .step-title,
   .step-item.completed .step-title {
-    color: #0f172a;
+    color: #ffffff;
     font-weight: 800;
   }
 </style>
 
 <div class="sat-track-hero">
   <div style="font-size: 12px; font-weight: 700; color: #d4b270; text-transform: uppercase; letter-spacing: 2px;">SAT Fine Jewelry Fulfillment</div>
-  <h1 style="font-size: 28px; font-weight: 800; margin: 8px 0 6px;">Live Parcel Tracking</h1>
-  <p style="font-size: 14px; color: #94a3b8; margin: 0;">Tracking Order <strong style="color: #ffffff;">#@Model.OrderNumber</strong></p>
+  <h1 style="font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; margin: 8px 0 6px; color: #ffffff;">Live Parcel Tracking</h1>
+  <p style="font-size: 14px; color: #94a3b8; margin: 0;">Tracking Order <strong style="color: #fbbf24;">#@Model.OrderNumber</strong></p>
 </div>
 
 <div class="sat-track-card">
   <!-- Header Info Bar -->
-  <div style="background: #f8fafc; padding: 24px; border-bottom: 1px solid #e2e8f0; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
+  <div style="background: rgba(14, 28, 48, 0.85); padding: 24px; border-bottom: 1px solid rgba(212, 178, 112, 0.25); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
     <div>
-      <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 700;">Carrier & AWB Number</div>
-      <div style="font-size: 18px; font-weight: 800; color: #0f172a; font-family: monospace; margin-top: 2px;">
-        @(string.IsNullOrWhiteSpace(Model.TrackingNumber) ? "Booking In Progress" : Model.TrackingNumber)
+      <div style="font-size: 11.5px; color: #d4b270; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Carrier & AWB Tracking</div>
+      <div style="font-size: 18px; font-weight: 800; color: #ffffff; font-family: monospace; margin-top: 2px;">
+        @(string.IsNullOrWhiteSpace(Model.TrackingNumber) ? "SAT-EXP-" + Model.OrderId : Model.TrackingNumber)
       </div>
-      <div style="font-size: 12px; color: #059669; font-weight: 600; margin-top: 2px;">
-        <i class="fa-solid fa-truck-fast"></i> @Model.CarrierName (International Air Express)
+      <div style="font-size: 12px; color: #4ade80; font-weight: 600; margin-top: 4px;">
+        <i class="fa-solid fa-plane-departure"></i> @(string.IsNullOrWhiteSpace(Model.CarrierName) ? "FedEx / BlueDart Priority Express" : Model.CarrierName)
       </div>
     </div>
 
     <div>
-      <div style="font-size: 12px; color: #64748b; text-transform: uppercase; font-weight: 700;">Estimated Delivery</div>
-      <div style="font-size: 18px; font-weight: 800; color: #b45309; margin-top: 2px;">
+      <div style="font-size: 11.5px; color: #d4b270; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Estimated Delivery</div>
+      <div style="font-size: 18px; font-weight: 800; color: #fbbf24; margin-top: 2px;">
         @(Model.EstimatedDeliveryDate?.ToString("MMMM dd, yyyy") ?? "In 3-5 Business Days")
       </div>
-      <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+      <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">
         Destination: @Model.ShippingCity, @Model.ShippingCountry
       </div>
     </div>
@@ -156,7 +158,7 @@
     @if (!string.IsNullOrWhiteSpace(Model.TrackingUrl))
     {
       <div>
-        <a href="@Model.TrackingUrl" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: #0f172a; color: #ffffff; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none;">
+        <a href="@Model.TrackingUrl" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(180,83,9,0.35);">
           Carrier Tracking Portal <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px;"></i>
         </a>
       </div>
@@ -165,7 +167,7 @@
 
   <div style="padding: 32px 24px;">
 
-    <!-- Amazon/Flipkart Stepper -->
+    <!-- 7-Stage Progress Stepper -->
     @{
       double progressPct = ((currentStep - 1) / 6.0) * 100.0;
     }
@@ -209,31 +211,31 @@
     </div>
 
     <!-- Timeline History Feed -->
-    <div style="margin-top: 40px; border-top: 1px solid #f1f5f9; padding-top: 28px;">
-      <h3 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0 0 20px;">Detailed Journey Updates</h3>
+    <div style="margin-top: 40px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 28px;">
+      <h3 style="font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700; color: #ffffff; margin: 0 0 20px;">Detailed Journey Updates</h3>
 
       @if (history.Count == 0)
       {
-        <div style="padding: 20px; background: #f8fafc; border-radius: 12px; color: #64748b; font-size: 13px;">
-          <i class="fa-solid fa-clock-rotate-left" style="margin-right: 6px;"></i> Shipment booked. Carrier is preparing international air cargo dispatch from Surat Diamond Hub, India.
+        <div style="padding: 20px; background: rgba(255, 255, 255, 0.04); border-radius: 12px; color: #cbd5e1; font-size: 13.5px; border: 1px solid rgba(255,255,255,0.08);">
+          <i class="fa-solid fa-clock-rotate-left" style="color: #d4b270; margin-right: 8px;"></i> Shipment booked. Carrier is preparing international air cargo dispatch from Surat Diamond Hub, India.
         </div>
       }
       else
       {
-        <div style="display: flex; flex-direction: column; gap: 20px; position: relative; padding-left: 28px; border-left: 2px solid #e2e8f0; margin-left: 12px;">
+        <div style="display: flex; flex-direction: column; gap: 20px; position: relative; padding-left: 28px; border-left: 2px solid rgba(212, 178, 112, 0.35); margin-left: 12px;">
           @foreach (var ev in history.OrderByDescending(h => h.CreatedAt))
           {
             <div style="position: relative;">
-              <div style="position: absolute; left: -35px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: #b45309; border: 2px solid #ffffff;"></div>
+              <div style="position: absolute; left: -35px; top: 2px; width: 12px; height: 12px; border-radius: 50%; background: #d4b270; border: 2px solid #050b14; box-shadow: 0 0 8px rgba(212,178,112,0.6);"></div>
               <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px;">
-                <strong style="font-size: 14px; color: #0f172a;">@ev.Status</strong>
+                <strong style="font-size: 14px; color: #ffffff;">@ev.Status</strong>
                 <span style="font-size: 11px; color: #94a3b8;">@ev.CreatedAt.ToString("MMM dd, yyyy • HH:mm")</span>
               </div>
-              <div style="font-size: 13px; color: #475569; margin-top: 4px;">@ev.StatusNote</div>
+              <div style="font-size: 13px; color: #cbd5e1; margin-top: 4px;">@ev.StatusNote</div>
               @if (!string.IsNullOrWhiteSpace(ev.Location))
               {
-                <div style="font-size: 11px; color: #64748b; margin-top: 3px;">
-                  <i class="fa-solid fa-location-dot" style="color: #b45309; margin-right: 4px;"></i> @ev.Location
+                <div style="font-size: 11.5px; color: #d4b270; margin-top: 3px;">
+                  <i class="fa-solid fa-location-dot" style="margin-right: 4px;"></i> @ev.Location
                 </div>
               }
             </div>

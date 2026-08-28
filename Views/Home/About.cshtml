@@ -195,8 +195,9 @@
 
 <style>
     .ivevar-about-page {
-        background-color: #faf8f5;
-        color: #1a1a1a;
+        background: #050b14;
+        color: #ffffff;
+        min-height: 100vh;
         font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
         padding-bottom: 80px;
     }
@@ -204,21 +205,22 @@
     .ivevar-header-section {
         text-align: center;
         padding: 60px 20px 30px;
-        background: #ffffff;
+        background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
+        border-bottom: 1px solid rgba(212, 178, 112, 0.2);
     }
 
     .ivevar-main-title {
         font-family: 'Playfair Display', Georgia, serif;
         font-size: 2.8rem;
         font-weight: 700;
-        color: #111827;
+        color: #ffffff;
         margin-bottom: 12px;
         letter-spacing: -0.5px;
     }
 
     .ivevar-main-subtitle {
         font-size: 1.05rem;
-        color: #6b7280;
+        color: #d4b270;
         max-width: 680px;
         margin: 0 auto;
         line-height: 1.6;
@@ -229,6 +231,7 @@
         max-height: 480px;
         overflow: hidden;
         margin-bottom: 50px;
+        border-bottom: 1px solid rgba(212, 178, 112, 0.25);
     }
 
     .ivevar-hero-banner-img {
@@ -254,16 +257,20 @@
         font-family: 'Playfair Display', Georgia, serif;
         font-size: 2.2rem;
         font-weight: 700;
-        color: #111827;
+        color: #ffffff;
         margin-bottom: 24px;
         text-align: center;
     }
 
     .ivevar-story-text p {
         font-size: 1.05rem;
-        color: #4b5563;
+        color: #cbd5e1;
         line-height: 1.8;
         margin-bottom: 16px;
+    }
+
+    .ivevar-story-text strong {
+        color: #d4b270;
     }
 
     /* 3-Column Values Grid */
@@ -275,20 +282,21 @@
     }
 
     .ivevar-card {
-        background: #ffffff;
-        border-radius: 12px;
+        background: #0b1524;
+        border-radius: 16px;
         overflow: hidden;
-        border: 1px solid #f0ede6;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        border: 1px solid rgba(212, 178, 112, 0.28);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
         display: flex;
         flex-direction: column;
         text-align: center;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     }
 
     .ivevar-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.8);
+        border-color: rgba(212, 178, 112, 0.6);
     }
 
     .ivevar-card-img-wrap {
@@ -311,18 +319,18 @@
         font-family: 'Playfair Display', Georgia, serif;
         font-size: 1.5rem;
         font-weight: 700;
-        color: #111827;
+        color: #ffffff;
         margin-bottom: 12px;
     }
 
     .ivevar-card-desc {
         font-size: 0.95rem;
-        color: #6b7280;
+        color: #94a3b8;
         line-height: 1.65;
         margin: 0;
     }
 
-    /* 5-Column Craftsmanship Grid */
+    /* 4-Column Craftsmanship Grid */
     .ivevar-craft-section {
         margin-bottom: 70px;
     }
@@ -334,11 +342,11 @@
     }
 
     .ivevar-craft-card {
-        background: #ffffff;
-        border-radius: 10px;
-        padding: 14px;
-        border: 1px solid #f0ede6;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        background: #0b1524;
+        border-radius: 14px;
+        padding: 16px;
+        border: 1px solid rgba(212, 178, 112, 0.25);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.5);
         display: flex;
         flex-direction: column;
     }
@@ -346,7 +354,7 @@
     .ivevar-craft-img-wrap {
         width: 100%;
         aspect-ratio: 1 / 1;
-        border-radius: 8px;
+        border-radius: 10px;
         overflow: hidden;
         margin-bottom: 14px;
     }
@@ -361,13 +369,13 @@
         font-family: 'Plus Jakarta Sans', sans-serif;
         font-size: 1rem;
         font-weight: 700;
-        color: #111827;
+        color: #ffffff;
         margin-bottom: 6px;
     }
 
     .ivevar-craft-desc {
         font-size: 0.85rem;
-        color: #6b7280;
+        color: #94a3b8;
         line-height: 1.5;
         margin-bottom: 12px;
         flex-grow: 1;
@@ -376,22 +384,21 @@
     .ivevar-view-more {
         font-size: 0.85rem;
         font-weight: 700;
-        color: #111827;
+        color: #d4b270;
         text-decoration: underline;
-
     }
 
     .ivevar-view-more:hover {
-        color: #b45309;
+        color: #ffffff;
     }
 
     /* Promise Section */
     .ivevar-promise-section {
-        background: #ffffff;
-        border-radius: 16px;
+        background: #0b1524;
+        border-radius: 20px;
         padding: 48px 32px;
-        border: 1px solid #f0ede6;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        border: 1px solid rgba(212, 178, 112, 0.3);
+        box-shadow: 0 12px 36px rgba(0,0,0,0.6);
     }
 
     .ivevar-promise-grid {
@@ -412,19 +419,19 @@
         width: 56px;
         height: 56px;
         border-radius: 50%;
-        background: #fdf8f0;
-        color: #b45309;
+        background: rgba(212, 178, 112, 0.15);
+        color: #d4b270;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.3rem;
-        border: 1px solid #fce8cc;
+        border: 1px solid rgba(212, 178, 112, 0.35);
     }
 
     .ivevar-promise-item span {
         font-size: 0.88rem;
         font-weight: 600;
-        color: #374151;
+        color: #cbd5e1;
         line-height: 1.4;
     }
 

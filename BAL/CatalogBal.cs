@@ -17,6 +17,17 @@ namespace SAT1.BAL
         public int ItemCount { get; set; }
     }
 
+    public class PagedCatalogResult
+    {
+        public List<CatalogItem> Items { get; set; } = new();
+        public int TotalCount { get; set; }
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+        public int TotalPages => PageSize > 0 ? (int)Math.Ceiling((double)TotalCount / PageSize) : 1;
+        public bool HasPreviousPage => Page > 1;
+        public bool HasNextPage => Page < TotalPages;
+    }
+
     public class PublicCategoryStoreDto
     {
         public string Id { get; set; } = string.Empty;
@@ -363,6 +374,107 @@ namespace SAT1.BAL
             return await GetProductsByNumericIdAsync(categoryId, webRootPath);
         }
 
+        // Fast High-Performance Database-Level Paged Query
+        public async Task<PagedCatalogResult> GetCategoryProductsPagedAsync(long categoryId, int page, int pageSize, string? shape, string? sort, string webRootPath)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 12;
+
+            try
+            {
+                var query = _context.Products
+                    .AsNoTracking()
+                    .Where(p => p.CategoryId == categoryId);
+
+                if (!string.IsNullOrWhiteSpace(shape) && shape.ToLower() != "all")
+                {
+                    var cleanShape = shape.Trim().ToLower();
+                    long? targetShapeId = cleanShape switch
+                    {
+                        "round" or "1" => 1,
+                        "oval" or "2" => 2,
+                        "emerald" or "3" => 3,
+                        "marquise" or "4" => 4,
+                        "pear" or "5" => 5,
+                        "princess" or "6" => 6,
+                        "cushion" or "7" => 7,
+                        "radiant" or "8" => 8,
+                        "asscher" or "9" => 9,
+                        "heart" or "10" => 10,
+                        _ => null
+                    };
+
+                    if (targetShapeId.HasValue)
+                    {
+                        query = query.Where(p => p.DiamondShapeId == targetShapeId.Value);
+                    }
+                    else
+                    {
+                        query = query.Where(p => p.Title.ToLower().Contains(cleanShape));
+                    }
+                }
+
+                // Apply Sorting at the database query level
+                query = (sort?.ToLower()) switch
+                {
+                    "price-asc" or "priceasc" => query.OrderBy(p => p.Price),
+                    "price-desc" or "pricedesc" => query.OrderByDescending(p => p.Price),
+                    "alpha-asc" or "alphaasc" => query.OrderBy(p => p.Title),
+                    "alpha-desc" or "alphadesc" => query.OrderByDescending(p => p.Title),
+                    "date-asc" or "dateasc" => query.OrderBy(p => p.CreatedAt),
+                    "date-desc" or "datedesc" => query.OrderByDescending(p => p.CreatedAt),
+                    _ => query.OrderByDescending(p => p.CreatedAt)
+                };
+
+                int totalCount = await query.CountAsync();
+
+                var pagedProducts = await query
+                    .Include(p => p.Images)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(p => new CatalogItem
+                    {
+                        Id = $"sat-prod-{p.ProductId}",
+                        Name = p.ProductName,
+                        CategoryId = p.CategoryId.ToString(),
+                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA VVS1",
+                        PriceUSD = p.BasePriceUSD,
+                        ImageUrl = p.Images.OrderBy(img => img.DisplayOrder).Select(img => img.ImagePath).FirstOrDefault() ?? "/assets/ring_1.jpg",
+                        GalleryImages = string.Join(",", p.Images.OrderBy(img => img.DisplayOrder).Select(img => img.ImagePath)),
+                        IsActive = true,
+                        CreatedAt = p.CreatedAt
+                    })
+                    .ToListAsync();
+
+                if (totalCount > 0)
+                {
+                    return new PagedCatalogResult
+                    {
+                        Items = pagedProducts,
+                        TotalCount = totalCount,
+                        Page = page,
+                        PageSize = pageSize
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetCategoryProductsPagedAsync Error]: {ex.Message}");
+            }
+
+            // Fallback
+            var allItems = await GetProductsByCategoryAndShapeAsync(categoryId, shape, webRootPath);
+            int fbCount = allItems.Count;
+            var fbPaged = allItems.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            return new PagedCatalogResult
+            {
+                Items = fbPaged,
+                TotalCount = fbCount,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
         // Overload accepting numeric long categoryId from UI click
         public async Task<List<CatalogItem>> GetProductsByNumericIdAsync(long categoryId, string webRootPath)
         {
@@ -545,23 +657,31 @@ namespace SAT1.BAL
                         }
                     }
 
-                    if (metalVariants.Count == 0)
-                    {
-                        var defaultMetals = await _context.Metals.OrderBy(m => m.Id).ToListAsync();
-                        metalVariants = defaultMetals.Select(m => {
-                            decimal offset = m.Name.Contains("14K") ? 180 : m.Name.Contains("18K") ? 480 : m.Name.Contains("Platinum") ? 850 : 0;
-                            return offset != 0 ? $"{m.Name} (+{offset:F0} USD)" : m.Name;
-                        }).ToList();
-                    }
+                    var pricingRules = await _context.DynamicPricingRules.AsNoTracking().Where(r => r.IsActive).ToListAsync();
 
-                    if (caratVariants.Count == 0)
-                    {
-                        var defaultCarats = await _context.CaratOptions.OrderBy(c => c.Id).ToListAsync();
-                        caratVariants = defaultCarats.Select(c => {
-                            decimal offset = c.Label.Contains("1.5") ? 450 : c.Label.Contains("2.0") ? 1100 : c.Label.Contains("2.5") ? 1800 : c.Label.Contains("3.0") ? 2600 : 0;
-                            return offset != 0 ? $"{c.Label} (+{offset:F0} USD)" : c.Label;
-                        }).ToList();
-                    }
+                    var defaultMetals = await _context.Metals.OrderBy(m => m.Id).ToListAsync();
+                    metalVariants = defaultMetals.Select(m => {
+                        var rule = pricingRules.FirstOrDefault(r => r.RuleType == "Metal" && (
+                            (m.Name.Contains("10K") && r.Code.Contains("10k")) ||
+                            (m.Name.Contains("14K") && r.Code.Contains("14k")) ||
+                            (m.Name.Contains("18K") && r.Code.Contains("18k")) ||
+                            (m.Name.Contains("Platinum") && r.Code.Contains("platinum")) ||
+                            (m.Name.Contains("Silver") && r.Code.Contains("silver"))
+                        ));
+                        decimal offset = rule?.PriceOffsetUSD ?? (m.Name.Contains("14K") ? 180 : m.Name.Contains("18K") ? 480 : m.Name.Contains("Platinum") ? 850 : 0);
+                        return $"{m.Name} (+{offset:F0} USD)";
+                    }).ToList();
+
+                    var defaultCarats = await _context.CaratOptions.OrderBy(c => c.CaratWeight).ToListAsync();
+                    caratVariants = defaultCarats.Select(c => {
+                        var rule = pricingRules.FirstOrDefault(r => r.RuleType == "Carat" && (
+                            r.DisplayName.Contains(c.CaratWeight.ToString("0.00")) || 
+                            r.Code.Contains(c.CaratWeight.ToString("0.00").Replace(".", "_")) ||
+                            c.Label.Contains(r.DisplayName.Replace(" CT", "").Trim())
+                        ));
+                        decimal offset = rule?.PriceOffsetUSD ?? (c.CaratWeight >= 3.0m ? 2600 : c.CaratWeight >= 2.0m ? 1100 : c.CaratWeight >= 1.5m ? 450 : 0);
+                        return $"{c.Label} (+{offset:F0} USD)";
+                    }).ToList();
 
                     return new CatalogItem
                     {

@@ -1,40 +1,86 @@
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
-    ViewData["Title"] = "Track Your Order - SAT Fine Jewelry";
+    ViewData["Title"] = "Track Your Order — SAT Jewel";
     var errorMessage = ViewBag.ErrorMessage as string;
+    var searchQuery = ViewBag.SearchQuery as string ?? "";
+    var searchEmail = ViewBag.SearchEmail as string ?? "";
+    var matchedOrders = ViewBag.MatchedOrders as List<SAT1.Models.Order> ?? new List<SAT1.Models.Order>();
 }
 
-<div style="min-height: 70vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px; background: #faf9f6;">
-  <div style="background: #ffffff; border-radius: 20px; border: 1px solid #e2e8f0; max-width: 480px; width: 100%; padding: 40px 32px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.06); text-align: center;">
-    
-    <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(212, 178, 112, 0.15); color: #b45309; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px;">
-      <i class="fa-solid fa-truck-fast"></i>
-    </div>
-
-    <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">Track Your SAT Order</h1>
-    <p style="font-size: 14px; color: #64748b; margin: 0 0 28px; line-height: 1.5;">Enter your Order Reference Number or AWB Tracking Number to see live journey status.</p>
-
-    @if (!string.IsNullOrWhiteSpace(errorMessage))
-    {
-      <div style="background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; text-align: left;">
-        <i class="fa-solid fa-circle-exclamation" style="margin-right: 6px;"></i> @errorMessage
-      </div>
-    }
-
-    <form method="get" action="/Order/Track" style="display: flex; flex-direction: column; gap: 16px; text-align: left;">
-      <div>
-        <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Order Number / Order ID</label>
-        <input type="text" name="orderId" required placeholder="e.g. SAT-ORD-ABC12345 or SAT-20260827-1234" 
-               style="width: 100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none;" />
+<div style="min-height: 75vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px; background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);">
+  
+  @if (matchedOrders.Count > 0)
+  {
+    <!-- Multiple Orders Found for Email Search -->
+    <div style="background: rgba(11, 21, 36, 0.95); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(212, 178, 112, 0.35); max-width: 900px; width: 100%; padding: 40px 32px; box-shadow: 0 25px 60px rgba(0,0,0,0.6);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; border-bottom: 1px solid rgba(212, 178, 112, 0.2); padding-bottom: 16px;">
+        <div>
+          <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #ffffff; margin: 0 0 6px;">Orders Found for "@(!string.IsNullOrWhiteSpace(searchEmail) ? searchEmail : searchQuery)"</h2>
+          <p style="font-size: 13.5px; color: #94a3b8; margin: 0;">We found <strong>@matchedOrders.Count</strong> jewelry shipments linked to your account. Select an order to view live journey updates.</p>
+        </div>
+        <a href="/Order/Track" style="color: #d4b270; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-arrow-left"></i> New Search
+        </a>
       </div>
 
-      <button type="submit" style="background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 8px; box-shadow: 0 4px 14px rgba(180, 83, 9, 0.25);">
-        Track Shipment Live
-      </button>
-    </form>
+      <div style="display: flex; flex-direction: column; gap: 14px;">
+        @foreach (var o in matchedOrders)
+        {
+          <div style="background: #050b14; border: 1px solid rgba(212, 178, 112, 0.25); border-radius: 14px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; transition: transform 0.2s ease, border-color 0.2s ease;">
+            <div>
+              <div style="font-size: 11px; color: #d4b270; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Order Reference</div>
+              <div style="font-size: 16px; font-weight: 800; color: #ffffff; margin-top: 2px;">@o.OrderId</div>
+              <div style="font-size: 13.5px; color: #cbd5e1; margin-top: 4px;">@o.ItemName</div>
+              <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Placed on @o.CreatedAt.ToString("MMM dd, yyyy") • $@o.Amount.ToString("N0") USD</div>
+            </div>
 
-    <div style="margin-top: 24px; font-size: 12px; color: #94a3b8;">
-      Questions about your delivery? <a href="mailto:concierge@satjewel.com" style="color: #b45309; text-decoration: none; font-weight: 600;">Contact Concierge</a>
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <span style="background: rgba(74, 222, 128, 0.15); border: 1px solid #4ade80; color: #4ade80; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                <i class="fa-solid fa-circle-check"></i> @o.Status
+              </span>
+              <a href="/Order/Track?orderId=@Uri.EscapeDataString(o.OrderId)" style="background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(180,83,9,0.35);">
+                <i class="fa-solid fa-truck-fast"></i> Track Shipment
+              </a>
+            </div>
+          </div>
+        }
+      </div>
     </div>
-  </div>
+  }
+  else
+  {
+    <!-- Default Search Lookup Box -->
+    <div style="background: rgba(11, 21, 36, 0.92); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(212, 178, 112, 0.35); max-width: 480px; width: 100%; padding: 40px 32px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center;">
+      
+      <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(212, 178, 112, 0.15); color: #d4b270; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; border: 1px solid rgba(212, 178, 112, 0.3);">
+        <i class="fa-solid fa-truck-fast"></i>
+      </div>
+
+      <h1 style="font-family: 'Playfair Display', Georgia, serif; font-size: 26px; font-weight: 700; color: #ffffff; margin: 0 0 8px;">Track Your SAT Order</h1>
+      <p style="font-size: 14px; color: #94a3b8; margin: 0 0 28px; line-height: 1.6;">Enter your <strong>Order ID</strong> or <strong>Registered Account Email</strong> to see live shipment progress.</p>
+
+      @if (!string.IsNullOrWhiteSpace(errorMessage))
+      {
+        <div style="background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #fca5a5; padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 20px; text-align: left;">
+          <i class="fa-solid fa-circle-exclamation" style="margin-right: 6px;"></i> @errorMessage
+        </div>
+      }
+
+      <form method="get" action="/Order/Track" style="display: flex; flex-direction: column; gap: 18px; text-align: left;">
+        <div>
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #d4b270; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px;">Order ID or Registered Email Address</label>
+          <input type="text" name="query" required value="@searchQuery" placeholder="e.g. SAT-ORD-12345 or user@gmail.com" 
+                 style="width: 100%; padding: 14px 16px; background: #050b14; border: 1px solid rgba(212, 178, 112, 0.35); border-radius: 10px; font-size: 14px; color: #ffffff; outline: none; box-sizing: border-box;" />
+        </div>
+
+        <button type="submit" style="background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 4px; box-shadow: 0 4px 16px rgba(180, 83, 9, 0.35); transition: transform 0.2s ease;">
+          <i class="fa-solid fa-magnifying-glass-location"></i> Track Shipment Live
+        </button>
+      </form>
+
+      <div style="margin-top: 24px; font-size: 12px; color: #64748b;">
+        Questions about your delivery? <a href="mailto:satjewels31@gmail.com" style="color: #d4b270; text-decoration: none; font-weight: 600;">Contact Concierge</a>
+      </div>
+    </div>
+  }
 </div>

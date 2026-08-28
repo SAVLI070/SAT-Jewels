@@ -66,7 +66,7 @@ namespace SAT1.Controllers
         // GET: /Product/Category?id=2 or /Product/Category/2 or /Product/Category/anniversary-ring
         [HttpGet]
         [AllowAnonymous]
-        public async Task<IActionResult> Category(string? id, long? catId, RingCategoryEnum? categoryEnum, string? name, string? shape, string? sort, string? diamondType)
+        public async Task<IActionResult> Category(string? id, long? catId, RingCategoryEnum? categoryEnum, string? name, string? shape, string? sort, string? diamondType, int page = 1, int pageSize = 12)
         {
             long categoryId = 2; // Default to AnniversaryRings (Id = 2)
 
@@ -112,51 +112,22 @@ namespace SAT1.Controllers
             ViewBag.CategoryEnum = enumVal;
             ViewBag.CategoryName = categoryDisplayName;
 
-            // Fetch products strictly by numeric long CategoryId and Diamond Shape
-            List<CatalogItem> products = await _catalogBal.GetProductsByCategoryAndShapeAsync(categoryId, shape, _env.WebRootPath);
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 12;
+
+            var pagedResult = await _catalogBal.GetCategoryProductsPagedAsync(categoryId, page, pageSize, shape, sort, _env.WebRootPath);
 
             ViewBag.SelectedShape = shape ?? "All";
             ViewBag.SelectedSort = sort ?? SortOptionEnum.Bestselling.ToString().ToLower();
             ViewBag.DiamondType = diamondType ?? DiamondTypeEnum.LabGrown.GetDisplayName();
+            ViewBag.CurrentPage = pagedResult.Page;
+            ViewBag.PageSize = pagedResult.PageSize;
+            ViewBag.TotalCount = pagedResult.TotalCount;
+            ViewBag.TotalPages = pagedResult.TotalPages;
+            ViewBag.HasPreviousPage = pagedResult.HasPreviousPage;
+            ViewBag.HasNextPage = pagedResult.HasNextPage;
 
-            // Apply Enum-based Sorting
-            switch (sort?.ToLower())
-            {
-                case "price-asc":
-                case "priceasc":
-                    products = products.OrderBy(p => p.PriceUSD).ToList();
-                    break;
-                case "price-desc":
-                case "pricedesc":
-                    products = products.OrderByDescending(p => p.PriceUSD).ToList();
-                    break;
-                case "alpha-asc":
-                case "alphaasc":
-                    products = products.OrderBy(p => p.Name).ToList();
-                    break;
-                case "alpha-desc":
-                case "alphadesc":
-                    products = products.OrderByDescending(p => p.Name).ToList();
-                    break;
-                case "date-asc":
-                case "dateasc":
-                    products = products.OrderBy(p => p.CreatedAt).ToList();
-                    break;
-                case "date-desc":
-                case "datedesc":
-                    products = products.OrderByDescending(p => p.CreatedAt).ToList();
-                    break;
-                case "relevant":
-                    products = products.OrderBy(p => p.Id).ToList();
-                    break;
-                case "featured":
-                case "bestselling":
-                default:
-                    products = products.OrderByDescending(p => p.CreatedAt).ToList();
-                    break;
-            }
-
-            return View("Category", products);
+            return View("Category", pagedResult.Items);
         }
 
         // GET: /Product/Details/{id}
@@ -208,6 +179,12 @@ namespace SAT1.Controllers
                 .ToList();
 
             ViewBag.RelatedItems = relatedItems;
+
+            var reviewBal = HttpContext.RequestServices.GetService<BAL.ReviewBal>();
+            if (reviewBal != null)
+            {
+                ViewBag.PhotoReviews = await reviewBal.GetStorefrontPhotoReviewsAsync();
+            }
 
             return View(product);
         }

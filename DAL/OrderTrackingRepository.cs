@@ -30,6 +30,30 @@ namespace SAT1.DAL
                 .FirstOrDefaultAsync(o => o.TrackingNumber == trackingNumber);
         }
 
+        public async Task<List<Order>> GetOrdersByEmailAsync(string email)
+        {
+            var cleanEmail = email.Trim().ToLower();
+            return await _context.Orders
+                .Include(o => o.TrackingHistory)
+                .Where(o => o.CustomerEmail.ToLower() == cleanEmail || (o.CustomerEmail != null && o.CustomerEmail.ToLower().Contains(cleanEmail)))
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<Order>> GetOrdersByQueryAsync(string query)
+        {
+            var clean = query.Trim().ToLower();
+            return await _context.Orders
+                .Include(o => o.TrackingHistory)
+                .Where(o => o.OrderId.ToLower() == clean || 
+                            o.OrderNumber.ToLower() == clean || 
+                            (o.TrackingNumber != null && o.TrackingNumber.ToLower() == clean) ||
+                            (o.CustomerEmail != null && o.CustomerEmail.ToLower().Contains(clean)) ||
+                            (o.ShippingPhone != null && o.ShippingPhone.Contains(clean)))
+                .OrderByDescending(o => o.CreatedAt)
+                .ToListAsync();
+        }
+
         public async Task<List<OrderTrackingHistory>> GetTrackingHistoryByOrderIdAsync(string orderId)
         {
             return await _context.OrderTrackingHistory

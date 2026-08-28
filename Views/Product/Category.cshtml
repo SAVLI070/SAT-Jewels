@@ -553,32 +553,10 @@
     .product-img-wrap {
       position: relative;
       width: 100%;
-      padding-top: 100%;
+      aspect-ratio: 1 / 1;
       overflow: hidden;
       background: #000000;
-    }
-    .product-img-wrap img {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-    .ivevar-product-card:hover .product-img-wrap img {
-      transform: scale(1.06);
-    }
-    .lab-grown-badge {
-      position: absolute;
-      bottom: 10px;
-      right: 10px;
-      background: #fef08a;
-      color: #713f12;
-      font-size: 10px;
-      font-weight: 800;
-      padding: 3px 8px;
-      border-radius: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      border-radius: 14px 14px 0 0;
     }
     .product-info-body {
       padding: 18px;
@@ -654,16 +632,16 @@
   <!-- SAT Jewel Navigation Bar (Dark Metallic Luxury Header) -->
   <!-- Clean Glitch-Free Header Section for Category Pages (Task 2) -->
   <nav class="navbar" style="position:relative; background:#08111e; border-bottom:1px solid rgba(212,178,112,0.3);">
-    <div class="container nav-inner" style="padding:14px 20px;">
-      <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:#ffffff;">
-        <img src="~/assets/sat_emblem_clean.png" asp-append-version="true" style="height:38px; width:auto; object-fit:contain;" alt="SAT Jewels Logo" />
-        <div style="display:flex; flex-direction:column; justify-content:center;">
-          <span style="font-family:var(--font-serif); font-size:20px; font-weight:700; color:#ffffff; letter-spacing:0.04em; line-height:1; white-space:nowrap;">SAT <span class="sat-brand-script" style="margin-left:4px;">Jewel</span></span>
-          <span style="font-size:8.5px; font-weight:600; color:rgba(255,255,255,0.75); letter-spacing:0.16em; text-transform:uppercase; margin-top:2px;">Fine Jewelry</span>
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; width:100%;">
+      <a href="/" class="sat-nav-brand-wrap" style="text-decoration:none;">
+        <img src="~/assets/sat_emblem_clean.png" asp-append-version="true" class="official-sat-logo-nav" alt="SAT Jewels Logo" />
+        <div class="nav-logo-slot">
+          <span style="font-family:var(--font-serif); font-size:21px; font-weight:700; color:#ffffff; letter-spacing:0.03em; line-height:1; white-space:nowrap; display:flex; align-items:center;">SAT <span class="sat-brand-script" style="margin-left:4px; color:var(--champagne-gold);">Jewel</span></span>
+          <span style="font-size:8.5px; font-weight:600; color:rgba(212,178,112,0.85); letter-spacing:0.22em; text-transform:uppercase; margin-top:3px;">Fine Jewelry</span>
         </div>
       </a>
 
-      <div style="margin-left:auto; display:flex; align-items:center; gap:14px;">
+      <div style="display:flex; align-items:center; gap:16px;">
         <a href="/" class="mobile-hidden" style="color:var(--champagne-gold); font-size:13.5px; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:6px;">
           <i class="fa-solid fa-arrow-left" style="font-size:12px;"></i> Back to Home
         </a>
@@ -849,13 +827,31 @@
         {
           var originalPriceUSD = (int)(item.PriceUSD * 1.15m);
           var imgSrc = string.IsNullOrEmpty(item.ImageUrl) ? "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" : item.ImageUrl;
+          var galList = !string.IsNullOrWhiteSpace(item.GalleryImages) 
+            ? item.GalleryImages.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList() 
+            : new List<string> { imgSrc };
+          if (galList.Count == 1)
+          {
+            galList.Add("/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png");
+            galList.Add("/assets/ivevar/modern_wedding_ring_band_be1024e1-bb04-457c-83d2-7acda4fc55b4.png");
+          }
 
-          <div class="ivevar-product-card">
-            <div class="product-img-wrap">
-              <a href="/Product/Details/@item.Id">
-                <img src="@imgSrc" alt="@item.Name" />
+          <div class="ivevar-product-card sat-scrub-card" data-count="@galList.Count">
+            <div class="product-img-wrap sat-carousel-wrap">
+              <a href="/Product/Details/@item.Id" class="sat-carousel-track">
+                @foreach (var gImg in galList)
+                {
+                  <div class="sat-carousel-slide">
+                    <img src="@gImg" alt="@item.Name" loading="lazy" />
+                  </div>
+                }
               </a>
-              <span class="lab-grown-badge">LAB GROWN</span>
+              <div class="sat-scrub-dots">
+                @for(int d = 0; d < Math.Min(galList.Count, 5); d++)
+                {
+                  <span class="scrub-dot @(d == 0 ? "active" : "")"></span>
+                }
+              </div>
             </div>
             <div class="product-info-body">
               <a href="/Product/Details/@item.Id" style="text-decoration:none;">
@@ -890,9 +886,273 @@
         </div>
       }
     </div>
+
+    @* Luxury Server-Side Pagination Bar (Task 4) *@
+    @{
+      int curPage = ViewBag.CurrentPage ?? 1;
+      int totPages = ViewBag.TotalPages ?? 1;
+      int totCount = ViewBag.TotalCount ?? (Model?.Count ?? 0);
+      int pSize = ViewBag.PageSize ?? 12;
+
+      string GetPagedUrl(int p)
+      {
+        return $"/Product/Category?id={categoryId}&shape={selectedShape}&sort={selectedSort}&page={p}";
+      }
+    }
+
+    @if (totPages > 1)
+    {
+      <div class="sat-pagination-wrap">
+        <div class="sat-page-counter">
+          Showing <strong>@(((curPage - 1) * pSize) + 1)–@(Math.Min(curPage * pSize, totCount))</strong> of <strong>@totCount</strong> Certified Jewelry Pieces
+        </div>
+        <div class="sat-page-controls">
+          @if (curPage > 1)
+          {
+            <a href="@GetPagedUrl(curPage - 1)" class="sat-p-nav-btn"><i class="fa-solid fa-arrow-left"></i> Prev</a>
+          }
+
+          @for (int p = 1; p <= totPages; p++)
+          {
+            if (p == 1 || p == totPages || (p >= curPage - 2 && p <= curPage + 2))
+            {
+              <a href="@GetPagedUrl(p)" class="sat-p-num-btn @(p == curPage ? "active" : "")">@p</a>
+            }
+            else if (p == curPage - 3 || p == curPage + 3)
+            {
+              <span class="sat-p-dots">...</span>
+            }
+          }
+
+          @if (curPage < totPages)
+          {
+            <a href="@GetPagedUrl(curPage + 1)" class="sat-p-nav-btn">Next <i class="fa-solid fa-arrow-right"></i></a>
+          }
+        </div>
+      </div>
+    }
   </div>
 
+  <style>
+    /* Pagination Styles */
+    .sat-pagination-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin: 40px auto 70px;
+      text-align: center;
+    }
+    .sat-page-counter {
+      font-size: 13.5px;
+      color: #94a3b8;
+    }
+    .sat-page-counter strong {
+      color: #ffffff;
+    }
+    .sat-page-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .sat-p-num-btn {
+      min-width: 40px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #08111e;
+      border: 1px solid rgba(212, 178, 112, 0.25);
+      border-radius: 8px;
+      color: #cbd5e1;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .sat-p-num-btn:hover {
+      border-color: #d4b270;
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+    .sat-p-num-btn.active {
+      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
+      color: #ffffff;
+      border-color: #d4b270;
+      box-shadow: 0 4px 14px rgba(212, 178, 112, 0.35);
+    }
+    .sat-p-nav-btn {
+      padding: 0 16px;
+      height: 40px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #08111e;
+      border: 1px solid rgba(212, 178, 112, 0.25);
+      border-radius: 8px;
+      color: #d4b270;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+    .sat-p-nav-btn:hover {
+      border-color: #d4b270;
+      background: rgba(212, 178, 112, 0.15);
+      color: #ffffff;
+    }
+    .sat-p-dots {
+      color: #64748b;
+      padding: 0 4px;
+      font-weight: 700;
+    }
+
+    /* Smooth Carousel Slider Styles */
+    .sat-carousel-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: #000000;
+    }
+    .sat-carousel-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.65s cubic-bezier(0.2, 0.8, 0.2, 1);
+      will-change: transform;
+      text-decoration: none;
+    }
+    .sat-carousel-slide {
+      position: relative;
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .sat-carousel-slide img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+    .ivevar-product-card:hover .sat-carousel-slide img {
+      transform: scale(1.05);
+    }
+
+    /* Hover Scrubber Dots */
+    .sat-scrub-dots {
+      position: absolute;
+      bottom: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 5px;
+      z-index: 5;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+    }
+    .ivevar-product-card:hover .sat-scrub-dots {
+      opacity: 1;
+    }
+    .scrub-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.4);
+      transition: all 0.3s ease;
+    }
+    .scrub-dot.active {
+      background: #d4b270;
+      width: 14px;
+      border-radius: 4px;
+    }
+  </style>
+
   <script>
+    // Desktop Slow & Calm Right-Sliding Photo by Photo Animation on Hover (Task 1)
+    document.querySelectorAll('.sat-scrub-card').forEach(card => {
+      const track = card.querySelector('.sat-carousel-track');
+      const dots = card.querySelectorAll('.scrub-dot');
+      const count = parseInt(card.getAttribute('data-count')) || 1;
+      if (!track || count <= 1) return;
+
+      let currentIdx = 0;
+      let autoSlideTimer = null;
+      let lastMoveTime = 0;
+
+      function slideTo(idx) {
+        currentIdx = (idx + count) % count;
+        track.style.transform = `translateX(-${currentIdx * 100}%)`;
+        dots.forEach((d, i) => {
+          if (i === currentIdx) d.classList.add('active');
+          else d.classList.remove('active');
+        });
+      }
+
+      // Calm auto-slide photo by photo to the right when mouse is hovering
+      card.addEventListener('mouseenter', () => {
+        clearInterval(autoSlideTimer);
+        autoSlideTimer = setInterval(() => {
+          slideTo(currentIdx + 1);
+        }, 1800); // Relaxed luxury 1.8s interval
+      });
+
+      // Smoothly damped mousemove: only transitions if cursor moved deliberately and with debounce
+      card.addEventListener('mousemove', (e) => {
+        const now = Date.now();
+        if (now - lastMoveTime < 280) return; // 280ms throttle to prevent fast jitter
+
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const pct = Math.max(0, Math.min(1, x / rect.width));
+        const targetIdx = Math.floor(pct * count);
+        
+        if (targetIdx !== currentIdx) {
+          lastMoveTime = now;
+          clearInterval(autoSlideTimer);
+          slideTo(targetIdx);
+          autoSlideTimer = setInterval(() => {
+            slideTo(currentIdx + 1);
+          }, 2000);
+        }
+      });
+
+      card.addEventListener('mouseleave', () => {
+        clearInterval(autoSlideTimer);
+        slideTo(0);
+      });
+
+      // Mobile Touch Swipe support
+      let touchStartX = 0;
+      card.addEventListener('touchstart', (e) => {
+        if (e.touches && e.touches.length > 0) {
+          touchStartX = e.touches[0].clientX;
+        }
+      }, { passive: true });
+
+      card.addEventListener('touchend', (e) => {
+        if (e.changedTouches && e.changedTouches.length > 0) {
+          const touchEndX = e.changedTouches[0].clientX;
+          const diff = touchEndX - touchStartX;
+          if (diff < -30) {
+            slideTo(currentIdx + 1); // Swipe left -> slide to next photo
+          } else if (diff > 30) {
+            slideTo(currentIdx - 1); // Swipe right -> slide to prev photo
+          }
+        }
+      }, { passive: true });
+    });
+
     function scrollShapes(offset) {
       document.getElementById('shapesTrack').scrollBy({ left: offset, behavior: 'smooth' });
     }
@@ -919,6 +1179,7 @@
     function applySorting(sortVal) {
       const urlParams = new URLSearchParams(window.location.search);
       urlParams.set('sort', sortVal);
+      urlParams.set('page', '1');
       window.location.search = urlParams.toString();
     }
 
