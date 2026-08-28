@@ -663,9 +663,10 @@ a {
 }
 
 .nav-actions {
+  justify-self: end;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 18px;
   flex-shrink: 0;
 }
 

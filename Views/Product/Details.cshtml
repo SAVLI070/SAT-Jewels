@@ -24,32 +24,28 @@
             .ToList();
     }
 
-    // Enrich gallery to 8 angle shots matching Earthly Jewels layout
+    // Enrich gallery to 4 angle shots matching Earthly Jewels layout
     List<string> fallbackAngles = new List<string> {
         mainImage,
         "/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png",
         "/assets/ivevar/ivevar-luxury-rings-925-silver-2-1-75-ct-sparkling-fancy-vivid-green-emerald-cut-moissanite-diamond-engagement-ring-44619311841585_7c5c472f-38eb-4a1b-89ee-25caa5a69c22.png",
-        "/assets/ivevar/modern_wedding_ring_band_be1024e1-bb04-457c-83d2-7acda4fc55b4.png",
-        "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg",
-        "/assets/bespoke/bespoke_craftsman.jpg",
-        "/assets/process/craft_stone_setting.jpg",
-        "/assets/guide/understanding_difference.jpg"
+        "/assets/ivevar/modern_wedding_ring_band_be1024e1-bb04-457c-83d2-7acda4fc55b4.png"
     };
 
     if (galleryList.Count == 0)
     {
         galleryList = fallbackAngles;
     }
-    else if (galleryList.Count < 8)
+    else if (galleryList.Count < 4)
     {
         foreach (var fa in fallbackAngles)
         {
             if (!galleryList.Contains(fa)) galleryList.Add(fa);
-            if (galleryList.Count >= 8) break;
+            if (galleryList.Count >= 4) break;
         }
     }
 
-    galleryList = galleryList.Take(8).ToList();
+    galleryList = galleryList.Take(4).ToList();
 
     var originalPriceUSD = (int)(Model.Price * 1.15m);
 
@@ -248,9 +244,9 @@
       position: sticky;
       top: 85px;
       align-self: flex-start;
-      height: min(720px, calc(100vh - 105px));
-      min-height: 600px;
-      max-height: 760px;
+      height: min(650px, calc(100vh - 105px));
+      min-height: 560px;
+      max-height: 700px;
       width: 100%;
       aspect-ratio: 3 / 4;
       z-index: 10;
@@ -291,7 +287,7 @@
       backdrop-filter: blur(4px);
     }
 
-    /* Column 2: Vertical Scrolling Detail Gallery (8 Angle Shots, slightly taller aspect ratio) */
+    /* Column 2: Vertical Scrolling Detail Gallery (4 Square Angle Shots) */
     .pd-gallery-scroll-col {
       display: flex;
       flex-direction: column;
@@ -302,7 +298,7 @@
     .pd-gallery-card {
       position: relative;
       width: 100%;
-      aspect-ratio: 4 / 5;
+      aspect-ratio: 1 / 1;
       background: #0b1524;
       border-radius: 14px;
       overflow: hidden;
@@ -1020,30 +1016,44 @@
     @@media (max-width: 991px) {
       .pd-split-layout {
         grid-template-columns: 1fr;
-        gap: 20px;
+        gap: 14px;
+        margin-top: 10px;
+        margin-bottom: 40px;
       }
       .pd-hero-sticky-col {
-        position: relative;
-        top: 0;
-        height: auto;
-        min-height: auto;
-        max-height: auto;
+        position: relative !important;
+        top: 0 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        aspect-ratio: auto !important;
+        width: 100% !important;
       }
       .pd-hero-img-card {
-        aspect-ratio: 1 / 1;
-        height: auto;
+        aspect-ratio: 1 / 1 !important;
+        height: auto !important;
+        width: 100% !important;
+        margin-bottom: 0 !important;
       }
       .pd-gallery-scroll-col {
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        gap: 12px;
-        padding-bottom: 8px;
+        display: flex !important;
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        scroll-snap-type: x mandatory !important;
+        gap: 10px !important;
+        padding-bottom: 6px !important;
+        width: 100% !important;
+        scrollbar-width: none !important;
+        -webkit-overflow-scrolling: touch;
+      }
+      .pd-gallery-scroll-col::-webkit-scrollbar {
+        display: none;
       }
       .pd-gallery-card {
-        flex: 0 0 110px;
-        scroll-snap-align: start;
+        flex: 0 0 90px !important;
+        width: 90px !important;
+        aspect-ratio: 1 / 1 !important;
+        scroll-snap-align: start !important;
       }
       .sat-floating-order-card {
         bottom: 16px;
