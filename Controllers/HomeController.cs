@@ -36,6 +36,28 @@ namespace SAT1.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> LandingNew()
+        {
+            var dbCounts = new Dictionary<long, int>();
+            try
+            {
+                dbCounts = await _context.Products
+                    .Where(p => p.IsAvailable)
+                    .GroupBy(p => p.CategoryId)
+                    .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+                    .ToDictionaryAsync(x => x.CategoryId, x => x.Count);
+            }
+            catch
+            {
+                dbCounts = new Dictionary<long, int>();
+            }
+
+            ViewBag.CategoryCountsByNumericId = dbCounts;
+            ViewData["Title"] = "SAT Jewel — Fine Jewelry | Mastery in Every Cut";
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult About()
         {
             ViewData["Title"] = "About Us & Our Story — SAT Jewel";

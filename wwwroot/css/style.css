@@ -3148,9 +3148,9 @@ a {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(10, 20, 38, 0.5);
+  background: rgba(10, 20, 38, 0.6);
   border: 1px solid rgba(212, 178, 112, 0.3);
-  padding: 12px;
+  padding: 6px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
@@ -3159,19 +3159,21 @@ a {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: invert(1) brightness(2);
-  transition: transform 0.3s ease;
+  filter: drop-shadow(0 0 6px rgba(212, 184, 120, 0.4));
+  transition: transform 0.3s ease, filter 0.3s ease;
 }
 
 .shape-line-item:hover .shape-icon-box {
-  background: rgba(212, 178, 112, 0.2);
+  background: rgba(212, 178, 112, 0.25);
   border-color: #d4b270;
-  box-shadow: 0 0 22px rgba(212, 178, 112, 0.4);
+  box-shadow: 0 0 22px rgba(212, 178, 112, 0.5);
   transform: translateY(-4px);
 }
 
-.shape-line-item:hover .shape-icon-box img {
-  transform: scale(1.12);
+.shape-line-item:hover .shape-icon-box img,
+.shape-line-item.active .shape-icon-box img {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 10px rgba(255, 220, 140, 0.8)) brightness(1.08);
 }
 
 .shape-label-text {

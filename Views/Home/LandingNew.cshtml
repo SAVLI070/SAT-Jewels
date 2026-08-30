@@ -1,0 +1,1392 @@
+@{
+    Layout = null;
+    ViewData["Title"] = "SAT Jewel — Fine Jewelry | Mastery in Every Cut";
+    var catCounts = ViewBag.CategoryCountsByNumericId as Dictionary<long, int> ?? new Dictionary<long, int>();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>@ViewData["Title"]</title>
+  <meta name="description" content="Mastery in Every Cut. Redefining luxury fine jewelry with 3D diamond caustics, certified lab grown gems, and bespoke studio craftsmanship." />
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Global Base CSS -->
+  <link rel="stylesheet" href="~/css/style.css" />
+
+  <style>
+    /* ==========================================================================
+       3D SCROLLABLE DESIGN THEME & STYLES (LUMIÈRE x SAT JEWEL)
+       ========================================================================== */
+    :root {
+      --ink: #f1eee8;
+      --muted: rgba(241, 238, 232, 0.65);
+      --gold: #d4b878;
+      --gold-glow: rgba(212, 184, 120, 0.45);
+      --bg: #07070a;
+      --glass: rgba(22, 20, 24, 0.44);
+      --stroke: rgba(241, 238, 232, 0.13);
+      --font-serif-luxury: 'Playfair Display', Georgia, serif;
+      --font-sans-luxury: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+
+    html {
+      scroll-behavior: auto !important;
+      overflow-x: clip !important;
+      overflow-y: visible !important;
+      height: auto !important;
+    }
+
+    body {
+      background: var(--bg) !important;
+      color: var(--ink);
+      font-family: var(--font-sans-luxury);
+      font-weight: 300;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: clip !important;
+      overflow-y: visible !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      position: relative !important;
+      min-height: 100vh;
+    }
+
+
+
+    /* 3D Themed Navigation Bar (Clean Floating Layout - Center Pill Only) */
+    .sat-3d-navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99999;
+      padding: 16px 0;
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-bottom: none;
+      transition: all 0.35s ease;
+      pointer-events: none;
+    }
+    .sat-3d-navbar .nav-inner {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 16px;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      width: 100%;
+      pointer-events: auto;
+    }
+
+    .sat-3d-navbar .sat-nav-brand-wrap {
+      justify-self: start;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .sat-3d-navbar .nav-links {
+      justify-self: center;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      padding: 5px 8px;
+      border-radius: 100px;
+      border: 1px solid var(--stroke);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+      margin: 0 auto;
+    }
+
+    .sat-3d-navbar .nav-link {
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(241, 238, 232, 0.8);
+      border-radius: 100px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+    }
+    .sat-3d-navbar .nav-link:hover,
+    .sat-3d-navbar .nav-link.active {
+      color: #ffffff;
+      background: rgba(212, 184, 120, 0.18);
+      border: 1px solid rgba(212, 184, 120, 0.4);
+    }
+
+    .sat-3d-navbar .nav-actions {
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    /* Luxury Dark-Glass Account Dropdown Menu */
+    .account-menu-dropdown {
+      position: absolute;
+      top: calc(100% + 12px);
+      right: 0;
+      min-width: 240px;
+      background: rgba(18, 16, 20, 0.95);
+      border: 1px solid rgba(212, 184, 120, 0.35);
+      border-radius: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 10px;
+      display: none;
+      z-index: 100000;
+    }
+    .account-menu.open .account-menu-dropdown {
+      display: block;
+      animation: satMenuFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @@keyframes satMenuFade {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .account-menu-head {
+      padding: 10px 12px 12px;
+      border-bottom: 1px solid rgba(241, 238, 232, 0.1);
+      margin-bottom: 6px;
+    }
+    .account-menu-hello {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+    }
+    .account-menu-email {
+      font-size: 11.5px;
+      color: rgba(212, 184, 120, 0.85);
+      margin-top: 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .account-menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: rgba(241, 238, 232, 0.85);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .account-menu-item:hover {
+      background: rgba(212, 184, 120, 0.16);
+      color: #ffffff;
+      transform: translateX(3px);
+    }
+    .account-menu-item i {
+      width: 16px;
+      color: var(--gold);
+      font-size: 13px;
+    }
+    .account-menu-divider {
+      height: 1px;
+      background: rgba(241, 238, 232, 0.08);
+      margin: 6px 0;
+    }
+    .account-menu-logout {
+      color: #f87171 !important;
+    }
+    .account-menu-logout i {
+      color: #f87171 !important;
+    }
+    .account-menu-logout:hover {
+      background: rgba(239, 68, 68, 0.15) !important;
+    }
+
+    /* Floating WhatsApp Widget */
+    .sat-floating-whatsapp-wrap {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 999999;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+    }
+    .sat-wa-badge-popup {
+      background: #0f172a;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      padding: 7px 14px;
+      border-radius: 20px;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      animation: waBounce 2.5s infinite ease-in-out;
+    }
+    .sat-wa-close-btn {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 2px;
+    }
+    .sat-wa-float-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #25d366;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      text-decoration: none;
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.45);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sat-wa-float-btn:hover {
+      transform: scale(1.12);
+      box-shadow: 0 12px 30px rgba(37, 211, 102, 0.6);
+      color: #ffffff;
+    }
+    @@keyframes waBounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    /* 3D Video Hero Scrubbing Stage */
+    .sat-hero-3d {
+      position: relative !important;
+      height: calc(100vh + 7000px) !important;
+      background: #04050a !important;
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+    .sat-hero-stage {
+      position: -webkit-sticky !important;
+      position: sticky !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100vh !important;
+      max-height: 100vh !important;
+      overflow: hidden !important;
+      background: #04050a !important;
+      z-index: 10 !important;
+    }
+    .sat-hero-stage video {
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      object-fit: cover !important;
+      display: block !important;
+    }
+    .sat-hero-scrim {
+      position: absolute !important;
+      inset: 0 !important;
+      background: radial-gradient(130% 90% at 50% 12%, transparent 35%, rgba(0,0,0,0.65) 100%),
+                  linear-gradient(180deg, rgba(4,5,10,0.4) 0%, transparent 25%, transparent 65%, rgba(4,5,10,0.85) 100%) !important;
+      pointer-events: none !important;
+    }
+
+    /* Typography Captions Overlay */
+    .sat-3d-cap {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 0 clamp(24px, 8vw, 140px);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(24px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      will-change: opacity, transform;
+    }
+    .sat-3d-cap.cap-center {
+      align-items: center;
+      text-align: center;
+    }
+    .sat-3d-cap.cap-left {
+      align-items: flex-start;
+      text-align: left;
+    }
+    .sat-3d-cap.cap-right {
+      align-items: flex-end;
+      text-align: right;
+    }
+
+    .sat-3d-cap .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .sat-3d-cap h1 {
+      font-family: var(--font-serif-luxury);
+      font-size: clamp(38px, 6.5vw, 92px);
+      font-weight: 500;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      color: #ffffff;
+      max-width: 16ch;
+      margin: 12px 0 16px;
+      text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+    }
+    .sat-3d-cap p {
+      max-width: 46ch;
+      font-size: clamp(15px, 1.4vw, 19px);
+      line-height: 1.65;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+    .sat-3d-cap .cap-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      border: 1px solid rgba(244, 241, 234, 0.4);
+      border-radius: 100px;
+      padding: 14px 32px;
+      font-size: 12.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #ffffff;
+      text-decoration: none;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      background: rgba(22, 20, 24, 0.5);
+      transition: all 0.3s ease;
+    }
+    .sat-3d-cap .cap-cta:hover {
+      background: var(--ink);
+      color: #04050a;
+      border-color: var(--ink);
+      transform: translateY(-2px);
+    }
+
+    .sat-scroll-hint {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10.5px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      animation: hintFloat 2s infinite ease-in-out;
+      pointer-events: none;
+    }
+    @@keyframes hintFloat {
+      0%, 100% { transform: translate(-50%, 0); opacity: 0.6; }
+      50% { transform: translate(-50%, 6px); opacity: 1; }
+    }
+
+    /* Split Story Section */
+    .sat-split-sec {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      min-height: 88vh;
+      background: #06070a;
+      position: relative;
+      z-index: 20;
+    }
+    .sat-split-copy {
+      padding: clamp(40px, 7vw, 120px);
+    }
+    .sat-split-copy .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+    }
+    .sat-split-copy h2 {
+      font-family: var(--font-serif-luxury);
+      font-size: clamp(32px, 4.2vw, 56px);
+      margin: 16px 0 20px;
+      max-width: 16ch;
+      color: #ffffff;
+      line-height: 1.1;
+    }
+    .sat-split-copy p {
+      color: var(--muted);
+      line-height: 1.7;
+      max-width: 48ch;
+      font-size: 16px;
+    }
+    .sat-3d-spec {
+      list-style: none;
+      display: flex;
+      gap: 38px;
+      margin-top: 36px;
+      padding: 0;
+    }
+    .sat-3d-spec li {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sat-3d-spec b {
+      font-family: var(--font-serif-luxury);
+      font-size: 34px;
+      color: var(--gold);
+      font-weight: 500;
+    }
+    .sat-3d-spec span {
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .sat-split-media {
+      min-height: 88vh;
+      background-size: cover;
+      background-position: center;
+    }
+    .sat-split-media.m-facade {
+      background-image: linear-gradient(0deg, rgba(6, 7, 10, 0.35), rgba(6, 7, 10, 0.35)), url('/assets/3d/facade.jpg');
+    }
+    .sat-split-media.m-interior {
+      background-image: linear-gradient(0deg, rgba(6, 7, 10, 0.35), rgba(6, 7, 10, 0.35)), url('/assets/3d/interior.jpg');
+    }
+
+    /* Collections Section with Shapes & 6 Categories */
+    .sat-collections-3d-sec {
+      padding: clamp(70px, 9vw, 130px) 24px;
+      background: #080a0f;
+      position: relative;
+      z-index: 20;
+    }
+    .sat-sec-head {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .sat-sec-head .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--gold);
+      font-weight: 600;
+      display: block;
+      margin-bottom: 10px;
+    }
+    .sat-sec-head h2 {
+      font-family: var(--font-serif-luxury);
+      font-size: clamp(32px, 4vw, 54px);
+      color: #ffffff;
+      margin: 0 0 12px;
+      font-weight: 500;
+    }
+    .sat-sec-divider {
+      width: 50px;
+      height: 1.5px;
+      background: var(--gold);
+      margin: 0 auto;
+    }
+
+    /* Diamond Shapes Scrollable Track */
+    .sat-3d-shapes-wrapper {
+      max-width: 1260px;
+      margin: 0 auto 60px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 10px 0;
+    }
+    .sat-3d-shapes-wrapper::-webkit-scrollbar { display: none; }
+    .sat-3d-shapes-track {
+      display: flex;
+      justify-content: center;
+      gap: 22px;
+      min-width: max-content;
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    .sat-3d-shape-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      gap: 10px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .sat-3d-shape-icon {
+      width: 66px;
+      height: 66px;
+      border-radius: 50%;
+      background: rgba(22, 20, 24, 0.7);
+      border: 1px solid rgba(212, 184, 120, 0.28);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.35s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    }
+    .sat-3d-shape-icon img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(212, 184, 120, 0.4));
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+    }
+    .sat-3d-shape-label {
+      font-size: 12.5px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      transition: color 0.3s ease;
+    }
+    .sat-3d-shape-item:hover .sat-3d-shape-icon {
+      border-color: var(--gold);
+      box-shadow: 0 0 22px var(--gold-glow), 0 6px 20px rgba(0, 0, 0, 0.6);
+      transform: translateY(-4px);
+      background: rgba(30, 26, 32, 0.85);
+    }
+    .sat-3d-shape-item:hover .sat-3d-shape-icon img {
+      transform: scale(1.18);
+      filter: drop-shadow(0 0 12px rgba(255, 220, 140, 0.8)) brightness(1.1);
+    }
+    .sat-3d-shape-item:hover .sat-3d-shape-label {
+      color: #ffffff;
+    }
+
+    /* 6 Categories Grid */
+    .sat-3d-cats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1240px;
+      margin: 0 auto;
+    }
+    .sat-3d-cat-card {
+      position: relative;
+      background: var(--glass);
+      border: 1px solid var(--stroke);
+      border-radius: 18px;
+      overflow: hidden;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      text-decoration: none;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+    .sat-3d-cat-img-box {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      position: relative;
+      background: #05070c;
+    }
+    .sat-3d-cat-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+    .sat-3d-cat-info {
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(241, 238, 232, 0.08);
+      background: rgba(10, 12, 18, 0.6);
+    }
+    .sat-3d-cat-title {
+      font-family: var(--font-serif-luxury);
+      font-size: 20px;
+      color: #ffffff;
+      margin: 0;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .sat-3d-cat-arrow {
+      color: var(--gold);
+      font-size: 15px;
+      transition: transform 0.3s ease;
+    }
+    .sat-3d-cat-card:hover {
+      transform: translateY(-8px);
+      border-color: var(--gold);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 184, 120, 0.25);
+    }
+    .sat-3d-cat-card:hover .sat-3d-cat-img-box img {
+      transform: scale(1.06);
+    }
+    .sat-3d-cat-card:hover .sat-3d-cat-arrow {
+      transform: translateX(4px);
+    }
+
+    /* Vista Section (The Craft) */
+    .sat-vista-sec {
+      position: relative;
+      min-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      z-index: 20;
+    }
+    .sat-vista-bg {
+      position: absolute;
+      inset: 0;
+      background: url('/assets/3d/interior.jpg') center/cover;
+      transform: scale(1.05);
+    }
+    .sat-vista-sec::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(6,7,10,0.85) 0%, rgba(6,7,10,0.5) 50%, rgba(6,7,10,0.92) 100%);
+    }
+    .sat-vista-inner {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      padding: 0 24px;
+      max-width: 1000px;
+    }
+    .sat-vista-inner h2 {
+      font-family: var(--font-serif-luxury);
+      font-size: clamp(34px, 5vw, 68px);
+      margin: 16px 0 18px;
+      line-height: 1.15;
+      color: #ffffff;
+    }
+    .sat-vista-inner p {
+      color: var(--muted);
+      font-size: clamp(15px, 1.5vw, 19px);
+      margin-bottom: 48px;
+    }
+    .sat-3d-figs {
+      display: flex;
+      gap: 60px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .sat-3d-figs div {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sat-3d-figs b {
+      font-family: var(--font-serif-luxury);
+      font-size: clamp(28px, 3.5vw, 48px);
+      color: var(--gold);
+      font-weight: 500;
+    }
+    .sat-3d-figs span {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* 4-Image Atelier Gallery */
+    .sat-gallery-sec {
+      padding: clamp(70px, 9vw, 130px) 24px;
+      background: var(--bg);
+      position: relative;
+      z-index: 20;
+    }
+    .sat-gallery-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .sat-gallery-fig {
+      position: relative;
+      height: 46vh;
+      min-height: 340px;
+      border-radius: 16px;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+      border: 1px solid var(--stroke);
+      transition: all 0.35s ease;
+    }
+    .sat-gallery-fig::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(0deg, rgba(6,7,10,0.8) 0%, transparent 55%);
+    }
+    .sat-gallery-fig figcaption {
+      position: absolute;
+      left: 24px;
+      bottom: 20px;
+      z-index: 2;
+      font-family: var(--font-serif-luxury);
+      font-size: 22px;
+      color: #ffffff;
+      letter-spacing: 0.02em;
+    }
+    .sat-gallery-fig:hover {
+      transform: translateY(-6px);
+      border-color: var(--gold);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Mobile Responsiveness */
+    @@media (max-width: 992px) {
+      .sat-3d-navbar .nav-links { display: none; }
+      .sat-split-sec { grid-template-columns: 1fr; }
+      .sat-split-sec.reverse .sat-split-copy { order: 0 !important; }
+      .sat-split-media { min-height: 50vh; }
+      .sat-3d-cats-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .sat-gallery-grid { grid-template-columns: 1fr; }
+      .sat-3d-figs { gap: 32px; }
+    }
+    @@media (max-width: 560px) {
+      .sat-3d-cats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+
+
+  <!-- SAT Jewel Navigation Bar (Clean Floating Layout) -->
+  <nav class="sat-3d-navbar" id="sat3dNavbar">
+    <div class="nav-inner">
+      <!-- Navbar Brand Wrap: Pure Golden SJ Logo Emblem + Shop Name -->
+      <a href="/" class="sat-nav-brand-wrap">
+        <img src="/assets/sat_logo_transparent.png" class="official-sat-logo-nav" alt="SAT Jewel Official Emblem Logo" style="height: 36px; width: auto; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(212,184,120,0.5));" />
+        <div class="nav-logo-slot">
+          <span style="font-family: var(--font-serif-luxury); font-size: 21px; font-weight: 700; color: #ffffff; letter-spacing: 0.03em; line-height: 1; white-space: nowrap; display: flex; align-items: center;">
+            SAT <span class="sat-brand-script" style="margin-left: 4px; color: var(--gold);">Jewel</span>
+          </span>
+          <span style="font-size: 8.5px; font-weight: 600; color: rgba(212, 184, 120, 0.85); letter-spacing: 0.22em; text-transform: uppercase; margin-top: 3px;">Fine Jewelry</span>
+        </div>
+      </a>
+
+      <!-- Navigation Bar Links (Home, Collections with MegaMenu Hover, Craft Process) -->
+      <div class="nav-links">
+        <a href="#top" class="nav-link active">
+          <i class="fa-solid fa-house" style="font-size: 12px;"></i>
+          <span>Home</span>
+        </a>
+        <div class="sat-nav-item sat-has-mega" style="position: relative;" onmouseenter="openSatMegaDropdown()" onmouseleave="closeSatMegaDropdown()">
+          <a href="#collections" class="nav-link" id="navCollectionsLink" onclick="toggleSatMegaDropdown(event)">
+            <i class="fa-solid fa-gem" style="font-size: 12px;"></i>
+            <span>Collections</span>
+            <i class="fa-solid fa-angle-down" style="font-size: 10px; margin-left: 2px;"></i>
+          </a>
+        </div>
+        <a href="#craft-story" class="nav-link">
+          <i class="fa-solid fa-hammer" style="font-size: 12px;"></i>
+          <span>Craft Process</span>
+        </a>
+      </div>
+
+      <!-- Action Icons (Search, Profile, Cart) -->
+      <div class="nav-actions">
+        <partial name="_AuthNav" />
+        <button class="hamburger desktop-hidden" onclick="openSatMobileDrawer()" aria-label="Menu" style="background:transparent; border:none; color:#ffffff; font-size:22px; cursor:pointer;">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 1. 3D HERO VIDEO SCROLLING SECTION -->
+  <section id="top" class="sat-hero-3d">
+    <div class="sat-hero-stage">
+      <video id="satHero3dVideo" src="/assets/3d/experience-v1781721669.mp4" muted playsinline preload="auto"></video>
+      <div class="sat-hero-scrim"></div>
+
+      <!-- Caption 0: 0.00 -> 0.12 -->
+      <div class="sat-3d-cap cap-center" id="cap0">
+        <span class="eyebrow">SAT JEWEL · FINE JEWELRY</span>
+        <h1>Mastery in Every Cut</h1>
+        <p>Redefining luxury jewelry with AI-driven valuation, conflict-free certified gems, and bespoke studio craftsmanship.</p>
+        <a href="#collections" class="cap-cta">Explore Collections &darr;</a>
+      </div>
+
+      <!-- Caption 1: 0.15 -> 0.27 -->
+      <div class="sat-3d-cap cap-left" id="cap1">
+        <span class="eyebrow">01 — THE LIGHT</span>
+        <h1>It starts with fire</h1>
+        <p>A diamond is only as beautiful as the light it holds and reflects back to the world.</p>
+      </div>
+
+      <!-- Caption 2: 0.30 -> 0.43 -->
+      <div class="sat-3d-cap cap-right" id="cap2">
+        <span class="eyebrow">02 — THE STONE</span>
+        <h1>One in a thousand</h1>
+        <p>100% Conflict-free GIA &amp; IGI certified gems selected for extraordinary inner blaze.</p>
+      </div>
+
+      <!-- Caption 3: 0.46 -> 0.58 -->
+      <div class="sat-3d-cap cap-left" id="cap3">
+        <span class="eyebrow">03 — THE FACETS</span>
+        <h1>Geometry of brilliance</h1>
+        <p>Every optical angle cut with microscopic precision to maximize fiery refraction.</p>
+      </div>
+
+      <!-- Caption 4: 0.61 -> 0.74 -->
+      <div class="sat-3d-cap cap-right" id="cap4">
+        <span class="eyebrow">04 — THE CRAFT</span>
+        <h1>Set by master hands</h1>
+        <p>18K Solid Gold &amp; Platinum 950, raised to hold a single pure flame.</p>
+      </div>
+
+      <!-- Caption 5: 0.78 -> 1.00 -->
+      <div class="sat-3d-cap cap-center" id="cap5">
+        <span class="eyebrow">05 — THE VAULT</span>
+        <h1>Kept, and treasured</h1>
+        <p>Bespoke heirloom pieces crafted to be inherited, cherished, and celebrated for generations.</p>
+        <a href="#collections" class="cap-cta">Explore SAT Collections &rarr;</a>
+      </div>
+
+      <!-- Scroll Hint -->
+      <div class="sat-scroll-hint">
+        <span>Scroll to explore</span>
+        <i class="fa-solid fa-chevron-down" style="font-size: 10px;"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. THE MAISON / STORY SECTION -->
+  <section id="craft-story" class="sat-split-sec">
+    <div class="sat-split-copy">
+      <span class="eyebrow">The Atelier</span>
+      <h2>Cut for fire, set by hand.</h2>
+      <p>Every SAT Jewel stone is selected for extraordinary brilliance, then set by master jewellers in solid gold or platinum — each piece a certified masterpiece recorded for life.</p>
+      <ul class="sat-3d-spec">
+        <li>
+          <b>D–F</b>
+          <span>Colour Grade</span>
+        </li>
+        <li>
+          <b>Top 1%</b>
+          <span>Diamond Cut</span>
+        </li>
+        <li>
+          <b>&infin;</b>
+          <span>Lifetime Care</span>
+        </li>
+      </ul>
+    </div>
+    <div class="sat-split-media m-facade"></div>
+  </section>
+
+  <!-- 3. COLLECTIONS SECTION: 10 DIAMOND SHAPES & 6 MAIN CATEGORIES -->
+  <section id="collections" class="sat-collections-3d-sec">
+    <div class="container" style="max-width: 1400px; margin: 0 auto;">
+      
+      <!-- Section Header -->
+      <div class="sat-sec-head">
+        <span class="eyebrow">Bespoke Diamond Cuts</span>
+        <h2>Shop Diamond Engagement Rings by Shape</h2>
+        <div class="sat-sec-divider"></div>
+      </div>
+
+      <!-- 10 Diamond Shapes Line-Art Grid (Active Navigation to Rings) -->
+      <div class="sat-3d-shapes-wrapper">
+        <div class="sat-3d-shapes-track">
+          <!-- 1. Round -->
+          <a href="/Product/Category?id=1&shape=Round" class="sat-3d-shape-item">
+            <div class="sat-3d-shape-icon">
+              <img src="/assets/shapes/real/round.png" alt="Round Diamond Cut" />
+            </div>
+            <span class="sat-3d-shape-label">Round</span>
+          </a>
+
+          <!-- 2. Marquise -->
+          <a href="/Product/Category?id=1&shape=Marquise" class="sat-3d-shape-item">
+            <div class="sat-3d-shape-icon">
+              <img src="/assets/shapes/real/marquise.png" alt="Marquise Diamond Cut" />
+            </div>
+            <span class="sat-3d-shape-label">Marquise</span>
+          </a>
+
+          <!-- 3. Asscher -->
+          <a href="/Product/Category?id=1&shape=Asscher" class="sat-3d-shape-item">
+            <div class="sat-3d-shape-icon">
+              <img src="/assets/shapes/real/asscher.png" alt="Asscher Diamond Cut" />
+            </div>
+            <span class="sat-3d-shape-label">Asscher</span>
+          </a>
+
+          <!-- 4. Pear -->
+          <a href="/Product/Category?id=1&shape=Pear" class="sat-3d-shape-item">
+            <div class="sat-3d-shape-icon">
+              <img src="/assets/shapes/real/pear.png" alt="Pear Diamond Cut" />
+            </div>
+            <span class="sat-3d-shape-label">Pear</span>
+          </a>
+
+          <!-- 5. Princess -->
+          <a href="/Product/Category?id=1&shape=Princess" class="sat-3d-shape-item">
+            <div class="sat-3d-shape-icon">
+              <img src="/assets/shapes/real/princess.png" alt="Princess Diamond Cut" />
+            </div>
+            <span class="sat-3d-shape-label">Princess</span>
+          </a>
+
+          <!-- 6. Cushion -->
+          <a href="/Product/Category?id=1&shape=Cushion" class="sat-3d-shape-item">
+            <div class="sat-3d-shape-icon">
+              <img src="/assets/shapes/real/cushion.png" alt="Cushion Diamond Cut" />
+            </div>
+            <span class="sat-3d-shape-label">Cushion</span>
+          </a>
+
+          <!-- 7. Radiant -->
+          <a href="/Product/Category?id=1&shape=Radiant" class="sat-3d-shape-item">
+            <div class="sat-3d-shape-icon">
+              <img src="/assets/shapes/real/radiant.png" alt="Radiant Diamond Cut" />
+            </div>
+            <span class="sat-3d-shape-label">Radiant</span>
+          </a>
+
+          <!-- 8. Oval -->
+          <a href="/Product/Category?id=1&shape=Oval" class="sat-3d-shape-item">
+            <div class="sat-3d-shape-icon">
+              <img src="/assets/shapes/real/oval.png" alt="Oval Diamond Cut" />
+            </div>
+            <span class="sat-3d-shape-label">Oval</span>
+          </a>
+
+          <!-- 9. Emerald -->
+          <a href="/Product/Category?id=1&shape=Emerald" class="sat-3d-shape-item">
+            <div class="sat-3d-shape-icon">
+              <img src="/assets/shapes/real/emerald.png" alt="Emerald Diamond Cut" />
+            </div>
+            <span class="sat-3d-shape-label">Emerald</span>
+          </a>
+
+          <!-- 10. Heart -->
+          <a href="/Product/Category?id=1&shape=Heart" class="sat-3d-shape-item">
+            <div class="sat-3d-shape-icon">
+              <img src="/assets/shapes/real/heart.png" alt="Heart Diamond Cut" />
+            </div>
+            <span class="sat-3d-shape-label">Heart</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Section Header 2: Shop by Category -->
+      <div class="sat-sec-head" style="margin-top: 40px;">
+        <span class="eyebrow">Certified Collections</span>
+        <h2>Shop By Category</h2>
+        <div class="sat-sec-divider"></div>
+      </div>
+
+      <!-- Desktop Horizontal Scroll Carousel & Mobile 2-Column Grid (One Line Track) -->
+      <div class="cat-carousel-container">
+        <!-- Carousel Navigation Left Arrow -->
+        <button type="button" class="cat-slider-arrow cat-arrow-left" onclick="scrollCatSlider(-300)" aria-label="Previous Category">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <!-- Track containing ONLY the 6 Main Categories in ONE LINE -->
+        <div class="cat-carousel-track" id="mainCatTrack">
+          <!-- 1. ENGAGEMENT RINGS -->
+          <a href="/Product/Category?id=1" class="cat-carousel-card">
+            <div class="cat-card-image-box">
+              <img src="/assets/categories/cat_engagement_rings.png" alt="Engagement Rings" loading="eager" />
+            </div>
+            <div class="cat-card-title-label">Engagement Rings &rarr;</div>
+          </a>
+
+          <!-- 2. WEDDING RINGS -->
+          <a href="/Product/Category?id=2" class="cat-carousel-card">
+            <div class="cat-card-image-box">
+              <img src="/assets/categories/cat_wedding_rings.webp" alt="Wedding Rings" loading="lazy" />
+            </div>
+            <div class="cat-card-title-label">Wedding Rings</div>
+          </a>
+
+          <!-- 3. BRIDAL SETS -->
+          <a href="/Product/Category?id=3" class="cat-carousel-card">
+            <div class="cat-card-image-box">
+              <img src="/assets/categories/cat_bridal_sets.webp" alt="Bridal Sets" loading="lazy" />
+            </div>
+            <div class="cat-card-title-label">Bridal Sets</div>
+          </a>
+
+          <!-- 4. EARRINGS -->
+          <a href="/Product/Category?id=4" class="cat-carousel-card">
+            <div class="cat-card-image-box">
+              <img src="/assets/categories/cat_earrings.webp" alt="Earrings" loading="lazy" />
+            </div>
+            <div class="cat-card-title-label">Earrings</div>
+          </a>
+
+          <!-- 5. BRACELETS -->
+          <a href="/Product/Category?id=5" class="cat-carousel-card">
+            <div class="cat-card-image-box">
+              <img src="/assets/categories/cat_bracelets.webp" alt="Bracelets" loading="lazy" />
+            </div>
+            <div class="cat-card-title-label">Bracelets</div>
+          </a>
+
+          <!-- 6. NECKLACES -->
+          <a href="/Product/Category?id=6" class="cat-carousel-card">
+            <div class="cat-card-image-box">
+              <img src="/assets/categories/cat_necklaces.webp" alt="Necklaces" loading="lazy" />
+            </div>
+            <div class="cat-card-title-label">Necklaces</div>
+          </a>
+        </div>
+
+        <!-- Carousel Navigation Right Arrow -->
+        <button type="button" class="cat-slider-arrow cat-arrow-right" onclick="scrollCatSlider(300)" aria-label="Next Category">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 4. CRAFTSMANSHIP VIDEO BANNER: "Made with Care, Made to Last" & "Your story, our craft." -->
+  <section id="craft-story" style="position: relative; background: #06070a; z-index: 20;">
+    <!-- Heading & Intro -->
+    <div style="max-width: 900px; margin: 0 auto; text-align: center; padding: 75px 24px 45px;">
+      <div style="font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 12px;">
+        Artisanal Studio
+      </div>
+      <h2 style="font-family: var(--font-serif-luxury); font-size: clamp(30px, 3.8vw, 46px); color: #ffffff; margin: 0 0 16px; font-weight: 500;">
+        Made with Care, Made to Last
+      </h2>
+      <p style="font-family: var(--font-serif-luxury); font-size: 16.5px; line-height: 1.85; color: rgba(241, 238, 232, 0.8); font-weight: 400; margin: 0;">
+        Every piece is handmade by skilled jewelers who care about quality. We use real gold and strong materials. Your ring will last a lifetime, whether you choose a lab diamond or moissanite. This is your story - we just help you build it.
+      </p>
+    </div>
+
+    <!-- Full-Width Background Video Banner -->
+    <div style="position: relative; width: 100%; height: 75vh; min-height: 480px; overflow: hidden; background: #000000;">
+      <video autoplay loop muted playsinline poster="/assets/ring_model.png" style="position: absolute; top: 50%; left: 50%; width: 100%; height: 100%; object-fit: cover; transform: translate(-50%, -50%); opacity: 0.75;">
+        <source src="/assets/videos/craft_jeweler.mp4" type="video/mp4" />
+      </video>
+
+      <!-- Cinematic Dark Gradient Overlay -->
+      <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(6,7,10,0.5) 0%, rgba(6,7,10,0.85) 100%);"></div>
+
+      <!-- Center Hero Text & CTA -->
+      <div style="position: relative; z-index: 20; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 20px;">
+        <h2 style="font-family: var(--font-serif-luxury); font-size: clamp(36px, 4.5vw, 54px); font-weight: 400; color: #ffffff; margin-bottom: 24px; letter-spacing: 0.5px; text-shadow: 0 4px 25px rgba(0,0,0,0.8);">
+          Your story, our craft.
+        </h2>
+        <a href="/Home/CustomRings" style="display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-sans); font-size: 13px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #ffffff; background: rgba(22, 20, 24, 0.75); border: 1px solid rgba(212, 184, 120, 0.45); padding: 15px 36px; border-radius: 6px; text-decoration: none; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: all 0.3s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.6);" onmouseover="this.style.background='var(--gold)'; this.style.color='#06070a'; this.style.borderColor='var(--gold)';" onmouseout="this.style.background='rgba(22, 20, 24, 0.75)'; this.style.color='#ffffff'; this.style.borderColor='rgba(212, 184, 120, 0.45)';">
+          EXPLORE CUSTOM RINGS &gt;
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. SAT JEWEL COMPLETE FOOTER COMPONENT -->
+  <partial name="_Footer" />
+
+  <!-- Global SAT Jewel Mega Menu & Mobile Drawer -->
+  <partial name="_MegaMenu" />
+
+  <!-- Global SAT Jewel Live Search Modal / Overlay -->
+  <div class="sat-search-modal-backdrop" id="satSearchModal" onclick="closeSatGlobalSearch(event)">
+    <div class="sat-search-modal-card" onclick="event.stopPropagation()">
+      <div class="sat-search-input-box">
+        <i class="fa-solid fa-magnifying-glass sat-search-input-icon"></i>
+        <input type="text" id="satSearchInput" placeholder="Search engagement rings, lab diamonds, moissanite, bracelets..." oninput="handleSatLiveSearch(this.value)" autocomplete="off" />
+        <button type="button" class="sat-search-close-btn" onclick="closeSatGlobalSearch(event)">&times;</button>
+      </div>
+
+      <!-- Quick Filter Chips -->
+      <div class="sat-search-chips-row">
+        <span class="sat-chip-title">Popular:</span>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Engagement Ring')">Engagement Rings</button>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Round')">Round Cut</button>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Oval')">Oval Cut</button>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Emerald')">Emerald Cut</button>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Moissanite')">Moissanite</button>
+        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Bracelet')">Bracelets</button>
+      </div>
+
+      <!-- Live Auto-complete Search Results Container -->
+      <div class="sat-search-results-wrap" id="satSearchResults">
+        <div class="sat-search-empty-state">
+          <i class="fa-solid fa-gem" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 8px;"></i>
+          <p>Type to search SAT Jewel's fine jewelry collection...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Floating SAT Jewel WhatsApp Chat Widget -->
+  <div class="sat-floating-whatsapp-wrap" id="satWhatsappWidget">
+    <div class="sat-wa-badge-popup">
+      <span>We Are Here! 👋</span>
+      <button type="button" class="sat-wa-close-btn" onclick="dismissWaWidget(event)">&times;</button>
+    </div>
+    <a href="https://wa.me/918320972779?text=Hello%20SAT%20Jewel%20Team!%20I%20am%20interested%20in%20your%20custom%20Lab-Grown%20Diamonds%20%26%20Moissanite%20Jewelry.%20Could%20you%20please%20assist%20me%3F" target="_blank" rel="noopener" class="sat-wa-float-btn" aria-label="Chat with SAT Jewel on WhatsApp">
+      <i class="fa-brands fa-whatsapp"></i>
+    </a>
+  </div>
+
+  <!-- 3D Video Scrubbing Controller & Lenis Smooth Scroller -->
+  <script type="module">
+    import Lenis from "/assets/3d/_lib/lenis.mjs";
+    if (matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      let armed = false;
+      const arm = () => {
+        if (armed || document.documentElement.scrollHeight <= innerHeight + 80) return;
+        armed = true;
+        const lenis = new Lenis({ smoothWheel: true });
+        const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
+        requestAnimationFrame(raf);
+        document.documentElement.style.scrollBehavior = "auto";
+      };
+      addEventListener("load", () => { setTimeout(arm, 600); setTimeout(arm, 2000); });
+    }
+  </script>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const video = document.getElementById('satHero3dVideo');
+      const container = document.getElementById('top');
+
+      window.scrollCatSlider = function (offset) {
+        const track = document.getElementById('mainCatTrack');
+        if (track) {
+          track.scrollBy({ left: offset, behavior: 'smooth' });
+        }
+      };
+
+      // Caption definitions with exact normalized scroll windows
+      const caps = [
+        { el: document.getElementById('cap0'), from: 0.00, to: 0.12 },
+        { el: document.getElementById('cap1'), from: 0.15, to: 0.27 },
+        { el: document.getElementById('cap2'), from: 0.30, to: 0.43 },
+        { el: document.getElementById('cap3'), from: 0.46, to: 0.58 },
+        { el: document.getElementById('cap4'), from: 0.61, to: 0.74 },
+        { el: document.getElementById('cap5'), from: 0.78, to: 1.00 }
+      ];
+
+      function clamp(val, min, max) {
+        return Math.max(min, Math.min(max, val));
+      }
+
+      function calcOpacity(progress, from, to) {
+        if (progress < from - 0.02 || progress > to + 0.02) return 0;
+        const range = to - from;
+        const fadeIn = from <= 0.001 ? 1 : clamp((progress - from) / (range * 0.22), 0, 1);
+        const fadeOut = to >= 0.999 ? 1 : clamp(1 - (progress - (to - range * 0.22)) / (range * 0.22), 0, 1);
+        return Math.max(0, Math.min(fadeIn, fadeOut));
+      }
+
+      let targetTime = 0;
+      let currentTime = 0;
+
+      function onScroll() {
+        if (!container) return;
+        const maxScroll = container.offsetHeight - window.innerHeight;
+        if (maxScroll <= 0) return;
+
+        const scrolled = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+        const progress = clamp(scrolled / maxScroll, 0, 1);
+
+
+
+        // Update video target time
+        if (video && video.duration && !isNaN(video.duration) && video.duration > 0) {
+          targetTime = progress * video.duration;
+        }
+
+        // Update Captions
+        caps.forEach(cap => {
+          if (!cap.el) return;
+          const op = calcOpacity(progress, cap.from, cap.to);
+          cap.el.style.opacity = op;
+          cap.el.style.transform = 'translateY(' + ((1 - op) * 24) + 'px)';
+          cap.el.style.pointerEvents = op > 0.5 ? 'auto' : 'none';
+        });
+      }
+
+      window.addEventListener('scroll', onScroll, { passive: true });
+      window.addEventListener('resize', onScroll, { passive: true });
+
+      // Smooth RAF Lerp loop for video time
+      const LERP_FACTOR = 0.16;
+      function scrubLoop() {
+        if (video && video.duration && !isNaN(video.duration) && video.duration > 0) {
+          currentTime += (targetTime - currentTime) * LERP_FACTOR;
+          if (Math.abs(targetTime - currentTime) < 0.0005) {
+            currentTime = targetTime;
+          }
+          const bounded = clamp(currentTime, 0, video.duration - 0.001);
+          if (Math.abs(video.currentTime - bounded) > 0.002) {
+            try {
+              if (typeof video.fastSeek === 'function') {
+                video.fastSeek(bounded);
+              } else {
+                video.currentTime = bounded;
+              }
+            } catch (_) {
+              try { video.currentTime = bounded; } catch (e) {}
+            }
+          }
+        }
+        requestAnimationFrame(scrubLoop);
+      }
+
+      if (video) {
+        video.muted = true;
+        video.defaultMuted = true;
+        video.playsInline = true;
+        try { video.pause(); } catch (_) {}
+        video.addEventListener('loadedmetadata', onScroll);
+        video.addEventListener('loadeddata', onScroll);
+        video.addEventListener('canplay', onScroll);
+        video.addEventListener('durationchange', onScroll);
+        try { video.load(); } catch (_) {}
+      }
+
+      requestAnimationFrame(scrubLoop);
+      setTimeout(onScroll, 100);
+      setTimeout(onScroll, 500);
+    })();
+  </script>
+
+  <!-- Global Live Search & WhatsApp Floating Controller Scripts -->
+  <script>
+    let satSearchDebounceTimer = null;
+
+    function openSatGlobalSearch(e) {
+      if (e) e.preventDefault();
+      const modal = document.getElementById('satSearchModal');
+      if (modal) {
+        modal.classList.add('open');
+        const input = document.getElementById('satSearchInput');
+        if (input) {
+          input.focus();
+          if (input.value.trim()) {
+            handleSatLiveSearch(input.value);
+          }
+        }
+      }
+    }
+
+    function closeSatGlobalSearch(e) {
+      if (e) e.preventDefault();
+      const modal = document.getElementById('satSearchModal');
+      if (modal) {
+        modal.classList.remove('open');
+      }
+    }
+
+    function applySearchQuery(query) {
+      const input = document.getElementById('satSearchInput');
+      if (input) {
+        input.value = query;
+        handleSatLiveSearch(query);
+      }
+    }
+
+    function handleSatLiveSearch(val) {
+      clearTimeout(satSearchDebounceTimer);
+      const container = document.getElementById('satSearchResults');
+      if (!container) return;
+
+      if (!val || val.trim().length < 2) {
+        container.innerHTML = `
+          <div class="sat-search-empty-state">
+            <i class="fa-solid fa-gem" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 8px;"></i>
+            <p>Type to search SAT Jewel's fine jewelry collection...</p>
+          </div>`;
+        return;
+      }
+
+      satSearchDebounceTimer = setTimeout(async () => {
+        container.innerHTML = `<div class="sat-search-empty-state"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.8rem; color: #d4b270;"></i><p>Searching collections...</p></div>`;
+        try {
+          const res = await fetch(`/api/CatalogApi/search?q=${encodeURIComponent(val.trim())}`);
+          const data = await res.json();
+
+          if (data.success && data.results && data.results.length > 0) {
+            let html = '<div class="sat-search-items-grid">';
+            data.results.forEach(item => {
+              const price = item.priceUSD ? `$${item.priceUSD.toLocaleString()}` : '$1,299';
+              const img = item.imageUrl || '/assets/categories/cat_engagement_rings.png';
+              html += `
+                <a href="/Product/Details/${item.id}" class="sat-search-item-card">
+                  <img src="${img}" alt="${item.name}" class="sat-search-item-img" />
+                  <div class="sat-search-item-info">
+                    <span class="sat-search-item-title">${item.name}</span>
+                    <span class="sat-search-item-meta">${item.categoryName || 'Fine Jewelry'} · ${item.gemstoneType || 'Diamond'}</span>
+                    <span class="sat-search-item-price">${price}</span>
+                  </div>
+                </a>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+          } else {
+            container.innerHTML = `
+              <div class="sat-search-empty-state">
+                <i class="fa-regular fa-face-frown" style="font-size: 2rem; color: #94a3b8; margin-bottom: 8px;"></i>
+                <p>No fine jewelry found matching "<strong>${val}</strong>". Try another keyword or shape.</p>
+              </div>`;
+          }
+        } catch (err) {
+          container.innerHTML = `<div class="sat-search-empty-state"><p>Unable to retrieve search results. Please try again.</p></div>`;
+        }
+      }, 250);
+    }
+
+    function dismissWaWidget(e) {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const badge = document.querySelector('.sat-wa-badge-popup');
+      if (badge) badge.style.display = 'none';
+    }
+
+    // Keyboard ESC listener to close search
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeSatGlobalSearch();
+      }
+    });
+  </script>
+
+</body>
+</html>
