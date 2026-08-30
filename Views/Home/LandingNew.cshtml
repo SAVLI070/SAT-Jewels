@@ -18,6 +18,11 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
+  <!-- Favicon / Tab Icons (Golden SJ Emblem) -->
+  <link rel="icon" type="image/png" href="/assets/sat_logo_transparent.png" />
+  <link rel="shortcut icon" type="image/png" href="/assets/sat_logo_transparent.png" />
+  <link rel="apple-touch-icon" href="/assets/sat_logo_transparent.png" />
+
   <!-- Global Base CSS -->
   <link rel="stylesheet" href="~/css/style.css" />
 
@@ -274,6 +279,280 @@
     @@keyframes waBounce {
       0%, 100% { transform: translateY(0); }
       50% { transform: translateY(-6px); }
+    }
+
+    /* Enterprise Craft Specs Luxury Card */
+    .sat-specs-section {
+      position: relative;
+      background: #06070a;
+      padding: 70px 24px 130px;
+      z-index: 20;
+      overflow: hidden;
+    }
+    .sat-enterprise-specs-card {
+      position: relative;
+      z-index: 2;
+      background: rgba(14, 13, 16, 0.72);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid rgba(212, 184, 120, 0.32);
+      border-radius: 28px;
+      padding: clamp(28px, 4vw, 44px) clamp(24px, 4vw, 50px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 36px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    /* =========================================================
+       GLOBAL LIVE SEARCH MODAL (Fixed Viewport Center Overlay)
+       ========================================================= */
+    .sat-search-modal-backdrop {
+      position: fixed !important;
+      inset: 0 !important;
+      background: rgba(6, 7, 10, 0.85) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      z-index: 9999999 !important;
+      display: flex !important;
+      justify-content: center !important;
+      align-items: flex-start !important;
+      padding: 90px 20px 40px !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+      transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s !important;
+      overflow-y: auto !important;
+    }
+    .sat-search-modal-backdrop.open {
+      opacity: 1 !important;
+      visibility: visible !important;
+      pointer-events: auto !important;
+    }
+    .sat-search-modal-card {
+      width: 100%;
+      max-width: 740px;
+      background: rgba(14, 13, 16, 0.96);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(212, 184, 120, 0.38);
+      border-radius: 20px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9), 0 0 50px rgba(212, 184, 120, 0.15);
+      padding: 24px;
+      position: relative;
+      animation: satSearchScale 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @@keyframes satSearchScale {
+      from { transform: scale(0.95) translateY(-10px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    .sat-search-input-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .sat-search-input-icon {
+      position: absolute;
+      left: 18px;
+      color: var(--gold);
+      font-size: 17px;
+      pointer-events: none;
+    }
+    #satSearchInput {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 16px 50px 16px 52px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(241, 238, 232, 0.16);
+      border-radius: 14px;
+      color: #ffffff;
+      font-size: 15px;
+      font-family: var(--font-sans-luxury);
+      outline: none;
+      transition: all 0.25s ease;
+    }
+    #satSearchInput:focus {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--gold);
+      box-shadow: 0 0 20px rgba(212, 184, 120, 0.35);
+    }
+    .sat-search-close-btn {
+      position: absolute;
+      right: 14px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 24px;
+      cursor: pointer;
+      line-height: 1;
+      padding: 6px 10px;
+      border-radius: 8px;
+      transition: color 0.2s;
+    }
+    .sat-search-close-btn:hover {
+      color: #ffffff;
+    }
+    .sat-search-chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(241, 238, 232, 0.08);
+      margin-bottom: 16px;
+    }
+    .sat-chip-title {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-right: 4px;
+    }
+    .sat-search-chip {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(241, 238, 232, 0.12);
+      padding: 6px 14px;
+      border-radius: 100px;
+      font-size: 12px;
+      color: rgba(241, 238, 232, 0.85);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: var(--font-sans-luxury);
+    }
+    .sat-search-chip:hover {
+      background: rgba(212, 184, 120, 0.16);
+      border-color: rgba(212, 184, 120, 0.4);
+      color: #ffffff;
+      transform: translateY(-1px);
+    }
+    .sat-search-results-wrap {
+      max-height: 380px;
+      overflow-y: auto;
+    }
+    .sat-search-empty-state {
+      text-align: center;
+      padding: 36px 20px;
+      color: var(--muted);
+      font-size: 13.5px;
+    }
+    .sat-search-items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 14px;
+    }
+    .sat-search-item-card {
+      display: flex;
+      flex-direction: column;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(241, 238, 232, 0.1);
+      border-radius: 12px;
+      padding: 10px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+    .sat-search-item-card:hover {
+      background: rgba(212, 184, 120, 0.12);
+      border-color: rgba(212, 184, 120, 0.45);
+      transform: translateY(-3px);
+    }
+    .sat-search-item-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .sat-search-item-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #ffffff;
+      line-height: 1.4;
+      margin-bottom: 4px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .sat-search-item-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    .sat-search-item-price {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+    .sat-enterprise-specs-card:hover {
+      border-color: rgba(212, 184, 120, 0.55);
+      box-shadow: 0 25px 70px rgba(0, 0, 0, 0.8), 0 0 35px rgba(212, 184, 120, 0.16);
+    }
+    .sat-specs-intro {
+      flex: 1;
+      min-width: 260px;
+    }
+    .sat-specs-title {
+      font-family: var(--font-serif-luxury);
+      font-size: clamp(24px, 2.5vw, 32px);
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0 0 8px;
+      letter-spacing: 0.02em;
+    }
+    .sat-specs-sub {
+      font-size: 13.5px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+    .sat-specs-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      flex: 1.6;
+      justify-content: flex-end;
+    }
+    .sat-spec-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(241, 238, 232, 0.15);
+      padding: 10px 20px;
+      border-radius: 100px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #f1eee8;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .sat-spec-pill:hover {
+      background: rgba(212, 184, 120, 0.18);
+      border-color: rgba(212, 184, 120, 0.5);
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+    .sat-spec-icon {
+      color: var(--gold);
+      font-size: 13.5px;
+      display: inline-flex;
+      align-items: center;
+    }
+    @@media (max-width: 992px) {
+      .sat-enterprise-specs-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 24px;
+      }
+      .sat-specs-grid {
+        justify-content: flex-start;
+      }
     }
 
     /* 3D Video Hero Scrubbing Stage */
@@ -765,7 +1044,45 @@
 
     /* Mobile Responsiveness */
     @@media (max-width: 992px) {
+      .sat-3d-navbar {
+        padding: 12px 0;
+      }
+      .sat-3d-navbar .nav-inner {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 0 16px !important;
+        gap: 8px !important;
+      }
+      .sat-3d-navbar .sat-nav-brand-wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+        gap: 8px;
+      }
+      .sat-3d-navbar .official-sat-logo-nav {
+        height: 28px !important;
+      }
+      .sat-3d-navbar .nav-logo-slot span:first-child {
+        font-size: 17px !important;
+      }
+      .sat-3d-navbar .nav-logo-slot span:last-child {
+        font-size: 7.5px !important;
+        letter-spacing: 0.16em !important;
+      }
       .sat-3d-navbar .nav-links { display: none; }
+      .sat-3d-navbar .nav-actions {
+        flex-shrink: 0;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+      }
+      .auth-nav-cluster.sat-icons-cluster {
+        gap: 8px !important;
+      }
+      .sat-header-icon-btn {
+        width: 36px !important;
+        height: 36px !important;
+      }
       .sat-split-sec { grid-template-columns: 1fr; }
       .sat-split-sec.reverse .sat-split-copy { order: 0 !important; }
       .sat-split-media { min-height: 50vh; }
@@ -836,7 +1153,6 @@
         <span class="eyebrow">SAT JEWEL · FINE JEWELRY</span>
         <h1>Mastery in Every Cut</h1>
         <p>Redefining luxury jewelry with AI-driven valuation, conflict-free certified gems, and bespoke studio craftsmanship.</p>
-        <a href="#collections" class="cap-cta">Explore Collections &darr;</a>
       </div>
 
       <!-- Caption 1: 0.15 -> 0.27 -->
@@ -872,7 +1188,6 @@
         <span class="eyebrow">05 — THE VAULT</span>
         <h1>Kept, and treasured</h1>
         <p>Bespoke heirloom pieces crafted to be inherited, cherished, and celebrated for generations.</p>
-        <a href="#collections" class="cap-cta">Explore SAT Collections &rarr;</a>
       </div>
 
       <!-- Scroll Hint -->
@@ -1113,7 +1428,41 @@
     </div>
   </section>
 
-  <!-- 5. SAT JEWEL COMPLETE FOOTER COMPONENT -->
+  <!-- 5. ENTERPRISE CRAFT SPECS BANNER (Trust & Technology Standards) -->
+  <section id="craft-specs" class="sat-specs-section">
+    <div style="max-width: 1320px; margin: 0 auto; position: relative; z-index: 2;">
+      <div class="sat-enterprise-specs-card">
+        <div class="sat-specs-intro">
+          <h3 class="sat-specs-title">Enterprise Craft Specs</h3>
+          <p class="sat-specs-sub">Standards of perfection powering our 3D Studio &amp; Diamond Exchange.</p>
+        </div>
+        <div class="sat-specs-grid">
+          <div class="sat-spec-pill">
+            <span class="sat-spec-icon"><i class="fa-solid fa-certificate"></i></span>
+            <span>GIA &amp; IGI Certified</span>
+          </div>
+          <div class="sat-spec-pill">
+            <span class="sat-spec-icon"><i class="fa-solid fa-crown"></i></span>
+            <span>18K Solid Gold &amp; Platinum 950</span>
+          </div>
+          <div class="sat-spec-pill">
+            <span class="sat-spec-icon"><i class="fa-solid fa-cube"></i></span>
+            <span>Real-time WebGL 3D Configurator</span>
+          </div>
+          <div class="sat-spec-pill">
+            <span class="sat-spec-icon"><i class="fa-solid fa-shield"></i></span>
+            <span>Blockchain Digital Passport</span>
+          </div>
+          <div class="sat-spec-pill">
+            <span class="sat-spec-icon"><i class="fa-solid fa-truck-fast"></i></span>
+            <span>Malca-Amit Armed Transit</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. SAT JEWEL COMPLETE FOOTER COMPONENT -->
   <partial name="_Footer" />
 
   <!-- Global SAT Jewel Mega Menu & Mobile Drawer -->

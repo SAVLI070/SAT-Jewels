@@ -10,57 +10,81 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sign In & Sign Up — SAT Jewel Sanctuary</title>
+  <title>Sign In &amp; Sign Up — SAT Jewel Sanctuary</title>
 
+  <!-- Favicon / Tab Icons -->
+  <link rel="icon" type="image/png" href="/assets/sat_logo_transparent.png" />
+  <link rel="shortcut icon" type="image/png" href="/assets/sat_logo_transparent.png" />
+  <link rel="apple-touch-icon" href="/assets/sat_logo_transparent.png" />
+
+  <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
   <link rel="stylesheet" href="~/css/style.css" />
   <style>
+    :root {
+      --ink: #f1eee8;
+      --muted: rgba(241, 238, 232, 0.65);
+      --gold: #d4b878;
+      --gold-dark: #b8944d;
+      --bg: #07070a;
+      --glass: rgba(14, 13, 16, 0.88);
+      --stroke: rgba(212, 184, 120, 0.32);
+      --font-serif-luxury: 'Playfair Display', Georgia, serif;
+      --font-sans-luxury: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background: radial-gradient(circle at 50% 30%, #0c1833 0%, #030712 100%);
-      font-family: var(--font-sans);
-      color: var(--cream-ivory);
+      background: var(--bg);
+      font-family: var(--font-sans-luxury);
+      color: var(--ink);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       position: relative;
       overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
     }
 
+    /* Ambient Luxury Blurred Background */
     .auth-bg-slider {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.22;
-      background: url('/assets/sat_jewels_shop_bg.jpg') center/cover no-repeat;
-      filter: blur(10px);
+      background: radial-gradient(circle at 50% 35%, rgba(26, 22, 30, 0.75) 0%, rgba(6, 7, 10, 0.98) 100%),
+                  url('/assets/auth_luxury_banner.jpg') center 25% / cover no-repeat;
+      opacity: 0.4;
+      filter: blur(4px);
     }
 
     .auth-page-container {
       position: relative;
       z-index: 2;
       width: 100%;
-      max-width: 960px;
+      max-width: 980px;
       padding: 24px 20px;
-      box-sizing: border-box;
     }
 
-    /* SLIDING SPLIT AUTH CONTAINER */
+    /* SLIDING SPLIT AUTH CONTAINER (Obsidian Dark Glass) */
     .auth-sliding-box {
-      background: rgba(8, 17, 34, 0.88);
-      backdrop-filter: blur(28px);
-      -webkit-backdrop-filter: blur(28px);
-      border: 1px solid rgba(212, 178, 112, 0.35);
+      background: var(--glass);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid var(--stroke);
       border-radius: 28px;
-      box-shadow: 0 25px 75px rgba(0, 0, 0, 0.75), 0 0 50px rgba(212, 178, 112, 0.18);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85), 0 0 50px rgba(212, 184, 120, 0.12);
       position: relative;
       overflow: hidden;
       width: 100%;
@@ -72,7 +96,7 @@
       top: 0;
       height: 100%;
       transition: all 0.6s cubic-bezier(0.65, 0, 0.35, 1);
-      padding: 44px 40px;
+      padding: 44px 42px;
       box-sizing: border-box;
       overflow-y: auto;
     }
@@ -111,58 +135,61 @@
 
     .auth-brand-head {
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
     }
 
     .auth-logo-badge {
-      width: 56px;
-      height: 56px;
-      margin: 0 auto 10px;
-      background: radial-gradient(circle, #0f1e36 0%, #081120 100%);
-      border: 1.5px solid #b45309;
-      border-radius: 14px;
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 12px;
+      background: rgba(22, 20, 24, 0.9);
+      border: 1px solid rgba(212, 184, 120, 0.4);
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 25px rgba(212, 178, 112, 0.35);
+      box-shadow: 0 4px 20px rgba(212, 184, 120, 0.25);
     }
 
     .auth-logo-badge img {
-      width: 76%;
-      height: 76%;
+      width: 68%;
+      height: 68%;
       object-fit: contain;
+      filter: drop-shadow(0 2px 6px rgba(212, 184, 120, 0.4));
     }
 
     .auth-title {
-      font-family: var(--font-serif);
+      font-family: var(--font-serif-luxury);
       font-size: 24px;
       font-weight: 700;
-      color: var(--cream-ivory);
-      margin: 0 0 4px;
+      color: #ffffff;
+      margin: 0 0 6px;
+      letter-spacing: 0.02em;
     }
 
     .auth-title span {
-      color: var(--champagne-gold);
+      color: var(--gold);
       font-style: italic;
     }
 
     .auth-sub {
-      font-size: 12px;
-      color: var(--taupe-beige);
+      font-size: 12.5px;
+      color: var(--muted);
       margin: 0;
     }
 
     .auth-input-group {
-      margin-bottom: 14px;
+      margin-bottom: 15px;
     }
 
     .auth-label {
       display: block;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
-      color: var(--champagne-gold);
-      margin-bottom: 5px;
-      letter-spacing: 0.02em;
+      color: var(--gold);
+      margin-bottom: 6px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
 
     .auth-input-wrap {
@@ -173,29 +200,35 @@
 
     .auth-input-wrap i {
       position: absolute;
-      left: 14px;
-      color: #94a3b8;
+      left: 15px;
+      color: rgba(212, 184, 120, 0.7);
       font-size: 14px;
       pointer-events: none;
     }
 
+    /* Sleek Dark Luxury Input Boxes */
     .auth-input {
       width: 100%;
       box-sizing: border-box;
-      padding: 11px 14px 11px 40px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      border-radius: var(--radius-md);
+      padding: 12px 14px 12px 42px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(241, 238, 232, 0.16);
+      border-radius: 12px;
       color: #ffffff;
-      font-size: 13px;
+      font-size: 13.5px;
       outline: none;
       transition: all 0.25s ease;
+      font-family: var(--font-sans-luxury);
+    }
+
+    .auth-input::placeholder {
+      color: rgba(241, 238, 232, 0.35);
     }
 
     .auth-input:focus {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: var(--champagne-gold);
-      box-shadow: 0 0 12px rgba(212, 178, 112, 0.3);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--gold);
+      box-shadow: 0 0 16px rgba(212, 184, 120, 0.35);
     }
 
     .auth-row-between {
@@ -203,59 +236,63 @@
       align-items: center;
       justify-content: space-between;
       font-size: 12px;
-      color: var(--taupe-beige);
+      color: var(--muted);
       margin-bottom: 18px;
     }
 
     .auth-row-between a {
-      color: var(--champagne-gold);
+      color: var(--gold);
       text-decoration: none;
       transition: color 0.2s;
     }
 
     .auth-row-between a:hover {
       text-decoration: underline;
+      color: #ffffff;
     }
 
+    /* Champagne-Gold Primary CTA */
     .btn-auth-submit {
       width: 100%;
-      padding: 12px 0;
+      padding: 13px 0;
       border: none;
-      border-radius: var(--radius-full);
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
-      color: #060d0a;
-      font-size: 14px;
-      font-weight: 700;
+      border-radius: 100px;
+      background: linear-gradient(135deg, #d4b878 0%, #b8944d 100%);
+      color: #06070a;
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      box-shadow: 0 4px 20px rgba(212, 178, 112, 0.35);
+      box-shadow: 0 6px 25px rgba(212, 184, 120, 0.4);
     }
 
     .btn-auth-submit:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 28px rgba(212, 178, 112, 0.6);
-      background: linear-gradient(135deg, #fcebc5 0%, #d4b270 100%);
+      box-shadow: 0 8px 32px rgba(212, 184, 120, 0.65);
+      background: linear-gradient(135deg, #f1dfae 0%, #d4b878 100%);
     }
 
     .auth-divider {
       display: flex;
       align-items: center;
-      margin: 18px 0 14px;
-      color: #64748b;
-      font-size: 11px;
+      margin: 20px 0 16px;
+      color: rgba(241, 238, 232, 0.45);
+      font-size: 10.5px;
       text-transform: uppercase;
-      letter-spacing: 0.1em;
+      letter-spacing: 0.12em;
     }
 
     .auth-divider::before, .auth-divider::after {
       content: '';
       flex: 1;
       height: 1px;
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(241, 238, 232, 0.1);
     }
 
     .auth-divider span {
@@ -273,12 +310,12 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      padding: 9px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: var(--radius-md);
+      padding: 10px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(241, 238, 232, 0.12);
+      border-radius: 10px;
       color: #ffffff;
-      font-size: 12px;
+      font-size: 12.5px;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
@@ -286,8 +323,9 @@
     }
 
     .btn-social:hover {
-      background: rgba(255, 255, 255, 0.12);
-      border-color: rgba(255, 255, 255, 0.25);
+      background: rgba(212, 184, 120, 0.14);
+      border-color: rgba(212, 184, 120, 0.4);
+      transform: translateY(-1px);
     }
 
     /* OVERLAY SLIDING BANNER CONTAINER */
@@ -307,8 +345,8 @@
     }
 
     .overlay {
-      background: linear-gradient(135deg, rgba(8, 17, 34, 0.88) 0%, rgba(3, 7, 18, 0.92) 100%),
-                  url('/assets/hero_crystals_macro_1786187419288.png') center/cover no-repeat;
+      background: linear-gradient(135deg, rgba(14, 13, 16, 0.94) 0%, rgba(6, 7, 10, 0.96) 100%),
+                  url('/assets/auth_luxury_banner.jpg') center/cover no-repeat;
       background-blend-mode: overlay;
       color: #ffffff;
       position: relative;
@@ -357,26 +395,27 @@
     }
 
     .overlay-badge {
-      width: 64px;
-      height: 64px;
+      width: 62px;
+      height: 62px;
       margin-bottom: 16px;
-      background: radial-gradient(circle, #0f1e36 0%, #081120 100%);
-      border: 1.5px solid #b45309;
-      border-radius: 16px;
+      background: rgba(22, 20, 24, 0.95);
+      border: 1.5px solid rgba(212, 184, 120, 0.45);
+      border-radius: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 30px rgba(212, 178, 112, 0.45);
+      box-shadow: 0 4px 25px rgba(212, 184, 120, 0.35);
     }
 
     .overlay-badge img {
-      width: 80%;
-      height: 80%;
+      width: 72%;
+      height: 72%;
       object-fit: contain;
+      filter: drop-shadow(0 2px 8px rgba(212, 184, 120, 0.5));
     }
 
     .overlay-title {
-      font-family: var(--font-serif);
+      font-family: var(--font-serif-luxury);
       font-size: 28px;
       font-weight: 700;
       color: #ffffff;
@@ -384,39 +423,41 @@
     }
 
     .overlay-title span {
-      color: var(--champagne-gold);
+      color: var(--gold);
       font-style: italic;
     }
 
     .overlay-desc {
-      font-size: 13px;
-      line-height: 1.6;
-      color: var(--taupe-beige);
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: var(--muted);
       margin: 0 0 24px;
       max-width: 320px;
     }
 
     .btn-ghost-gold-overlay {
-      padding: 12px 28px;
-      border-radius: var(--radius-full);
-      background: rgba(255, 255, 255, 0.08);
+      padding: 12px 30px;
+      border-radius: 100px;
+      background: rgba(22, 20, 24, 0.7);
       backdrop-filter: blur(10px);
-      border: 1px solid var(--champagne-gold);
-      color: var(--champagne-gold);
-      font-size: 14px;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 13px;
       font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
       cursor: pointer;
       transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
       gap: 10px;
-      box-shadow: 0 4px 20px rgba(212, 178, 112, 0.25);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     }
 
     .btn-ghost-gold-overlay:hover {
-      background: var(--champagne-gold);
-      color: #060d0a;
-      box-shadow: 0 6px 28px rgba(212, 178, 112, 0.6);
+      background: var(--gold);
+      color: #06070a;
+      box-shadow: 0 6px 28px rgba(212, 184, 120, 0.6);
       transform: translateY(-2px);
     }
 
@@ -425,9 +466,9 @@
       border: 1px solid rgba(248, 113, 113, 0.35);
       color: #fca5a5;
       padding: 10px 14px;
-      border-radius: var(--radius-md);
-      font-size: 12px;
-      margin-bottom: 14px;
+      border-radius: 10px;
+      font-size: 12.5px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -435,11 +476,11 @@
 
     .auth-foot-back {
       text-align: center;
-      margin-top: 20px;
+      margin-top: 22px;
     }
 
     .auth-foot-back a {
-      color: var(--taupe-beige);
+      color: var(--muted);
       font-size: 13px;
       text-decoration: none;
       display: inline-flex;
@@ -449,7 +490,7 @@
     }
 
     .auth-foot-back a:hover {
-      color: var(--champagne-gold);
+      color: var(--gold);
     }
 
     /* RESPONSIVE LAYOUT FOR MOBILE SCREENS */
@@ -506,10 +547,10 @@
         <form method="post" action="/Account/HandleSignIn">
           <div class="auth-brand-head">
             <div class="auth-logo-badge">
-              <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
+              <img src="/assets/sat_logo_transparent.png" alt="SAT Jewel Official Emblem Logo" />
             </div>
             <h1 class="auth-title">Sign In to <span>SAT Jewel</span></h1>
-            <p class="auth-sub">Access your bespoke GIA vault & order tracking</p>
+            <p class="auth-sub">Access your bespoke GIA vault &amp; order tracking</p>
           </div>
 
           @if (!string.IsNullOrEmpty(error) && initialMode == "signin")
@@ -538,7 +579,7 @@
 
           <div class="auth-row-between">
             <label style="display:flex;align-items:center;gap:6px;cursor:pointer;">
-              <input type="checkbox" name="rememberMe" value="true" />
+              <input type="checkbox" name="rememberMe" value="true" style="accent-color: var(--gold);" />
               <span>Remember me</span>
             </label>
             <a href="mailto:concierge@satjewels.com?subject=Password%20Reset%20Request">Forgot password?</a>
@@ -563,8 +604,8 @@
         </div>
 
         <!-- Mobile Switcher Link -->
-        <div class="mobile-auth-switch" style="text-align:center;margin-top:16px;">
-          <a href="javascript:void(0)" onclick="toggleAuthMode('signup')" style="color:var(--champagne-gold);font-size:13px;text-decoration:none;">
+        <div class="mobile-auth-switch" style="text-align:center;margin-top:18px;">
+          <a href="javascript:void(0)" onclick="toggleAuthMode('signup')" style="color:var(--gold);font-size:13px;text-decoration:none;">
             Don't have an account? <strong>Sign Up Here</strong>
           </a>
         </div>
@@ -575,7 +616,7 @@
         <form method="post" action="/Account/HandleSignUp">
           <div class="auth-brand-head">
             <div class="auth-logo-badge">
-              <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
+              <img src="/assets/sat_logo_transparent.png" alt="SAT Jewel Official Emblem Logo" />
             </div>
             <h1 class="auth-title">Create <span>Account</span></h1>
             <p class="auth-sub">Join SAT Jewel Bespoke VIP Sanctuary</p>
@@ -590,10 +631,10 @@
           }
 
           <div class="auth-input-group">
-            <label class="auth-label">Full Name * <span style="font-size:10px;color:var(--taupe-beige);">(Letters & spaces only)</span></label>
+            <label class="auth-label">Full Name *</label>
             <div class="auth-input-wrap">
               <i class="fa-regular fa-user"></i>
-              <input type="text" name="fullName" class="auth-input" placeholder="e.g. Eleanor Vance" pattern="^[a-zA-Z\s]{2,50}$" title="Full Name can only contain letters and spaces (no numbers or special characters)." required />
+              <input type="text" name="fullName" class="auth-input" placeholder="e.g. Eleanor Vance" pattern="^[a-zA-Z\s]{2,50}$" title="Full Name can only contain letters and spaces." required />
             </div>
           </div>
 
@@ -606,7 +647,7 @@
           </div>
 
           <div class="auth-input-group">
-            <label class="auth-label">USA Mobile Phone (Optional) <span style="font-size:10px;color:var(--taupe-beige);">(10 digits)</span></label>
+            <label class="auth-label">USA Mobile Phone (Optional)</label>
             <div class="auth-input-wrap">
               <i class="fa-solid fa-phone"></i>
               <input type="tel" name="phone" class="auth-input" placeholder="+1 (555) 000-0000" pattern="^(\+?1\s*[-\.]?)?\(?[2-9]\d{2}\)?\s*[-\.]?\s*\d{3}\s*[-\.]?\s*\d{4}$" title="Mobile number must be a valid 10-digit USA phone number." />
@@ -614,7 +655,7 @@
           </div>
 
           <div class="auth-input-group">
-            <label class="auth-label">Create Password * <span style="font-size:10px;color:var(--taupe-beige);">(Min 8 chars, 1 letter, 1 special char)</span></label>
+            <label class="auth-label">Create Password *</label>
             <div class="auth-input-wrap">
               <i class="fa-solid fa-lock"></i>
               <input type="password" name="password" class="auth-input" placeholder="At least 8 chars (1 letter, 1 special char)" minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Za-z])(?=.*[\W_]).{8,}$" title="Password must be at least 8 characters with at least 1 lowercase letter, 1 alphabet letter, and 1 special character." required />
@@ -629,14 +670,14 @@
             </div>
           </div>
 
-          <button type="submit" class="btn-auth-submit" style="margin-top:10px;">
+          <button type="submit" class="btn-auth-submit" style="margin-top:12px;">
             <i class="fa-solid fa-sparkles"></i> Create VIP Account
           </button>
         </form>
 
         <!-- Mobile Switcher Link -->
-        <div class="mobile-auth-switch" style="text-align:center;margin-top:16px;">
-          <a href="javascript:void(0)" onclick="toggleAuthMode('signin')" style="color:var(--champagne-gold);font-size:13px;text-decoration:none;">
+        <div class="mobile-auth-switch" style="text-align:center;margin-top:18px;">
+          <a href="javascript:void(0)" onclick="toggleAuthMode('signin')" style="color:var(--gold);font-size:13px;text-decoration:none;">
             Already have an account? <strong>Sign In Here</strong>
           </a>
         </div>
@@ -648,7 +689,7 @@
           <!-- Left Overlay (Shown when Sign Up form is on Right side) -->
           <div class="overlay-panel overlay-left">
             <div class="overlay-badge">
-              <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
+              <img src="/assets/sat_logo_transparent.png" alt="SAT Jewel Official Emblem Logo" />
             </div>
             <h1 class="overlay-title">Already a <span>Client?</span></h1>
             <p class="overlay-desc">Sign in to manage your high-carat orders, inspect GIA diamond certificates, and access private bespoke auctions.</p>
@@ -660,7 +701,7 @@
           <!-- Right Overlay (Shown when Sign In form is on Left side) -->
           <div class="overlay-panel overlay-right">
             <div class="overlay-badge">
-              <img src="~/assets/sat_emblem_clean.png" alt="SAT Jewel Emblem" />
+              <img src="/assets/sat_logo_transparent.png" alt="SAT Jewel Official Emblem Logo" />
             </div>
             <h1 class="overlay-title">New to <span>SAT Jewel?</span></h1>
             <p class="overlay-desc">Create your VIP account to explore bespoke diamond crafting, AI portfolio valuation, and exclusive concierge access.</p>

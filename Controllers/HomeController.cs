@@ -32,7 +32,8 @@ namespace SAT1.Controllers
             }
 
             ViewBag.CategoryCountsByNumericId = dbCounts;
-            return View();
+            ViewData["Title"] = "SAT Jewel — Fine Jewelry | Mastery in Every Cut";
+            return View("LandingNew");
         }
 
         [HttpGet]

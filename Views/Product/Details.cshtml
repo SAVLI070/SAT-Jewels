@@ -170,9 +170,9 @@
       max-width: 100vw;
       margin: 0;
       padding: 0;
-      background: #050b14;
-      color: #ffffff;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #07070a;
+      color: #f1eee8;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
       min-height: 100vh;
     }
 
@@ -188,23 +188,24 @@
     .sat-announcement-bar {
       width: 100%;
       background: #000000;
-      color: #d4b270;
+      color: #d4b878;
       text-align: center;
       padding: 8px 14px;
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.6px;
-      border-bottom: 1px solid rgba(212, 178, 112, 0.2);
+      border-bottom: 1px solid rgba(212, 184, 120, 0.2);
     }
 
     /* Navbar */
     .sat-nav-header {
-      background: #08111e;
-      border-bottom: 1px solid rgba(212, 178, 112, 0.25);
+      background: rgba(14, 13, 16, 0.92);
+      border-bottom: 1px solid rgba(212, 184, 120, 0.25);
       position: sticky;
       top: 0;
       z-index: 1000;
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
     .sat-nav-inner {
       max-width: 1400px;
@@ -222,7 +223,7 @@
       text-decoration: none;
       letter-spacing: 0.8px;
     }
-    .gold-text { color: #d4b270; }
+    .gold-text { color: #d4b878; }
 
     /* =========================================================
        EARTHLY JEWELS 3-COLUMN SPLIT PRODUCT LAYOUT
@@ -259,7 +260,7 @@
       background: #000000;
       border-radius: 18px;
       overflow: hidden;
-      border: 1px solid rgba(212, 178, 112, 0.3);
+      border: 1px solid rgba(212, 184, 120, 0.3);
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
     }
     .pd-hero-img-card img {
@@ -275,9 +276,9 @@
       position: absolute;
       top: 14px;
       left: 14px;
-      background: rgba(8, 17, 30, 0.85);
-      border: 1px solid #d4b270;
-      color: #d4b270;
+      background: rgba(14, 13, 16, 0.85);
+      border: 1px solid #d4b878;
+      color: #d4b878;
       font-size: 10px;
       font-weight: 800;
       padding: 4px 10px;
@@ -299,17 +300,24 @@
       position: relative;
       width: 100%;
       aspect-ratio: 1 / 1;
-      background: #0b1524;
+      background: rgba(14, 13, 16, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-radius: 14px;
       overflow: hidden;
-      border: 1px solid rgba(212, 178, 112, 0.22);
+      border: 1px solid rgba(212, 184, 120, 0.25);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
       cursor: pointer;
-      transition: transform 0.25s ease, border-color 0.25s ease;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
     .pd-gallery-card:hover {
       transform: translateY(-4px);
-      border-color: #d4b270;
+      border-color: #d4b878;
+      box-shadow: 0 12px 30px rgba(212, 184, 120, 0.25);
+    }
+    .pd-gallery-card.active {
+      border-color: #d4b878 !important;
+      box-shadow: 0 0 16px rgba(212, 184, 120, 0.45) !important;
     }
     .pd-gallery-card img {
       width: 100%;
@@ -341,11 +349,11 @@
     .pd-price-val {
       font-size: 26px;
       font-weight: 800;
-      color: #fbbf24;
+      color: #d4b878;
     }
     .pd-price-orig {
       font-size: 16px;
-      color: #64748b;
+      color: rgba(241, 238, 232, 0.45);
       text-decoration: line-through;
     }
     .pd-save-badge {
@@ -358,7 +366,7 @@
     }
     .pd-installment-sub {
       font-size: 13px;
-      color: #94a3b8;
+      color: rgba(241, 238, 232, 0.65);
     }
     .pd-installment-sub strong { color: #ffffff; }
 
@@ -370,9 +378,9 @@
       margin-top: 4px;
     }
     .pd-trust-pill {
-      background: rgba(212, 178, 112, 0.1);
-      border: 1px solid rgba(212, 178, 112, 0.25);
-      color: #cbd5e1;
+      background: rgba(212, 184, 120, 0.1);
+      border: 1px solid rgba(212, 184, 120, 0.25);
+      color: rgba(241, 238, 232, 0.85);
       font-size: 11.5px;
       padding: 4px 10px;
       border-radius: 6px;
@@ -380,7 +388,7 @@
       align-items: center;
       gap: 6px;
     }
-    .pd-trust-pill i { color: #d4b270; }
+    .pd-trust-pill i { color: #d4b878; }
 
     /* LUXURY ANIMATED STONE SWITCH */
     .stone-switch-wrap {
@@ -389,7 +397,7 @@
     .stone-switch-label {
       font-size: 12px;
       font-weight: 700;
-      color: #d4b270;
+      color: #d4b878;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       margin-bottom: 8px;
@@ -401,8 +409,8 @@
       position: relative;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      background: #08111e;
-      border: 1px solid rgba(212, 178, 112, 0.35);
+      background: rgba(14, 13, 16, 0.85);
+      border: 1px solid rgba(212, 184, 120, 0.35);
       border-radius: 12px;
       padding: 4px;
       user-select: none;
@@ -414,9 +422,9 @@
       bottom: 4px;
       left: 4px;
       width: calc(50% - 4px);
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
+      background: linear-gradient(135deg, #d4b878 0%, #b8944d 100%);
       border-radius: 8px;
-      box-shadow: 0 4px 14px rgba(212, 178, 112, 0.4);
+      box-shadow: 0 4px 14px rgba(212, 184, 120, 0.4);
       transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 1;
     }
@@ -428,7 +436,7 @@
       z-index: 2;
       background: transparent;
       border: none;
-      color: #94a3b8;
+      color: rgba(241, 238, 232, 0.65);
       font-size: 13.5px;
       font-weight: 700;
       padding: 10px;
@@ -440,9 +448,9 @@
       transition: color 0.3s ease, transform 0.2s ease;
     }
     .stone-opt-btn.active {
-      color: #ffffff;
+      color: #06070a;
       transform: scale(1.02);
-      text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      font-weight: 800;
     }
 
     /* Metal Swatches */
@@ -454,7 +462,7 @@
       display: flex;
       justify-content: space-between;
     }
-    .opt-label span { color: #d4b270; }
+    .opt-label span { color: #d4b878; }
     .metal-swatch-list {
       display: flex;
       flex-wrap: wrap;
@@ -464,9 +472,9 @@
     .metal-swatch-btn {
       padding: 6px 12px;
       border-radius: 8px;
-      border: 1px solid rgba(212, 178, 112, 0.25);
-      background: #08111e;
-      color: #ffffff;
+      border: 1px solid rgba(241, 238, 232, 0.16);
+      background: rgba(14, 13, 16, 0.85);
+      color: #f1eee8;
       font-size: 12px;
       font-weight: 700;
       cursor: pointer;
@@ -476,14 +484,14 @@
       transition: all 0.2s ease;
     }
     .metal-swatch-btn:hover {
-      border-color: #d4b270;
+      border-color: #d4b878;
       transform: translateY(-2px);
     }
     .metal-swatch-btn.active {
-      background: rgba(212, 178, 112, 0.2);
-      border-color: #d4b270;
-      color: #fbbf24;
-      box-shadow: 0 0 12px rgba(212, 178, 112, 0.3);
+      background: rgba(212, 184, 120, 0.22);
+      border-color: #d4b878;
+      color: #d4b878;
+      box-shadow: 0 0 14px rgba(212, 184, 120, 0.3);
     }
 
     /* Carat Buttons */
@@ -496,31 +504,32 @@
     .carat-btn {
       padding: 7px 14px;
       border-radius: 8px;
-      border: 1px solid rgba(212, 178, 112, 0.25);
-      background: #08111e;
-      color: #ffffff;
+      border: 1px solid rgba(241, 238, 232, 0.16);
+      background: rgba(14, 13, 16, 0.85);
+      color: #f1eee8;
       font-size: 12.5px;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.2s ease;
     }
     .carat-btn:hover {
-      border-color: #d4b270;
+      border-color: #d4b878;
       transform: translateY(-2px);
     }
     .carat-btn.active {
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
-      border-color: #d4b270;
-      color: #ffffff;
-      box-shadow: 0 4px 12px rgba(212, 178, 112, 0.35);
+      background: linear-gradient(135deg, #d4b878 0%, #b8944d 100%);
+      border-color: #d4b878;
+      color: #06070a;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(212, 184, 120, 0.35);
     }
 
     /* Ring Size Dropdown & Engraving */
     .pd-select {
       width: 100%;
       padding: 12px 14px;
-      background: #08111e;
-      border: 1px solid rgba(212, 178, 112, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(241, 238, 232, 0.16);
       border-radius: 8px;
       color: #ffffff;
       font-size: 13.5px;
@@ -529,8 +538,8 @@
     .pd-input {
       width: 100%;
       padding: 12px 14px;
-      background: #08111e;
-      border: 1px solid rgba(212, 178, 112, 0.3);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(241, 238, 232, 0.16);
       border-radius: 8px;
       color: #ffffff;
       font-size: 13.5px;
@@ -547,30 +556,31 @@
     .btn-begin-order {
       width: 100%;
       padding: 15px;
-      background: linear-gradient(135deg, #d4b270 0%, #b45309 100%);
-      color: #ffffff;
+      background: linear-gradient(135deg, #d4b878 0%, #b8944d 100%);
+      color: #06070a;
       border: none;
       border-radius: 10px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.05em;
       text-transform: uppercase;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 6px 20px rgba(180, 83, 9, 0.4);
+      box-shadow: 0 6px 22px rgba(212, 184, 120, 0.4);
       transition: all 0.25s ease;
     }
     .btn-begin-order:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(212, 178, 112, 0.5);
+      box-shadow: 0 10px 30px rgba(212, 184, 120, 0.6);
+      background: linear-gradient(135deg, #f1dfae 0%, #d4b878 100%);
     }
     .btn-whatsapp-chat {
       width: 100%;
       padding: 14px;
-      background: #0f372e;
+      background: rgba(16, 185, 129, 0.15);
       border: 1px solid #10b981;
       color: #a7f3d0;
       border-radius: 10px;
@@ -582,6 +592,7 @@
       justify-content: center;
       gap: 8px;
       text-decoration: none;
+      transition: all 0.2s ease;
     }
     .btn-whatsapp-chat:hover {
       background: #065f46;
@@ -590,8 +601,8 @@
 
     /* Quality Metric Rings */
     .pd-metrics-card {
-      background: #08111e;
-      border: 1px solid rgba(212, 178, 112, 0.25);
+      background: rgba(14, 13, 16, 0.85);
+      border: 1px solid rgba(212, 184, 120, 0.25);
       border-radius: 14px;
       padding: 16px;
       display: grid;
@@ -618,10 +629,10 @@
       font-weight: 800;
       color: #ffffff;
     }
-    .metric-circle.gold { border-color: #fbbf24; }
+    .metric-circle.gold { border-color: #d4b878; }
     .metric-name {
       font-size: 11px;
-      color: #94a3b8;
+      color: rgba(241, 238, 232, 0.65);
       font-weight: 600;
     }
 
@@ -633,8 +644,8 @@
       gap: 8px;
     }
     .acc-item {
-      background: #08111e;
-      border: 1px solid rgba(212, 178, 112, 0.2);
+      background: rgba(14, 13, 16, 0.85);
+      border: 1px solid rgba(212, 184, 120, 0.2);
       border-radius: 10px;
       overflow: hidden;
     }
@@ -651,7 +662,7 @@
     }
     .acc-header i {
       font-size: 12px;
-      color: #d4b270;
+      color: #d4b878;
       transition: transform 0.25s ease;
     }
     .acc-item.open .acc-header i {
@@ -661,7 +672,7 @@
       display: none;
       padding: 0 16px 14px;
       font-size: 13px;
-      color: #cbd5e1;
+      color: rgba(241, 238, 232, 0.8);
       line-height: 1.6;
       border-top: 1px solid rgba(255,255,255,0.06);
       padding-top: 12px;
@@ -676,9 +687,9 @@
        ========================================================= */
     .sat-craft-process-section {
       padding: 60px 0 50px;
-      background: #060e1a;
-      border-top: 1px solid rgba(212, 178, 112, 0.2);
-      border-bottom: 1px solid rgba(212, 178, 112, 0.2);
+      background: #06070a;
+      border-top: 1px solid rgba(212, 184, 120, 0.2);
+      border-bottom: 1px solid rgba(212, 184, 120, 0.2);
       position: relative;
     }
     .craft-heading-wrap {
@@ -1100,7 +1111,7 @@
         @for (int i = 0; i < galleryList.Count; i++)
         {
           var img = galleryList[i];
-          <div class="pd-gallery-card" onclick="switchHeroImage('@img')">
+          <div class="pd-gallery-card @(i == 0 ? "active" : "")" data-index="@i" onclick="switchHeroImage('@img', @i)">
             <img src="@img" alt="Angle @(i+1)" />
           </div>
         }
@@ -1600,17 +1611,108 @@
       document.getElementById('floatingSpecsSub').textContent = `${selectedMetal} • ${selectedCarat} • ${stoneLabel}`;
     }
 
-    function switchHeroImage(src) {
+    const pdGalleryImages = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(galleryList));
+    let activeGalleryIdx = 0;
+    let autoGalleryTimer = null;
+    let isUserInteractingWithGallery = false;
+
+    function switchHeroImage(src, idx) {
+      if (typeof idx === 'number') {
+        activeGalleryIdx = idx;
+      } else {
+        const found = pdGalleryImages.indexOf(src);
+        if (found >= 0) activeGalleryIdx = found;
+      }
+
       const hero = document.getElementById('heroMainImg');
       if (hero) {
-        hero.style.opacity = '0.4';
+        hero.style.opacity = '0.5';
         setTimeout(() => {
           hero.src = src;
           hero.style.opacity = '1';
-        }, 150);
+        }, 120);
       }
       const thumb = document.getElementById('floatingThumb');
       if (thumb) thumb.src = src;
+
+      // Update thumbnail active styles & auto-scroll thumbnail container horizontally on mobile (without jumping page vertical scroll)
+      const galleryContainer = document.getElementById('detailGalleryCol');
+      document.querySelectorAll('.pd-gallery-card').forEach((card, i) => {
+        if (i === activeGalleryIdx) {
+          card.classList.add('active');
+          if (galleryContainer && window.innerWidth <= 991) {
+            const cardLeft = card.offsetLeft;
+            const cardWidth = card.offsetWidth;
+            const containerWidth = galleryContainer.offsetWidth;
+            galleryContainer.scrollTo({
+              left: cardLeft - (containerWidth / 2) + (cardWidth / 2),
+              behavior: 'smooth'
+            });
+          }
+        } else {
+          card.classList.remove('active');
+        }
+      });
+    }
+
+    // Amazon-Style Interactive Cursor Zoom on Main Image (Magnification follows cursor)
+    (function initAmazonZoom() {
+      const heroCard = document.querySelector('.pd-hero-img-card');
+      const heroImg = document.getElementById('heroMainImg');
+      if (!heroCard || !heroImg) return;
+
+      heroCard.style.cursor = 'crosshair';
+
+      heroCard.addEventListener('mouseenter', () => {
+        if (window.innerWidth > 991) {
+          heroImg.style.transition = 'transform 0.08s ease-out';
+          heroImg.style.transform = 'scale(2.2)';
+        }
+      });
+
+      heroCard.addEventListener('mousemove', (e) => {
+        if (window.innerWidth > 991) {
+          const rect = heroCard.getBoundingClientRect();
+          const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+          const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+          heroImg.style.transformOrigin = `${x}% ${y}%`;
+        }
+      });
+
+      heroCard.addEventListener('mouseleave', () => {
+        heroImg.style.transition = 'transform 0.3s ease-out';
+        heroImg.style.transform = 'scale(1)';
+        heroImg.style.transformOrigin = 'center center';
+      });
+    })();
+
+    // Mobile Auto-Scrolling Gallery Cycle (Every 3.5 seconds)
+    function startMobileGalleryAutoScroll() {
+      if (autoGalleryTimer) clearInterval(autoGalleryTimer);
+      if (!pdGalleryImages || pdGalleryImages.length <= 1) return;
+
+      autoGalleryTimer = setInterval(() => {
+        if (window.innerWidth <= 991 && !isUserInteractingWithGallery) {
+          activeGalleryIdx = (activeGalleryIdx + 1) % pdGalleryImages.length;
+          switchHeroImage(pdGalleryImages[activeGalleryIdx], activeGalleryIdx);
+        }
+      }, 3500);
+    }
+
+    startMobileGalleryAutoScroll();
+
+    // Pause auto-scroll when user touches/interacts with gallery
+    const galleryCol = document.getElementById('detailGalleryCol');
+    if (galleryCol) {
+      galleryCol.addEventListener('touchstart', () => {
+        isUserInteractingWithGallery = true;
+      }, { passive: true });
+
+      galleryCol.addEventListener('touchend', () => {
+        setTimeout(() => {
+          isUserInteractingWithGallery = false;
+        }, 7000);
+      }, { passive: true });
     }
 
     function toggleAcc(header) {

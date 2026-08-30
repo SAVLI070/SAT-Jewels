@@ -15,8 +15,8 @@
   <link rel="stylesheet" href="~/css/style.css" />
   <style>
     body {
-      background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);
-      color: #ffffff;
+      background: #07070a;
+      color: #f1eee8;
       font-family: var(--font-sans);
       min-height: 100vh;
       margin: 0;
@@ -37,7 +37,7 @@
       margin: 0 0 10px;
     }
     .shop-sub {
-      color: var(--taupe-beige);
+      color: rgba(241, 238, 232, 0.65);
       font-size: 15px;
     }
     .shop-grid {
@@ -52,9 +52,10 @@
       .shop-grid { grid-template-columns: 1fr; }
     }
     .shop-card {
-      background: rgba(8, 17, 34, 0.85);
+      background: rgba(14, 13, 16, 0.85);
       backdrop-filter: blur(20px);
-      border: 1px solid rgba(212, 178, 112, 0.3);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(241, 238, 232, 0.14);
       border-radius: 20px;
       overflow: hidden;
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
@@ -64,8 +65,8 @@
     }
     .shop-card:hover {
       transform: translateY(-6px);
-      border-color: var(--champagne-gold);
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 25px rgba(212, 178, 112, 0.25);
+      border-color: rgba(212, 184, 120, 0.6);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), 0 0 25px rgba(212, 184, 120, 0.25);
     }
     .shop-img-wrap {
       width: 100%;
@@ -97,7 +98,7 @@
     }
     .shop-item-spec {
       font-size: 13px;
-      color: var(--taupe-beige);
+      color: rgba(241, 238, 232, 0.65);
       margin-bottom: 16px;
       line-height: 1.5;
     }
@@ -105,15 +106,15 @@
       font-family: var(--font-serif);
       font-size: 24px;
       font-weight: 700;
-      color: #fbbf24;
+      color: #d4b878;
       margin-bottom: 18px;
     }
     .btn-shop-details {
       padding: 12px;
       border-radius: 30px;
-      background: var(--champagne-gold);
-      color: #060d0a;
-      font-weight: 700;
+      background: linear-gradient(135deg, #d4b878 0%, #b8944d 100%);
+      color: #06070a;
+      font-weight: 800;
       text-decoration: none;
       text-align: center;
       transition: all 0.3s ease;
