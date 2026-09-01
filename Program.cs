@@ -2,6 +2,10 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using SAT1.Models;
 
+// Prevent inotify instance exhaustion (limit 128) in Linux containers (Render, Docker, Kubernetes)
+Environment.SetEnvironmentVariable("DOTNET_USE_POLLING_FILE_WATCHER", "1");
+Environment.SetEnvironmentVariable("DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE", "false");
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Resolve & Validate PostgreSQL Connection String (Render / Neon Cloud DB)

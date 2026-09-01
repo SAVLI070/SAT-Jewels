@@ -170,19 +170,26 @@
     top: 72px;
     left: 50%;
     transform: translateX(-50%);
-    width: min(980px, 94vw);
-    background: rgba(14, 13, 16, 0.96);
+    width: min(940px, calc(100vw - 32px));
+    box-sizing: border-box;
+    overflow: hidden;
+    background: rgba(12, 11, 15, 0.97);
     backdrop-filter: blur(28px);
     -webkit-backdrop-filter: blur(28px);
-    border: 1px solid rgba(212, 178, 112, 0.35);
-    border-radius: 18px;
-    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95), 0 0 40px rgba(212, 184, 120, 0.12);
-    padding: 26px 30px;
+    border: 1px solid rgba(212, 184, 120, 0.45);
+    border-radius: 20px;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.95), 0 0 40px rgba(212, 184, 120, 0.15);
+    padding: 24px 26px;
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
     transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s;
     z-index: 999999;
+  }
+
+  .sat-mega-container {
+    width: 100%;
+    box-sizing: border-box;
   }
 
   /* Invisible hover bridge to prevent premature mouseleave across navbar gap */
@@ -207,17 +214,33 @@
   /* Mega Grid */
   .sat-mega-grid {
     display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 28px;
+    grid-template-columns: 1fr 270px;
+    gap: 22px;
     align-items: stretch;
+    width: 100%;
+    box-sizing: border-box;
   }
+
+  .sat-mega-column {
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  .sat-mega-featured-col {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    max-width: 270px;
+    box-sizing: border-box;
+  }
+
   .sat-mega-col-heading {
     font-family: var(--font-sans);
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
     color: var(--champagne-gold, #d4b270);
-    letter-spacing: 0.1em;
-    margin: 0 0 18px;
+    letter-spacing: 0.12em;
+    margin: 0 0 16px;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -227,120 +250,170 @@
   .sat-main-cats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+    gap: 12px;
+    box-sizing: border-box;
   }
 
+  /* New Luxury Gold Hover Color Combination */
   .sat-mega-cat-card {
     display: flex;
     align-items: center;
-    gap: 14px;
-    padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
+    gap: 12px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
     text-decoration: none;
-    transition: all 0.25s ease;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
   }
+
   .sat-mega-cat-card:hover {
-    background: rgba(212, 178, 112, 0.12);
-    border-color: rgba(212, 178, 112, 0.5);
-    transform: translateX(3px);
+    background: linear-gradient(135deg, rgba(212, 184, 120, 0.16) 0%, rgba(180, 83, 9, 0.08) 100%);
+    border-color: rgba(212, 184, 120, 0.55);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 0 16px rgba(212, 184, 120, 0.15);
+    transform: translateX(4px);
   }
+
   .sat-mega-cat-img {
-    width: 48px;
-    height: 48px;
+    width: 44px;
+    height: 44px;
     border-radius: 8px;
     object-fit: cover;
-    border: 1px solid rgba(212, 178, 112, 0.3);
+    border: 1px solid rgba(212, 184, 120, 0.3);
     flex-shrink: 0;
+    transition: all 0.25s ease;
   }
+
+  .sat-mega-cat-card:hover .sat-mega-cat-img {
+    border-color: var(--champagne-gold, #d4b270);
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(212, 184, 120, 0.35);
+  }
+
   .sat-mega-cat-info {
     display: flex;
     flex-direction: column;
     gap: 2px;
     flex: 1;
     overflow: hidden;
+    min-width: 0;
   }
+
   .sat-cat-name {
     font-size: 13.5px;
     font-weight: 700;
-    color: #ffffff;
-    letter-spacing: 0.3px;
+    color: #f1eee8;
+    letter-spacing: 0.2px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-  .sat-cat-sub {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.65);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .sat-cat-arrow {
-    font-size: 11px;
-    color: var(--champagne-gold, #d4b270);
-    opacity: 0.7;
-    transition: transform 0.2s ease, opacity 0.2s ease;
-    flex-shrink: 0;
-  }
-  .sat-mega-cat-card:hover .sat-cat-arrow {
-    opacity: 1;
-    transform: translateX(3px);
+    transition: color 0.2s ease, text-shadow 0.2s ease;
   }
 
+  .sat-mega-cat-card:hover .sat-cat-name {
+    color: #d4b270;
+    text-shadow: 0 0 12px rgba(212, 184, 120, 0.45);
+  }
+
+  .sat-cat-sub {
+    font-size: 11px;
+    color: rgba(241, 238, 232, 0.55);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+  }
+
+  .sat-mega-cat-card:hover .sat-cat-sub {
+    color: rgba(241, 238, 232, 0.85);
+  }
+
+  .sat-cat-arrow {
+    font-size: 11px;
+    color: rgba(212, 184, 120, 0.5);
+    transition: transform 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .sat-mega-cat-card:hover .sat-cat-arrow {
+    color: #d4b270;
+    opacity: 1;
+    transform: translateX(4px);
+  }
+
+  /* Featured Card Constrained to Column */
   .sat-mega-card {
     position: relative;
     width: 100%;
     height: 100%;
-    min-height: 240px;
-    border-radius: 12px;
+    min-height: 230px;
+    border-radius: 14px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    border: 1px solid rgba(212, 184, 120, 0.25);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    box-sizing: border-box;
   }
+
   .sat-card-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.6s ease;
+    display: block;
   }
+
   .sat-mega-card:hover .sat-card-img {
-    transform: scale(1.06);
+    transform: scale(1.05);
   }
+
   .sat-card-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(6, 14, 25, 0.88) 100%);
-    padding: 24px 20px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(6, 14, 25, 0.92) 100%);
+    padding: 20px 18px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
     align-items: flex-start;
+    box-sizing: border-box;
   }
+
   .sat-card-title {
     font-family: var(--font-serif, 'Playfair Display', serif);
-    font-size: 18px;
+    font-size: 16.5px;
     font-style: italic;
     color: #ffffff;
     margin: 0 0 12px;
     line-height: 1.35;
     text-shadow: 0 2px 10px rgba(0,0,0,0.8);
   }
+
   .sat-card-btn {
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #060c14;
-    background: var(--champagne-gold, #d4b270);
+    color: #0b0a0d;
+    background: linear-gradient(135deg, #d4b878 0%, #b45309 100%);
     padding: 8px 16px;
     border-radius: 20px;
     text-decoration: none;
     transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(212, 184, 120, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
   }
+
   .sat-card-btn:hover {
     background: #ffffff;
+    color: #0b0a0d;
     transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
   }
 
   /* MOBILE OFF-CANVAS DRAWER STYLES */
