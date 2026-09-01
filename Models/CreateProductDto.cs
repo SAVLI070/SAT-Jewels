@@ -13,6 +13,7 @@ namespace SAT1.Models
         public string EditId { get; set; } = "";
         public string Title { get; set; } = "";
         public decimal PriceUSD { get; set; }
+        public decimal MoissanitePriceUSD { get; set; } = 0m;
         public long CategoryId { get; set; }
         public long DiamondShapeId { get; set; }
         public string DiamondType { get; set; } = "Lab Grown Diamond";

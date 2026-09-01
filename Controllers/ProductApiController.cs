@@ -374,10 +374,10 @@ namespace SAT1.Controllers
         // Returns the dynamic database-backed metal & carat price increments
         // =========================================================================
         [HttpGet("pricing-rules")]
-        public async Task<IActionResult> GetPricingRules()
+        public async Task<IActionResult> GetPricingRules([FromServices] BAL.AdminBal adminBal)
         {
-            var rules = await _context.DynamicPricingRules
-                .AsNoTracking()
+            var rawRules = await adminBal.GetDynamicPricingRulesAsync();
+            var rules = rawRules
                 .Where(r => r.IsActive)
                 .OrderBy(r => r.RuleType)
                 .ThenBy(r => r.DisplayOrder)
@@ -390,7 +390,7 @@ namespace SAT1.Controllers
                     r.PriceOffsetUSD,
                     r.DisplayOrder
                 })
-                .ToListAsync();
+                .ToList();
 
             return Ok(new { success = true, rules });
         }

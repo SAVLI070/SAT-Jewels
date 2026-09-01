@@ -14,10 +14,65 @@ namespace SAT1.BAL
     public class AdminBal
     {
         private readonly SatJewelDbContext _context;
+        private readonly IConfiguration _configuration;
 
-        public AdminBal(SatJewelDbContext context)
+        public AdminBal(SatJewelDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
+        }
+
+        public static string? ExtractCloudinaryPublicId(string? url)
+        {
+            if (string.IsNullOrWhiteSpace(url) || !url.Contains("res.cloudinary.com")) return null;
+            try
+            {
+                var uri = new Uri(url);
+                var path = uri.AbsolutePath;
+                var uploadIdx = path.IndexOf("/upload/");
+                if (uploadIdx == -1) return null;
+
+                var afterUpload = path.Substring(uploadIdx + "/upload/".Length);
+                afterUpload = System.Text.RegularExpressions.Regex.Replace(afterUpload, @"^v\d+/", "");
+
+                var dotIdx = afterUpload.LastIndexOf('.');
+                if (dotIdx > 0)
+                {
+                    afterUpload = afterUpload.Substring(0, dotIdx);
+                }
+                return Uri.UnescapeDataString(afterUpload);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> DeleteFromCloudinaryAsync(string? imageUrl)
+        {
+            var publicId = ExtractCloudinaryPublicId(imageUrl);
+            if (string.IsNullOrWhiteSpace(publicId)) return false;
+
+            var cloudName = _configuration["Cloudinary:CloudName"] ?? "ktznlodb";
+            var apiKey = _configuration["Cloudinary:ApiKey"];
+            var apiSecret = _configuration["Cloudinary:ApiSecret"];
+
+            if (string.IsNullOrWhiteSpace(cloudName) || string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(apiSecret))
+                return false;
+
+            try
+            {
+                var account = new CloudinaryDotNet.Account(cloudName, apiKey, apiSecret);
+                var cloudinary = new CloudinaryDotNet.Cloudinary(account);
+                var deleteParams = new CloudinaryDotNet.Actions.DeletionParams(publicId);
+                var result = await cloudinary.DestroyAsync(deleteParams);
+                return result?.Result == "ok";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Cloudinary Delete Warning for {publicId}]: {ex.Message}");
+                return false;
+            }
         }
 
         public async Task<DashboardStatsDto> GetDashboardStatsAsync()
@@ -40,8 +95,9 @@ namespace SAT1.BAL
             
             var userRole = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
             var userEmail = user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower() ?? "";
+            var name = user.Identity.Name?.ToLower() ?? "";
             
-            return userRole == "Admin" || userEmail == "admin" || userEmail == "admin@satjewel.com" || userEmail == "admin@satjewels.com" || user.Identity.Name == "SAT Administrator";
+            return userRole == "Admin" || user.IsInRole("Admin") || userEmail.Contains("admin") || name.Contains("admin");
         }
 
         public async Task<Product> CreateProductWithVariantsAsync(CreateProductDto dto)
@@ -49,6 +105,7 @@ namespace SAT1.BAL
             if (string.IsNullOrWhiteSpace(dto.Title)) throw new ArgumentException("Product title is required.");
 
             Product? product = null;
+            var newImgUrls = dto.ImageUrls?.Where(u => !string.IsNullOrWhiteSpace(u)).Select(u => u.Trim()).ToList() ?? new List<string>();
 
             // Check if editing existing product
             if (!string.IsNullOrWhiteSpace(dto.EditId))
@@ -74,8 +131,16 @@ namespace SAT1.BAL
                 _context.Products.Update(product);
                 await _context.SaveChangesAsync();
 
-                // Clear old images & variants
+                // Clean up any replaced old images from Cloudinary storage
                 var oldImgs = await _context.ProductImages.Where(i => i.ProductId == product.ProductId).ToListAsync();
+                foreach (var oldImg in oldImgs)
+                {
+                    if (!newImgUrls.Contains(oldImg.ImagePath))
+                    {
+                        _ = DeleteFromCloudinaryAsync(oldImg.ImagePath);
+                    }
+                }
+
                 if (oldImgs.Any()) _context.ProductImages.RemoveRange(oldImgs);
 
                 var oldVars = await _context.ProductVariants.Where(v => v.ProductId == product.ProductId).ToListAsync();
@@ -184,10 +249,14 @@ namespace SAT1.BAL
             var targetCatId = !string.IsNullOrWhiteSpace(dto.EditId) ? dto.EditId : product.ProductId.ToString();
             var catItem = await _context.CatalogItems.FirstOrDefaultAsync(i => i.Id == targetCatId || i.Id == product.ProductId.ToString() || i.Id == $"sat-prod-{product.ProductId}");
             
+            decimal moissanitePrice = dto.MoissanitePriceUSD > 0 ? dto.MoissanitePriceUSD : Math.Round(dto.PriceUSD * 0.55m);
+
             if (catItem != null)
             {
                 catItem.Name = dto.Title.Trim();
                 catItem.PriceUSD = dto.PriceUSD;
+                catItem.MoissanitePrice = moissanitePrice;
+                catItem.Spec = $"Fine Jewelry | {dto.DiamondType} | MoissPrice:{moissanitePrice} | {dto.Title.Trim()}";
                 catItem.CategoryId = dto.CategoryId.ToString();
                 if (!string.IsNullOrWhiteSpace(metalOptionsStr)) catItem.MetalOptions = metalOptionsStr;
                 if (!string.IsNullOrWhiteSpace(caratOptionsStr)) catItem.CaratOptions = caratOptionsStr;
@@ -207,7 +276,8 @@ namespace SAT1.BAL
                     Name = dto.Title.Trim(),
                     CategoryId = dto.CategoryId.ToString(),
                     PriceUSD = dto.PriceUSD,
-                    Spec = $"Fine Jewelry | {dto.DiamondType} | {dto.Title.Trim()}",
+                    MoissanitePrice = moissanitePrice,
+                    Spec = $"Fine Jewelry | {dto.DiamondType} | MoissPrice:{moissanitePrice} | {dto.Title.Trim()}",
                     ImageUrl = dto.ImageUrls != null && dto.ImageUrls.Count > 0 ? dto.ImageUrls[0] : "/assets/ring_1.jpg",
                     GalleryImages = dto.ImageUrls != null ? string.Join(",", dto.ImageUrls) : "",
                     MetalOptions = metalOptionsStr,
@@ -233,7 +303,7 @@ namespace SAT1.BAL
 
             if (rules.Count == 0)
             {
-                // Seed standard defaults matching Bianca Chiara luxury tiers + Silver
+                // Seed standard defaults matching Bianca Chiara luxury tiers + Silver + Ring Sizes
                 var defaultRules = new List<DynamicPricingRule>
                 {
                     // Metals
@@ -252,6 +322,16 @@ namespace SAT1.BAL
                     new() { RuleType = "Carat", Code = "3.00_ct", DisplayName = "3.00 CT", PriceOffsetUSD = 2600, DisplayOrder = 7, IsActive = true },
                     new() { RuleType = "Carat", Code = "4.00_ct", DisplayName = "4.00 CT", PriceOffsetUSD = 4200, DisplayOrder = 8, IsActive = true },
                     new() { RuleType = "Carat", Code = "5.00_ct", DisplayName = "5.00 CT", PriceOffsetUSD = 6000, DisplayOrder = 9, IsActive = true },
+                    // Ring Sizes (Admin Controlled)
+                    new() { RuleType = "RingSize", Code = "us_4_0", DisplayName = "US 4.0 (14.9mm)", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true },
+                    new() { RuleType = "RingSize", Code = "us_5_0", DisplayName = "US 5.0 (15.7mm)", PriceOffsetUSD = 0, DisplayOrder = 2, IsActive = true },
+                    new() { RuleType = "RingSize", Code = "us_6_0", DisplayName = "US 6.0 (16.5mm)", PriceOffsetUSD = 0, DisplayOrder = 3, IsActive = true },
+                    new() { RuleType = "RingSize", Code = "us_7_0", DisplayName = "US 7.0 (17.3mm)", PriceOffsetUSD = 0, DisplayOrder = 4, IsActive = true },
+                    new() { RuleType = "RingSize", Code = "us_8_0", DisplayName = "US 8.0 (18.2mm)", PriceOffsetUSD = 0, DisplayOrder = 5, IsActive = true },
+                    new() { RuleType = "RingSize", Code = "us_9_0", DisplayName = "US 9.0 (19.0mm)", PriceOffsetUSD = 25, DisplayOrder = 6, IsActive = true },
+                    new() { RuleType = "RingSize", Code = "us_10_0", DisplayName = "US 10.0 (19.8mm)", PriceOffsetUSD = 50, DisplayOrder = 7, IsActive = true },
+                    new() { RuleType = "RingSize", Code = "us_11_0", DisplayName = "US 11.0 (20.6mm)", PriceOffsetUSD = 75, DisplayOrder = 8, IsActive = true },
+                    new() { RuleType = "RingSize", Code = "us_12_0", DisplayName = "US 12.0 (21.4mm)", PriceOffsetUSD = 100, DisplayOrder = 9, IsActive = true },
                 };
 
                 _context.DynamicPricingRules.AddRange(defaultRules);
@@ -275,6 +355,26 @@ namespace SAT1.BAL
                 _context.DynamicPricingRules.Add(silverRule);
                 await _context.SaveChangesAsync();
                 rules.Insert(0, silverRule);
+            }
+
+            // Ensure Ring Size rules exist in existing databases
+            if (!rules.Any(r => r.RuleType == "RingSize"))
+            {
+                var defaultRingSizes = new List<DynamicPricingRule>
+                {
+                    new() { RuleType = "RingSize", Code = "us_4_0", DisplayName = "US 4.0 (14.9mm)", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true, UpdatedAt = DateTime.UtcNow },
+                    new() { RuleType = "RingSize", Code = "us_5_0", DisplayName = "US 5.0 (15.7mm)", PriceOffsetUSD = 0, DisplayOrder = 2, IsActive = true, UpdatedAt = DateTime.UtcNow },
+                    new() { RuleType = "RingSize", Code = "us_6_0", DisplayName = "US 6.0 (16.5mm)", PriceOffsetUSD = 0, DisplayOrder = 3, IsActive = true, UpdatedAt = DateTime.UtcNow },
+                    new() { RuleType = "RingSize", Code = "us_7_0", DisplayName = "US 7.0 (17.3mm)", PriceOffsetUSD = 0, DisplayOrder = 4, IsActive = true, UpdatedAt = DateTime.UtcNow },
+                    new() { RuleType = "RingSize", Code = "us_8_0", DisplayName = "US 8.0 (18.2mm)", PriceOffsetUSD = 0, DisplayOrder = 5, IsActive = true, UpdatedAt = DateTime.UtcNow },
+                    new() { RuleType = "RingSize", Code = "us_9_0", DisplayName = "US 9.0 (19.0mm)", PriceOffsetUSD = 25, DisplayOrder = 6, IsActive = true, UpdatedAt = DateTime.UtcNow },
+                    new() { RuleType = "RingSize", Code = "us_10_0", DisplayName = "US 10.0 (19.8mm)", PriceOffsetUSD = 50, DisplayOrder = 7, IsActive = true, UpdatedAt = DateTime.UtcNow },
+                    new() { RuleType = "RingSize", Code = "us_11_0", DisplayName = "US 11.0 (20.6mm)", PriceOffsetUSD = 75, DisplayOrder = 8, IsActive = true, UpdatedAt = DateTime.UtcNow },
+                    new() { RuleType = "RingSize", Code = "us_12_0", DisplayName = "US 12.0 (21.4mm)", PriceOffsetUSD = 100, DisplayOrder = 9, IsActive = true, UpdatedAt = DateTime.UtcNow },
+                };
+                _context.DynamicPricingRules.AddRange(defaultRingSizes);
+                await _context.SaveChangesAsync();
+                rules.AddRange(defaultRingSizes);
             }
 
             return rules;
@@ -442,6 +542,58 @@ namespace SAT1.BAL
             }
 
             return result.OrderByDescending(u => u.LifetimeSpendUSD).ThenByDescending(u => u.TotalOrders).ToList();
+        }
+
+        public async Task<bool> DeleteProductAsync(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return false;
+
+            var cleanId = id.Replace("sat-prod-", "").Replace("sat-local-", "").Trim();
+            Product? product = null;
+            if (long.TryParse(cleanId, out long numericId))
+            {
+                product = await _context.Products.Include(p => p.Images).Include(p => p.Variants).FirstOrDefaultAsync(p => p.ProductId == numericId);
+            }
+            if (product == null)
+            {
+                product = await _context.Products.Include(p => p.Images).Include(p => p.Variants).FirstOrDefaultAsync(p => p.Title.ToLower() == id.Trim().ToLower());
+            }
+
+            var catItem = await _context.CatalogItems.FirstOrDefaultAsync(i => i.Id == id || i.Id == $"sat-prod-{cleanId}" || i.Id == cleanId);
+
+            // Clean up all product images from Cloudinary storage
+            if (product?.Images != null)
+            {
+                foreach (var img in product.Images)
+                {
+                    _ = DeleteFromCloudinaryAsync(img.ImagePath);
+                }
+            }
+            if (catItem != null)
+            {
+                if (!string.IsNullOrWhiteSpace(catItem.ImageUrl))
+                {
+                    _ = DeleteFromCloudinaryAsync(catItem.ImageUrl);
+                }
+                if (!string.IsNullOrWhiteSpace(catItem.GalleryImages))
+                {
+                    foreach (var gUrl in catItem.GalleryImages.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        _ = DeleteFromCloudinaryAsync(gUrl.Trim());
+                    }
+                }
+                _context.CatalogItems.Remove(catItem);
+            }
+
+            if (product != null)
+            {
+                if (product.Images.Any()) _context.ProductImages.RemoveRange(product.Images);
+                if (product.Variants.Any()) _context.ProductVariants.RemoveRange(product.Variants);
+                _context.Products.Remove(product);
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

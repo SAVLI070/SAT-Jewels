@@ -12,11 +12,13 @@ namespace SAT1.Controllers
     public class AccountController : Controller
     {
         private readonly AuthBal _authBal;
+        private readonly OtpService _otpService;
         private readonly SatJewelDbContext _context;
 
-        public AccountController(AuthBal authBal, SatJewelDbContext context)
+        public AccountController(AuthBal authBal, OtpService otpService, SatJewelDbContext context)
         {
             _authBal = authBal;
+            _otpService = otpService;
             _context = context;
         }
 
@@ -110,19 +112,21 @@ namespace SAT1.Controllers
         // FAST PHONE / OTP LOGIN (MATCHING EARTHLY JEWELS MODAL FLOW)
         // =========================================================================
         [HttpPost]
-        public IActionResult SendPhoneOtp([FromBody] PhoneOtpRequest req)
+        public async Task<IActionResult> SendPhoneOtp([FromBody] PhoneOtpRequest req)
         {
             if (string.IsNullOrWhiteSpace(req?.Phone))
             {
-                return Json(new { success = false, message = "Please enter a valid phone number." });
+                return Json(new { success = false, message = "Please enter a valid mobile phone number." });
             }
 
-            var clean = req.Phone.Trim().Replace(" ", "").Replace("-", "");
-            // In demo/production, generate standard 6-digit OTP (e.g. 123456)
-            var otp = "123456";
-            HttpContext.Session.SetString("AUTH_PHONE_" + clean, otp);
-
-            return Json(new { success = true, message = "OTP sent successfully to " + clean, demoOtp = otp });
+            var result = await _otpService.GenerateAndSendOtpAsync(req.Phone);
+            return Json(new
+            {
+                success = result.Success,
+                message = result.Message,
+                cooldownSeconds = result.CooldownSeconds,
+                demoOtp = result.DemoOtp
+            });
         }
 
         public class PhoneOtpRequest
@@ -141,19 +145,22 @@ namespace SAT1.Controllers
                 return Json(new { success = false, message = "Phone number is required." });
             }
 
-            var clean = req.Phone.Trim().Replace(" ", "").Replace("-", "");
-            
-            // Validate OTP (accepts 123456 or session OTP or direct verification)
-            var sessionOtp = HttpContext.Session.GetString("AUTH_PHONE_" + clean);
-            if (!string.IsNullOrWhiteSpace(req.Otp) && req.Otp != "123456" && req.Otp != sessionOtp)
+            if (string.IsNullOrWhiteSpace(req.Otp))
             {
-                return Json(new { success = false, message = "Invalid verification code. Please check and try again." });
+                return Json(new { success = false, message = "Please enter the verification code." });
             }
 
+            var verifyResult = await _otpService.VerifyOtpAsync(req.Phone, req.Otp);
+            if (!verifyResult.Success)
+            {
+                return Json(new { success = false, message = verifyResult.Message });
+            }
+
+            var clean = _otpService.NormalizePhoneNumber(req.Phone);
             var user = await _authBal.GetOrCreateUserByPhoneAsync(clean, req.FullName);
             if (user == null)
             {
-                return Json(new { success = false, message = "Unable to create or verify account." });
+                return Json(new { success = false, message = "Unable to establish VIP session." });
             }
 
             var claims = new List<Claim>

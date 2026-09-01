@@ -28,6 +28,35 @@ namespace SAT1.Models
             set => Price = value; 
         }
 
+        [NotMapped]
+        private decimal _moissanitePrice = 0m;
+
+        [NotMapped]
+        public decimal MoissanitePrice 
+        { 
+            get
+            {
+                if (_moissanitePrice > 0) return _moissanitePrice;
+                if (!string.IsNullOrEmpty(Spec) && Spec.Contains("MoissPrice:"))
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(Spec, @"MoissPrice:(\d+(\.\d+)?)");
+                    if (match.Success && decimal.TryParse(match.Groups[1].Value, out decimal parsed))
+                    {
+                        return parsed;
+                    }
+                }
+                return Math.Round(Price * 0.55m);
+            }
+            set => _moissanitePrice = value; 
+        }
+
+        [NotMapped]
+        public decimal MoissanitePriceUSD
+        {
+            get => MoissanitePrice;
+            set => MoissanitePrice = value;
+        }
+
         public string ImageUrl { get; set; } = string.Empty;
 
         public string GalleryImages { get; set; } = string.Empty; // Comma-separated multi-angle photo URLs

@@ -1,7 +1,9 @@
+@inject SAT1.BAL.CatalogBal CatalogBal
 @{
     Layout = null;
     ViewData["Title"] = "SAT Jewel — Fine Jewelry | Mastery in Every Cut";
     var catCounts = ViewBag.CategoryCountsByNumericId as Dictionary<long, int> ?? new Dictionary<long, int>();
+    var publicCategories = await CatalogBal.GetPublicCategoriesAsync();
 }
 
 <!DOCTYPE html>
@@ -1332,55 +1334,20 @@
           <i class="fa-solid fa-chevron-left"></i>
         </button>
 
-        <!-- Track containing ONLY the 6 Main Categories in ONE LINE -->
+        <!-- Track containing ONLY the Active Categories in ONE LINE -->
         <div class="cat-carousel-track" id="mainCatTrack">
-          <!-- 1. ENGAGEMENT RINGS -->
-          <a href="/Product/Category?id=1" class="cat-carousel-card">
-            <div class="cat-card-image-box">
-              <img src="/assets/categories/cat_engagement_rings.png" alt="Engagement Rings" loading="eager" />
-            </div>
-            <div class="cat-card-title-label">Engagement Rings &rarr;</div>
-          </a>
-
-          <!-- 2. WEDDING RINGS -->
-          <a href="/Product/Category?id=2" class="cat-carousel-card">
-            <div class="cat-card-image-box">
-              <img src="/assets/categories/cat_wedding_rings.webp" alt="Wedding Rings" loading="lazy" />
-            </div>
-            <div class="cat-card-title-label">Wedding Rings</div>
-          </a>
-
-          <!-- 3. BRIDAL SETS -->
-          <a href="/Product/Category?id=3" class="cat-carousel-card">
-            <div class="cat-card-image-box">
-              <img src="/assets/categories/cat_bridal_sets.webp" alt="Bridal Sets" loading="lazy" />
-            </div>
-            <div class="cat-card-title-label">Bridal Sets</div>
-          </a>
-
-          <!-- 4. EARRINGS -->
-          <a href="/Product/Category?id=4" class="cat-carousel-card">
-            <div class="cat-card-image-box">
-              <img src="/assets/categories/cat_earrings.webp" alt="Earrings" loading="lazy" />
-            </div>
-            <div class="cat-card-title-label">Earrings</div>
-          </a>
-
-          <!-- 5. BRACELETS -->
-          <a href="/Product/Category?id=5" class="cat-carousel-card">
-            <div class="cat-card-image-box">
-              <img src="/assets/categories/cat_bracelets.webp" alt="Bracelets" loading="lazy" />
-            </div>
-            <div class="cat-card-title-label">Bracelets</div>
-          </a>
-
-          <!-- 6. NECKLACES -->
-          <a href="/Product/Category?id=6" class="cat-carousel-card">
-            <div class="cat-card-image-box">
-              <img src="/assets/categories/cat_necklaces.webp" alt="Necklaces" loading="lazy" />
-            </div>
-            <div class="cat-card-title-label">Necklaces</div>
-          </a>
+          @if (publicCategories != null && publicCategories.Count > 0)
+          {
+            @foreach (var cat in publicCategories)
+            {
+              <a href="/Product/Category?id=@cat.Id" class="cat-carousel-card">
+                <div class="cat-card-image-box">
+                  <img src="@cat.ImageUrl" alt="@cat.Name" loading="lazy" />
+                </div>
+                <div class="cat-card-title-label">@cat.Name &rarr;</div>
+              </a>
+            }
+          }
         </div>
 
         <!-- Carousel Navigation Right Arrow -->
@@ -1539,6 +1506,28 @@
           track.scrollBy({ left: offset, behavior: 'smooth' });
         }
       };
+
+      async function syncVisibleCategories() {
+        try {
+          const res = await fetch('/api/catalogapi/categories');
+          if (!res.ok) return;
+          const cats = await res.json();
+          const track = document.getElementById('mainCatTrack');
+          if (track && Array.isArray(cats)) {
+            track.innerHTML = cats.map(c => `
+              <a href="/Product/Category?id=${c.id}" class="cat-carousel-card">
+                <div class="cat-card-image-box">
+                  <img src="${c.imageUrl}" alt="${c.name}" loading="lazy" />
+                </div>
+                <div class="cat-card-title-label">${c.name} &rarr;</div>
+              </a>
+            `).join('');
+          }
+        } catch (e) {
+          console.warn('Could not sync dynamic categories:', e);
+        }
+      }
+      document.addEventListener('DOMContentLoaded', syncVisibleCategories);
 
       // Caption definitions with exact normalized scroll windows
       const caps = [

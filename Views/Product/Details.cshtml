@@ -1192,15 +1192,19 @@
           </div>
         </div>
 
-        <!-- Ring Size Selection -->
+        <!-- Ring Size Selection (Dynamically Controlled from Admin) -->
         <div>
-          <div class="opt-label">Select Ring Size (US): <span style="font-size:11px; text-decoration:underline; cursor:pointer;">Size Guide</span></div>
-          <select class="pd-select" id="selRingSize">
-            <option>US 5.0 (15.7mm)</option>
-            <option selected>US 6.0 (16.5mm)</option>
-            <option>US 7.0 (17.3mm)</option>
-            <option>US 8.0 (18.2mm)</option>
-            <option>US 9.0 (19.0mm)</option>
+          <div class="opt-label">Select Ring Size (US): <span style="font-size:11px; text-decoration:underline; cursor:pointer;" onclick="alert('💍 SAT Jewel Ring Size Guide:\n\nUS 4.0: 14.9 mm\nUS 5.0: 15.7 mm\nUS 6.0: 16.5 mm (Standard)\nUS 7.0: 17.3 mm\nUS 8.0: 18.2 mm\nUS 9.0: 19.0 mm\nUS 10.0: 19.8 mm\nUS 11.0: 20.6 mm\nUS 12.0: 21.4 mm\n\nAll bespoke sizes available upon request.')">Size Guide</span></div>
+          <select class="pd-select" id="selRingSize" onchange="handleRingSizeChange()">
+            <option value="US 4.0 (14.9mm)">US 4.0 (14.9mm)</option>
+            <option value="US 5.0 (15.7mm)">US 5.0 (15.7mm)</option>
+            <option value="US 6.0 (16.5mm)" selected>US 6.0 (16.5mm)</option>
+            <option value="US 7.0 (17.3mm)">US 7.0 (17.3mm)</option>
+            <option value="US 8.0 (18.2mm)">US 8.0 (18.2mm)</option>
+            <option value="US 9.0 (19.0mm)">US 9.0 (19.0mm)</option>
+            <option value="US 10.0 (19.8mm)">US 10.0 (19.8mm)</option>
+            <option value="US 11.0 (20.6mm)">US 11.0 (20.6mm)</option>
+            <option value="US 12.0 (21.4mm)">US 12.0 (21.4mm)</option>
           </select>
         </div>
 
@@ -1507,21 +1511,35 @@
   <partial name="_Footer" />
 
   <script>
-    // Global State for Dynamic Recalculation
+    // Global State for Dynamic Recalculation (Dual Stone Category Pricing: Lab Grown Diamond vs Moissanite)
     const basePriceUSD = @Model.Price;
+    const moissaniteBasePriceUSD = @(Model.MoissanitePrice > 0 ? Model.MoissanitePrice : Math.Round(Model.Price * 0.55m));
     let currentStoneType = 'LabGrownDiamond'; // 'LabGrownDiamond' or 'Moissanite'
     let selectedMetal = '@(metalList.FirstOrDefault()?.Name ?? "14K Yellow Gold")';
     let selectedCarat = '@(caratList.FirstOrDefault()?.Label ?? "1.50 CT")';
+    let selectedRingSize = 'US 6.0 (16.5mm)';
 
-    // Metal & Carat Adjustments Pre-populated from Server
+    // Metal, Carat & Ring Size Adjustments Pre-populated from Server
     let metalAdjustments = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(metalList.ToDictionary(m => (string)m.Name, m => (decimal)m.Offset)));
     let caratAdjustments = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(caratList.ToDictionary(c => (string)c.Label, c => (decimal)c.Offset)));
+    let ringSizeAdjustments = {
+      'US 4.0 (14.9mm)': 0,
+      'US 5.0 (15.7mm)': 0,
+      'US 6.0 (16.5mm)': 0,
+      'US 7.0 (17.3mm)': 0,
+      'US 8.0 (18.2mm)': 0,
+      'US 9.0 (19.0mm)': 25,
+      'US 10.0 (19.8mm)': 50,
+      'US 11.0 (20.6mm)': 75,
+      'US 12.0 (21.4mm)': 100
+    };
 
-    // Fetch real-time Admin Pricing Rules from DB and match with normalized regex
+    // Fetch real-time Admin Pricing Rules from DB (Metals, Carats, Ring Sizes) and sync with UI
     fetch('/api/ProductApi/pricing-rules')
       .then(res => res.json())
       .then(data => {
         if (data && data.rules && data.rules.length > 0) {
+          const ringSizeRules = [];
           data.rules.forEach(r => {
             if (r.ruleType === 'Metal') {
               for (let k in metalAdjustments) {
@@ -1543,8 +1561,26 @@
                   caratAdjustments[k] = r.priceOffsetUSD;
                 }
               }
+            } else if (r.ruleType === 'RingSize') {
+              ringSizeAdjustments[r.displayName] = r.priceOffsetUSD;
+              ringSizeRules.push(r);
             }
           });
+
+          // If Ring Size rules returned from DB, dynamically update the select box options with real-time price offsets
+          if (ringSizeRules.length > 0) {
+            const sel = document.getElementById('selRingSize');
+            if (sel) {
+              const currentVal = sel.value;
+              sel.innerHTML = ringSizeRules.map(r => {
+                const offsetLabel = r.priceOffsetUSD > 0 ? ` (+${r.priceOffsetUSD.toLocaleString('en-US')} USD)` : '';
+                const isSel = (r.displayName === currentVal || (currentVal.includes('6.0') && r.displayName.includes('6.0'))) ? 'selected' : '';
+                return `<option value="${r.displayName}" ${isSel}>${r.displayName}${offsetLabel}</option>`;
+              }).join('');
+              selectedRingSize = sel.value;
+            }
+          }
+
           recalculatePrice();
         }
       })
@@ -1590,12 +1626,21 @@
       recalculatePrice();
     }
 
+    function handleRingSizeChange() {
+      const sel = document.getElementById('selRingSize');
+      if (sel) {
+        selectedRingSize = sel.value;
+        recalculatePrice();
+      }
+    }
+
     function recalculatePrice() {
       const metalAdj = metalAdjustments[selectedMetal] || 0;
       const caratAdj = caratAdjustments[selectedCarat] || 0;
+      const ringSizeAdj = ringSizeAdjustments[selectedRingSize] || 0;
 
-      let subtotal = basePriceUSD + metalAdj + caratAdj;
-      let finalPrice = (currentStoneType === 'Moissanite') ? Math.max(120, Math.round(subtotal * 0.55)) : subtotal;
+      const activeBasePrice = (currentStoneType === 'Moissanite') ? moissaniteBasePriceUSD : basePriceUSD;
+      let finalPrice = Math.max(100, Math.round(activeBasePrice + metalAdj + caratAdj + ringSizeAdj));
       let originalPrice = Math.floor(finalPrice * 1.15);
       let monthly = (finalPrice / 4).toFixed(2);
 
@@ -1608,7 +1653,8 @@
       document.getElementById('floatingPriceVal').textContent = `$ ${finalPrice.toLocaleString('en-US')}`;
 
       const stoneLabel = currentStoneType === 'Moissanite' ? 'Moissanite' : 'Lab Diamond';
-      document.getElementById('floatingSpecsSub').textContent = `${selectedMetal} • ${selectedCarat} • ${stoneLabel}`;
+      const sizeShort = (selectedRingSize || 'US 6.0').split(' ')[0] + ' ' + ((selectedRingSize || '').split(' ')[1] || '');
+      document.getElementById('floatingSpecsSub').textContent = `${selectedMetal} • ${selectedCarat} • ${sizeShort} • ${stoneLabel}`;
     }
 
     const pdGalleryImages = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(galleryList));

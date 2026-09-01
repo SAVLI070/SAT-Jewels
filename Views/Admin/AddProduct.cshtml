@@ -373,14 +373,44 @@
           <input type="hidden" id="adminCategoryId" value="1" />
         </div>
 
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
-          <div>
-            <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Item Title / Name *</label>
-            <input type="text" id="adminTitle" class="form-input" placeholder="e.g. Royal Solitaire Oval Cut Ring" required oninput="updateLivePreview()" style="width:100%; box-sizing:border-box; padding:12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; color:#0f172a;" />
+        <!-- Item Title -->
+        <div style="margin-bottom:16px;">
+          <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Item Title / Name *</label>
+          <input type="text" id="adminTitle" class="form-input" placeholder="e.g. Royal Solitaire Oval Cut Ring" required oninput="updateLivePreview()" style="width:100%; box-sizing:border-box; padding:12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; color:#0f172a; font-size:14px; font-weight:500;" />
+        </div>
+
+        <!-- Dual Category Stone Pricing Card (Lab Diamond vs Moissanite) -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:16px; margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+            <div style="font-size:12.5px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+              <i class="fa-solid fa-tags" style="color:#b45309;"></i> Dual Stone Base Pricing
+            </div>
+            <span style="font-size:11px; color:#64748b;">Customers toggle stone types dynamically on the details page</span>
           </div>
-          <div>
-            <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Base Price ($ USD) *</label>
-            <input type="number" id="adminPrice" class="form-input" placeholder="2713" min="1" required oninput="updateLivePreview()" style="width:100%; box-sizing:border-box; padding:12px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; color:#0f172a;" />
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px;">
+            <div>
+              <label style="font-size:12.5px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">
+                💎 Lab Grown Price ($ USD) *
+              </label>
+              <div style="position:relative;">
+                <input type="number" id="adminPrice" class="form-input" placeholder="2713" min="1" required oninput="handleLabPriceChange()" style="width:100%; box-sizing:border-box; padding:11px 12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; color:#0f172a; font-size:14px; font-weight:700;" />
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <label style="font-size:12.5px; font-weight:700; color:#0f172a;">
+                  ✨ Moissanite Price ($ USD)
+                </label>
+                <button type="button" onclick="autoCalcMoissanite()" style="background:#fef3c7; border:1px solid #d97706; color:#b45309; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:12px; cursor:pointer; display:inline-flex; align-items:center; gap:3px;">
+                  ⚡ Auto 55%
+                </button>
+              </div>
+              <div style="position:relative;">
+                <input type="number" id="adminMoissanitePrice" class="form-input" placeholder="1492" min="1" oninput="updateLivePreview()" style="width:100%; box-sizing:border-box; padding:11px 12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; color:#0f172a; font-size:14px; font-weight:700;" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -523,8 +553,14 @@
       </div>
 
       <div class="preview-stage">
-        <span style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.8); color:#fff; font-size:9.5px; font-weight:700; padding:3px 6px; border-radius:4px; z-index:2;">Lab Grown</span>
+        <span id="prevBadge" style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.8); color:#fff; font-size:9.5px; font-weight:700; padding:3px 6px; border-radius:4px; z-index:2;">💎 Lab Grown</span>
         <img id="prevImg" src="/assets/ring_1.jpg" alt="Preview" />
+      </div>
+
+      <!-- Preview Stone Selector Toggle -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px; background:#f1f5f9; padding:3px; border-radius:8px; margin-bottom:10px;">
+        <button type="button" id="prevBtnLab" onclick="setPreviewStone('LabGrown')" style="padding:6px; font-size:11px; font-weight:700; border:none; border-radius:6px; background:#0f172a; color:#fff; cursor:pointer;">💎 Lab Diamond</button>
+        <button type="button" id="prevBtnMoiss" onclick="setPreviewStone('Moissanite')" style="padding:6px; font-size:11px; font-weight:700; border:none; border-radius:6px; background:transparent; color:#64748b; cursor:pointer;">✨ Moissanite</button>
       </div>
 
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
@@ -660,12 +696,59 @@
     updateLivePreview();
   }
 
+  let previewStoneType = 'LabGrown';
+
+  function handleLabPriceChange() {
+    const labPrice = parseFloat(document.getElementById('adminPrice').value) || 0;
+    const moissInput = document.getElementById('adminMoissanitePrice');
+    // If moissanite is empty or was previously auto-calc, update it
+    if (!moissInput.dataset.manualEdit && labPrice > 0) {
+      moissInput.value = Math.round(labPrice * 0.55);
+    }
+    updateLivePreview();
+  }
+
+  function autoCalcMoissanite() {
+    const labPrice = parseFloat(document.getElementById('adminPrice').value) || 0;
+    if (labPrice > 0) {
+      const moissInput = document.getElementById('adminMoissanitePrice');
+      moissInput.value = Math.round(labPrice * 0.55);
+      moissInput.dataset.manualEdit = '';
+      updateLivePreview();
+    }
+  }
+
+  function setPreviewStone(type) {
+    previewStoneType = type;
+    const btnLab = document.getElementById('prevBtnLab');
+    const btnMoiss = document.getElementById('prevBtnMoiss');
+    const badge = document.getElementById('prevBadge');
+
+    if (type === 'Moissanite') {
+      btnMoiss.style.background = '#0f172a';
+      btnMoiss.style.color = '#ffffff';
+      btnLab.style.background = 'transparent';
+      btnLab.style.color = '#64748b';
+      badge.textContent = '✨ Moissanite';
+    } else {
+      btnLab.style.background = '#0f172a';
+      btnLab.style.color = '#ffffff';
+      btnMoiss.style.background = 'transparent';
+      btnMoiss.style.color = '#64748b';
+      badge.textContent = '💎 Lab Grown';
+    }
+    updateLivePreview();
+  }
+
   function updateLivePreview() {
     const titleVal = document.getElementById('adminTitle').value.trim() || 'Royal Solitaire Ring';
-    const priceVal = parseFloat(document.getElementById('adminPrice').value) || 2713;
+    const labPrice = parseFloat(document.getElementById('adminPrice').value) || 2713;
+    const moissPrice = parseFloat(document.getElementById('adminMoissanitePrice').value) || Math.round(labPrice * 0.55);
+
+    const activeBasePrice = previewStoneType === 'Moissanite' ? moissPrice : labPrice;
 
     document.getElementById('prevTitle').textContent = titleVal;
-    document.getElementById('prevPrice').textContent = `$${priceVal.toLocaleString('en-US')} USD`;
+    document.getElementById('prevPrice').textContent = `$${activeBasePrice.toLocaleString('en-US')} USD`;
 
     const activeMetals = Array.from(document.querySelectorAll('.metal-pill-btn.active')).map(b => b.textContent);
     const activeCarats = Array.from(document.querySelectorAll('.carat-pill-btn.active')).map(b => b.dataset.label.split(' ')[0] + ' ' + b.dataset.label.split(' ')[1]);
@@ -678,6 +761,57 @@
     if (url) {
       currentUploadedUrls = [url];
       document.getElementById('prevImg').src = url;
+      renderUploadPreviewGrid();
+    }
+  }
+
+  function renderUploadPreviewGrid() {
+    const previewGrid = document.getElementById('uploadPreviewGrid');
+    if (!previewGrid) return;
+    if (currentUploadedUrls.length === 0) {
+      previewGrid.innerHTML = '<div style="grid-column:1/-1; font-size:12px; color:#64748b; font-style:italic;">No photos uploaded yet. Upload high-res photos above.</div>';
+      return;
+    }
+    previewGrid.innerHTML = currentUploadedUrls.map((u, i) => `
+      <div style="position:relative; height:85px; border-radius:8px; overflow:hidden; border:${i === 0 ? '2px solid #b45309' : '1px solid #cbd5e1'}; background:#f8fafc; cursor:pointer;" onclick="setCoverImage(${i})">
+        <img src="${u}" style="width:100%; height:100%; object-fit:cover;" alt="Photo ${i+1}" />
+        ${i === 0 ? '<span style="position:absolute; bottom:2px; left:2px; background:rgba(180,83,9,0.9); color:#fff; font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px;">Cover</span>' : ''}
+        <button type="button" onclick="event.stopPropagation(); removeUploadedImage(${i})" title="Remove photo"
+          style="position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%; background:rgba(220,38,38,0.9); color:#ffffff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px; transition:transform 0.2s;">
+          <i class="fa-solid fa-times"></i>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  function setCoverImage(index) {
+    if (index >= 0 && index < currentUploadedUrls.length) {
+      const selected = currentUploadedUrls.splice(index, 1)[0];
+      currentUploadedUrls.unshift(selected);
+      document.getElementById('prevImg').src = currentUploadedUrls[0];
+      renderUploadPreviewGrid();
+    }
+  }
+
+  async function removeUploadedImage(index) {
+    if (index < 0 || index >= currentUploadedUrls.length) return;
+    const urlToRemove = currentUploadedUrls[index];
+    currentUploadedUrls.splice(index, 1);
+    renderUploadPreviewGrid();
+
+    if (currentUploadedUrls.length > 0) {
+      document.getElementById('prevImg').src = currentUploadedUrls[0];
+    } else {
+      document.getElementById('prevImg').src = '/assets/ring_1.jpg';
+    }
+
+    // If this image is on Cloudinary and was explicitly deleted by the admin, remove it from Cloudinary storage
+    if (urlToRemove && urlToRemove.includes('res.cloudinary.com')) {
+      try {
+        await fetch(`/api/catalogapi/delete-image?url=${encodeURIComponent(urlToRemove)}`, { method: 'POST' });
+      } catch (e) {
+        console.warn('Cloudinary image deletion error:', e);
+      }
     }
   }
 
@@ -686,8 +820,6 @@
     if (files.length === 0) return;
 
     const statusText = document.getElementById('uploadStatusText');
-    const previewGrid = document.getElementById('uploadPreviewGrid');
-
     statusText.textContent = `Uploading ${files.length} file(s) to Cloudinary...`;
 
     const formData = new FormData();
@@ -700,15 +832,10 @@
       });
       const data = await res.json();
       if (data.success && data.urls) {
-        currentUploadedUrls = data.urls;
-        statusText.textContent = `Successfully uploaded ${data.urls.length} photo(s)!`;
-        document.getElementById('prevImg').src = data.urls[0];
-
-        previewGrid.innerHTML = data.urls.map((u, i) => `
-          <div style="height:70px; border-radius:8px; overflow:hidden; border:1px solid var(--champagne-gold);">
-            <img src="${u}" style="width:100%; height:100%; object-fit:cover;" alt="Uploaded ${i+1}" />
-          </div>
-        `).join('');
+        currentUploadedUrls = [...currentUploadedUrls, ...data.urls];
+        statusText.textContent = `Successfully uploaded ${data.urls.length} photo(s) to Cloudinary!`;
+        document.getElementById('prevImg').src = currentUploadedUrls[0];
+        renderUploadPreviewGrid();
       } else {
         alert(data.message || 'Upload failed');
       }
@@ -855,20 +982,35 @@
       // Step 1: Basic Info
       document.getElementById('adminTitle').value = item.name || item.title || '';
       document.getElementById('adminPrice').value = item.priceUSD || item.price || 0;
+      document.getElementById('adminMoissanitePrice').value = item.moissanitePriceUSD || item.moissanitePrice || Math.round((item.priceUSD || item.price || 0) * 0.55);
       
       if (item.categoryId) {
         const catCard = document.querySelector(`.cat-select-card[onclick*="'${item.categoryId}'"]`);
         if (catCard) setCategory(item.categoryId, item.categoryId, catCard);
       }
 
-      // Step 2: Photo Studio
-      if (item.imageUrl) {
-        currentUploadedUrls = [item.imageUrl];
-        if (item.galleryImages) {
-          currentUploadedUrls = item.galleryImages.split(',').map(s => s.trim()).filter(Boolean);
-        }
-        document.getElementById('prevImg').src = item.imageUrl;
+      // Step 2: Photo Studio - Load ALL existing product images
+      const existingImgs = [];
+      if (item.imageUrl && item.imageUrl.trim()) {
+        existingImgs.push(item.imageUrl.trim());
       }
+      if (item.galleryImages && item.galleryImages.trim()) {
+        item.galleryImages.split(',').map(s => s.trim()).filter(Boolean).forEach(u => {
+          if (!existingImgs.includes(u)) existingImgs.push(u);
+        });
+      }
+      if (item.images && Array.isArray(item.images)) {
+        item.images.forEach(im => {
+          const u = (im.imagePath || im.url || '').trim();
+          if (u && !existingImgs.includes(u)) existingImgs.push(u);
+        });
+      }
+
+      currentUploadedUrls = existingImgs;
+      if (currentUploadedUrls.length > 0) {
+        document.getElementById('prevImg').src = currentUploadedUrls[0];
+      }
+      renderUploadPreviewGrid();
 
       // Step 3: Metals & Carats
       if (item.variants && item.variants.length > 0) {
@@ -923,6 +1065,7 @@
 
     const title = document.getElementById('adminTitle').value.trim();
     const priceUSD = parseFloat(document.getElementById('adminPrice').value) || 0;
+    const moissanitePriceUSD = parseFloat(document.getElementById('adminMoissanitePrice').value) || Math.round(priceUSD * 0.55);
     const categoryId = parseInt(document.getElementById('adminCategoryId').value) || 1;
     const shapeId = parseInt(document.getElementById('adminShapeId').value) || 1;
 
@@ -959,6 +1102,7 @@
       editId: editingProductId || '',
       title,
       priceUSD,
+      moissanitePriceUSD,
       categoryId,
       diamondShapeId: shapeId,
       diamondType: 'Lab Grown Diamond',

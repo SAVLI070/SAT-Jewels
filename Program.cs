@@ -53,12 +53,16 @@ builder.Services.AddControllersWithViews();
 // Add HttpClient for External Payment Gateways (PayPal & Razorpay)
 builder.Services.AddHttpClient();
 
+// Add In-Memory Caching (for OTP security, rate limiting, and temporary token vaults)
+builder.Services.AddMemoryCache();
+
 // Register BAL & DAL Payment Services
 builder.Services.AddScoped<SAT1.DAL.OrderRepository>();
 builder.Services.AddScoped<SAT1.DAL.OrderTrackingRepository>();
 builder.Services.AddScoped<SAT1.BAL.CatalogBal>();
 builder.Services.AddScoped<SAT1.BAL.AdminBal>();
 builder.Services.AddScoped<SAT1.BAL.AuthBal>();
+builder.Services.AddScoped<SAT1.BAL.OtpService>();
 builder.Services.AddScoped<SAT1.BAL.ReviewBal>();
 builder.Services.AddScoped<SAT1.BAL.EmailNotificationService>();
 builder.Services.AddScoped<SAT1.BAL.Shipping.IShippingProviderService, SAT1.BAL.Shipping.DefaultShippingProviderService>();

@@ -51,8 +51,41 @@ namespace SAT1.Models
         [NotMapped]
         public string Subtitle { get; set; } = "Bespoke Fine Jewelry & AI Diamond Valuation";
 
+        private string? _imageUrl;
+
         [NotMapped]
-        public string ImageUrl { get; set; } = "/assets/categories/cat_engagement_rings.png";
+        public string ImageUrl
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(_imageUrl) && !_imageUrl.EndsWith("cat_engagement_rings.png"))
+                    return _imageUrl;
+                return GetDefaultImageUrl(CategoryId, Name, Slug);
+            }
+            set => _imageUrl = value;
+        }
+
+        public static string GetDefaultImageUrl(long categoryId, string? name, string? slug)
+        {
+            var clean = (name ?? slug ?? "").ToLower();
+            if (categoryId == 1 || clean.Contains("engagement")) return "https://res.cloudinary.com/ktznlodb/image/upload/v1788278433/sat_jewels/categories/cat_1_engagement_rings.png";
+            if (categoryId == 2 || clean.Contains("wedding ring") || (clean.Contains("wedding") && !clean.Contains("band"))) return "https://res.cloudinary.com/ktznlodb/image/upload/v1788278437/sat_jewels/categories/cat_2_wedding_rings.jpg";
+            if (categoryId == 3 || clean.Contains("bridal") || clean.Contains("men")) return "https://res.cloudinary.com/ktznlodb/image/upload/v1788278440/sat_jewels/categories/cat_3_bridal_sets.jpg";
+            if (categoryId == 4 || clean.Contains("earring")) return "https://res.cloudinary.com/ktznlodb/image/upload/v1788278443/sat_jewels/categories/cat_4_earrings.jpg";
+            if (categoryId == 5 || clean.Contains("bracelet")) return "https://res.cloudinary.com/ktznlodb/image/upload/v1788278446/sat_jewels/categories/cat_5_bracelets.jpg";
+            if (categoryId == 6 || clean.Contains("necklace") || clean.Contains("pendant")) return "https://res.cloudinary.com/ktznlodb/image/upload/v1788278451/sat_jewels/categories/cat_6_necklaces.jpg";
+
+            return categoryId switch
+            {
+                1 => "https://res.cloudinary.com/ktznlodb/image/upload/v1788278433/sat_jewels/categories/cat_1_engagement_rings.png",
+                2 => "https://res.cloudinary.com/ktznlodb/image/upload/v1788278437/sat_jewels/categories/cat_2_wedding_rings.jpg",
+                3 => "https://res.cloudinary.com/ktznlodb/image/upload/v1788278440/sat_jewels/categories/cat_3_bridal_sets.jpg",
+                4 => "https://res.cloudinary.com/ktznlodb/image/upload/v1788278443/sat_jewels/categories/cat_4_earrings.jpg",
+                5 => "https://res.cloudinary.com/ktznlodb/image/upload/v1788278446/sat_jewels/categories/cat_5_bracelets.jpg",
+                6 => "https://res.cloudinary.com/ktznlodb/image/upload/v1788278451/sat_jewels/categories/cat_6_necklaces.jpg",
+                _ => "https://res.cloudinary.com/ktznlodb/image/upload/v1788278433/sat_jewels/categories/cat_1_engagement_rings.png"
+            };
+        }
 
         [NotMapped]
         public int DisplayOrder { get; set; } = 1;

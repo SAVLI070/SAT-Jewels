@@ -1,4 +1,5 @@
 @model List<SAT1.Models.CatalogItem>
+@inject SAT1.BAL.CatalogBal CatalogBal
 @{
     var categoryId = ViewBag.CategoryId ?? 2;
     var categoryName = ViewBag.CategoryName as string ?? "Anniversary Ring";
@@ -7,6 +8,7 @@
     var canonical = $"{Context.Request.Scheme}://{Context.Request.Host}/Product/Category?id={categoryId}";
     var selectedShape = ViewBag.SelectedShape as string ?? "All";
     var selectedSort = ViewBag.SelectedSort as string ?? "bestselling";
+    var publicCategories = await CatalogBal.GetPublicCategoriesAsync();
 }
 @functions {
     string GetSortDisplayName(string key) {
@@ -699,26 +701,17 @@
         Shop Lab Grown Diamond @categoryName, the perfect symbol of love and commitment. Explore @categoryName.ToLower() in a variety of styles, including solitaire, pavé, hidden halo, halo, halo &amp; pavé, three stone, bezel, cluster, split shank, Toi et Moi, and many other beautiful designs.
       </p>
 
-      <!-- 6 Equal-Width Redirection Buttons (Desktop: 1 Row, Mobile: 2 Columns) -->
-      <div class="cat-redir-grid">
-        <a href="/Product/Category?id=1" class="cat-redir-btn @(categoryId == 1 ? "active" : "")">
-          ENGAGEMENT RINGS
-        </a>
-        <a href="/Product/Category?id=2" class="cat-redir-btn @(categoryId == 2 ? "active" : "")">
-          WEDDING RINGS
-        </a>
-        <a href="/Product/Category?id=3" class="cat-redir-btn @(categoryId == 3 ? "active" : "")">
-          BRIDAL SETS
-        </a>
-        <a href="/Product/Category?id=4" class="cat-redir-btn @(categoryId == 4 ? "active" : "")">
-          EARRINGS
-        </a>
-        <a href="/Product/Category?id=5" class="cat-redir-btn @(categoryId == 5 ? "active" : "")">
-          BRACELETS
-        </a>
-        <a href="/Product/Category?id=6" class="cat-redir-btn @(categoryId == 6 ? "active" : "")">
-          NECKLACES
-        </a>
+      <!-- Equal-Width Redirection Buttons (Dynamic Active Categories) -->
+      <div class="cat-redir-grid" style="grid-template-columns: repeat(@(Math.Max(1, Math.Min(6, publicCategories.Count))), 1fr);">
+        @if (publicCategories != null && publicCategories.Count > 0)
+        {
+          @foreach (var cat in publicCategories)
+          {
+            <a href="/Product/Category?id=@cat.Id" class="cat-redir-btn @(categoryId.ToString() == cat.Id ? "active" : "")">
+              @cat.Name
+            </a>
+          }
+        }
       </div>
     </div>
   </section>

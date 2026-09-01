@@ -283,6 +283,7 @@
       </h3>
       
       <form id="addCategoryForm" onsubmit="handleAddNewCategory(event)">
+        <input type="hidden" id="adminCatId" value="" />
         <!-- Task 2: Category Hierarchy Level Selection -->
         <div class="cat-form-group">
           <label class="cat-form-label">Category Level / Hierarchy *</label>
@@ -425,6 +426,7 @@
     try {
       const res = await fetch('/api/catalogapi/admin-categories');
       const categories = await res.json();
+      window.adminCategoriesCache = categories || [];
       const tbody = document.getElementById('adminCategoriesTableBody');
       const parentSelect = document.getElementById('adminParentId');
       if (!tbody) return;
@@ -487,7 +489,7 @@
               </div>
             </td>
             <td>
-              <button type="button" onclick="editCategory('${c.id}', '${c.name.replace(/'/g, "\\'")}')" style="background:#fef3c7; border:1px solid #d97706; color:#b45309; padding:6px 12px; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; transition:all 0.2s;">
+              <button type="button" onclick="editCategory('${c.id}')" style="background:#fef3c7; border:1px solid #d97706; color:#b45309; padding:6px 12px; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; transition:all 0.2s;">
                 <i class="fa-solid fa-pen-to-square"></i> Edit
               </button>
             </td>
@@ -536,7 +538,7 @@
       if (selectedCategoryFile) {
         const formData = new FormData();
         formData.append('file', selectedCategoryFile);
-        const uploadRes = await fetch('/api/catalogapi/upload-image', {
+        const uploadRes = await fetch('/api/catalogapi/upload-image?folder=sat_jewels/categories', {
           method: 'POST',
           body: formData
         });
@@ -547,16 +549,17 @@
       }
 
       if (!finalImgUrl) {
-        finalImgUrl = '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';
+        finalImgUrl = 'https://res.cloudinary.com/ktznlodb/image/upload/v1788278433/sat_jewels/categories/cat_1_engagement_rings.png';
       }
 
+      const existingId = document.getElementById('adminCatId').value.trim();
       const catName = document.getElementById('adminCatName').value.trim();
       const generatedSlug = catName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const catType = document.getElementById('adminCategoryType').value;
       const parentId = catType === 'Sub Category' ? (document.getElementById('adminParentId').value || null) : null;
 
       const categoryPayload = {
-        id: generatedSlug || ('cat-' + Date.now()),
+        id: existingId || generatedSlug || ('cat-' + Date.now()),
         name: catName,
         parentId: parentId,
         categoryType: catType,
@@ -578,10 +581,12 @@
 
       const saveData = await saveRes.json();
       if (saveRes.ok) {
-        showToast(`Category "${catName}" published to Neon DB!`, 'success', 'Saved Successfully');
+        showToast(`Category "${catName}" published to database!`, 'success', 'Saved Successfully');
         document.getElementById('addCategoryForm').reset();
+        document.getElementById('adminCatId').value = '';
         document.getElementById('catPreviewBox').style.display = 'none';
         selectedCategoryFile = null;
+        btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Save &amp; Publish New Category';
         loadAdminCategoriesTable();
       } else {
         showToast(saveData.message || 'Error saving category', 'error');
@@ -590,13 +595,27 @@
       showToast('Error connecting to database endpoint.', 'error');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Save &amp; Publish New Category';
     }
   }
 
-  function editCategory(id, name) {
-    document.getElementById('adminCatId').value = id;
-    document.getElementById('adminCatName').value = name;
+  function editCategory(id) {
+    const cat = (window.adminCategoriesCache || []).find(c => c.id == id || c.name == id);
+    if (!cat) return;
+
+    document.getElementById('adminCatId').value = cat.id;
+    document.getElementById('adminCatName').value = cat.name;
+    if (document.getElementById('adminCatSub')) document.getElementById('adminCatSub').value = cat.subtitle || '';
+    if (document.getElementById('adminCatBadge')) document.getElementById('adminCatBadge').value = cat.badge || 'Popular';
+    if (document.getElementById('adminCatImg')) document.getElementById('adminCatImg').value = cat.imageUrl || '';
+    
+    if (cat.imageUrl) {
+      document.getElementById('catPreviewImg').src = cat.imageUrl;
+      document.getElementById('catPreviewBox').style.display = 'block';
+    }
+
+    const btn = document.getElementById('btnSaveCategory');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Update Category Image &amp; Details';
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 </script>

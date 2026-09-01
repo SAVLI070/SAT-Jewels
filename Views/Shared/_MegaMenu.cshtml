@@ -1,79 +1,38 @@
+@inject SAT1.BAL.CatalogBal CatalogBal
+@{
+    var publicCategories = await CatalogBal.GetPublicCategoriesAsync();
+}
 <!-- SAT JEWEL LUXURY MEGA MENU & MOBILE OFF-CANVAS DRAWER -->
 
-<!-- 1. DESKTOP MEGA MENU DROPDOWN (CENTERED POPUP WITH 6 MAIN CATEGORIES) -->
+<!-- 1. DESKTOP MEGA MENU DROPDOWN (CENTERED POPUP WITH DYNAMIC ACTIVE CATEGORIES) -->
 <div class="sat-mega-dropdown" id="satMegaDropdown">
   <div class="sat-mega-container">
     
     <!-- Main Mega Content Grid -->
     <div class="sat-mega-grid">
 
-      <!-- MAIN 6 CATEGORIES LIST COLUMN -->
+      <!-- MAIN CATEGORIES LIST COLUMN -->
       <div class="sat-mega-column">
         <h3 class="sat-mega-col-heading">
           <i class="fa-solid fa-gem" style="color: var(--champagne-gold);"></i>
-          <span>EXPLORE OUR 6 MAIN COLLECTIONS</span>
+          <span>EXPLORE OUR COLLECTIONS</span>
         </h3>
 
-        <div class="sat-main-cats-grid">
-          <!-- 1. ENGAGEMENT RINGS -->
-          <a href="/Product/Category?id=1" class="sat-mega-cat-card">
-            <img src="/assets/categories/cat_engagement_rings.png" alt="Engagement Rings" class="sat-mega-cat-img" />
-            <div class="sat-mega-cat-info">
-              <span class="sat-cat-name">ENGAGEMENT RINGS</span>
-              <span class="sat-cat-sub">Solitaires & Custom Halos</span>
-            </div>
-            <i class="fa-solid fa-chevron-right sat-cat-arrow"></i>
-          </a>
-
-          <!-- 2. WEDDING RINGS -->
-          <a href="/Product/Category?id=2" class="sat-mega-cat-card">
-            <img src="/assets/categories/cat_wedding_rings.webp" alt="Wedding Rings" class="sat-mega-cat-img" />
-            <div class="sat-mega-cat-info">
-              <span class="sat-cat-name">WEDDING RINGS</span>
-              <span class="sat-cat-sub">Eternity & Wedding Bands</span>
-            </div>
-            <i class="fa-solid fa-chevron-right sat-cat-arrow"></i>
-          </a>
-
-          <!-- 3. BRIDAL SETS -->
-          <a href="/Product/Category?id=3" class="sat-mega-cat-card">
-            <img src="/assets/categories/cat_bridal_sets.webp" alt="Bridal Sets" class="sat-mega-cat-img" />
-            <div class="sat-mega-cat-info">
-              <span class="sat-cat-name">BRIDAL SETS</span>
-              <span class="sat-cat-sub">Matching Engagement & Band Sets</span>
-            </div>
-            <i class="fa-solid fa-chevron-right sat-cat-arrow"></i>
-          </a>
-
-          <!-- 4. EARRINGS -->
-          <a href="/Product/Category?id=4" class="sat-mega-cat-card">
-            <img src="/assets/categories/cat_earrings.webp" alt="Earrings" class="sat-mega-cat-img" />
-            <div class="sat-mega-cat-info">
-              <span class="sat-cat-name">EARRINGS</span>
-              <span class="sat-cat-sub">Diamond Studs & Drop Earrings</span>
-            </div>
-            <i class="fa-solid fa-chevron-right sat-cat-arrow"></i>
-          </a>
-
-          <!-- 5. BRACELETS -->
-          <a href="/Product/Category?id=5" class="sat-mega-cat-card">
-            <img src="/assets/categories/cat_bracelets.webp" alt="Bracelets" class="sat-mega-cat-img" />
-            <div class="sat-mega-cat-info">
-              <span class="sat-cat-name">BRACELETS</span>
-              <span class="sat-cat-sub">Tennis Bracelets & Bangles</span>
-            </div>
-            <i class="fa-solid fa-chevron-right sat-cat-arrow"></i>
-          </a>
-
-          <!-- 6. NECKLACES -->
-          <a href="/Product/Category?id=6" class="sat-mega-cat-card">
-            <img src="/assets/categories/cat_necklaces.webp" alt="Necklaces" class="sat-mega-cat-img" />
-            <div class="sat-mega-cat-info">
-              <span class="sat-cat-name">NECKLACES</span>
-              <span class="sat-cat-sub">Pendant & Solitaire Necklaces</span>
-            </div>
-            <i class="fa-solid fa-chevron-right sat-cat-arrow"></i>
-          </a>
+        <div class="sat-main-cats-grid" id="satMegaDesktopCatsGrid">
+          @if (publicCategories != null && publicCategories.Count > 0)
+          {
+            @foreach (var cat in publicCategories)
+            {
+              <a href="/Product/Category?id=@cat.Id" class="sat-mega-cat-card">
+                <img src="@cat.ImageUrl" alt="@cat.Name" class="sat-mega-cat-img" />
+                <div class="sat-mega-cat-info">
+                  <span class="sat-cat-name">@cat.Name</span>
+                  <span class="sat-cat-sub">@(string.IsNullOrWhiteSpace(cat.Subtitle) ? "Fine Crafted Jewelry" : cat.Subtitle)</span>
+                </div>
+                <i class="fa-solid fa-chevron-right sat-cat-arrow"></i>
+              </a>
+            }
+          }
         </div>
       </div>
 
@@ -164,38 +123,24 @@
     </div>
   </div>
 
-  <!-- SCREEN 2: COLLECTIONS DRILLDOWN (6 MAIN CATEGORIES - MATCHING USER IMAGE 1) -->
+  <!-- SCREEN 2: COLLECTIONS DRILLDOWN (ACTIVE DYNAMIC CATEGORIES) -->
   <div class="sat-mob-screen" id="satMobSubScreen">
     <button type="button" class="sat-mob-back-btn" onclick="backSatMobMainScreen()">
       <i class="fa-solid fa-arrow-left"></i>
       <span>Back to Main Menu</span>
     </button>
 
-    <div class="sat-mob-menu-list">
-      <a href="/Product/Category?id=1" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
-        <span>ENGAGEMENT RINGS</span>
-        <i class="fa-solid fa-chevron-right"></i>
-      </a>
-      <a href="/Product/Category?id=2" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
-        <span>WEDDING RINGS</span>
-        <i class="fa-solid fa-chevron-right"></i>
-      </a>
-      <a href="/Product/Category?id=3" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
-        <span>BRIDAL SETS</span>
-        <i class="fa-solid fa-chevron-right"></i>
-      </a>
-      <a href="/Product/Category?id=4" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
-        <span>EARRINGS</span>
-        <i class="fa-solid fa-chevron-right"></i>
-      </a>
-      <a href="/Product/Category?id=5" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
-        <span>BRACELETS</span>
-        <i class="fa-solid fa-chevron-right"></i>
-      </a>
-      <a href="/Product/Category?id=6" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
-        <span>NECKLACES</span>
-        <i class="fa-solid fa-chevron-right"></i>
-      </a>
+    <div class="sat-mob-menu-list" id="satMegaMobileCatsList">
+      @if (publicCategories != null && publicCategories.Count > 0)
+      {
+        @foreach (var cat in publicCategories)
+        {
+          <a href="/Product/Category?id=@cat.Id" class="sat-mob-menu-item" onclick="closeSatMobileDrawer()">
+            <span>@cat.Name</span>
+            <i class="fa-solid fa-chevron-right"></i>
+          </a>
+        }
+      }
     </div>
 
     <!-- Extra Mobile Utility Links -->

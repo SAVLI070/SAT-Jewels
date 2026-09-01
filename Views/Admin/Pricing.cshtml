@@ -3,90 +3,188 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var metalRules = Model.Where(r => r.RuleType == "Metal").OrderBy(r => r.DisplayOrder).ToList();
     var caratRules = Model.Where(r => r.RuleType == "Carat").OrderBy(r => r.DisplayOrder).ToList();
+    var ringSizeRules = Model.Where(r => r.RuleType == "RingSize").OrderBy(r => r.DisplayOrder).ToList();
 }
 
-<div style="padding: 24px; max-width: 1400px; margin: 0 auto;">
+<style>
+  .pricing-page-wrap {
+    padding: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .pricing-header-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .pricing-columns-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  @@media (max-width: 1100px) {
+    .pricing-columns-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @@media (max-width: 768px) {
+    .pricing-page-wrap {
+      padding: 16px 12px;
+    }
+    .pricing-columns-grid {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+  }
+
+  .pricing-tier-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pricing-rule-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+  }
+
+  .pricing-rule-row:hover {
+    border-color: #cbd5e1;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+
+  .pricing-offset-box {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 4px 6px;
+    flex-shrink: 0;
+  }
+
+  .rule-offset-input {
+    width: 60px;
+    border: none;
+    outline: none;
+    font-weight: 800;
+    color: #0f172a;
+    font-size: 13.5px;
+    text-align: right;
+    background: transparent;
+  }
+
+  @@media (max-width: 480px) {
+    .pricing-rule-row {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .pricing-offset-box {
+      margin-left: auto;
+    }
+  }
+</style>
+
+<div class="pricing-page-wrap">
 
   <!-- Header -->
-  <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px;">
+  <div class="pricing-header-bar">
     <div>
-      <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">Metal & Carat Dynamic Pricing Rules</h1>
-      <p style="font-size: 14px; color: #64748b; margin: 4px 0 0;">Adjust store-wide price additions for metal grades and diamond carat sizes. Changes immediately apply to the Landing Page, Catalog, and Product Details.</p>
+      <h1 style="font-size: 22px; font-weight: 800; color: #0f172a; margin: 0;">Metal, Carat &amp; Ring Size Dynamic Pricing Rules</h1>
+      <p style="font-size: 13.5px; color: #64748b; margin: 4px 0 0;">Adjust store-wide price additions for metal grades, diamond carat sizes, and ring sizes. Changes immediately apply to the Landing Page, Catalog, and Product Details.</p>
     </div>
 
-    <div style="display: flex; gap: 12px;">
-      <button type="button" onclick="openAddRuleModal()" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <button type="button" onclick="openAddRuleModal()" style="background: #ffffff; color: #0f172a; border: 1px solid #cbd5e1; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
         <i class="fa-solid fa-plus" style="color: #b45309;"></i> Add Custom Tier
       </button>
-      <button type="button" onclick="saveAllPricingRules()" id="savePricingBtn" style="background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; border: none; padding: 10px 24px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(180, 83, 9, 0.25);">
+      <button type="button" onclick="saveAllPricingRules()" id="savePricingBtn" style="background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; border: none; padding: 9px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(180, 83, 9, 0.25);">
         <i class="fa-solid fa-floppy-disk"></i> Save Pricing Rules
       </button>
     </div>
   </div>
 
   <!-- Live Pricing Simulator Banner -->
-  <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; padding: 24px; color: #ffffff; margin-bottom: 28px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);">
-    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
+  <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; padding: 20px; color: #ffffff; margin-bottom: 24px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px;">
       <div>
-        <div style="font-size: 12px; font-weight: 700; color: #d4b270; text-transform: uppercase; letter-spacing: 1px;">⚡ Live Storefront Formula Simulator</div>
-        <div style="font-size: 18px; font-weight: 800; margin-top: 4px;">Dynamic Retail Formula: Base Price + Metal Offset + Carat Offset</div>
-        <p style="font-size: 13px; color: #94a3b8; margin: 4px 0 0;">Test how customer prices are calculated across variants in real-time.</p>
+        <div style="font-size: 11px; font-weight: 700; color: #d4b270; text-transform: uppercase; letter-spacing: 1px;">⚡ Live Storefront Formula Simulator</div>
+        <div style="font-size: 16px; font-weight: 800; margin-top: 2px;">Dynamic Retail Formula: Base Price + Metal Offset + Carat Offset + Ring Size Offset</div>
+        <p style="font-size: 12.5px; color: #94a3b8; margin: 2px 0 0;">Test how customer prices are calculated across metal, carat, and ring size in real-time.</p>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.08); padding: 12px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12);">
+      <div style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.08); padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); flex-wrap: wrap;">
         <div>
-          <span style="font-size: 11px; color: #cbd5e1; display: block;">Sample Ring Base Price:</span>
-          <strong style="font-size: 18px; color: #ffffff;">$2,020.00</strong>
+          <span style="font-size: 10.5px; color: #cbd5e1; display: block;">Base Price:</span>
+          <strong style="font-size: 16px; color: #ffffff;">$2,020</strong>
         </div>
-        <i class="fa-solid fa-arrow-right" style="color: #d4b270; font-size: 14px;"></i>
+        <i class="fa-solid fa-arrow-right" style="color: #d4b270; font-size: 12px;"></i>
         <div>
-          <span style="font-size: 11px; color: #cbd5e1; display: block;">18K Gold (+$480) + 2.00ct (+$1,100):</span>
-          <strong style="font-size: 18px; color: #d4b270;" id="simulatedResultPrice">$3,600.00 USD</strong>
+          <span style="font-size: 10.5px; color: #cbd5e1; display: block;">18K Gold (+$480) + 2.00ct (+$1,100) + US 10.0 (+$50):</span>
+          <strong style="font-size: 16px; color: #d4b270;" id="simulatedResultPrice">$3,650.00 USD</strong>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Pricing Tables Layout (2 Columns) -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 24px;">
+  <!-- Pricing Tables Layout (3 Columns Grid) -->
+  <div class="pricing-columns-grid">
 
     <!-- Metal Tier Rules -->
-    <div style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
+    <div class="pricing-tier-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
         <div>
-          <h2 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
+          <h2 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 6px;">
             <i class="fa-solid fa-ring" style="color: #b45309;"></i> Metal Price Increments
           </h2>
-          <span style="font-size: 12px; color: #64748b;">Global offsets added per metal purity</span>
+          <span style="font-size: 11.5px; color: #64748b;">Added per metal purity</span>
         </div>
-        <span style="font-size: 12px; font-weight: 700; color: #0f172a; background: #f8fafc; padding: 4px 10px; border-radius: 8px; border: 1px solid #e2e8f0;">@metalRules.Count Tiers</span>
+        <span style="font-size: 11px; font-weight: 700; color: #0f172a; background: #f8fafc; padding: 3px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">@metalRules.Count Tiers</span>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
         @foreach (var metal in metalRules)
         {
-          <div class="pricing-rule-row" data-id="@metal.Id" data-type="Metal" data-code="@metal.Code" 
-               style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
-            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-              <div style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #b45309;">
+          <div class="pricing-rule-row" data-id="@metal.Id" data-type="Metal" data-code="@metal.Code">
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+              <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: #b45309; flex-shrink: 0;">
                 @metal.DisplayOrder
               </div>
-              <div>
-                <input type="text" class="rule-name-input" value="@metal.DisplayName" style="font-weight: 700; color: #0f172a; font-size: 14px; border: 1px solid transparent; background: transparent; padding: 2px 4px; border-radius: 6px;" onfocus="this.style.border='1px solid #cbd5e1'; this.style.background='#ffffff'" onblur="this.style.border='1px solid transparent'; this.style.background='transparent'" />
-                <div style="font-size: 11px; color: #94a3b8; font-family: monospace;">Code: @metal.Code</div>
+              <div style="min-width: 0; flex: 1;">
+                <input type="text" class="rule-name-input" value="@metal.DisplayName" style="width: 100%; box-sizing: border-box; font-weight: 700; color: #0f172a; font-size: 13px; border: 1px solid transparent; background: transparent; padding: 2px; border-radius: 4px;" onfocus="this.style.border='1px solid #cbd5e1'; this.style.background='#ffffff'" onblur="this.style.border='1px solid transparent'; this.style.background='transparent'" />
+                <div style="font-size: 10px; color: #94a3b8; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@metal.Code</div>
               </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="display: flex; align-items: center; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 4px 8px;">
-                <span style="color: #64748b; font-weight: 700; font-size: 13px; margin-right: 4px;">+$</span>
-                <input type="number" step="10" min="0" class="rule-offset-input" value="@metal.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" 
-                       style="width: 80px; border: none; outline: none; font-weight: 800; color: #0f172a; font-size: 14px; text-align: right;" />
-                <span style="color: #94a3b8; font-size: 11px; margin-left: 4px;">USD</span>
+            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+              <div class="pricing-offset-box">
+                <span style="color: #64748b; font-weight: 700; font-size: 12px; margin-right: 2px;">+$</span>
+                <input type="number" step="10" min="0" class="rule-offset-input" value="@metal.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" />
+                <span style="color: #94a3b8; font-size: 10px; margin-left: 2px;">USD</span>
               </div>
 
-              <label style="display: flex; align-items: center; cursor: pointer;" title="Active Status">
-                <input type="checkbox" class="rule-active-input" @(metal.IsActive ? "checked" : "") style="width: 16px; height: 16px; accent-color: #b45309;" />
+              <label style="display: flex; align-items: center; cursor: pointer; flex-shrink: 0;" title="Active Status">
+                <input type="checkbox" class="rule-active-input" @(metal.IsActive ? "checked" : "") style="width: 15px; height: 15px; accent-color: #b45309;" />
               </label>
             </div>
           </div>
@@ -95,42 +193,82 @@
     </div>
 
     <!-- Carat Tier Rules -->
-    <div style="background: #ffffff; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9;">
+    <div class="pricing-tier-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
         <div>
-          <h2 style="font-size: 16px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-gem" style="color: #2563eb;"></i> Diamond Carat Increments
+          <h2 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-gem" style="color: #2563eb;"></i> Carat Increments
           </h2>
-          <span style="font-size: 12px; color: #64748b;">Global offsets added per diamond carat weight</span>
+          <span style="font-size: 11.5px; color: #64748b;">Added per diamond carat weight</span>
         </div>
-        <span style="font-size: 12px; font-weight: 700; color: #0f172a; background: #f8fafc; padding: 4px 10px; border-radius: 8px; border: 1px solid #e2e8f0;">@caratRules.Count Tiers</span>
+        <span style="font-size: 11px; font-weight: 700; color: #0f172a; background: #f8fafc; padding: 3px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">@caratRules.Count Tiers</span>
       </div>
 
-      <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div style="display: flex; flex-direction: column; gap: 8px;">
         @foreach (var carat in caratRules)
         {
-          <div class="pricing-rule-row" data-id="@carat.Id" data-type="Carat" data-code="@carat.Code"
-               style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0;">
-            <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
-              <div style="width: 32px; height: 32px; border-radius: 50%; background: #ffffff; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; color: #2563eb;">
+          <div class="pricing-rule-row" data-id="@carat.Id" data-type="Carat" data-code="@carat.Code">
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+              <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: #2563eb; flex-shrink: 0;">
                 @carat.DisplayOrder
               </div>
-              <div>
-                <input type="text" class="rule-name-input" value="@carat.DisplayName" style="font-weight: 700; color: #0f172a; font-size: 14px; border: 1px solid transparent; background: transparent; padding: 2px 4px; border-radius: 6px;" onfocus="this.style.border='1px solid #cbd5e1'; this.style.background='#ffffff'" onblur="this.style.border='1px solid transparent'; this.style.background='transparent'" />
-                <div style="font-size: 11px; color: #94a3b8; font-family: monospace;">Code: @carat.Code</div>
+              <div style="min-width: 0; flex: 1;">
+                <input type="text" class="rule-name-input" value="@carat.DisplayName" style="width: 100%; box-sizing: border-box; font-weight: 700; color: #0f172a; font-size: 13px; border: 1px solid transparent; background: transparent; padding: 2px; border-radius: 4px;" onfocus="this.style.border='1px solid #cbd5e1'; this.style.background='#ffffff'" onblur="this.style.border='1px solid transparent'; this.style.background='transparent'" />
+                <div style="font-size: 10px; color: #94a3b8; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@carat.Code</div>
               </div>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="display: flex; align-items: center; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 4px 8px;">
-                <span style="color: #64748b; font-weight: 700; font-size: 13px; margin-right: 4px;">+$</span>
-                <input type="number" step="50" min="0" class="rule-offset-input" value="@carat.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" 
-                       style="width: 80px; border: none; outline: none; font-weight: 800; color: #0f172a; font-size: 14px; text-align: right;" />
-                <span style="color: #94a3b8; font-size: 11px; margin-left: 4px;">USD</span>
+            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+              <div class="pricing-offset-box">
+                <span style="color: #64748b; font-weight: 700; font-size: 12px; margin-right: 2px;">+$</span>
+                <input type="number" step="50" min="0" class="rule-offset-input" value="@carat.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" />
+                <span style="color: #94a3b8; font-size: 10px; margin-left: 2px;">USD</span>
               </div>
 
-              <label style="display: flex; align-items: center; cursor: pointer;" title="Active Status">
-                <input type="checkbox" class="rule-active-input" @(carat.IsActive ? "checked" : "") style="width: 16px; height: 16px; accent-color: #2563eb;" />
+              <label style="display: flex; align-items: center; cursor: pointer; flex-shrink: 0;" title="Active Status">
+                <input type="checkbox" class="rule-active-input" @(carat.IsActive ? "checked" : "") style="width: 15px; height: 15px; accent-color: #2563eb;" />
+              </label>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Ring Size Tier Rules -->
+    <div class="pricing-tier-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
+        <div>
+          <h2 style="font-size: 15px; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-ruler-combined" style="color: #16a34a;"></i> Ring Size Increments
+          </h2>
+          <span style="font-size: 11.5px; color: #64748b;">Dynamic offsets for ring sizes</span>
+        </div>
+        <span style="font-size: 11px; font-weight: 700; color: #0f172a; background: #f8fafc; padding: 3px 8px; border-radius: 6px; border: 1px solid #e2e8f0;">@ringSizeRules.Count Sizes</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; max-height: 440px; overflow-y: auto; padding-right: 2px;">
+        @foreach (var size in ringSizeRules)
+        {
+          <div class="pricing-rule-row" data-id="@size.Id" data-type="RingSize" data-code="@size.Code">
+            <div style="display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0;">
+              <div style="width: 26px; height: 26px; border-radius: 50%; background: #ffffff; border: 1px solid #cbd5e1; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: #16a34a; flex-shrink: 0;">
+                @size.DisplayOrder
+              </div>
+              <div style="min-width: 0; flex: 1;">
+                <input type="text" class="rule-name-input" value="@size.DisplayName" style="width: 100%; box-sizing: border-box; font-weight: 700; color: #0f172a; font-size: 13px; border: 1px solid transparent; background: transparent; padding: 2px; border-radius: 4px;" onfocus="this.style.border='1px solid #cbd5e1'; this.style.background='#ffffff'" onblur="this.style.border='1px solid transparent'; this.style.background='transparent'" />
+                <div style="font-size: 10px; color: #94a3b8; font-family: monospace; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">@size.Code</div>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+              <div class="pricing-offset-box">
+                <span style="color: #64748b; font-weight: 700; font-size: 12px; margin-right: 2px;">+$</span>
+                <input type="number" step="5" min="0" class="rule-offset-input" value="@size.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" />
+                <span style="color: #94a3b8; font-size: 10px; margin-left: 2px;">USD</span>
+              </div>
+
+              <label style="display: flex; align-items: center; cursor: pointer; flex-shrink: 0;" title="Active Status">
+                <input type="checkbox" class="rule-active-input" @(size.IsActive ? "checked" : "") style="width: 15px; height: 15px; accent-color: #16a34a;" />
               </label>
             </div>
           </div>
@@ -156,22 +294,23 @@
         <select id="newRuleType" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px;">
           <option value="Metal">Metal Type (e.g. 22K Gold, Rose Gold)</option>
           <option value="Carat">Diamond Carat (e.g. 3.50 CT, 6.00 CT)</option>
+          <option value="RingSize">Ring Size (e.g. US 13.0, Bespoke Size)</option>
         </select>
       </div>
 
       <div style="margin-bottom: 14px;">
         <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Display Name</label>
-        <input type="text" id="newRuleName" required placeholder="e.g. 22K Solid Gold or 3.50 CT" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px;" />
+        <input type="text" id="newRuleName" required placeholder="e.g. 22K Solid Gold, 3.50 CT, or US 13.0 (22.2mm)" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px;" />
       </div>
 
       <div style="margin-bottom: 14px;">
         <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Unique Slug Code</label>
-        <input type="text" id="newRuleCode" required placeholder="e.g. 22k_gold or 3.50_ct" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px;" />
+        <input type="text" id="newRuleCode" required placeholder="e.g. 22k_gold, 3.50_ct, or us_13_0" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px;" />
       </div>
 
       <div style="margin-bottom: 20px;">
         <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Price Offset (USD)</label>
-        <input type="number" step="10" id="newRuleOffset" required placeholder="e.g. 650" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px;" />
+        <input type="number" step="5" id="newRuleOffset" required placeholder="e.g. 50" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px;" />
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 10px;">
@@ -186,15 +325,17 @@
   function updateLiveSimulator() {
     let metal18kOffset = 480;
     let carat2ctOffset = 1100;
+    let ringSize10Offset = 50;
 
     document.querySelectorAll('.pricing-rule-row').forEach(row => {
       const code = row.getAttribute('data-code');
       const offset = parseFloat(row.querySelector('.rule-offset-input').value) || 0;
       if (code === '18k_gold') metal18kOffset = offset;
       if (code === '2.00_ct') carat2ctOffset = offset;
+      if (code === 'us_10_0') ringSize10Offset = offset;
     });
 
-    const total = 2020 + metal18kOffset + carat2ctOffset;
+    const total = 2020 + metal18kOffset + carat2ctOffset + ringSize10Offset;
     document.getElementById('simulatedResultPrice').innerText = '$' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USD';
   }
 

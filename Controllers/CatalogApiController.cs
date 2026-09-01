@@ -24,10 +24,7 @@ namespace SAT1.Controllers
 
         private bool IsAdminUser()
         {
-            if (User.Identity?.IsAuthenticated != true) return false;
-            var userRole = User.FindFirst(ClaimTypes.Role)?.Value;
-            var userEmail = User.FindFirst(ClaimTypes.Email)?.Value?.ToLower() ?? "";
-            return userRole == "Admin" || userEmail.Contains("admin") || User.Identity.Name == "SAT Administrator";
+            return _adminBal.CheckAdminAccess(User);
         }
 
         // 1. GET ALL ACTIVE CATEGORIES (Dynamic Main Landing Page Grid - ONLY IsActive == true)
@@ -241,7 +238,7 @@ namespace SAT1.Controllers
                 return BadRequest(new { success = false, message = "Invalid product request." });
             }
 
-            var (isValid, serverValidatedPrice, itemName, errorMsg) = await _catalogBal.CalculateServerValidatedPriceAsync(req.ItemId, req.MetalOption, req.CaratOption);
+            var (isValid, serverValidatedPrice, itemName, errorMsg) = await _catalogBal.CalculateServerValidatedPriceAsync(req.ItemId, req.MetalOption, req.CaratOption, req.RingSizeOption, req.StoneOption);
 
             if (!isValid)
             {
@@ -361,6 +358,104 @@ namespace SAT1.Controllers
             return Ok(new { success = true, count = savedUrls.Count, urls = savedUrls });
         }
 
+        // OWASP A08: DIRECT-TO-CLOUDINARY SINGLE IMAGE UPLOAD
+        [HttpPost("upload-image")]
+        public async Task<IActionResult> UploadSingleImage([FromForm] IFormFile? file, [FromQuery] string? folder)
+        {
+            if (!IsAdminUser())
+            {
+                return StatusCode(403, new { success = false, message = "Access Denied: Admin authorization required to upload files." });
+            }
+
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { success = false, message = "No file provided." });
+            }
+
+            const long maxFileSizeBytes = 10 * 1024 * 1024; // 10 MB limit
+            var allowedExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" };
+            var allowedMimeTypes = new HashSet<string> { "image/jpeg", "image/png", "image/webp" };
+
+            var cloudName = _configuration["Cloudinary:CloudName"] ?? "ktznlodb";
+            var apiKey = _configuration["Cloudinary:ApiKey"];
+            var apiSecret = _configuration["Cloudinary:ApiSecret"];
+
+            if (string.IsNullOrWhiteSpace(cloudName) || string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(apiSecret))
+            {
+                return StatusCode(500, new { success = false, message = "Cloudinary configuration is missing." });
+            }
+
+            if (file.Length > maxFileSizeBytes)
+            {
+                return BadRequest(new { success = false, message = $"File '{file.FileName}' exceeds 10 MB." });
+            }
+
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(ext) || !allowedMimeTypes.Contains(file.ContentType.ToLowerInvariant()))
+            {
+                return BadRequest(new { success = false, message = "Invalid file type. Only PNG, JPG, and WebP are allowed." });
+            }
+
+            try
+            {
+                var account = new CloudinaryDotNet.Account(cloudName, apiKey, apiSecret);
+                var cloudinary = new CloudinaryDotNet.Cloudinary(account);
+
+                using var fileStream = file.OpenReadStream();
+                var uploadParams = new ImageUploadParams
+                {
+                    File = new FileDescription(file.FileName, fileStream),
+                    Folder = string.IsNullOrWhiteSpace(folder) ? "sat_jewels/categories" : folder,
+                    Overwrite = true
+                };
+
+                var uploadResult = await cloudinary.UploadAsync(uploadParams);
+                if (uploadResult != null && uploadResult.SecureUrl != null)
+                {
+                    return Ok(new { success = true, imageUrl = uploadResult.SecureUrl.ToString() });
+                }
+                return StatusCode(500, new { success = false, message = uploadResult?.Error?.Message ?? "Cloudinary upload failed." });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = ex.Message });
+            }
+        }
+
+        // OWASP A08: DIRECT-TO-CLOUDINARY IMAGE DELETION & STORAGE CLEANUP
+        [HttpPost("delete-image")]
+        [HttpDelete("delete-image")]
+        public async Task<IActionResult> DeleteImage([FromQuery] string? url, [FromBody] DeleteImageRequest? body)
+        {
+            if (!IsAdminUser())
+            {
+                return StatusCode(403, new { success = false, message = "Access Denied: Admin authorization required." });
+            }
+
+            var targetUrl = url ?? body?.Url;
+            if (string.IsNullOrWhiteSpace(targetUrl))
+            {
+                return BadRequest(new { success = false, message = "Image URL is required for deletion." });
+            }
+
+            var deleted = await _adminBal.DeleteFromCloudinaryAsync(targetUrl);
+            return Ok(new { success = true, deleted = deleted, message = deleted ? "Image removed from Cloudinary storage." : "Image not found or already removed." });
+        }
+
+        // DELETE PRODUCT & CLEAN UP CLOUDINARY STORAGE
+        [HttpDelete("products/{id}")]
+        public async Task<IActionResult> DeleteProduct(string id)
+        {
+            if (!IsAdminUser())
+            {
+                return StatusCode(403, new { success = false, message = "Access Denied: Admin authorization required." });
+            }
+
+            var success = await _adminBal.DeleteProductAsync(id);
+            if (!success) return NotFound(new { success = false, message = "Product not found" });
+            return Ok(new { success = true, message = "Product and associated Cloudinary images deleted successfully." });
+        }
+
         // 6. SEARCH PRODUCTS API FOR LIVE STOREFRONT SEARCH BAR
         [HttpGet("search")]
         public async Task<IActionResult> SearchProducts([FromQuery] string? q)
@@ -383,5 +478,12 @@ namespace SAT1.Controllers
         public string ItemId { get; set; } = string.Empty;
         public string? MetalOption { get; set; }
         public string? CaratOption { get; set; }
+        public string? RingSizeOption { get; set; }
+        public string? StoneOption { get; set; }
+    }
+
+    public class DeleteImageRequest
+    {
+        public string? Url { get; set; }
     }
 }

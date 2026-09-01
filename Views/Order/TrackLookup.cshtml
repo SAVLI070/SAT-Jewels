@@ -7,13 +7,13 @@
     var matchedOrders = ViewBag.MatchedOrders as List<SAT1.Models.Order> ?? new List<SAT1.Models.Order>();
 }
 
-<div style="min-height: 75vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px; background: radial-gradient(circle at 50% 20%, #0d1b2a 0%, #050b14 100%);">
+<div style="min-height: 75vh; display: flex; align-items: center; justify-content: center; padding: 60px 20px; background: radial-gradient(circle at 50% 20%, #16141a 0%, #06070a 100%);">
   
   @if (matchedOrders.Count > 0)
   {
     <!-- Multiple Orders Found for Email Search -->
-    <div style="background: rgba(11, 21, 36, 0.95); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(212, 178, 112, 0.35); max-width: 900px; width: 100%; padding: 40px 32px; box-shadow: 0 25px 60px rgba(0,0,0,0.6);">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; border-bottom: 1px solid rgba(212, 178, 112, 0.2); padding-bottom: 16px;">
+    <div style="background: rgba(14, 13, 16, 0.92); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(212, 184, 120, 0.35); max-width: 900px; width: 100%; padding: 40px 32px; box-shadow: 0 25px 60px rgba(0,0,0,0.85);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px; border-bottom: 1px solid rgba(212, 184, 120, 0.2); padding-bottom: 16px;">
         <div>
           <h2 style="font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 700; color: #ffffff; margin: 0 0 6px;">Orders Found for "@(!string.IsNullOrWhiteSpace(searchEmail) ? searchEmail : searchQuery)"</h2>
           <p style="font-size: 13.5px; color: #94a3b8; margin: 0;">We found <strong>@matchedOrders.Count</strong> jewelry shipments linked to your account. Select an order to view live journey updates.</p>
@@ -26,7 +26,7 @@
       <div style="display: flex; flex-direction: column; gap: 14px;">
         @foreach (var o in matchedOrders)
         {
-          <div style="background: #050b14; border: 1px solid rgba(212, 178, 112, 0.25); border-radius: 14px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; transition: transform 0.2s ease, border-color 0.2s ease;">
+          <div style="background: #06070a; border: 1px solid rgba(212, 184, 120, 0.25); border-radius: 14px; padding: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; transition: transform 0.2s ease, border-color 0.2s ease;">
             <div>
               <div style="font-size: 11px; color: #d4b270; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Order Reference</div>
               <div style="font-size: 16px; font-weight: 800; color: #ffffff; margin-top: 2px;">@o.OrderId</div>
@@ -50,7 +50,7 @@
   else
   {
     <!-- Default Search Lookup Box -->
-    <div style="background: rgba(11, 21, 36, 0.92); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(212, 178, 112, 0.35); max-width: 480px; width: 100%; padding: 40px 32px; box-shadow: 0 25px 60px rgba(0,0,0,0.6); text-align: center;">
+    <div style="background: rgba(14, 13, 16, 0.92); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(212, 184, 120, 0.35); max-width: 480px; width: 100%; padding: 40px 32px; box-shadow: 0 25px 60px rgba(0,0,0,0.85); text-align: center;">
       
       <div style="width: 56px; height: 56px; border-radius: 50%; background: rgba(212, 178, 112, 0.15); color: #d4b270; display: inline-flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px; border: 1px solid rgba(212, 178, 112, 0.3);">
         <i class="fa-solid fa-truck-fast"></i>
@@ -70,7 +70,7 @@
         <div>
           <label style="display: block; font-size: 12px; font-weight: 700; color: #d4b270; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px;">Order ID or Registered Email Address</label>
           <input type="text" name="query" required value="@searchQuery" placeholder="e.g. SAT-ORD-12345 or user@gmail.com" 
-                 style="width: 100%; padding: 14px 16px; background: #050b14; border: 1px solid rgba(212, 178, 112, 0.35); border-radius: 10px; font-size: 14px; color: #ffffff; outline: none; box-sizing: border-box;" />
+                 style="width: 100%; padding: 14px 16px; background: #06070a; border: 1px solid rgba(212, 178, 112, 0.35); border-radius: 10px; font-size: 14px; color: #ffffff; outline: none; box-sizing: border-box;" />
         </div>
 
         <button type="submit" style="background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; border: none; padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; margin-top: 4px; box-shadow: 0 4px 16px rgba(180, 83, 9, 0.35); transition: transform 0.2s ease;">
