@@ -58,6 +58,12 @@ namespace SAT1.Models
         [Column("status")]
         public string Status { get; set; } = "Approved"; // "Approved", "Pending", "Rejected"
 
+        [Column("photo_url")]
+        public string? PhotoUrl { get; set; }
+
+        [Column("avatar_url")]
+        public string? AvatarUrl { get; set; }
+
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

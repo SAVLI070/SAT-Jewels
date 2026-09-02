@@ -183,7 +183,7 @@ namespace SAT1.Controllers
             var reviewBal = HttpContext.RequestServices.GetService<BAL.ReviewBal>();
             if (reviewBal != null)
             {
-                ViewBag.PhotoReviews = await reviewBal.GetStorefrontPhotoReviewsAsync();
+                ViewBag.PhotoReviews = await reviewBal.GetStorefrontPhotoReviewsAsync(product.Id.ToString());
             }
 
             return View(product);
