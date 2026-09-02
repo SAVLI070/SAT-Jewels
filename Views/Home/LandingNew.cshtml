@@ -1117,18 +1117,18 @@
 
       <!-- Navigation Bar Links (Home, Collections with MegaMenu Hover, Craft Process) -->
       <div class="nav-links">
-        <a href="#top" class="nav-link active">
+        <a href="#top" class="nav-link active" id="navHomeLink" onclick="scrollToNavSection(event, 'top')">
           <i class="fa-solid fa-house" style="font-size: 12px;"></i>
           <span>Home</span>
         </a>
         <div class="sat-nav-item sat-has-mega" style="position: relative;" onmouseenter="openSatMegaDropdown()" onmouseleave="closeSatMegaDropdown()">
-          <a href="#collections" class="nav-link" id="navCollectionsLink" onclick="toggleSatMegaDropdown(event)">
+          <a href="#collections" class="nav-link" id="navCollectionsLink" onclick="handleNavCollectionsClick(event)">
             <i class="fa-solid fa-gem" style="font-size: 12px;"></i>
             <span>Collections</span>
             <i class="fa-solid fa-angle-down" style="font-size: 10px; margin-left: 2px;"></i>
           </a>
         </div>
-        <a href="#craft-story" class="nav-link">
+        <a href="#craft-process" class="nav-link" id="navCraftLink" onclick="scrollToNavSection(event, 'craft-process')">
           <i class="fa-solid fa-hammer" style="font-size: 12px;"></i>
           <span>Craft Process</span>
         </a>
@@ -1360,7 +1360,7 @@
   </section>
 
   <!-- 4. CRAFTSMANSHIP VIDEO BANNER: "Made with Care, Made to Last" & "Your story, our craft." -->
-  <section id="craft-story" style="position: relative; background: #06070a; z-index: 20;">
+  <section id="craft-process" style="position: relative; background: #06070a; z-index: 20;">
     <!-- Heading & Intro -->
     <div style="max-width: 900px; margin: 0 auto; text-align: center; padding: 75px 24px 45px;">
       <div style="font-size: 11px; letter-spacing: 0.35em; text-transform: uppercase; color: var(--gold); font-weight: 600; margin-bottom: 12px;">
@@ -1724,6 +1724,64 @@
         closeSatGlobalSearch();
       }
     });
+
+    // =========================================================================
+    // SCROLLSPY & SMOOTH SCROLL NAVBAR CONTROLLER
+    // Moves active pill across (Home -> Collections -> Craft Process) on scroll
+    // =========================================================================
+    function scrollToNavSection(e, sectionId) {
+      if (e) e.preventDefault();
+      const el = document.getElementById(sectionId);
+      if (el) {
+        const navH = 75;
+        const targetPos = el.getBoundingClientRect().top + window.pageYOffset - navH;
+        window.scrollTo({ top: Math.max(0, targetPos), behavior: 'smooth' });
+      }
+    }
+
+    function handleNavCollectionsClick(e) {
+      if (window.innerWidth <= 992) {
+        if (e) e.preventDefault();
+        openSatMobileDrawer();
+      } else {
+        scrollToNavSection(e, 'collections');
+      }
+    }
+
+    function updateNavScrollSpy() {
+      const scrollPos = window.scrollY || window.pageYOffset || document.documentElement.scrollTop || 0;
+      const windowH = window.innerHeight;
+      const triggerOffset = windowH * 0.42;
+
+      const topSec = document.getElementById('top');
+      const colSec = document.getElementById('collections');
+      const craftSec = document.getElementById('craft-process');
+
+      let activeId = 'navHomeLink';
+
+      if (craftSec && scrollPos + triggerOffset >= craftSec.offsetTop) {
+        activeId = 'navCraftLink';
+      } else if (colSec && scrollPos + triggerOffset >= colSec.offsetTop) {
+        activeId = 'navCollectionsLink';
+      } else {
+        activeId = 'navHomeLink';
+      }
+
+      ['navHomeLink', 'navCollectionsLink', 'navCraftLink'].forEach(id => {
+        const link = document.getElementById(id);
+        if (link) {
+          if (id === activeId) {
+            link.classList.add('active');
+          } else {
+            link.classList.remove('active');
+          }
+        }
+      });
+    }
+
+    window.addEventListener('scroll', updateNavScrollSpy, { passive: true });
+    window.addEventListener('resize', updateNavScrollSpy, { passive: true });
+    document.addEventListener('DOMContentLoaded', updateNavScrollSpy);
   </script>
 
 </body>
