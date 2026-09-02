@@ -16,7 +16,7 @@ namespace SAT1.Models
         [Required]
         public string CategoryId { get; set; } = "rings"; // Foreign key to Category.Id (e.g., rings, necklaces)
 
-        public string Spec { get; set; } = string.Empty;
+        public string? Spec { get; set; } = string.Empty;
 
         [Required]
         public decimal Price { get; set; }
@@ -57,13 +57,13 @@ namespace SAT1.Models
             set => MoissanitePrice = value;
         }
 
-        public string ImageUrl { get; set; } = string.Empty;
+        public string? ImageUrl { get; set; } = string.Empty;
 
-        public string GalleryImages { get; set; } = string.Empty; // Comma-separated multi-angle photo URLs
+        public string? GalleryImages { get; set; } = string.Empty; // Comma-separated multi-angle photo URLs
 
-        public string MetalOptions { get; set; } = string.Empty;
+        public string? MetalOptions { get; set; } = string.Empty;
 
-        public string CaratOptions { get; set; } = string.Empty;
+        public string? CaratOptions { get; set; } = string.Empty;
 
         public bool IsActive { get; set; } = true;
 

@@ -279,7 +279,7 @@ namespace SAT1.Controllers
             var allowedExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" };
             var allowedMimeTypes = new HashSet<string> { "image/jpeg", "image/png", "image/webp" };
 
-            var cloudName = _configuration["Cloudinary:CloudName"] ?? "ktznlodb";
+            var cloudName = _configuration["Cloudinary:CloudName"] ?? "ihcs8m6o";
             var apiKey = _configuration["Cloudinary:ApiKey"];
             var apiSecret = _configuration["Cloudinary:ApiSecret"];
 
@@ -376,7 +376,7 @@ namespace SAT1.Controllers
             var allowedExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" };
             var allowedMimeTypes = new HashSet<string> { "image/jpeg", "image/png", "image/webp" };
 
-            var cloudName = _configuration["Cloudinary:CloudName"] ?? "ktznlodb";
+            var cloudName = _configuration["Cloudinary:CloudName"] ?? "ihcs8m6o";
             var apiKey = _configuration["Cloudinary:ApiKey"];
             var apiSecret = _configuration["Cloudinary:ApiSecret"];
 

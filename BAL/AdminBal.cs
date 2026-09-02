@@ -53,7 +53,7 @@ namespace SAT1.BAL
             var publicId = ExtractCloudinaryPublicId(imageUrl);
             if (string.IsNullOrWhiteSpace(publicId)) return false;
 
-            var cloudName = _configuration["Cloudinary:CloudName"] ?? "ktznlodb";
+            var cloudName = _configuration["Cloudinary:CloudName"] ?? "ihcs8m6o";
             var apiKey = _configuration["Cloudinary:ApiKey"];
             var apiSecret = _configuration["Cloudinary:ApiSecret"];
 

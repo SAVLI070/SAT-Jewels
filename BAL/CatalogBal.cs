@@ -61,12 +61,12 @@ namespace SAT1.BAL
 
         private static readonly Dictionary<string, string> DefaultCloudinaryCategoryImages = new()
         {
-            { "1", "https://res.cloudinary.com/ktznlodb/image/upload/v1788278433/sat_jewels/categories/cat_1_engagement_rings.png" },
-            { "2", "https://res.cloudinary.com/ktznlodb/image/upload/v1788278437/sat_jewels/categories/cat_2_wedding_rings.jpg" },
-            { "3", "https://res.cloudinary.com/ktznlodb/image/upload/v1788278440/sat_jewels/categories/cat_3_bridal_sets.jpg" },
-            { "4", "https://res.cloudinary.com/ktznlodb/image/upload/v1788278443/sat_jewels/categories/cat_4_earrings.jpg" },
-            { "5", "https://res.cloudinary.com/ktznlodb/image/upload/v1788278446/sat_jewels/categories/cat_5_bracelets.jpg" },
-            { "6", "https://res.cloudinary.com/ktznlodb/image/upload/v1788278451/sat_jewels/categories/cat_6_necklaces.jpg" }
+            { "1", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png" },
+            { "2", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366771/sat_jewels/categories/cat_2_wedding_rings.jpg" },
+            { "3", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366773/sat_jewels/categories/cat_3_bridal_sets.jpg" },
+            { "4", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366775/sat_jewels/categories/cat_4_earrings.jpg" },
+            { "5", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366777/sat_jewels/categories/cat_5_bracelets.jpg" },
+            { "6", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366779/sat_jewels/categories/cat_6_necklaces.jpg" }
         };
 
         private async Task EnsureDefaultCategoriesAsync()

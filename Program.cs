@@ -13,9 +13,9 @@ var rawConn = builder.Configuration["DATABASE_URL"]
     ?? builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? Environment.GetEnvironmentVariable("DATABASE_URL");
 
-string connectionString = "Host=ep-soft-sound-azkeypgg-pooler.c-3.ap-southeast-1.aws.neon.tech;Port=5432;Database=neondb;Username=neondb_owner;Password=npg_yX8TV4rmHEqR;Ssl Mode=Require;Trust Server Certificate=true;";
+string connectionString = "Host=satjewels-postgres.c4r4s48oeqi1.us-east-1.rds.amazonaws.com;Port=5432;Database=satjewels_db;Username=satjewels_admin;Password=SatJewels#Db2026!Secure;Ssl Mode=Require;Trust Server Certificate=true;";
 
-if (!string.IsNullOrWhiteSpace(rawConn) && !rawConn.Contains("database-1.cluster-c0rk64yygjkf.us-east-1.rds.amazonaws.com"))
+if (!string.IsNullOrWhiteSpace(rawConn))
 {
     if (rawConn.StartsWith("postgres://") || rawConn.StartsWith("postgresql://"))
     {
@@ -227,8 +227,19 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-    app.UseHttpsRedirection();
+    app.UseForwardedHeaders(new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
+    });
+
+    // Only redirect if an HTTPS port is configured (avoids warning when running HTTP-only or behind SSL-terminating proxies)
+    if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTPS_PORT")) || 
+        !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORT")) ||
+        builder.Configuration.GetValue<int?>("https_port") != null)
+    {
+        app.UseHsts();
+        app.UseHttpsRedirection();
+    }
 }
 
 app.UseStatusCodePagesWithReExecute("/Home/Restricted");
