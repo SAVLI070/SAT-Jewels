@@ -21,7 +21,6 @@ namespace SAT1.Controllers
             try
             {
                 dbCounts = await _context.Products
-                    .Where(p => p.IsAvailable)
                     .GroupBy(p => p.CategoryId)
                     .Select(g => new { CategoryId = g.Key, Count = g.Count() })
                     .ToDictionaryAsync(x => x.CategoryId, x => x.Count);
@@ -32,8 +31,8 @@ namespace SAT1.Controllers
             }
 
             ViewBag.CategoryCountsByNumericId = dbCounts;
-            ViewData["Title"] = "SAT Jewel — Fine Jewelry | Mastery in Every Cut";
-            return View("LandingNew");
+            ViewData["Title"] = "Fine Jewelry & AI Diamond Intelligence — SAT Jewel";
+            return View();
         }
 
         [HttpGet]
@@ -43,7 +42,6 @@ namespace SAT1.Controllers
             try
             {
                 dbCounts = await _context.Products
-                    .Where(p => p.IsAvailable)
                     .GroupBy(p => p.CategoryId)
                     .Select(g => new { CategoryId = g.Key, Count = g.Count() })
                     .ToDictionaryAsync(x => x.CategoryId, x => x.Count);

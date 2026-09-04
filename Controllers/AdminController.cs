@@ -34,14 +34,15 @@ namespace SAT1.Controllers
         [HttpGet("")]
         [HttpGet("index")]
         [HttpGet("dashboard")]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             if (!CheckAccess())
             {
                 return HandleUnauthorized();
             }
+            var stats = await _adminBal.GetDashboardStatsAsync();
             ViewBag.Title = "Dashboard Overview";
-            return View("Index");
+            return View("Index", stats);
         }
 
         [HttpGet("categories")]

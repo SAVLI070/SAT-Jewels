@@ -1,6 +1,8 @@
+@model SAT1.BAL.DashboardStatsDto
 @{
     ViewData["Title"] = "Dashboard Overview";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var stats = Model ?? new SAT1.BAL.DashboardStatsDto();
 }
 
 <style>
@@ -132,7 +134,7 @@
         Welcome to SAT Jewel Admin Portal
       </h2>
       <p style="font-size: 14px; color: #64748b; margin: 0; max-width: 600px;">
-        Manage your fine jewelry collections, main categories, product variants, and dynamic diamond carat pricing with real-time Neon DB PostgreSQL synchronization.
+        Manage your fine jewelry collections, main categories, product variants, and dynamic diamond carat pricing with real-time AWS RDS PostgreSQL synchronization.
       </p>
     </div>
     <a href="/Admin/AddProduct" style="padding: 12px 24px; background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); border-radius: 12px; color: #ffffff; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(180, 83, 9, 0.25);">
@@ -145,7 +147,7 @@
     <div class="dash-stat-card">
       <div class="dash-stat-icon"><i class="fa-solid fa-gem"></i></div>
       <div>
-        <div class="dash-stat-val">2,868</div>
+        <div class="dash-stat-val">@stats.TotalProducts.ToString("N0")</div>
         <div class="dash-stat-lbl">Total Fine Jewelry Products</div>
       </div>
     </div>
@@ -153,7 +155,7 @@
     <div class="dash-stat-card">
       <div class="dash-stat-icon"><i class="fa-solid fa-layer-group"></i></div>
       <div>
-        <div class="dash-stat-val">6</div>
+        <div class="dash-stat-val">@stats.TotalCategories</div>
         <div class="dash-stat-lbl">Main Collection Categories</div>
       </div>
     </div>
@@ -161,7 +163,7 @@
     <div class="dash-stat-card">
       <div class="dash-stat-icon"><i class="fa-solid fa-ring"></i></div>
       <div>
-        <div class="dash-stat-val">10</div>
+        <div class="dash-stat-val">@stats.TotalMetals</div>
         <div class="dash-stat-lbl">Supported Metal Types</div>
       </div>
     </div>
@@ -170,7 +172,7 @@
       <div class="dash-stat-icon"><i class="fa-solid fa-database"></i></div>
       <div>
         <div class="dash-stat-val" style="color: #16a34a;">Active</div>
-        <div class="dash-stat-lbl">Neon DB Serverless Sync</div>
+        <div class="dash-stat-lbl">AWS RDS PostgreSQL Sync</div>
       </div>
     </div>
   </div>
