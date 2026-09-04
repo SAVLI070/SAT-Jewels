@@ -60,7 +60,7 @@ namespace SAT1.Models
         public long DiamondShapeId { get; set; }
 
         [Column("created_at")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Legacy / Presentation Helper Properties
         [NotMapped]

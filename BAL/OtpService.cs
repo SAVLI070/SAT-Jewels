@@ -90,7 +90,7 @@ namespace SAT1.BAL
             }
 
             var rateLimitKey = $"OTP_RATE_{phone}";
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
 
             // 1. Rate Limiting Check (1 request / 60 seconds, max 5 per hour)
             if (_cache.TryGetValue(rateLimitKey, out OtpRateLimitTracker? tracker) && tracker != null)
@@ -212,7 +212,7 @@ namespace SAT1.BAL
                 return Task.FromResult(new OtpResult { Success = false, Message = "This code has already been used. Please request a new code." });
             }
 
-            if (DateTime.UtcNow > record.ExpiresAt)
+            if (DateTime.Now > record.ExpiresAt)
             {
                 _cache.Remove(cacheKey);
                 return Task.FromResult(new OtpResult { Success = false, Message = "Verification code has expired. Please request a new code." });

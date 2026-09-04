@@ -66,7 +66,7 @@ namespace SAT1.BAL
                     result.CarrierName,
                     result.TrackingUrl,
                     result.EstimatedDeliveryDate,
-                    DateTime.UtcNow);
+                    DateTime.Now);
 
                 var historyEntry = new OrderTrackingHistory
                 {
@@ -78,7 +78,7 @@ namespace SAT1.BAL
                     TrackingUrl = result.TrackingUrl,
                     Location = "Surat Diamond Hub, India",
                     Source = "System",
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now
                 };
 
                 await _trackingRepo.AddTrackingHistoryAsync(historyEntry);
@@ -102,7 +102,7 @@ namespace SAT1.BAL
                     StatusNote = $"Shipment booking failed: {result.ErrorMessage}",
                     CarrierName = _shippingProvider.ProviderName,
                     Source = "System",
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now
                 };
                 await _trackingRepo.AddTrackingHistoryAsync(exceptionEntry);
 

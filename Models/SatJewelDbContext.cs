@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace SAT1.Models
 {
@@ -24,6 +25,15 @@ namespace SAT1.Models
         public DbSet<DynamicPricingRule> DynamicPricingRules { get; set; } = null!;
         public DbSet<OrderTrackingHistory> OrderTrackingHistory { get; set; } = null!;
         public DbSet<ProductReview> ProductReviews { get; set; } = null!;
+
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            base.ConfigureConventions(configurationBuilder);
+            configurationBuilder.Properties<DateTime>()
+                .HaveConversion<DateTimeToUtcConverter>();
+            configurationBuilder.Properties<DateTime?>()
+                .HaveConversion<NullableDateTimeToUtcConverter>();
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -63,8 +73,10 @@ namespace SAT1.Models
                     Email = "admin@satjewel.com",
                     Phone = "+91 76987 27798",
                     Password = "AEt7jWRBQ8tWWyQ9pfdeqth4t26Lwq8NID6cCWMxJFo=",
+                    PasswordHash = "AEt7jWRBQ8tWWyQ9pfdeqth4t26Lwq8NID6cCWMxJFo=",
                     Role = "Admin",
-                    CreatedAt = DateTime.UtcNow
+                    IsActive = true,
+                    CreatedAt = DateTime.Now
                 },
                 new User
                 {
@@ -73,8 +85,10 @@ namespace SAT1.Models
                     Email = "admin@satjewels.com",
                     Phone = "+91 76987 27798",
                     Password = "AEt7jWRBQ8tWWyQ9pfdeqth4t26Lwq8NID6cCWMxJFo=",
+                    PasswordHash = "AEt7jWRBQ8tWWyQ9pfdeqth4t26Lwq8NID6cCWMxJFo=",
                     Role = "Admin",
-                    CreatedAt = DateTime.UtcNow
+                    IsActive = true,
+                    CreatedAt = DateTime.Now
                 },
                 new User
                 {
@@ -83,10 +97,30 @@ namespace SAT1.Models
                     Email = "satjewels31@gmail.com",
                     Phone = "+91 76987 27798",
                     Password = "AEt7jWRBQ8tWWyQ9pfdeqth4t26Lwq8NID6cCWMxJFo=",
+                    PasswordHash = "AEt7jWRBQ8tWWyQ9pfdeqth4t26Lwq8NID6cCWMxJFo=",
                     Role = "Admin",
-                    CreatedAt = DateTime.UtcNow
+                    IsActive = true,
+                    CreatedAt = DateTime.Now
                 }
             );
+        }
+    }
+
+    public class DateTimeToUtcConverter : ValueConverter<DateTime, DateTime>
+    {
+        public DateTimeToUtcConverter() : base(
+            v => v.Kind == DateTimeKind.Utc ? v : DateTime.SpecifyKind(v, DateTimeKind.Utc),
+            v => v)
+        {
+        }
+    }
+
+    public class NullableDateTimeToUtcConverter : ValueConverter<DateTime?, DateTime?>
+    {
+        public NullableDateTimeToUtcConverter() : base(
+            v => !v.HasValue ? v : (v.Value.Kind == DateTimeKind.Utc ? v : DateTime.SpecifyKind(v.Value, DateTimeKind.Utc)),
+            v => v)
+        {
         }
     }
 }

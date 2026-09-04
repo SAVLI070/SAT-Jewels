@@ -45,7 +45,7 @@ namespace SAT1.Models
 
         public byte[]? EncryptedGatewayPayload { get; set; }
 
-        public DateTime PaymentDate { get; set; } = DateTime.UtcNow;
+        public DateTime PaymentDate { get; set; } = DateTime.Now;
 
         [ForeignKey("OrderId")]
         public virtual Order? Order { get; set; }

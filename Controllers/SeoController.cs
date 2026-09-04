@@ -29,7 +29,7 @@ namespace SAT1.Controllers
             // 1. Homepage (Priority 1.0)
             urlElements.Add(new XElement(ns + "url",
                 new XElement(ns + "loc", $"{baseUrl}/"),
-                new XElement(ns + "lastmod", DateTime.UtcNow.ToString("yyyy-MM-dd")),
+                new XElement(ns + "lastmod", DateTime.Now.ToString("yyyy-MM-dd")),
                 new XElement(ns + "changefreq", "daily"),
                 new XElement(ns + "priority", "1.0")
             ));
@@ -40,7 +40,7 @@ namespace SAT1.Controllers
             {
                 urlElements.Add(new XElement(ns + "url",
                     new XElement(ns + "loc", $"{baseUrl}/Product/Category?id={catId}"),
-                    new XElement(ns + "lastmod", DateTime.UtcNow.ToString("yyyy-MM-dd")),
+                    new XElement(ns + "lastmod", DateTime.Now.ToString("yyyy-MM-dd")),
                     new XElement(ns + "changefreq", "weekly"),
                     new XElement(ns + "priority", "0.8")
                 ));
@@ -52,7 +52,7 @@ namespace SAT1.Controllers
             {
                 urlElements.Add(new XElement(ns + "url",
                     new XElement(ns + "loc", $"{baseUrl}{sp}"),
-                    new XElement(ns + "lastmod", DateTime.UtcNow.ToString("yyyy-MM-dd")),
+                    new XElement(ns + "lastmod", DateTime.Now.ToString("yyyy-MM-dd")),
                     new XElement(ns + "changefreq", "monthly"),
                     new XElement(ns + "priority", "0.6")
                 ));

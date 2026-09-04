@@ -82,7 +82,7 @@ namespace SAT1.BAL
                                 MetalOptions = "18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|Platinum 950 (+350)",
                                 CaratOptions = "1.5ct GIA (+0)|2.0ct GIA (+750)|3.0ct GIA (+2000)",
                                 IsActive = true,
-                                CreatedAt = DateTime.UtcNow.AddMinutes(-globalIdx)
+                                CreatedAt = DateTime.Now.AddMinutes(-globalIdx)
                             });
                             globalIdx++;
                         }
@@ -164,7 +164,7 @@ namespace SAT1.BAL
                         MetalOptions = "18K Yellow Gold (+0)|18K White Gold (+0)|18K Rose Gold (+0)|Platinum 950 (+350)",
                         CaratOptions = "1.5ct GIA (+0)|2.0ct GIA (+750)|3.0ct GIA (+2000)",
                         IsActive = true,
-                        CreatedAt = DateTime.UtcNow.AddMinutes(-idx)
+                        CreatedAt = DateTime.Now.AddMinutes(-idx)
                     });
                     idx++;
                 }

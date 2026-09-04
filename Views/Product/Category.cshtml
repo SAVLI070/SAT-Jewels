@@ -857,14 +857,13 @@
         foreach (var item in Model)
         {
           var originalPriceUSD = (int)(item.PriceUSD * 1.15m);
-          var imgSrc = string.IsNullOrEmpty(item.ImageUrl) ? "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" : item.ImageUrl;
+          var imgSrc = string.IsNullOrEmpty(item.ImageUrl) ? "/assets/ring_1.jpg" : item.ImageUrl;
           var galList = !string.IsNullOrWhiteSpace(item.GalleryImages) 
-            ? item.GalleryImages.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).ToList() 
+            ? item.GalleryImages.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).Distinct().ToList() 
             : new List<string> { imgSrc };
-          if (galList.Count == 1)
+          if (!galList.Contains(imgSrc))
           {
-            galList.Add("/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png");
-            galList.Add("/assets/ivevar/modern_wedding_ring_band_be1024e1-bb04-457c-83d2-7acda4fc55b4.png");
+            galList.Insert(0, imgSrc);
           }
 
           <div class="ivevar-product-card sat-scrub-card" data-count="@galList.Count">
@@ -877,12 +876,15 @@
                   </div>
                 }
               </a>
-              <div class="sat-scrub-dots">
-                @for(int d = 0; d < Math.Min(galList.Count, 5); d++)
-                {
-                  <span class="scrub-dot @(d == 0 ? "active" : "")"></span>
-                }
-              </div>
+              @if (galList.Count > 1)
+              {
+                <div class="sat-scrub-dots">
+                  @for(int d = 0; d < Math.Min(galList.Count, 5); d++)
+                  {
+                    <span class="scrub-dot @(d == 0 ? "active" : "")"></span>
+                  }
+                </div>
+              }
             </div>
             <div class="product-info-body">
               <a href="/Product/Details/@item.Id" style="text-decoration:none;">
@@ -1216,12 +1218,22 @@
 
     const isUserAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
 
+    function getCartStorageKey() {
+      const isAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+      const email = '@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower()?.Trim() ?? "")';
+      if (isAuth && email) {
+        return 'sat_cart_' + encodeURIComponent(email);
+      }
+      return 'sat_cart_guest';
+    }
+
     function quickAddToCart(id, name, priceUSD, img) {
       try {
-        const saved = localStorage.getItem('sat_shopping_cart_usd');
+        const key = getCartStorageKey();
+        const saved = localStorage.getItem(key);
         let items = saved ? JSON.parse(saved) : [];
         items.push({ id, name, priceUSD, img: img || '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg', quantity: 1 });
-        localStorage.setItem('sat_shopping_cart_usd', JSON.stringify(items));
+        localStorage.setItem(key, JSON.stringify(items));
         
         if (!isUserAuthenticated) {
           alert('🔒 Please sign in to your account first before completing payment.');

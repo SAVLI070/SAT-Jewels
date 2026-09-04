@@ -45,6 +45,14 @@ namespace SAT1.Controllers
         {
             ViewData["InitialMode"] = "signin";
             ViewData["ReturnUrl"] = returnUrl;
+            if (TempData["SuccessMessage"] != null)
+            {
+                ViewBag.SuccessMessage = TempData["SuccessMessage"]?.ToString();
+            }
+            if (TempData["PreFillEmail"] != null)
+            {
+                ViewBag.Email = TempData["PreFillEmail"]?.ToString();
+            }
             return View("Auth");
         }
 
@@ -177,11 +185,47 @@ namespace SAT1.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
             {
                 IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+                ExpiresUtc = DateTimeOffset.Now.AddDays(30)
             });
 
             var targetUrl = !string.IsNullOrWhiteSpace(req.ReturnUrl) && Url.IsLocalUrl(req.ReturnUrl) ? req.ReturnUrl : "/";
             return Json(new { success = true, message = "Logged in successfully!", redirectUrl = targetUrl, userName = user.FullName });
+        }
+
+        // Real-Time Duplicate Email and Phone Availability Verification
+        [HttpGet]
+        public async Task<IActionResult> CheckAvailability(string? email, string? phone)
+        {
+            bool emailExists = false;
+            bool phoneExists = false;
+            string? emailMsg = null;
+            string? phoneMsg = null;
+
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                var cleanEmail = email.Trim().ToLower();
+                emailExists = await _context.Users.AnyAsync(u => u.Email.ToLower() == cleanEmail);
+                if (emailExists)
+                {
+                    emailMsg = "An account with this email address already exists. Please Sign In.";
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(phone))
+            {
+                var phoneDigits = Regex.Replace(phone, @"[^\d]", "");
+                if (phoneDigits.Length >= 10)
+                {
+                    var suffix = phoneDigits.Substring(phoneDigits.Length - 10);
+                    phoneExists = await _context.Users.AnyAsync(u => u.Phone != null && u.Phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("+", "").EndsWith(suffix));
+                    if (phoneExists)
+                    {
+                        phoneMsg = "This mobile number is already registered to another account.";
+                    }
+                }
+            }
+
+            return Json(new { emailExists, phoneExists, emailMsg, phoneMsg });
         }
 
         [HttpPost]
@@ -189,6 +233,9 @@ namespace SAT1.Controllers
         {
             ViewData["InitialMode"] = "signup";
             ViewData["ReturnUrl"] = returnUrl;
+            ViewBag.FullName = fullName;
+            ViewBag.Email = email;
+            ViewBag.Phone = phone;
 
             // 1. Required Fields Validation
             if (string.IsNullOrWhiteSpace(fullName) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
@@ -211,7 +258,16 @@ namespace SAT1.Controllers
                 return View("Auth");
             }
 
-            // 4. USA Mobile Phone Number Validation (Must be exactly 10 digits if provided)
+            // 4. Duplicate Email Verification
+            var cleanEmail = email.Trim().ToLower();
+            var emailTaken = await _context.Users.AnyAsync(u => u.Email.ToLower() == cleanEmail);
+            if (emailTaken)
+            {
+                ViewBag.ErrorMessage = "An account with this email address already exists. Please Sign In.";
+                return View("Auth");
+            }
+
+            // 5. Mobile Phone Number Validation (Must be exactly 10 digits if provided) & Duplicate Check
             if (!string.IsNullOrWhiteSpace(phone))
             {
                 var phoneDigits = Regex.Replace(phone, @"[^\d]", "");
@@ -220,9 +276,17 @@ namespace SAT1.Controllers
                     ViewBag.ErrorMessage = "Mobile number must be a valid 10-digit USA phone number (e.g. 555-123-4567).";
                     return View("Auth");
                 }
+
+                var suffix = phoneDigits.Substring(phoneDigits.Length - 10);
+                var phoneTaken = await _context.Users.AnyAsync(u => u.Phone != null && u.Phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("+", "").EndsWith(suffix));
+                if (phoneTaken)
+                {
+                    ViewBag.ErrorMessage = "This mobile number is already registered to another account. Please use another number or Sign In.";
+                    return View("Auth");
+                }
             }
 
-            // 5. Password Complexity Regex Validation
+            // 6. Password Complexity Regex Validation
             // (At least 8 characters, contains at least 1 lowercase letter, 1 letter, and 1 special character)
             if (password.Length < 8 || !Regex.IsMatch(password, @"[a-z]") || !Regex.IsMatch(password, @"[A-Za-z]") || !Regex.IsMatch(password, @"[\W_]"))
             {
@@ -230,40 +294,36 @@ namespace SAT1.Controllers
                 return View("Auth");
             }
 
-            // 6. Confirm Password Matching
+            // 7. Confirm Password Matching
             if (password != confirmPassword)
             {
                 ViewBag.ErrorMessage = "Passwords do not match. Please verify your password confirmation.";
                 return View("Auth");
             }
 
-            // 7. Duplicate Account Verification
-            var user = await _authBal.RegisterNewUserAsync(fullName, email, phone, password, confirmPassword);
+            // 8. Safe DB Registration
+            User? user = null;
+            try
+            {
+                user = await _authBal.RegisterNewUserAsync(fullName, email, phone, password, confirmPassword);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Registration Error]: {ex.Message}");
+                ViewBag.ErrorMessage = "Unable to complete registration. Please verify your information or try again.";
+                return View("Auth");
+            }
+
             if (user == null)
             {
                 ViewBag.ErrorMessage = "An account with this email address already exists. Please Sign In.";
                 return View("Auth");
             }
 
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.FullName),
-                new Claim(ClaimTypes.Email, user.Email),
-                new Claim(ClaimTypes.Role, "Client")
-            };
+            TempData["SuccessMessage"] = "Registration successful! Please sign in with your email and password.";
+            TempData["PreFillEmail"] = user.Email;
 
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var principal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
-
-            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
-            {
-                return Redirect(returnUrl);
-            }
-
-            return Redirect("/");
+            return RedirectToAction("SignIn", new { returnUrl });
         }
 
         [HttpGet]
@@ -351,7 +411,11 @@ namespace SAT1.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
             model.UserId = userId;
 
-            if (string.IsNullOrWhiteSpace(model.AddressId))
+            var existing = !string.IsNullOrWhiteSpace(model.AddressId) 
+                ? await _authBal.GetAddressByIdAsync(model.AddressId, userId) 
+                : null;
+
+            if (existing == null)
             {
                 await _authBal.AddUserAddressAsync(model);
                 TempData["SuccessMessage"] = "New address successfully added to your account vault.";

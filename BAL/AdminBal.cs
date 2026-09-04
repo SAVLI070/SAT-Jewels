@@ -175,7 +175,7 @@ namespace SAT1.BAL
                     Price = dto.PriceUSD,
                     CategoryId = dto.CategoryId > 0 ? dto.CategoryId : 1,
                     DiamondShapeId = dto.DiamondShapeId > 0 ? dto.DiamondShapeId : 1,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now
                 };
 
                 _context.Products.Add(product);
@@ -295,7 +295,7 @@ namespace SAT1.BAL
                     MetalOptions = metalOptionsStr,
                     CaratOptions = caratOptionsStr,
                     IsActive = true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now
                 });
                 await _context.SaveChangesAsync();
             }
@@ -315,26 +315,31 @@ namespace SAT1.BAL
 
             if (rules.Count == 0)
             {
-                // Seed standard defaults matching Bianca Chiara luxury tiers + Silver + Ring Sizes
+                // Seed standard defaults matching the complete 10 Metals, 9 Carats, and 9 Ring Sizes
                 var defaultRules = new List<DynamicPricingRule>
                 {
-                    // Metals
-                    new() { RuleType = "Metal", Code = "silver_925", DisplayName = "925 Sterling Silver", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true },
-                    new() { RuleType = "Metal", Code = "10k_gold", DisplayName = "10K Gold", PriceOffsetUSD = 50, DisplayOrder = 2, IsActive = true },
-                    new() { RuleType = "Metal", Code = "14k_gold", DisplayName = "14K Gold", PriceOffsetUSD = 180, DisplayOrder = 3, IsActive = true },
-                    new() { RuleType = "Metal", Code = "18k_gold", DisplayName = "18K Gold", PriceOffsetUSD = 480, DisplayOrder = 4, IsActive = true },
-                    new() { RuleType = "Metal", Code = "platinum_950", DisplayName = "950 Platinum", PriceOffsetUSD = 850, DisplayOrder = 5, IsActive = true },
-                    // Carats
-                    new() { RuleType = "Carat", Code = "1.00_ct", DisplayName = "1.00 CT", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true },
-                    new() { RuleType = "Carat", Code = "1.25_ct", DisplayName = "1.25 CT", PriceOffsetUSD = 250, DisplayOrder = 2, IsActive = true },
-                    new() { RuleType = "Carat", Code = "1.50_ct", DisplayName = "1.50 CT", PriceOffsetUSD = 450, DisplayOrder = 3, IsActive = true },
-                    new() { RuleType = "Carat", Code = "1.75_ct", DisplayName = "1.75 CT", PriceOffsetUSD = 750, DisplayOrder = 4, IsActive = true },
-                    new() { RuleType = "Carat", Code = "2.00_ct", DisplayName = "2.00 CT", PriceOffsetUSD = 1100, DisplayOrder = 5, IsActive = true },
-                    new() { RuleType = "Carat", Code = "2.50_ct", DisplayName = "2.50 CT", PriceOffsetUSD = 1800, DisplayOrder = 6, IsActive = true },
-                    new() { RuleType = "Carat", Code = "3.00_ct", DisplayName = "3.00 CT", PriceOffsetUSD = 2600, DisplayOrder = 7, IsActive = true },
-                    new() { RuleType = "Carat", Code = "4.00_ct", DisplayName = "4.00 CT", PriceOffsetUSD = 4200, DisplayOrder = 8, IsActive = true },
-                    new() { RuleType = "Carat", Code = "5.00_ct", DisplayName = "5.00 CT", PriceOffsetUSD = 6000, DisplayOrder = 9, IsActive = true },
-                    // Ring Sizes (Admin Controlled)
+                    // 10 Metals
+                    new() { RuleType = "Metal", Code = "10k_yellow_gold", DisplayName = "10K Yellow Gold", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true },
+                    new() { RuleType = "Metal", Code = "10k_white_gold", DisplayName = "10K White Gold", PriceOffsetUSD = 0, DisplayOrder = 2, IsActive = true },
+                    new() { RuleType = "Metal", Code = "10k_rose_gold", DisplayName = "10K Rose Gold", PriceOffsetUSD = 0, DisplayOrder = 3, IsActive = true },
+                    new() { RuleType = "Metal", Code = "14k_yellow_gold", DisplayName = "14K Yellow Gold", PriceOffsetUSD = 180, DisplayOrder = 4, IsActive = true },
+                    new() { RuleType = "Metal", Code = "14k_white_gold", DisplayName = "14K White Gold", PriceOffsetUSD = 180, DisplayOrder = 5, IsActive = true },
+                    new() { RuleType = "Metal", Code = "14k_rose_gold", DisplayName = "14K Rose Gold", PriceOffsetUSD = 180, DisplayOrder = 6, IsActive = true },
+                    new() { RuleType = "Metal", Code = "18k_yellow_gold", DisplayName = "18K Yellow Gold", PriceOffsetUSD = 480, DisplayOrder = 7, IsActive = true },
+                    new() { RuleType = "Metal", Code = "18k_white_gold", DisplayName = "18K White Gold", PriceOffsetUSD = 480, DisplayOrder = 8, IsActive = true },
+                    new() { RuleType = "Metal", Code = "18k_rose_gold", DisplayName = "18K Rose Gold", PriceOffsetUSD = 480, DisplayOrder = 9, IsActive = true },
+                    new() { RuleType = "Metal", Code = "950_platinum", DisplayName = "950 Platinum", PriceOffsetUSD = 850, DisplayOrder = 10, IsActive = true },
+                    // 9 Carats
+                    new() { RuleType = "Carat", Code = "0.50_ct", DisplayName = "0.50 CT", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true },
+                    new() { RuleType = "Carat", Code = "0.75_ct", DisplayName = "0.75 CT", PriceOffsetUSD = 150, DisplayOrder = 2, IsActive = true },
+                    new() { RuleType = "Carat", Code = "1.00_ct", DisplayName = "1.00 CT", PriceOffsetUSD = 350, DisplayOrder = 3, IsActive = true },
+                    new() { RuleType = "Carat", Code = "1.25_ct", DisplayName = "1.25 CT", PriceOffsetUSD = 550, DisplayOrder = 4, IsActive = true },
+                    new() { RuleType = "Carat", Code = "1.50_ct", DisplayName = "1.50 CT", PriceOffsetUSD = 750, DisplayOrder = 5, IsActive = true },
+                    new() { RuleType = "Carat", Code = "2.00_ct", DisplayName = "2.00 CT", PriceOffsetUSD = 1200, DisplayOrder = 6, IsActive = true },
+                    new() { RuleType = "Carat", Code = "3.00_ct", DisplayName = "3.00 CT", PriceOffsetUSD = 2400, DisplayOrder = 7, IsActive = true },
+                    new() { RuleType = "Carat", Code = "4.00_ct", DisplayName = "4.00 CT", PriceOffsetUSD = 3800, DisplayOrder = 8, IsActive = true },
+                    new() { RuleType = "Carat", Code = "5.00_ct", DisplayName = "5.00 CT", PriceOffsetUSD = 5500, DisplayOrder = 9, IsActive = true },
+                    // 9 Ring Sizes
                     new() { RuleType = "RingSize", Code = "us_4_0", DisplayName = "US 4.0 (14.9mm)", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true },
                     new() { RuleType = "RingSize", Code = "us_5_0", DisplayName = "US 5.0 (15.7mm)", PriceOffsetUSD = 0, DisplayOrder = 2, IsActive = true },
                     new() { RuleType = "RingSize", Code = "us_6_0", DisplayName = "US 6.0 (16.5mm)", PriceOffsetUSD = 0, DisplayOrder = 3, IsActive = true },
@@ -362,7 +367,7 @@ namespace SAT1.BAL
                     PriceOffsetUSD = 0,
                     DisplayOrder = 1,
                     IsActive = true,
-                    UpdatedAt = DateTime.UtcNow
+                    UpdatedAt = DateTime.Now
                 };
                 _context.DynamicPricingRules.Add(silverRule);
                 await _context.SaveChangesAsync();
@@ -374,15 +379,15 @@ namespace SAT1.BAL
             {
                 var defaultRingSizes = new List<DynamicPricingRule>
                 {
-                    new() { RuleType = "RingSize", Code = "us_4_0", DisplayName = "US 4.0 (14.9mm)", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true, UpdatedAt = DateTime.UtcNow },
-                    new() { RuleType = "RingSize", Code = "us_5_0", DisplayName = "US 5.0 (15.7mm)", PriceOffsetUSD = 0, DisplayOrder = 2, IsActive = true, UpdatedAt = DateTime.UtcNow },
-                    new() { RuleType = "RingSize", Code = "us_6_0", DisplayName = "US 6.0 (16.5mm)", PriceOffsetUSD = 0, DisplayOrder = 3, IsActive = true, UpdatedAt = DateTime.UtcNow },
-                    new() { RuleType = "RingSize", Code = "us_7_0", DisplayName = "US 7.0 (17.3mm)", PriceOffsetUSD = 0, DisplayOrder = 4, IsActive = true, UpdatedAt = DateTime.UtcNow },
-                    new() { RuleType = "RingSize", Code = "us_8_0", DisplayName = "US 8.0 (18.2mm)", PriceOffsetUSD = 0, DisplayOrder = 5, IsActive = true, UpdatedAt = DateTime.UtcNow },
-                    new() { RuleType = "RingSize", Code = "us_9_0", DisplayName = "US 9.0 (19.0mm)", PriceOffsetUSD = 25, DisplayOrder = 6, IsActive = true, UpdatedAt = DateTime.UtcNow },
-                    new() { RuleType = "RingSize", Code = "us_10_0", DisplayName = "US 10.0 (19.8mm)", PriceOffsetUSD = 50, DisplayOrder = 7, IsActive = true, UpdatedAt = DateTime.UtcNow },
-                    new() { RuleType = "RingSize", Code = "us_11_0", DisplayName = "US 11.0 (20.6mm)", PriceOffsetUSD = 75, DisplayOrder = 8, IsActive = true, UpdatedAt = DateTime.UtcNow },
-                    new() { RuleType = "RingSize", Code = "us_12_0", DisplayName = "US 12.0 (21.4mm)", PriceOffsetUSD = 100, DisplayOrder = 9, IsActive = true, UpdatedAt = DateTime.UtcNow },
+                    new() { RuleType = "RingSize", Code = "us_4_0", DisplayName = "US 4.0 (14.9mm)", PriceOffsetUSD = 0, DisplayOrder = 1, IsActive = true, UpdatedAt = DateTime.Now },
+                    new() { RuleType = "RingSize", Code = "us_5_0", DisplayName = "US 5.0 (15.7mm)", PriceOffsetUSD = 0, DisplayOrder = 2, IsActive = true, UpdatedAt = DateTime.Now },
+                    new() { RuleType = "RingSize", Code = "us_6_0", DisplayName = "US 6.0 (16.5mm)", PriceOffsetUSD = 0, DisplayOrder = 3, IsActive = true, UpdatedAt = DateTime.Now },
+                    new() { RuleType = "RingSize", Code = "us_7_0", DisplayName = "US 7.0 (17.3mm)", PriceOffsetUSD = 0, DisplayOrder = 4, IsActive = true, UpdatedAt = DateTime.Now },
+                    new() { RuleType = "RingSize", Code = "us_8_0", DisplayName = "US 8.0 (18.2mm)", PriceOffsetUSD = 0, DisplayOrder = 5, IsActive = true, UpdatedAt = DateTime.Now },
+                    new() { RuleType = "RingSize", Code = "us_9_0", DisplayName = "US 9.0 (19.0mm)", PriceOffsetUSD = 25, DisplayOrder = 6, IsActive = true, UpdatedAt = DateTime.Now },
+                    new() { RuleType = "RingSize", Code = "us_10_0", DisplayName = "US 10.0 (19.8mm)", PriceOffsetUSD = 50, DisplayOrder = 7, IsActive = true, UpdatedAt = DateTime.Now },
+                    new() { RuleType = "RingSize", Code = "us_11_0", DisplayName = "US 11.0 (20.6mm)", PriceOffsetUSD = 75, DisplayOrder = 8, IsActive = true, UpdatedAt = DateTime.Now },
+                    new() { RuleType = "RingSize", Code = "us_12_0", DisplayName = "US 12.0 (21.4mm)", PriceOffsetUSD = 100, DisplayOrder = 9, IsActive = true, UpdatedAt = DateTime.Now },
                 };
                 _context.DynamicPricingRules.AddRange(defaultRingSizes);
                 await _context.SaveChangesAsync();
@@ -404,7 +409,7 @@ namespace SAT1.BAL
                         existing.PriceOffsetUSD = dto.PriceOffsetUSD;
                         existing.DisplayName = dto.DisplayName;
                         existing.IsActive = dto.IsActive;
-                        existing.UpdatedAt = DateTime.UtcNow;
+                        existing.UpdatedAt = DateTime.Now;
                         _context.DynamicPricingRules.Update(existing);
                     }
                     else if (!string.IsNullOrWhiteSpace(dto.Code))
@@ -417,7 +422,7 @@ namespace SAT1.BAL
                             PriceOffsetUSD = dto.PriceOffsetUSD,
                             DisplayOrder = dto.DisplayOrder,
                             IsActive = dto.IsActive,
-                            UpdatedAt = DateTime.UtcNow
+                            UpdatedAt = DateTime.Now
                         });
                     }
                 }
@@ -433,7 +438,7 @@ namespace SAT1.BAL
 
         public async Task<bool> AddPricingRuleAsync(DynamicPricingRule rule)
         {
-            rule.UpdatedAt = DateTime.UtcNow;
+            rule.UpdatedAt = DateTime.Now;
             _context.DynamicPricingRules.Add(rule);
             await _context.SaveChangesAsync();
             return true;
@@ -448,10 +453,40 @@ namespace SAT1.BAL
                 .Include(o => o.TrackingHistory)
                 .AsNoTracking();
 
-            if (!string.IsNullOrWhiteSpace(statusFilter) && statusFilter.ToLower() != "all")
+            if (!string.IsNullOrWhiteSpace(statusFilter) && !statusFilter.Equals("all", StringComparison.OrdinalIgnoreCase))
             {
                 var cleanStatus = statusFilter.Trim().ToLower();
-                query = query.Where(o => o.OrderStatus.ToLower() == cleanStatus || o.CurrentTrackingStatus.ToLower() == cleanStatus);
+                if (cleanStatus == "paid")
+                {
+                    query = query.Where(o => 
+                        o.OrderStatus.ToLower().Contains("paid") || 
+                        o.OrderStatus.ToLower().Contains("completed"));
+                }
+                else if (cleanStatus == "shipmentbooked" || cleanStatus == "dispatched")
+                {
+                    query = query.Where(o => 
+                        o.OrderStatus.ToLower().Contains("dispatched") || 
+                        o.OrderStatus.ToLower().Contains("booked") ||
+                        (o.CurrentTrackingStatus != null && (o.CurrentTrackingStatus.ToLower().Contains("dispatched") || o.CurrentTrackingStatus.ToLower().Contains("booked"))));
+                }
+                else if (cleanStatus == "intransit" || cleanStatus == "in transit")
+                {
+                    query = query.Where(o => 
+                        o.OrderStatus.ToLower().Contains("transit") || 
+                        (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.ToLower().Contains("transit")));
+                }
+                else if (cleanStatus == "delivered")
+                {
+                    query = query.Where(o => 
+                        o.OrderStatus.ToLower().Contains("delivered") || 
+                        (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.ToLower().Contains("delivered")));
+                }
+                else
+                {
+                    query = query.Where(o => 
+                        o.OrderStatus.ToLower() == cleanStatus || 
+                        (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.ToLower() == cleanStatus));
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -461,7 +496,7 @@ namespace SAT1.BAL
                     o.OrderNumber.ToLower().Contains(q) || 
                     o.CustomerEmail.ToLower().Contains(q) || 
                     o.ShippingFullName.ToLower().Contains(q) || 
-                    o.TrackingNumber.ToLower().Contains(q) ||
+                    (o.TrackingNumber != null && o.TrackingNumber.ToLower().Contains(q)) ||
                     o.OrderId.ToLower().Contains(q));
             }
 
@@ -507,7 +542,12 @@ namespace SAT1.BAL
                     (!string.IsNullOrWhiteSpace(o.CustomerEmail) && o.CustomerEmail.Equals(u.Email, StringComparison.OrdinalIgnoreCase))
                 ).ToList();
 
-                var paidOrders = uOrders.Where(o => o.OrderStatus == "Paid").ToList();
+                var paidOrders = uOrders.Where(o => 
+                    !string.IsNullOrWhiteSpace(o.OrderStatus) && 
+                    !o.OrderStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) && 
+                    !o.OrderStatus.Equals("Pending", StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+
                 var lastOrder = uOrders.OrderByDescending(o => o.CreatedAt).FirstOrDefault();
 
                 result.Add(new UserWithStatsDto
@@ -534,7 +574,12 @@ namespace SAT1.BAL
             foreach (var g in guestOrders)
             {
                 var gOrders = g.ToList();
-                var paidOrders = gOrders.Where(o => o.OrderStatus == "Paid").ToList();
+                var paidOrders = gOrders.Where(o => 
+                    !string.IsNullOrWhiteSpace(o.OrderStatus) && 
+                    !o.OrderStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) && 
+                    !o.OrderStatus.Equals("Pending", StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+
                 var first = gOrders.First();
                 var last = gOrders.OrderByDescending(o => o.CreatedAt).First();
 

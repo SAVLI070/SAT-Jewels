@@ -338,9 +338,19 @@
         }
     }
 
+    function getCartStorageKey() {
+        const isAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+        const email = '@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower()?.Trim() ?? "")';
+        if (isAuth && email) {
+            return 'sat_cart_' + encodeURIComponent(email);
+        }
+        return 'sat_cart_guest';
+    }
+
     function addWishlistItemToCart(id, name, price, img) {
         try {
-            let cart = JSON.parse(localStorage.getItem('sat_shopping_cart_usd') || '[]');
+            const key = getCartStorageKey();
+            let cart = JSON.parse(localStorage.getItem(key) || '[]');
             const existing = cart.find(x => x.id === id);
             if (existing) {
                 existing.quantity = (existing.quantity || 1) + 1;
@@ -355,7 +365,7 @@
                     selectedCarat: '1.50 ct'
                 });
             }
-            localStorage.setItem('sat_shopping_cart_usd', JSON.stringify(cart));
+            localStorage.setItem(key, JSON.stringify(cart));
             alert(`"${name}" added to your cart!`);
             window.location.href = '/Product/Cart';
         } catch (e) {

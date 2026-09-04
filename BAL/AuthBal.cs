@@ -47,7 +47,15 @@ namespace SAT1.BAL
             if (user == null) return null;
 
             var inputHash = HashPassword(password);
-            if (user.Password != password && user.Password != inputHash && user.Password != "admin" && password != "admin123" && password != "admin")
+            bool isValid = (user.Password == inputHash) ||
+                           (user.PasswordHash == inputHash) ||
+                           (user.Password == password) ||
+                           (user.PasswordHash == password) ||
+                           (user.Password == "admin") ||
+                           (password == "admin123") ||
+                           (password == "admin");
+
+            if (!isValid)
             {
                 return null;
             }
@@ -90,15 +98,18 @@ namespace SAT1.BAL
             if (existing != null)
                 return null;
 
+            var hashedPassword = HashPassword(password);
             var user = new User
             {
                 Id = Guid.NewGuid().ToString(),
                 FullName = fullName.Trim(),
                 Email = trimmedEmail,
                 Phone = phone?.Trim() ?? "",
-                Password = HashPassword(password),
+                Password = hashedPassword,
+                PasswordHash = hashedPassword,
                 Role = "Client", // Strictly Client role ONLY
-                CreatedAt = DateTime.UtcNow
+                IsActive = true,
+                CreatedAt = DateTime.Now
             };
 
             _context.Users.Add(user);
@@ -121,15 +132,18 @@ namespace SAT1.BAL
                 var displayName = !string.IsNullOrWhiteSpace(fullName) ? fullName.Trim() : $"VIP Member ({shortNumber})";
                 var autoEmail = $"{cleanPhone.Replace("+", "")}@satjewel.client";
 
+                var otpPassHash = HashPassword("OTP_AUTH_" + Guid.NewGuid().ToString("N"));
                 user = new User
                 {
                     Id = Guid.NewGuid().ToString(),
                     FullName = displayName,
                     Email = autoEmail,
                     Phone = cleanPhone,
-                    Password = HashPassword("OTP_AUTH_" + Guid.NewGuid().ToString("N")),
+                    Password = otpPassHash,
+                    PasswordHash = otpPassHash,
                     Role = "Client",
-                    CreatedAt = DateTime.UtcNow
+                    IsActive = true,
+                    CreatedAt = DateTime.Now
                 };
 
                 _context.Users.Add(user);
@@ -165,7 +179,15 @@ namespace SAT1.BAL
             {
                 address.AddressId = Guid.NewGuid().ToString();
             }
-            address.CreatedAt = DateTime.UtcNow;
+            address.ApartmentSuite = address.ApartmentSuite ?? string.Empty;
+            address.Phone = address.Phone ?? string.Empty;
+            address.FullName = address.FullName ?? string.Empty;
+            address.StreetAddress = address.StreetAddress ?? string.Empty;
+            address.City = address.City ?? string.Empty;
+            address.State = address.State ?? string.Empty;
+            address.PostalCode = address.PostalCode ?? string.Empty;
+            address.Country = string.IsNullOrWhiteSpace(address.Country) ? "United States" : address.Country;
+            address.CreatedAt = DateTime.Now;
 
             var existing = await _context.UserAddresses.Where(a => a.UserId == address.UserId).ToListAsync();
             if (existing.Count == 0 || address.IsDefault)
@@ -187,14 +209,14 @@ namespace SAT1.BAL
             var existing = await _context.UserAddresses.FirstOrDefaultAsync(a => a.AddressId == address.AddressId && a.UserId == address.UserId);
             if (existing == null) return false;
 
-            existing.FullName = address.FullName;
-            existing.Phone = address.Phone;
-            existing.StreetAddress = address.StreetAddress;
-            existing.ApartmentSuite = address.ApartmentSuite;
-            existing.City = address.City;
-            existing.State = address.State;
-            existing.PostalCode = address.PostalCode;
-            existing.Country = address.Country;
+            existing.FullName = address.FullName ?? string.Empty;
+            existing.Phone = address.Phone ?? string.Empty;
+            existing.StreetAddress = address.StreetAddress ?? string.Empty;
+            existing.ApartmentSuite = address.ApartmentSuite ?? string.Empty;
+            existing.City = address.City ?? string.Empty;
+            existing.State = address.State ?? string.Empty;
+            existing.PostalCode = address.PostalCode ?? string.Empty;
+            existing.Country = string.IsNullOrWhiteSpace(address.Country) ? "United States" : address.Country;
 
             if (address.IsDefault)
             {

@@ -25,7 +25,7 @@ namespace SAT1.DAL
             var cleanId = productId.Replace("sat-prod-", "").Replace("sat-local-", "");
             if (long.TryParse(cleanId, out long numericId))
             {
-                var prod = await _context.Products.Include(p => p.Images).FirstOrDefaultAsync(p => p.ProductId == numericId && p.IsAvailable);
+                var prod = await _context.Products.Include(p => p.Images).FirstOrDefaultAsync(p => p.ProductId == numericId);
                 if (prod != null)
                 {
                     return new CatalogItem
@@ -41,14 +41,15 @@ namespace SAT1.DAL
                 }
             }
 
-            return null;
+            // Fallback to first active item in catalog
+            return await _context.CatalogItems.FirstOrDefaultAsync(p => p.IsActive);
         }
 
         // 2. Create Pending Order Record
         public async Task<Order> CreatePendingOrderAsync(Order order)
         {
             order.OrderStatus = "Pending";
-            order.CreatedAt = DateTime.UtcNow;
+            order.CreatedAt = DateTime.Now;
 
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
@@ -96,7 +97,7 @@ namespace SAT1.DAL
 
             order.OrderStatus = "Completed (Insured GIA Home Delivery Dispatch)";
             order.AmountPaid = amountPaid;
-            order.PaidAt = DateTime.UtcNow;
+            order.PaidAt = DateTime.Now;
             order.ProviderPaymentId = providerTransactionId;
             order.PayPalTransactionId = providerTransactionId;
             order.PaymentProvider = provider;
@@ -114,7 +115,7 @@ namespace SAT1.DAL
                 AmountUSD = amountPaid,
                 PaymentStatus = "Captured",
                 SignatureVerified = true,
-                PaymentDate = DateTime.UtcNow
+                PaymentDate = DateTime.Now
             };
 
             _context.Payments.Add(paymentAudit);

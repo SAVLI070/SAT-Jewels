@@ -94,7 +94,7 @@ namespace SAT1.Models
         public bool IsActive { get; set; } = true;
 
         [NotMapped]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         [NotMapped]
         public virtual Category? ParentCategory { get; set; }

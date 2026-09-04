@@ -97,7 +97,7 @@ namespace SAT1.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
             {
                 IsPersistent = true,
-                ExpiresUtc = DateTimeOffset.UtcNow.AddDays(30)
+                ExpiresUtc = DateTimeOffset.Now.AddDays(30)
             });
 
             return Ok(new

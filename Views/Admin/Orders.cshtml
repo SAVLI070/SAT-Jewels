@@ -15,12 +15,12 @@
     </div>
     
     <!-- Filter Tabs -->
-    <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <a href="/Admin/Orders?status=All" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Orders (@Model.Count)</a>
-      <a href="/Admin/Orders?status=Paid" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Paid" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Paid</a>
-      <a href="/Admin/Orders?status=ShipmentBooked" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "ShipmentBooked" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Dispatched</a>
-      <a href="/Admin/Orders?status=InTransit" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "InTransit" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">In Transit</a>
-      <a href="/Admin/Orders?status=Delivered" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Delivered" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Delivered</a>
+    <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap;">
+      <a href="/Admin/Orders?status=All" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Orders (@(ViewBag.TotalCount ?? Model.Count))</a>
+      <a href="/Admin/Orders?status=Paid" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Paid" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Paid (@(ViewBag.PaidCount ?? 0))</a>
+      <a href="/Admin/Orders?status=ShipmentBooked" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "ShipmentBooked" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Dispatched (@(ViewBag.DispatchedCount ?? 0))</a>
+      <a href="/Admin/Orders?status=InTransit" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "InTransit" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">In Transit (@(ViewBag.InTransitCount ?? 0))</a>
+      <a href="/Admin/Orders?status=Delivered" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Delivered" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Delivered (@(ViewBag.DeliveredCount ?? 0))</a>
     </div>
   </div>
 

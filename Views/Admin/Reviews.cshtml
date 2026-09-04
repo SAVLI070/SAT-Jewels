@@ -2,6 +2,10 @@
 @{
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var statusFilter = ViewBag.StatusFilter as string ?? "All";
+    int curPage = ViewBag.CurrentPage ?? 1;
+    int totPages = ViewBag.TotalPages ?? 1;
+    int totCount = ViewBag.TotalCount ?? Model.Count;
+    int pSize = ViewBag.PageSize ?? 12;
 }
 
 <div style="padding: 24px; max-width: 1400px; margin: 0 auto;">
@@ -15,7 +19,7 @@
 
     <!-- Status Tabs -->
     <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-      <a href="/Admin/Reviews?status=All" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Reviews (@Model.Count)</a>
+      <a href="/Admin/Reviews?status=All" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Reviews (@(ViewBag.AllReviewsCount ?? Model.Count))</a>
       <a href="/Admin/Reviews?status=Approved" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Approved" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Approved</a>
       <a href="/Admin/Reviews?status=Pending" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Pending" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Pending</a>
       <a href="/Admin/Reviews?status=Rejected" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Rejected" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Rejected</a>
@@ -118,6 +122,46 @@
         </div>
       }
     </div>
+
+    @* Admin Reviews Pagination Bar *@
+    @if (totPages > 1)
+    {
+      <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-top: 32px; padding: 18px 24px; background: #ffffff; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <div style="font-size: 13.5px; color: #64748b;">
+          Showing <strong style="color: #0f172a;">@(((curPage - 1) * pSize) + 1)–@(Math.Min(curPage * pSize, totCount))</strong> of <strong style="color: #0f172a;">@totCount</strong> Reviews
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 6px;">
+          @if (curPage > 1)
+          {
+            <a href="/Admin/Reviews?status=@(statusFilter)&page=@(curPage - 1)" style="padding: 7px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; font-size: 13px; font-weight: 600; text-decoration: none;">
+              &larr; Prev
+            </a>
+          }
+
+          @for (int p = 1; p <= totPages; p++)
+          {
+            if (p == 1 || p == totPages || (p >= curPage - 2 && p <= curPage + 2))
+            {
+              <a href="/Admin/Reviews?status=@(statusFilter)&page=@p" style="min-width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; @(p == curPage ? "background:#b45309; color:#ffffff; border:1px solid #b45309;" : "background:#ffffff; color:#334155; border:1px solid #cbd5e1;")">
+                @p
+              </a>
+            }
+            else if (p == curPage - 3 || p == curPage + 3)
+            {
+              <span style="padding: 0 4px; color: #94a3b8;">...</span>
+            }
+          }
+
+          @if (curPage < totPages)
+          {
+            <a href="/Admin/Reviews?status=@(statusFilter)&page=@(curPage + 1)" style="padding: 7px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; font-size: 13px; font-weight: 600; text-decoration: none;">
+              Next &rarr;
+            </a>
+          }
+        </div>
+      </div>
+    }
   }
 
 </div>

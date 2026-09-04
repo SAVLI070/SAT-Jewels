@@ -293,7 +293,7 @@
         <button type="button" style="background:none; border:none; color:#ffffff; font-size:18px; cursor:pointer;" onclick="closeAddressModal()">&times;</button>
       </div>
 
-      <form method="post" action="/Account/SaveAddress">
+      <form method="post" action="/Account/SaveAddress" onsubmit="return validateAddressForm(event)">
         <input type="hidden" id="modalAddressId" name="AddressId" value="" />
 
         <div class="form-group">
@@ -331,15 +331,19 @@
           <div class="form-group">
             <label>Zip / Postal Code</label>
             <input type="text" id="modalPostalCode" name="PostalCode" class="form-control" placeholder="10001" required />
+            <div id="postalErrorMsg" style="color:#ef4444; font-size:11.5px; margin-top:4px; display:none;"></div>
           </div>
           <div class="form-group">
             <label>Country</label>
-            <select id="modalCountry" name="Country" class="form-control">
+            <select id="modalCountry" name="Country" class="form-control" onchange="updatePostalPlaceholder()">
               <option value="United States" selected>United States</option>
               <option value="Canada">Canada</option>
               <option value="United Kingdom">United Kingdom</option>
               <option value="Australia">Australia</option>
               <option value="India">India</option>
+              <option value="Germany">Germany</option>
+              <option value="France">France</option>
+              <option value="United Arab Emirates">United Arab Emirates</option>
             </select>
           </div>
         </div>
@@ -358,6 +362,80 @@
   </div>
 
   <script>
+    function updatePostalPlaceholder() {
+      const country = document.getElementById('modalCountry').value;
+      const postalInput = document.getElementById('modalPostalCode');
+      const err = document.getElementById('postalErrorMsg');
+      if (err) err.style.display = 'none';
+
+      switch (country) {
+        case 'United States': postalInput.placeholder = '10001 or 90210'; break;
+        case 'Canada': postalInput.placeholder = 'K1A 0B1'; break;
+        case 'United Kingdom': postalInput.placeholder = 'SW1A 1AA'; break;
+        case 'Australia': postalInput.placeholder = '2000'; break;
+        case 'India': postalInput.placeholder = '395006 or 110001'; break;
+        default: postalInput.placeholder = 'Postal code'; break;
+      }
+    }
+
+    function validateAddressForm(e) {
+      const country = document.getElementById('modalCountry').value;
+      const postal = (document.getElementById('modalPostalCode').value || '').trim();
+      const err = document.getElementById('postalErrorMsg');
+
+      let isValid = true;
+      let msg = '';
+
+      if (country === 'United States') {
+        const usRegex = /^\d{5}(-\d{4})?$/;
+        if (!usRegex.test(postal)) {
+          isValid = false;
+          msg = 'Please enter a valid 5-digit US ZIP code (e.g. 10001).';
+        }
+      } else if (country === 'Canada') {
+        const caRegex = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
+        if (!caRegex.test(postal)) {
+          isValid = false;
+          msg = 'Please enter a valid Canadian Postal Code (e.g. K1A 0B1).';
+        }
+      } else if (country === 'United Kingdom') {
+        const ukRegex = /^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i;
+        if (!ukRegex.test(postal)) {
+          isValid = false;
+          msg = 'Please enter a valid UK Postcode (e.g. SW1A 1AA).';
+        }
+      } else if (country === 'India') {
+        const inRegex = /^\d{6}$/;
+        if (!inRegex.test(postal)) {
+          isValid = false;
+          msg = 'Please enter a valid 6-digit Indian PIN code (e.g. 395006).';
+        }
+      } else if (country === 'Australia') {
+        const auRegex = /^\d{4}$/;
+        if (!auRegex.test(postal)) {
+          isValid = false;
+          msg = 'Please enter a valid 4-digit Australian Postcode (e.g. 2000).';
+        }
+      } else {
+        if (postal.length < 3) {
+          isValid = false;
+          msg = 'Please enter a valid postal / ZIP code.';
+        }
+      }
+
+      if (!isValid) {
+        if (err) {
+          err.innerText = msg;
+          err.style.display = 'block';
+        } else {
+          alert(msg);
+        }
+        e.preventDefault();
+        return false;
+      }
+      return true;
+    }
+
     function openAddAddressModal() {
       document.getElementById('modalTitle').innerText = 'Add New Address';
       document.getElementById('modalAddressId').value = '';
@@ -370,6 +448,9 @@
       document.getElementById('modalPostalCode').value = '';
       document.getElementById('modalCountry').value = 'United States';
       document.getElementById('modalIsDefault').checked = false;
+      const err = document.getElementById('postalErrorMsg');
+      if (err) err.style.display = 'none';
+      updatePostalPlaceholder();
       document.getElementById('addressModal').style.display = 'flex';
     }
 
@@ -385,6 +466,9 @@
       document.getElementById('modalPostalCode').value = item.PostalCode || '';
       document.getElementById('modalCountry').value = item.Country || 'United States';
       document.getElementById('modalIsDefault').checked = item.IsDefault || false;
+      const err = document.getElementById('postalErrorMsg');
+      if (err) err.style.display = 'none';
+      updatePostalPlaceholder();
       document.getElementById('addressModal').style.display = 'flex';
     }
 

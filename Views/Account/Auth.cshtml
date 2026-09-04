@@ -532,7 +532,12 @@
 
         <!-- 1. SIGN IN PANE -->
         <div class="sat-pane @(initialMode != "signup" ? "active" : "")" id="paneSignIn">
-          <form method="post" action="/Account/HandleSignIn">
+          <form method="post" action="/Account/HandleSignIn" id="formSignIn" onsubmit="return handleSignInSubmit(event)">
+            <div id="clientSignInAlert" class="sat-auth-alert" style="display:none;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span id="clientSignInAlertMsg"></span>
+            </div>
+
             @if (!string.IsNullOrEmpty(error) && initialMode != "signup")
             {
               <div class="sat-auth-alert">
@@ -541,11 +546,19 @@
               </div>
             }
 
+            @if (!string.IsNullOrWhiteSpace(ViewBag.SuccessMessage as string) && initialMode != "signup")
+            {
+              <div class="sat-auth-alert" style="display:flex; margin-bottom:18px; background:rgba(34, 197, 94, 0.15); border:1px solid rgba(34, 197, 94, 0.4); border-radius:12px; padding:12px 14px; color:#86efac; font-size:13px; align-items:center; gap:10px;">
+                <i class="fa-solid fa-circle-check" style="font-size:16px;"></i>
+                <span>@ViewBag.SuccessMessage</span>
+              </div>
+            }
+
             <div class="sat-auth-field">
               <label class="sat-field-label">Email or Username</label>
               <div class="sat-input-shell">
                 <i class="fa-regular fa-envelope prefix-icon"></i>
-                <input type="text" name="email" class="sat-input-ctrl" placeholder="client@satjewels.com" required />
+                <input type="text" name="email" id="inputSignInEmail" class="sat-input-ctrl" value="@(ViewBag.Email ?? "")" placeholder="client@satjewels.com" oninput="hideAuthAlerts()" required />
               </div>
             </div>
 
@@ -553,7 +566,7 @@
               <label class="sat-field-label">Vault Password</label>
               <div class="sat-input-shell">
                 <i class="fa-solid fa-lock prefix-icon"></i>
-                <input type="password" name="password" id="inputSignInPassword" class="sat-input-ctrl" placeholder="••••••••" required />
+                <input type="password" name="password" id="inputSignInPassword" class="sat-input-ctrl" placeholder="••••••••" oninput="hideAuthAlerts()" required />
                 <button type="button" class="sat-toggle-pwd" onclick="togglePwdVisibility('inputSignInPassword', this)" aria-label="Toggle Password">
                   <i class="fa-regular fa-eye"></i>
                 </button>
@@ -589,7 +602,12 @@
 
         <!-- 2. SIGN UP PANE -->
         <div class="sat-pane @(initialMode == "signup" ? "active" : "")" id="paneSignUp">
-          <form method="post" action="/Account/HandleSignUp">
+          <form method="post" action="/Account/HandleSignUp" id="formSignUp" onsubmit="return handleSignUpSubmit(event)">
+            <div id="clientSignUpAlert" class="sat-auth-alert" style="display:none;">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span id="clientSignUpAlertMsg"></span>
+            </div>
+
             @if (!string.IsNullOrEmpty(error) && initialMode == "signup")
             {
               <div class="sat-auth-alert">
@@ -602,7 +620,7 @@
               <label class="sat-field-label">Full Name *</label>
               <div class="sat-input-shell">
                 <i class="fa-regular fa-user prefix-icon"></i>
-                <input type="text" name="fullName" class="sat-input-ctrl" placeholder="e.g. Eleanor Vance" pattern="^[a-zA-Z\s]{2,50}$" title="Full Name can only contain letters and spaces." required />
+                <input type="text" name="fullName" id="inputSignUpFullName" class="sat-input-ctrl" placeholder="e.g. Eleanor Vance" value="@(ViewBag.FullName ?? "")" pattern="^[a-zA-Z\s]{2,50}$" title="Full Name can only contain letters and spaces." oninput="hideAuthAlerts()" required />
               </div>
             </div>
 
@@ -610,23 +628,25 @@
               <label class="sat-field-label">Email Address *</label>
               <div class="sat-input-shell">
                 <i class="fa-regular fa-envelope prefix-icon"></i>
-                <input type="email" name="email" class="sat-input-ctrl" placeholder="eleanor@example.com" required />
+                <input type="email" name="email" id="inputSignUpEmail" class="sat-input-ctrl" placeholder="eleanor@example.com" value="@(ViewBag.Email ?? "")" oninput="hideAuthAlerts(); checkEmailAvailabilityLive();" onblur="checkEmailAvailabilityLive();" required />
               </div>
+              <div id="emailAvailabilityFeedback" style="display:none; font-size:11.5px; margin-top:5px; font-weight:600; line-height:1.4;"></div>
             </div>
 
             <div class="sat-auth-field">
               <label class="sat-field-label">Mobile Phone (Optional)</label>
               <div class="sat-input-shell">
                 <i class="fa-solid fa-phone prefix-icon"></i>
-                <input type="tel" name="phone" class="sat-input-ctrl" placeholder="+1 (555) 000-0000" pattern="^(\+?1\s*[-\.]?)?\(?[2-9]\d{2}\)?\s*[-\.]?\s*\d{3}\s*[-\.]?\s*\d{4}$" title="Mobile number must be a valid 10-digit USA phone number." />
+                <input type="tel" name="phone" id="inputSignUpPhone" class="sat-input-ctrl" placeholder="+1 (555) 000-0000" value="@(ViewBag.Phone ?? "")" pattern="^(\+?1\s*[-\.]?)?\(?[2-9]\d{2}\)?\s*[-\.]?\s*\d{3}\s*[-\.]?\s*\d{4}$" title="Mobile number must be a valid 10-digit USA phone number." oninput="hideAuthAlerts(); checkPhoneAvailabilityLive();" onblur="checkPhoneAvailabilityLive();" />
               </div>
+              <div id="phoneAvailabilityFeedback" style="display:none; font-size:11.5px; margin-top:5px; font-weight:600; line-height:1.4;"></div>
             </div>
 
             <div class="sat-auth-field">
               <label class="sat-field-label">Create Password *</label>
               <div class="sat-input-shell">
                 <i class="fa-solid fa-lock prefix-icon"></i>
-                <input type="password" name="password" id="inputSignUpPassword" class="sat-input-ctrl" placeholder="Min 8 chars, 1 letter, 1 symbol" minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Za-z])(?=.*[\W_]).{8,}$" title="Password must be at least 8 characters with at least 1 lowercase letter, 1 alphabet letter, and 1 special character." required />
+                <input type="password" name="password" id="inputSignUpPassword" class="sat-input-ctrl" placeholder="Min 8 chars, 1 letter, 1 symbol" minlength="8" pattern="^(?=.*[a-z])(?=.*[A-Za-z])(?=.*[\W_]).{8,}$" title="Password must be at least 8 characters with at least 1 lowercase letter, 1 alphabet letter, and 1 special character." oninput="hideAuthAlerts(); validatePasswordsLive();" required />
                 <button type="button" class="sat-toggle-pwd" onclick="togglePwdVisibility('inputSignUpPassword', this)" aria-label="Toggle Password">
                   <i class="fa-regular fa-eye"></i>
                 </button>
@@ -637,7 +657,7 @@
               <label class="sat-field-label">Confirm Password *</label>
               <div class="sat-input-shell">
                 <i class="fa-solid fa-shield-halved prefix-icon"></i>
-                <input type="password" name="confirmPassword" id="inputSignUpConfirmPassword" class="sat-input-ctrl" placeholder="Repeat password" required />
+                <input type="password" name="confirmPassword" id="inputSignUpConfirmPassword" class="sat-input-ctrl" placeholder="Repeat password" oninput="hideAuthAlerts(); validatePasswordsLive();" required />
               </div>
             </div>
 
@@ -666,7 +686,12 @@
   </div>
 
   <script>
+    function hideAuthAlerts() {
+      document.querySelectorAll('.sat-auth-alert').forEach(el => el.style.display = 'none');
+    }
+
     function switchAuthTab(mode) {
+      hideAuthAlerts();
       const paneSignIn = document.getElementById('paneSignIn');
       const paneSignUp = document.getElementById('paneSignUp');
       const tabSignIn = document.getElementById('tabSignInBtn');
@@ -697,6 +722,206 @@
         input.type = 'password';
         btn.innerHTML = '<i class="fa-regular fa-eye"></i>';
       }
+    }
+
+    function handleSignInSubmit(e) {
+      const email = document.getElementById('inputSignInEmail');
+      const pwd = document.getElementById('inputSignInPassword');
+      const alertBox = document.getElementById('clientSignInAlert');
+      const alertMsg = document.getElementById('clientSignInAlertMsg');
+
+      if (!email || !pwd) return true;
+
+      if (!email.value.trim() || !pwd.value.trim()) {
+        e.preventDefault();
+        if (alertBox && alertMsg) {
+          alertMsg.textContent = "All required fields must be filled.";
+          alertBox.style.display = "flex";
+          alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        if (!email.value.trim()) email.focus();
+        else pwd.focus();
+        return false;
+      }
+
+      if (alertBox) alertBox.style.display = 'none';
+      return true;
+    }
+
+    function validatePasswordsLive() {
+      const pwd = document.getElementById('inputSignUpPassword');
+      const cpwd = document.getElementById('inputSignUpConfirmPassword');
+      const alertBox = document.getElementById('clientSignUpAlert');
+
+      if (!pwd || !cpwd) return;
+
+      if (cpwd.value.length > 0) {
+        if (pwd.value !== cpwd.value) {
+          cpwd.style.borderColor = '#ef4444';
+          cpwd.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.4)';
+        } else {
+          cpwd.style.borderColor = '#22c55e';
+          cpwd.style.boxShadow = '0 0 12px rgba(34, 197, 94, 0.35)';
+          if (alertBox) alertBox.style.display = 'none';
+        }
+      } else {
+        cpwd.style.borderColor = '';
+        cpwd.style.boxShadow = '';
+      }
+    }
+
+    let emailCheckTimeout = null;
+    let phoneCheckTimeout = null;
+    let isEmailDuplicate = false;
+    let isPhoneDuplicate = false;
+
+    function checkEmailAvailabilityLive() {
+      clearTimeout(emailCheckTimeout);
+      const emailInput = document.getElementById('inputSignUpEmail');
+      const feedback = document.getElementById('emailAvailabilityFeedback');
+      if (!emailInput || !feedback) return;
+
+      const val = emailInput.value.trim();
+      if (!val || val.indexOf('@@') === -1 || val.indexOf('.') === -1) {
+        feedback.style.display = 'none';
+        emailInput.style.borderColor = '';
+        emailInput.style.boxShadow = '';
+        isEmailDuplicate = false;
+        return;
+      }
+
+      emailCheckTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch('/Account/CheckAvailability?email=' + encodeURIComponent(val));
+          const data = await res.json();
+          if (data.emailExists) {
+            isEmailDuplicate = true;
+            emailInput.style.borderColor = '#ef4444';
+            emailInput.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.4)';
+            feedback.style.display = 'block';
+            feedback.style.color = '#f87171';
+            feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> An account with this email address already exists. <a href="javascript:void(0)" onclick="switchAuthTab('signin')" style="color:#d4b878; text-decoration:underline; font-weight:700; margin-left:4px;">Sign In here &rarr;</a>`;
+          } else {
+            isEmailDuplicate = false;
+            emailInput.style.borderColor = '#22c55e';
+            emailInput.style.boxShadow = '0 0 12px rgba(34, 197, 94, 0.3)';
+            feedback.style.display = 'block';
+            feedback.style.color = '#4ade80';
+            feedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> Email is available.`;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }, 350);
+    }
+
+    function checkPhoneAvailabilityLive() {
+      clearTimeout(phoneCheckTimeout);
+      const phoneInput = document.getElementById('inputSignUpPhone');
+      const feedback = document.getElementById('phoneAvailabilityFeedback');
+      if (!phoneInput || !feedback) return;
+
+      const val = phoneInput.value.trim();
+      const digits = val.replace(/\D/g, '');
+      if (digits.length < 10) {
+        feedback.style.display = 'none';
+        phoneInput.style.borderColor = '';
+        phoneInput.style.boxShadow = '';
+        isPhoneDuplicate = false;
+        return;
+      }
+
+      phoneCheckTimeout = setTimeout(async () => {
+        try {
+          const res = await fetch('/Account/CheckAvailability?phone=' + encodeURIComponent(val));
+          const data = await res.json();
+          if (data.phoneExists) {
+            isPhoneDuplicate = true;
+            phoneInput.style.borderColor = '#ef4444';
+            phoneInput.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.4)';
+            feedback.style.display = 'block';
+            feedback.style.color = '#f87171';
+            feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> This mobile number is already registered to another account.`;
+          } else {
+            isPhoneDuplicate = false;
+            phoneInput.style.borderColor = '#22c55e';
+            phoneInput.style.boxShadow = '0 0 12px rgba(34, 197, 94, 0.3)';
+            feedback.style.display = 'block';
+            feedback.style.color = '#4ade80';
+            feedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> Mobile number is available.`;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }, 350);
+    }
+
+    function handleSignUpSubmit(e) {
+      const fullName = document.getElementById('inputSignUpFullName');
+      const email = document.getElementById('inputSignUpEmail');
+      const pwd = document.getElementById('inputSignUpPassword');
+      const cpwd = document.getElementById('inputSignUpConfirmPassword');
+      const alertBox = document.getElementById('clientSignUpAlert');
+      const alertMsg = document.getElementById('clientSignUpAlertMsg');
+
+      if (!fullName || !email || !pwd || !cpwd) return true;
+
+      if (!fullName.value.trim() || !email.value.trim() || !pwd.value.trim() || !cpwd.value.trim()) {
+        e.preventDefault();
+        if (alertBox && alertMsg) {
+          alertMsg.textContent = "All required fields must be filled.";
+          alertBox.style.display = "flex";
+          alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        if (!fullName.value.trim()) fullName.focus();
+        else if (!email.value.trim()) email.focus();
+        else if (!pwd.value.trim()) pwd.focus();
+        else cpwd.focus();
+        return false;
+      }
+
+      if (isEmailDuplicate) {
+        e.preventDefault();
+        if (alertBox && alertMsg) {
+          alertMsg.textContent = "An account with this email address already exists. Please Sign In.";
+          alertBox.style.display = "flex";
+          alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        email.focus();
+        return false;
+      }
+
+      if (isPhoneDuplicate) {
+        e.preventDefault();
+        if (alertBox && alertMsg) {
+          alertMsg.textContent = "This mobile number is already registered to another account. Please use another number.";
+          alertBox.style.display = "flex";
+          alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        document.getElementById('inputSignUpPhone')?.focus();
+        return false;
+      }
+
+      if (pwd.value !== cpwd.value) {
+        e.preventDefault();
+        if (alertBox && alertMsg) {
+          alertMsg.textContent = "Passwords do not match. Please verify your password confirmation.";
+          alertBox.style.display = "flex";
+          alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        cpwd.style.borderColor = '#ef4444';
+        cpwd.style.boxShadow = '0 0 16px rgba(239, 68, 68, 0.5)';
+        cpwd.focus();
+        return false;
+      }
+
+      if (alertBox) alertBox.style.display = 'none';
+      try {
+        const cleanEmail = email.value.trim().toLowerCase();
+        localStorage.setItem('sat_cart_' + encodeURIComponent(cleanEmail), '[]');
+        localStorage.removeItem('sat_shopping_cart_usd');
+      } catch (_) {}
+      return true;
     }
   </script>
 </body>

@@ -4,20 +4,16 @@
     ViewData["Title"] = $"Live Order Tracking #{Model.OrderNumber} - SAT Fine Jewelry";
     var history = ViewBag.History as List<SAT1.Models.OrderTrackingHistory> ?? new List<SAT1.Models.OrderTrackingHistory>();
 
-    // Determine current progress index (0 to 6)
-    int currentStep = 1;
-    switch (Model.CurrentTrackingStatus)
-    {
-        case "OrderPlaced": currentStep = 1; break;
-        case "Processing": currentStep = 2; break;
-        case "ShipmentBooked": currentStep = 3; break;
-        case "Shipped":
-        case "InTransit": currentStep = 4; break;
-        case "CustomsClearance": currentStep = 5; break;
-        case "OutForDelivery": currentStep = 6; break;
-        case "Delivered": currentStep = 7; break;
-        default: currentStep = 3; break;
-    }
+    // Determine current progress index (1 to 7)
+    int currentStep = 3;
+    var rawStatus = (Model.CurrentTrackingStatus ?? Model.OrderStatus ?? "").ToLower();
+    if (rawStatus.Contains("delivered") || rawStatus.Contains("completed")) currentStep = 7;
+    else if (rawStatus.Contains("outfordelivery") || rawStatus.Contains("out for delivery")) currentStep = 6;
+    else if (rawStatus.Contains("customs") || rawStatus.Contains("us customs")) currentStep = 5;
+    else if (rawStatus.Contains("intransit") || rawStatus.Contains("in transit") || rawStatus.Contains("air") || rawStatus.Contains("shipped")) currentStep = 4;
+    else if (rawStatus.Contains("booked") || rawStatus.Contains("dispatched")) currentStep = 3;
+    else if (rawStatus.Contains("processing") || rawStatus.Contains("crafting") || rawStatus.Contains("qc")) currentStep = 2;
+    else if (rawStatus.Contains("placed") || rawStatus.Contains("pending")) currentStep = 1;
 }
 
 <style>
@@ -205,8 +201,8 @@
         <div class="step-title">Out for Delivery</div>
       </div>
 
-      <div class="step-item @(currentStep == 7 ? "completed" : "")">
-        <div class="step-circle">@(currentStep == 7 ? "✓" : "7")</div>
+      <div class="step-item @(currentStep >= 7 ? "completed active" : "")">
+        <div class="step-circle">@(currentStep >= 7 ? "✓" : "7")</div>
         <div class="step-title">Delivered</div>
       </div>
     </div>

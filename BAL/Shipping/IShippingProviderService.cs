@@ -39,7 +39,7 @@ namespace SAT1.BAL.Shipping
         public string CarrierStatus { get; set; } = string.Empty;
         public string StatusNote { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
-        public DateTime EventTimestamp { get; set; } = DateTime.UtcNow;
+        public DateTime EventTimestamp { get; set; } = DateTime.Now;
         public DateTime? EstimatedDeliveryDate { get; set; }
         public string RawPayload { get; set; } = string.Empty;
     }

@@ -13,7 +13,7 @@ namespace SAT1.Models
         public string OrderId { get; set; } = Guid.NewGuid().ToString();
 
         [MaxLength(50)]
-        public string OrderNumber { get; set; } = $"SAT-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}";
+        public string OrderNumber { get; set; } = $"SAT-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}";
 
         public string UserId { get; set; } = string.Empty;
 
@@ -93,7 +93,7 @@ namespace SAT1.Models
 
         public string? SuspiciousReason { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         // Shipping & Fulfillment Tracking Fields (Amazon/Flipkart Automatic Workflow)
         [MaxLength(50)]

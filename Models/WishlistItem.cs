@@ -20,6 +20,6 @@ namespace SAT1.Models
 
         public string ImageUrl { get; set; } = string.Empty;
 
-        public DateTime AddedAt { get; set; } = DateTime.UtcNow;
+        public DateTime AddedAt { get; set; } = DateTime.Now;
     }
 }

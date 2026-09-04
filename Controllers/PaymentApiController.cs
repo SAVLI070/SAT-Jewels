@@ -84,7 +84,7 @@ namespace SAT1.Controllers
                     PaymentMethod = "PayPal Express USD (" + req.PayPalOrderId + ")",
                     PayPalTransactionId = req.PayPalOrderId,
                     Status = "Completed (Insured GIA Home Delivery Dispatch)",
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now
                 };
 
                 _context.Orders.Add(order);
@@ -163,7 +163,7 @@ namespace SAT1.Controllers
                     PaymentMethod = "PayPal.Me Direct Transfer (" + (req.PayPalTransactionId ?? "Pending Verification") + ")",
                     PayPalTransactionId = req.PayPalTransactionId ?? "PPME-" + orderId,
                     Status = "Payment Pending Verification (PayPal Direct Transfer)",
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now
                 };
 
                 _context.Orders.Add(order);

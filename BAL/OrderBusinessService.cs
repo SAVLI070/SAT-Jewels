@@ -65,7 +65,7 @@ namespace SAT1.BAL
             var pendingOrder = new Order
             {
                 OrderId = internalOrderId,
-                OrderNumber = $"SAT-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}",
+                OrderNumber = $"SAT-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}",
                 UserId = userId,
                 CustomerEmail = userEmail,
                 ItemName = $"{product.Name} (Qty: {quantity})",
@@ -85,7 +85,7 @@ namespace SAT1.BAL
                 ShippingPostalCode = shipping.PostalCode,
                 ShippingCountry = shipping.Country,
                 CustomerRegion = shipping.Country,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now
             };
 
             await _orderRepo.CreatePendingOrderAsync(pendingOrder);
@@ -165,7 +165,7 @@ namespace SAT1.BAL
             var pendingOrder = new Order
             {
                 OrderId = internalOrderId,
-                OrderNumber = $"SAT-{DateTime.UtcNow:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}",
+                OrderNumber = $"SAT-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}",
                 UserId = userId,
                 CustomerEmail = userEmail,
                 ItemName = $"{product.Name} (Qty: {quantity})",
@@ -184,7 +184,7 @@ namespace SAT1.BAL
                 ShippingPostalCode = shipping.PostalCode,
                 ShippingCountry = shipping.Country,
                 CustomerRegion = shipping.Country,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now
             };
 
             await _orderRepo.CreatePendingOrderAsync(pendingOrder);

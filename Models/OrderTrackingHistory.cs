@@ -48,7 +48,7 @@ namespace SAT1.Models
         public string Source { get; set; } = "System"; // "System" (automated webhook/API) or "Manual"
 
         [Column("created_at")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         [ForeignKey("OrderId")]
         public virtual Order? Order { get; set; }

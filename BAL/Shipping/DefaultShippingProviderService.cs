@@ -41,9 +41,9 @@ namespace SAT1.BAL.Shipping
 
                 // Generate authoritative AWB / Tracking number
                 var randomNum = Random.Shared.Next(10000000, 99999999);
-                var awb = $"DHL{DateTime.UtcNow:yyyyMMdd}{randomNum}";
+                var awb = $"DHL{DateTime.Now:yyyyMMdd}{randomNum}";
                 var trackingUrl = $"https://www.dhl.com/en/express/tracking.html?AWB={awb}";
-                var estDelivery = DateTime.UtcNow.AddDays(4); // Standard India -> USA DHL Express duration (3-5 days)
+                var estDelivery = DateTime.Now.AddDays(4); // Standard India -> USA DHL Express duration (3-5 days)
 
                 return new ShipmentBookingResult
                 {
@@ -76,8 +76,8 @@ namespace SAT1.BAL.Shipping
                 CarrierStatus = "PROCESSED_AT_TRANSIT_HUB",
                 StatusNote = "Processed through Mumbai Air Cargo Hub. En route to JFK International Airport, USA.",
                 Location = "Mumbai Air Cargo Hub, India",
-                EventTimestamp = DateTime.UtcNow,
-                EstimatedDeliveryDate = DateTime.UtcNow.AddDays(3)
+                EventTimestamp = DateTime.Now,
+                EstimatedDeliveryDate = DateTime.Now.AddDays(3)
             };
         }
 
@@ -110,7 +110,7 @@ namespace SAT1.BAL.Shipping
                 var note = root.TryGetProperty("note", out var n) ? n.GetString() ?? "" : "Carrier status updated.";
                 var location = root.TryGetProperty("location", out var l) ? l.GetString() ?? "" : "";
 
-                DateTime eventTime = DateTime.UtcNow;
+                DateTime eventTime = DateTime.Now;
                 if (root.TryGetProperty("timestamp", out var t) && DateTime.TryParse(t.GetString(), out var dt))
                 {
                     eventTime = dt;

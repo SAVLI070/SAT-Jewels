@@ -83,7 +83,7 @@ namespace SAT1.Controllers
                         ProductName = req.ProductName ?? "Fine Jewelry Product",
                         PriceUSD = req.PriceUSD,
                         ImageUrl = req.ImageUrl ?? "/assets/categories/cat_engagement_rings.png",
-                        AddedAt = DateTime.UtcNow
+                        AddedAt = DateTime.Now
                     };
 
                     _context.WishlistItems.Add(newItem);

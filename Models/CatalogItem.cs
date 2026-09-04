@@ -18,14 +18,31 @@ namespace SAT1.Models
 
         public string? Spec { get; set; } = string.Empty;
 
-        [Required]
-        public decimal Price { get; set; }
+        private decimal _price;
 
-        [NotMapped]
+        [Required]
+        [Column("Price")]
+        public decimal Price 
+        { 
+            get => _price; 
+            set 
+            { 
+                _price = value; 
+                if (_priceUSD == 0m) _priceUSD = value; 
+            } 
+        }
+
+        private decimal _priceUSD;
+
+        [Column("PriceUSD")]
         public decimal PriceUSD 
         { 
-            get => Price; 
-            set => Price = value; 
+            get => _priceUSD > 0 ? _priceUSD : _price; 
+            set 
+            { 
+                _priceUSD = value; 
+                _price = value; 
+            } 
         }
 
         [NotMapped]
@@ -67,7 +84,7 @@ namespace SAT1.Models
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         [NotMapped]
         public virtual ICollection<MetalOption> MetalOptionList { get; set; } = new List<MetalOption>();

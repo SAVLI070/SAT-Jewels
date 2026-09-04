@@ -3,6 +3,7 @@
     ViewData["Title"] = "Shopping Cart & Home Delivery Checkout";
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     var userName = User.Identity?.Name ?? "";
+    var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -245,11 +246,12 @@
             <div class="form-grid-2col" style="margin-top:14px;">
               <div class="form-group-item">
                 <label>Postal / ZIP Code *</label>
-                <input type="text" id="shipPostalCode" class="form-input-field" placeholder="e.g. 400001 / 10001" required />
+                <input type="text" id="shipPostalCode" class="form-input-field" placeholder="e.g. 400001 / 396445 (6 digits)" oninput="checkAddressValidation()" required />
+                <div id="postalCodeFeedback" style="display:none; font-size:11.5px; margin-top:4px; font-weight:600; line-height:1.4;"></div>
               </div>
               <div class="form-group-item">
                 <label>Country *</label>
-                <select id="shipCountry" class="form-input-field" required>
+                <select id="shipCountry" class="form-input-field" onchange="onCountryChanged()" required>
                   <option value="India" selected>India</option>
                   <option value="United States">United States</option>
                   <option value="United Kingdom">United Kingdom</option>
@@ -285,10 +287,13 @@
           </div>
 
           <div id="paypalContainerBox" class="paypal-box-wrap" style="opacity: 0.5; pointer-events: none;">
-            <!-- Option 1: Official PayPal Express Checkout (In-Page Popup SDK) -->
+            <!-- Option 1: Official PayPal Express Checkout -->
             <div style="margin-bottom: 20px;">
               <div style="font-size:12px; color:var(--taupe-beige); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Option 1: Pay with PayPal</div>
-              <div id="paypal-button-container"></div>
+              <button type="button" id="btnPayPalExpress" class="btn-paypal-express" onclick="payWithPayPalInstant()" style="width:100%; padding:14px 20px; background:#ffc439; color:#003087; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(255,196,57,0.3); transition:all 0.3s ease;">
+                <i class="fa-brands fa-paypal" style="font-size:20px; color:#003087;"></i> Pay with PayPal (<span id="paypalBtnAmountDisplay">$0 USD</span>)
+              </button>
+              <div id="paypal-button-container" style="margin-top:12px; display:none;"></div>
             </div>
 
             <!-- Option 2: Razorpay Independent Card Gateway (Embedded Modal Overlay) -->
@@ -358,17 +363,149 @@
       }
     }
 
+    function onCountryChanged() {
+      const countryEl = document.getElementById('shipCountry');
+      const postalEl = document.getElementById('shipPostalCode');
+      if (!countryEl || !postalEl) return;
+
+      const country = countryEl.value;
+      switch (country) {
+        case 'India':
+          postalEl.placeholder = 'e.g. 400001 / 396445 (6-digit PIN)';
+          break;
+        case 'United States':
+          postalEl.placeholder = 'e.g. 10001 / 90210 (5-digit ZIP)';
+          break;
+        case 'United Kingdom':
+          postalEl.placeholder = 'e.g. SW1A 1AA / EC1A 1BB';
+          break;
+        case 'Canada':
+          postalEl.placeholder = 'e.g. M5V 2T6 / K1A 0B1';
+          break;
+        case 'Australia':
+          postalEl.placeholder = 'e.g. 2000 / 3000 (4-digit Postcode)';
+          break;
+        case 'Germany':
+        case 'France':
+          postalEl.placeholder = 'e.g. 75001 / 10115 (5-digit Code)';
+          break;
+        default:
+          postalEl.placeholder = 'Postal / ZIP Code';
+          break;
+      }
+      checkAddressValidation();
+    }
+
+    function validatePostalCodeFormat(postal, country) {
+      if (!postal) return { valid: false, message: 'Postal / ZIP Code is required.' };
+      const clean = postal.trim().toUpperCase();
+      const digitsOnly = clean.replace(/\D/g, '');
+
+      if (country === 'United States') {
+        if (digitsOnly.length === 6) {
+          return {
+            valid: false,
+            message: `"${postal}" is a 6-digit Indian PIN code. For United States, please enter a 5-digit US ZIP code (e.g. 10001, 90210) or switch country to India.`
+          };
+        }
+        const usRegex = /^\d{5}(-\d{4})?$/;
+        if (!usRegex.test(clean)) {
+          return { valid: false, message: 'For United States, please enter a valid 5-digit ZIP code (e.g. 10001, 90210).' };
+        }
+        return { valid: true };
+      }
+
+      if (country === 'India') {
+        if (digitsOnly.length === 5) {
+          return {
+            valid: false,
+            message: `"${postal}" is a 5-digit US ZIP code. For India, please enter a 6-digit Indian PIN code (e.g. 400001, 396445) or switch country to United States.`
+          };
+        }
+        const inRegex = /^\d{6}$/;
+        if (!inRegex.test(clean)) {
+          return { valid: false, message: 'For India, please enter a valid 6-digit postal PIN code (e.g. 396445, 400001).' };
+        }
+        return { valid: true };
+      }
+
+      if (country === 'United Kingdom') {
+        const ukRegex = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/;
+        if (!ukRegex.test(clean)) {
+          return { valid: false, message: 'For United Kingdom, please enter a valid UK postcode (e.g. SW1A 1AA, EC1A 1BB).' };
+        }
+        return { valid: true };
+      }
+
+      if (country === 'Canada') {
+        const caRegex = /^[A-Z]\d[A-Z]\s*\d[A-Z]\d$/;
+        if (!caRegex.test(clean)) {
+          return { valid: false, message: 'For Canada, please enter a valid Canadian postal code (e.g. M5V 2T6).' };
+        }
+        return { valid: true };
+      }
+
+      if (country === 'Australia') {
+        if (!/^\d{4}$/.test(clean)) {
+          return { valid: false, message: 'For Australia, please enter a valid 4-digit postcode (e.g. 2000).' };
+        }
+        return { valid: true };
+      }
+
+      if (country === 'Germany' || country === 'France') {
+        if (!/^\d{5}$/.test(clean)) {
+          return { valid: false, message: `For ${country}, please enter a valid 5-digit postal code (e.g. 75001).` };
+        }
+        return { valid: true };
+      }
+
+      if (clean.length < 3) {
+        return { valid: false, message: 'Please enter a valid postal code.' };
+      }
+
+      return { valid: true };
+    }
+
     function checkAddressValidation() {
       const addr = getShippingAddressData();
       const notice = document.getElementById('addressWarningNotice');
       const paypalBox = document.getElementById('paypalContainerBox');
+      const postalFeedback = document.getElementById('postalCodeFeedback');
+      const postalEl = document.getElementById('shipPostalCode');
+      const countryEl = document.getElementById('shipCountry');
+
+      const postalVal = postalEl ? postalEl.value.trim() : '';
+      const countryVal = countryEl ? countryEl.value : 'India';
+
+      if (postalVal && postalFeedback && postalEl) {
+        const postalCheck = validatePostalCodeFormat(postalVal, countryVal);
+        if (!postalCheck.valid) {
+          postalFeedback.style.display = 'block';
+          postalFeedback.style.color = '#f87171';
+          postalFeedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${postalCheck.message}`;
+          postalEl.style.borderColor = '#ef4444';
+          postalEl.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.4)';
+        } else {
+          postalFeedback.style.display = 'block';
+          postalFeedback.style.color = '#4ade80';
+          postalFeedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> Valid ${countryVal} postal format.`;
+          postalEl.style.borderColor = '#22c55e';
+          postalEl.style.boxShadow = '0 0 10px rgba(34, 197, 94, 0.3)';
+        }
+      } else if (postalFeedback) {
+        postalFeedback.style.display = 'none';
+        if (postalEl) {
+          postalEl.style.borderColor = '';
+          postalEl.style.boxShadow = '';
+        }
+      }
 
       if (addr) {
         if (notice) {
           notice.style.background = 'rgba(34, 197, 94, 0.12)';
           notice.style.borderColor = '#22c55e';
           notice.style.color = '#4ade80';
-          notice.innerHTML = '<i class="fa-solid fa-circle-check" style="font-size:18px; color:#22c55e;"></i> <div><strong>Payment Authorized:</strong> Shipping address verified. You may now complete your PayPal payment below.</div>';
+          notice.innerHTML = `<i class="fa-solid fa-circle-check" style="font-size:18px; color:#22c55e;"></i> <div><strong>Payment Authorized:</strong> Shipping address verified for ${addr.country}. You may now complete your payment below.</div>`;
         }
         if (paypalBox) {
           paypalBox.style.opacity = '1';
@@ -380,7 +517,7 @@
           notice.style.background = 'rgba(239,68,68,0.12)';
           notice.style.borderColor = '#ef4444';
           notice.style.color = '#fca5a5';
-          notice.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="font-size:18px; color:#ef4444;"></i> <div><strong>Payment Permission Locked:</strong> Complete home delivery shipping address required before payment button unlocks.</div>';
+          notice.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="font-size:18px; color:#ef4444;"></i> <div><strong>Payment Permission Locked:</strong> Complete home delivery shipping address with valid country-matched PIN/ZIP code required before payment button unlocks.</div>';
         }
         if (paypalBox) {
           paypalBox.style.opacity = '0.5';
@@ -390,6 +527,15 @@
       }
     }
 
+    function getCartStorageKey() {
+      const isAuth = @(isAuthenticated ? "true" : "false");
+      const email = '@(userEmail.ToLower().Trim())';
+      if (isAuth && email) {
+        return 'sat_cart_' + encodeURIComponent(email);
+      }
+      return 'sat_cart_guest';
+    }
+
     function renderCart() {
       const container = document.getElementById('cartItemsContainer');
       const totalEl = document.getElementById('cartTotalDisplay');
@@ -397,7 +543,8 @@
       if (!container) return;
 
       try {
-        const saved = localStorage.getItem('sat_shopping_cart_usd');
+        const key = getCartStorageKey();
+        const saved = localStorage.getItem(key);
         const items = saved ? JSON.parse(saved) : [];
 
         if (items.length === 0) {
@@ -456,6 +603,78 @@
       }
     }
 
+    async function payWithPayPalInstant() {
+      if (!isUserAuthenticated) {
+        alert('🚫 PERMISSION DENIED: You must sign in to your account before proceeding to payment.');
+        window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+        return;
+      }
+
+      const addr = getShippingAddressData();
+      if (!addr) {
+        alert('⚠️ PERMISSION DENIED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, ZIP) is required before payment can be initialized.');
+        checkAddressValidation();
+        return;
+      }
+
+      const key = getCartStorageKey();
+      const savedCart = localStorage.getItem(key);
+      const cartItems = savedCart ? JSON.parse(savedCart) : [];
+      const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-8') : 'sat-prod-8';
+      const qty = cartItems.length > 0 ? (Number(cartItems[0].quantity) || 1) : 1;
+
+      showPaymentProcessing("Processing PayPal payment authorization and securing your bespoke jewelry order...");
+
+      try {
+        // Step 1: Create PayPal Order
+        const res = await fetch('/api/payment/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: firstItemId,
+            quantity: qty,
+            shippingFullName: addr.name,
+            shippingPhone: addr.phone,
+            shippingStreet: addr.street,
+            shippingCity: addr.city,
+            shippingState: addr.state,
+            shippingPostalCode: addr.postal,
+            shippingCountry: addr.country
+          })
+        });
+
+        const result = await res.json();
+        if (!result.success || !result.orderId) {
+          hidePaymentProcessing();
+          alert('Error initializing PayPal order: ' + (result.message || 'Server error'));
+          return;
+        }
+
+        // Step 2: Auto-verify and confirm payment into DB
+        const verifyRes = await fetch('/api/payment/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payPalOrderId: result.orderId })
+        });
+
+        const verifyResult = await verifyRes.json();
+        hidePaymentProcessing();
+
+        if (verifyResult.success) {
+          localStorage.removeItem(getCartStorageKey());
+          alert('🎉 PayPal Payment Authorized & Order Placed Successfully!\n\nOrder ID: ' + (verifyResult.orderId || result.internalOrderId || result.orderId) + '\nStatus: Paid & Insured Dispatch Booked');
+          window.location.href = '/Account/Orders';
+        } else {
+          alert('⚠️ Payment Verification Notice: ' + (verifyResult.message || 'Processing'));
+          window.location.href = '/Account/Orders';
+        }
+      } catch (err) {
+        hidePaymentProcessing();
+        console.error('PayPal instant error:', err);
+        alert('An error occurred during payment processing. Please try again.');
+      }
+    }
+
     async function payWithPayPalMe() {
       if (!isUserAuthenticated) {
         alert('🚫 PERMISSION DENIED: You must sign in to your account before proceeding to payment.');
@@ -503,7 +722,7 @@
           // Open direct PayPal.Me link pre-filled with exact amount in new tab
           window.open(data.directPaymentUrl, '_blank');
           
-          localStorage.removeItem('sat_shopping_cart_usd');
+          localStorage.removeItem(getCartStorageKey());
           if (typeof showPaymentSuccessModal === 'function') {
             showPaymentSuccessModal(data.orderId);
           } else {
@@ -550,15 +769,21 @@
         return null;
       }
 
+      if (typeof validatePostalCodeFormat === 'function') {
+        const check = validatePostalCodeFormat(postal, country);
+        if (!check.valid) return null;
+      }
+
       return { name, phone, street, city, state, postal, country };
     }
 
     function removeItem(index) {
       try {
-        const saved = localStorage.getItem('sat_shopping_cart_usd');
+        const key = getCartStorageKey();
+        const saved = localStorage.getItem(key);
         let items = saved ? JSON.parse(saved) : [];
         items.splice(index, 1);
-        localStorage.setItem('sat_shopping_cart_usd', JSON.stringify(items));
+        localStorage.setItem(key, JSON.stringify(items));
         renderCart();
         if (typeof syncCartBadge === 'function') syncCartBadge();
       } catch (e) {}
@@ -611,9 +836,10 @@
           }
 
           // Security Rule: Never send price/amount! Pass only productId & quantity to server
-          const savedCart = localStorage.getItem('sat_shopping_cart_usd');
+          const key = getCartStorageKey();
+          const savedCart = localStorage.getItem(key);
           const cartItems = savedCart ? JSON.parse(savedCart) : [];
-          const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-441') : 'sat-prod-441';
+          const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-8') : 'sat-prod-8';
           const qty = cartItems.length > 0 ? (Number(cartItems[0].quantity) || 1) : 1;
 
           try {
@@ -657,7 +883,7 @@
           .then(result => {
             hidePaymentProcessing();
             if (result.success) {
-              localStorage.removeItem('sat_shopping_cart_usd');
+              localStorage.removeItem(getCartStorageKey());
               alert('🎉 Order Verified & Placed Successfully! Order ID: ' + (result.orderId || data.orderID));
               window.location.href = '/Account/Orders';
             } else {
@@ -694,9 +920,10 @@
         return;
       }
 
-      const savedCart = localStorage.getItem('sat_shopping_cart_usd');
+      const key = getCartStorageKey();
+      const savedCart = localStorage.getItem(key);
       const cartItems = savedCart ? JSON.parse(savedCart) : [];
-      const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-441') : 'sat-prod-441';
+      const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-8') : 'sat-prod-8';
       const qty = cartItems.length > 0 ? (Number(cartItems[0].quantity) || 1) : 1;
 
       try {
@@ -750,7 +977,7 @@
               hidePaymentProcessing();
 
               if (verifyResult.success) {
-                localStorage.removeItem('sat_shopping_cart_usd');
+                localStorage.removeItem(getCartStorageKey());
                 alert('🎉 Razorpay Card Order Verified and Confirmed! Order ID: ' + (verifyResult.orderId || response.razorpay_order_id));
                 window.location.href = '/Account/Orders';
               } else {

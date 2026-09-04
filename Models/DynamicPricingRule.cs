@@ -38,7 +38,7 @@ namespace SAT1.Models
         public bool IsActive { get; set; } = true;
 
         [Column("updated_at")]
-        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
     }
 
     public class DynamicPricingRuleDto

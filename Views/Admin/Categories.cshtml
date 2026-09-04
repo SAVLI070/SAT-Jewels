@@ -9,9 +9,33 @@
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
-    padding: 28px;
+    padding: 24px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     color: #0f172a;
+    height: 640px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cat-card-scroll {
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 6px;
+  }
+
+  .custom-admin-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-admin-scroll::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+  }
+  .custom-admin-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+  .custom-admin-scroll::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
   }
 
   .cat-form-group {
@@ -278,90 +302,92 @@
   <div class="cat-main-grid">
     <!-- LEFT: Add / Edit Category Form Panel -->
     <div class="cat-card-panel">
-      <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;font-weight:700;">
+      <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:14px;font-size:18px;display:flex;align-items:center;gap:10px;font-weight:700;flex-shrink:0;">
         <i class="fa-solid fa-folder-plus" style="color:#b45309;"></i> Create Category / Sub-Category
       </h3>
       
-      <form id="addCategoryForm" onsubmit="handleAddNewCategory(event)">
-        <input type="hidden" id="adminCatId" value="" />
-        <!-- Task 2: Category Hierarchy Level Selection -->
-        <div class="cat-form-group">
-          <label class="cat-form-label">Category Level / Hierarchy *</label>
-          <select id="adminCategoryType" class="cat-form-input" onchange="onCategoryTypeChange(this.value)">
-            <option value="Main Category" selected>🏢 Main Category (Root Level)</option>
-            <option value="Sub Category">📁 Sub-Category (Nested under Parent)</option>
-          </select>
-        </div>
-
-        <!-- Task 2: Parent Category Selector Dropdown -->
-        <div class="cat-form-group" id="parentSelectGroup" style="display:none;">
-          <label class="cat-form-label">Select Parent Main Category *</label>
-          <select id="adminParentId" class="cat-form-input">
-            <option value="">-- Select Parent Category --</option>
-            <option value="rings">Engagement Rings &amp; Solitaires</option>
-            <option value="wedding-rings">Wedding Rings &amp; Bands</option>
-            <option value="necklaces">Necklaces &amp; Pendants</option>
-            <option value="earrings">Earrings &amp; Studs</option>
-            <option value="bracelets">Bracelets &amp; Bangles</option>
-          </select>
-        </div>
-
-        <div class="cat-form-group">
-          <label class="cat-form-label">Category Title / Name *</label>
-          <input type="text" id="adminCatName" class="cat-form-input" placeholder="e.g. Lab Diamond Anniversary Rings" required />
-        </div>
-
-        <div class="cat-form-group">
-          <label class="cat-form-label">Subtitle Description *</label>
-          <input type="text" id="adminCatSub" class="cat-form-input" placeholder="e.g. Handcrafted Lab Diamonds &amp; Eternity Bands" required />
-        </div>
-
-        <div class="cat-form-group">
-          <label class="cat-form-label">Badge Tag</label>
-          <select id="adminCatBadge" class="cat-form-input">
-            <option value="Popular" selected>Popular</option>
-            <option value="Top Selling">Top Selling</option>
-            <option value="Trending">Trending</option>
-            <option value="Featured">Featured</option>
-            <option value="New Arrival">New Arrival</option>
-            <option value="GIA Certified">GIA Certified</option>
-          </select>
-        </div>
-
-        <!-- COVER IMAGE FILE UPLOAD ZONE -->
-        <div class="cat-form-group">
-          <label class="cat-form-label">Cover Image File Upload *</label>
-          <div class="cat-upload-dropzone" onclick="document.getElementById('adminCatFileInput').click()">
-            <i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#b45309;margin-bottom:6px;"></i>
-            <div style="font-weight:700;color:#0f172a;font-size:13px;">Click to Upload Cover Image</div>
-            <div style="font-size:11px;color:#64748b;">PNG, JPG, WebP (Max 10MB)</div>
-            <input type="file" id="adminCatFileInput" accept="image/*" style="display:none;" onchange="previewCatUploadFile(this)" />
+      <div class="cat-card-scroll custom-admin-scroll">
+        <form id="addCategoryForm" onsubmit="handleAddNewCategory(event)">
+          <input type="hidden" id="adminCatId" value="" />
+          <!-- Task 2: Category Hierarchy Level Selection -->
+          <div class="cat-form-group">
+            <label class="cat-form-label">Category Level / Hierarchy *</label>
+            <select id="adminCategoryType" class="cat-form-input" onchange="onCategoryTypeChange(this.value)">
+              <option value="Main Category" selected>🏢 Main Category (Root Level)</option>
+              <option value="Sub Category">📁 Sub-Category (Nested under Parent)</option>
+            </select>
           </div>
 
-          <div class="cat-preview-box" id="catPreviewBox">
-            <img id="catPreviewImg" src="" alt="Category Preview" />
+          <!-- Task 2: Parent Category Selector Dropdown -->
+          <div class="cat-form-group" id="parentSelectGroup" style="display:none;">
+            <label class="cat-form-label">Select Parent Main Category *</label>
+            <select id="adminParentId" class="cat-form-input">
+              <option value="">-- Select Parent Category --</option>
+              <option value="rings">Engagement Rings &amp; Solitaires</option>
+              <option value="wedding-rings">Wedding Rings &amp; Bands</option>
+              <option value="necklaces">Necklaces &amp; Pendants</option>
+              <option value="earrings">Earrings &amp; Studs</option>
+              <option value="bracelets">Bracelets &amp; Bangles</option>
+            </select>
           </div>
-        </div>
 
-        <!-- PRESET / CUSTOM URL FALLBACK -->
-        <div class="cat-form-group">
-          <label class="cat-form-label">Or Preset Asset / Custom Image URL</label>
-          <input type="text" id="adminCatImg" class="cat-form-input" placeholder="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" />
-        </div>
+          <div class="cat-form-group">
+            <label class="cat-form-label">Category Title / Name *</label>
+            <input type="text" id="adminCatName" class="cat-form-input" placeholder="e.g. Lab Diamond Anniversary Rings" required />
+          </div>
 
-        <button type="submit" class="cat-btn-submit" id="btnSaveCategory" style="background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#ffffff; margin-top:8px;">
-          <i class="fa-solid fa-plus-circle"></i> Save &amp; Publish New Category
-        </button>
-      </form>
+          <div class="cat-form-group">
+            <label class="cat-form-label">Subtitle Description *</label>
+            <input type="text" id="adminCatSub" class="cat-form-input" placeholder="e.g. Handcrafted Lab Diamonds &amp; Eternity Bands" required />
+          </div>
+
+          <div class="cat-form-group">
+            <label class="cat-form-label">Badge Tag</label>
+            <select id="adminCatBadge" class="cat-form-input">
+              <option value="Popular" selected>Popular</option>
+              <option value="Top Selling">Top Selling</option>
+              <option value="Trending">Trending</option>
+              <option value="Featured">Featured</option>
+              <option value="New Arrival">New Arrival</option>
+              <option value="GIA Certified">GIA Certified</option>
+            </select>
+          </div>
+
+          <!-- COVER IMAGE FILE UPLOAD ZONE -->
+          <div class="cat-form-group">
+            <label class="cat-form-label">Cover Image File Upload *</label>
+            <div class="cat-upload-dropzone" onclick="document.getElementById('adminCatFileInput').click()">
+              <i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#b45309;margin-bottom:6px;"></i>
+              <div style="font-weight:700;color:#0f172a;font-size:13px;">Click to Upload Cover Image</div>
+              <div style="font-size:11px;color:#64748b;">PNG, JPG, WebP (Max 10MB)</div>
+              <input type="file" id="adminCatFileInput" accept="image/*" style="display:none;" onchange="previewCatUploadFile(this)" />
+            </div>
+
+            <div class="cat-preview-box" id="catPreviewBox">
+              <img id="catPreviewImg" src="" alt="Category Preview" />
+            </div>
+          </div>
+
+          <!-- PRESET / CUSTOM URL FALLBACK -->
+          <div class="cat-form-group">
+            <label class="cat-form-label">Or Preset Asset / Custom Image URL</label>
+            <input type="text" id="adminCatImg" class="cat-form-input" placeholder="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" />
+          </div>
+
+          <button type="submit" class="cat-btn-submit" id="btnSaveCategory" style="background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#ffffff; margin-top:8px; margin-bottom:12px;">
+            <i class="fa-solid fa-plus-circle"></i> Save &amp; Publish New Category
+          </button>
+        </form>
+      </div>
     </div>
 
     <!-- RIGHT: Active Category & Sub-Category Tree Listing Table -->
     <div class="cat-card-panel">
-      <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:20px;font-size:20px;display:flex;align-items:center;gap:10px;font-weight:700;">
+      <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:14px;font-size:18px;display:flex;align-items:center;gap:10px;font-weight:700;flex-shrink:0;">
         <i class="fa-solid fa-sitemap" style="color:#b45309;"></i> Categories &amp; Sub-Categories Tree
       </h3>
       
-      <div class="table-responsive">
+      <div class="cat-card-scroll custom-admin-scroll table-responsive">
         <table class="admin-table">
           <thead>
             <tr>

@@ -168,14 +168,28 @@
     }
   });
 
-  (function syncCartBadge() {
+  function getSatUserCartKey() {
+    const isAuth = @(isAuthenticated ? "true" : "false");
+    const email = '@(userEmail.ToLower().Trim())';
+    if (isAuth && email) {
+      return 'sat_cart_' + encodeURIComponent(email);
+    }
+    return 'sat_cart_guest';
+  }
+
+  function syncCartBadge() {
     try {
-      const saved = localStorage.getItem('sat_shopping_cart_usd');
+      const key = getSatUserCartKey();
+      const saved = localStorage.getItem(key);
       const items = saved ? JSON.parse(saved) : [];
       const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
       document.querySelectorAll('#navCartCount, .auth-nav-cart-count').forEach(el => {
         el.textContent = String(count);
       });
     } catch (_) { }
-  })();
+  }
+
+  window.getSatUserCartKey = getSatUserCartKey;
+  window.syncCartBadge = syncCartBadge;
+  syncCartBadge();
 </script>

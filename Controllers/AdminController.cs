@@ -83,10 +83,18 @@ namespace SAT1.Controllers
         {
             if (!CheckAccess()) return HandleUnauthorized();
             ViewBag.Title = "Customer Orders & Live Tracking";
-            var orders = await _adminBal.GetAllOrdersWithTrackingAsync(status, q);
+            var allOrders = await _adminBal.GetAllOrdersWithTrackingAsync("All", null);
+            var filteredOrders = await _adminBal.GetAllOrdersWithTrackingAsync(status, q);
+            
+            ViewBag.TotalCount = allOrders.Count;
+            ViewBag.PaidCount = allOrders.Count(o => o.OrderStatus.Contains("Paid", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Completed", StringComparison.OrdinalIgnoreCase));
+            ViewBag.DispatchedCount = allOrders.Count(o => o.OrderStatus.Contains("Dispatched", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Booked", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && (o.CurrentTrackingStatus.Contains("Dispatched", StringComparison.OrdinalIgnoreCase) || o.CurrentTrackingStatus.Contains("Booked", StringComparison.OrdinalIgnoreCase))));
+            ViewBag.InTransitCount = allOrders.Count(o => o.OrderStatus.Contains("Transit", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.Contains("Transit", StringComparison.OrdinalIgnoreCase)));
+            ViewBag.DeliveredCount = allOrders.Count(o => o.OrderStatus.Contains("Delivered", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.Contains("Delivered", StringComparison.OrdinalIgnoreCase)));
+
             ViewBag.StatusFilter = status ?? "All";
             ViewBag.SearchQuery = q ?? "";
-            return View(orders);
+            return View(filteredOrders);
         }
 
         [HttpGet("users")]
@@ -108,13 +116,28 @@ namespace SAT1.Controllers
         }
 
         [HttpGet("reviews")]
-        public async Task<IActionResult> Reviews([FromServices] ReviewBal reviewBal, string? status)
+        public async Task<IActionResult> Reviews([FromServices] ReviewBal reviewBal, string? status, int page = 1, int pageSize = 12)
         {
             if (!CheckAccess()) return HandleUnauthorized();
             ViewBag.Title = "Product Customer Reviews Moderation";
-            var reviews = await reviewBal.GetAllReviewsAsync(status);
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 12;
+
+            var allReviews = await reviewBal.GetAllReviewsAsync(status);
+            int totalCount = allReviews.Count;
+            int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+
+            var pagedReviews = allReviews.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+
             ViewBag.StatusFilter = status ?? "All";
-            return View(reviews);
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.AllReviewsCount = (await reviewBal.GetAllReviewsAsync("All")).Count;
+
+            return View(pagedReviews);
         }
 
         [HttpGet("shippingexceptions")]

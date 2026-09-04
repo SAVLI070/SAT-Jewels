@@ -21,31 +21,14 @@
     {
         galleryList = Model.GalleryImages.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Select(s => FixImg(s.Trim()))
+            .Distinct()
             .ToList();
     }
 
-    // Enrich gallery to 4 angle shots matching Earthly Jewels layout
-    List<string> fallbackAngles = new List<string> {
-        mainImage,
-        "/assets/ivevar/ivevar-luxury-rings-925-silver-0-80-ct-sparkling-antique-shape-moissanite-silhouette-diamond-ring-vintage-fine-jewelry-44619076403505_c18db5d1-09b7-41c4-8fd4-f72a5a00aa4a.png",
-        "/assets/ivevar/ivevar-luxury-rings-925-silver-2-1-75-ct-sparkling-fancy-vivid-green-emerald-cut-moissanite-diamond-engagement-ring-44619311841585_7c5c472f-38eb-4a1b-89ee-25caa5a69c22.png",
-        "/assets/ivevar/modern_wedding_ring_band_be1024e1-bb04-457c-83d2-7acda4fc55b4.png"
-    };
-
-    if (galleryList.Count == 0)
+    if (!galleryList.Contains(mainImage))
     {
-        galleryList = fallbackAngles;
+        galleryList.Insert(0, mainImage);
     }
-    else if (galleryList.Count < 4)
-    {
-        foreach (var fa in fallbackAngles)
-        {
-            if (!galleryList.Contains(fa)) galleryList.Add(fa);
-            if (galleryList.Count >= 4) break;
-        }
-    }
-
-    galleryList = galleryList.Take(4).ToList();
 
     var originalPriceUSD = (int)(Model.Price * 1.15m);
 
@@ -66,9 +49,12 @@
         .Select(g => g.First())
         .ToList();
 
-    if (metalList.Count == 0)
+    if (metalList.Count < 10)
     {
         metalList = new[] {
+            new { Name = "10K Yellow Gold", Offset = 0m },
+            new { Name = "10K White Gold", Offset = 0m },
+            new { Name = "10K Rose Gold", Offset = 0m },
             new { Name = "14K Yellow Gold", Offset = 180m },
             new { Name = "14K White Gold", Offset = 180m },
             new { Name = "14K Rose Gold", Offset = 180m },
@@ -96,13 +82,18 @@
         .Select(g => g.First())
         .ToList();
 
-    if (caratList.Count == 0)
+    if (caratList.Count < 9)
     {
         caratList = new[] {
-            new { Label = "1.00 CT", Offset = 0m },
-            new { Label = "1.50 CT", Offset = 450m },
-            new { Label = "2.00 CT", Offset = 1100m },
-            new { Label = "3.00 CT", Offset = 2600m }
+            new { Label = "0.50 CT", Offset = 0m },
+            new { Label = "0.75 CT", Offset = 150m },
+            new { Label = "1.00 CT", Offset = 350m },
+            new { Label = "1.25 CT", Offset = 550m },
+            new { Label = "1.50 CT", Offset = 750m },
+            new { Label = "2.00 CT", Offset = 1200m },
+            new { Label = "3.00 CT", Offset = 2400m },
+            new { Label = "4.00 CT", Offset = 3800m },
+            new { Label = "5.00 CT", Offset = 5500m }
         }.ToList();
     }
 
@@ -151,7 +142,7 @@
       "url": "@prodCanonical",
       "priceCurrency": "USD",
       "price": "@Model.Price",
-      "priceValidUntil": "@DateTime.UtcNow.AddYears(1).ToString("yyyy-MM-dd")",
+      "priceValidUntil": "@DateTime.Now.AddYears(1).ToString("yyyy-MM-dd")",
       "availability": "https://schema.org/InStock",
       "itemCondition": "https://schema.org/NewCondition"
     }
@@ -1713,20 +1704,16 @@
           data.rules.forEach(r => {
             if (r.ruleType === 'Metal') {
               for (let k in metalAdjustments) {
-                const kLower = k.toLowerCase();
-                const codeLower = (r.code || '').toLowerCase();
-                if ((kLower.includes('10k') && codeLower.includes('10k')) ||
-                    (kLower.includes('14k') && codeLower.includes('14k')) ||
-                    (kLower.includes('18k') && codeLower.includes('18k')) ||
-                    (kLower.includes('platinum') && codeLower.includes('platinum')) ||
-                    (kLower.includes('silver') && codeLower.includes('silver'))) {
+                if (k.toLowerCase().trim() === (r.displayName || '').toLowerCase().trim()) {
+                  metalAdjustments[k] = r.priceOffsetUSD;
+                } else if ((r.code || '').toLowerCase() === k.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '')) {
                   metalAdjustments[k] = r.priceOffsetUSD;
                 }
               }
             } else if (r.ruleType === 'Carat') {
               for (let k in caratAdjustments) {
                 const kNum = (k.match(/\d+(\.\d+)?/) || [''])[0];
-                const rNum = (r.displayName.match(/\d+(\.\d+)?/) || [''])[0];
+                const rNum = ((r.displayName || r.code || '').match(/\d+(\.\d+)?/) || [''])[0];
                 if (kNum && rNum && Math.abs(parseFloat(kNum) - parseFloat(rNum)) < 0.05) {
                   caratAdjustments[k] = r.priceOffsetUSD;
                 }
@@ -1973,7 +1960,17 @@
 
         const variantTitle = `@Model.Name (${stoneName}, ${selectedMetal}, ${selectedCarat}, Size: ${ringSize}${engraving ? `, Engraved: "${engraving}"` : ''})`;
 
-        const saved = localStorage.getItem('sat_shopping_cart_usd');
+        function getCartStorageKey() {
+          const isAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+          const email = '@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower()?.Trim() ?? "")';
+          if (isAuth && email) {
+            return 'sat_cart_' + encodeURIComponent(email);
+          }
+          return 'sat_cart_guest';
+        }
+
+        const key = getCartStorageKey();
+        const saved = localStorage.getItem(key);
         let items = saved ? JSON.parse(saved) : [];
         items.push({
           id: '@Model.Id',
@@ -1987,7 +1984,7 @@
           img: '@mainImage',
           quantity: 1
         });
-        localStorage.setItem('sat_shopping_cart_usd', JSON.stringify(items));
+        localStorage.setItem(key, JSON.stringify(items));
 
         if (!isUserAuthenticated) {
           alert('🔒 Please sign in to your account first to complete your bespoke order.');

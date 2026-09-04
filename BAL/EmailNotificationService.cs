@@ -74,7 +74,7 @@ namespace SAT1.BAL
     </div>
 
     <p style='font-size:11px; color:#64748b; margin-top:32px; text-align:center;'>
-      &copy; {DateTime.UtcNow.Year} SAT Fine Jewelry. Handcrafted with GIA certified excellence.
+      &copy; {DateTime.Now.Year} SAT Fine Jewelry. Handcrafted with GIA certified excellence.
     </p>
   </div>
 </body>

@@ -66,7 +66,7 @@ namespace SAT1.BAL
                         ReviewText = "I was hesitant to buy fine diamond jewelry online, but the sparkle and craftsmanship exceeded all expectations. The certification arrived intact and the 18K yellow gold setting is pristine.",
                         IsVerifiedBuyer = true,
                         Status = "Approved",
-                        CreatedAt = DateTime.UtcNow.AddDays(-12)
+                        CreatedAt = DateTime.Now.AddDays(-12)
                     },
                     new ProductReview
                     {
@@ -80,7 +80,7 @@ namespace SAT1.BAL
                         ReviewText = "Shipped via DHL express and reached NYC in 4 days. The oval cut diamond has tremendous fire and zero visible inclusions. Highly recommend SAT!",
                         IsVerifiedBuyer = true,
                         Status = "Approved",
-                        CreatedAt = DateTime.UtcNow.AddDays(-28)
+                        CreatedAt = DateTime.Now.AddDays(-28)
                     }
                 };
             }
@@ -145,7 +145,7 @@ namespace SAT1.BAL
                 ReviewText = reviewText.Trim(),
                 IsVerifiedBuyer = isVerified,
                 Status = "Approved", // Auto-approved or set to Pending
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.Now
             };
 
             _context.ProductReviews.Add(review);
