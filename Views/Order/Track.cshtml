@@ -132,34 +132,40 @@
 <div class="sat-track-card">
   <!-- Header Info Bar -->
   <div style="background: rgba(14, 28, 48, 0.85); padding: 24px; border-bottom: 1px solid rgba(212, 178, 112, 0.25); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
+    @{
+      var carrierName = string.IsNullOrWhiteSpace(Model.CarrierName) ? "UPS Worldwide Express" : Model.CarrierName;
+      var trackingNum = string.IsNullOrWhiteSpace(Model.TrackingNumber) ? "1ZSAT88901" + Model.OrderId : Model.TrackingNumber;
+      var portalUrl = !string.IsNullOrWhiteSpace(Model.TrackingUrl) ? Model.TrackingUrl : SAT1.BAL.Shipping.DefaultShippingProviderService.GetCarrierTrackingPortalUrl(carrierName, trackingNum);
+      string carrierIcon = "fa-plane-departure";
+      if (carrierName.Contains("UPS", StringComparison.OrdinalIgnoreCase)) carrierIcon = "fa-truck-fast";
+      else if (carrierName.Contains("Aramex", StringComparison.OrdinalIgnoreCase)) carrierIcon = "fa-earth-americas";
+      else if (carrierName.Contains("USPS", StringComparison.OrdinalIgnoreCase)) carrierIcon = "fa-envelope-circle-check";
+    }
     <div>
       <div style="font-size: 11.5px; color: #d4b270; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Carrier & AWB Tracking</div>
       <div style="font-size: 18px; font-weight: 800; color: #ffffff; font-family: monospace; margin-top: 2px;">
-        @(string.IsNullOrWhiteSpace(Model.TrackingNumber) ? "SAT-EXP-" + Model.OrderId : Model.TrackingNumber)
+        @trackingNum
       </div>
       <div style="font-size: 12px; color: #4ade80; font-weight: 600; margin-top: 4px;">
-        <i class="fa-solid fa-plane-departure"></i> @(string.IsNullOrWhiteSpace(Model.CarrierName) ? "FedEx / BlueDart Priority Express" : Model.CarrierName)
+        <i class="fa-solid @carrierIcon"></i> @carrierName
       </div>
     </div>
 
     <div>
       <div style="font-size: 11.5px; color: #d4b270; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Estimated Delivery</div>
       <div style="font-size: 18px; font-weight: 800; color: #fbbf24; margin-top: 2px;">
-        @(Model.EstimatedDeliveryDate?.ToString("MMMM dd, yyyy") ?? "In 3-5 Business Days")
+        @(Model.EstimatedDeliveryDate?.ToString("MMMM dd, yyyy") ?? "In 2-4 Business Days")
       </div>
       <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">
         Destination: @Model.ShippingCity, @Model.ShippingCountry
       </div>
     </div>
 
-    @if (!string.IsNullOrWhiteSpace(Model.TrackingUrl))
-    {
-      <div>
-        <a href="@Model.TrackingUrl" target="_blank" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(180,83,9,0.35);">
-          Carrier Tracking Portal <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px;"></i>
-        </a>
-      </div>
-    }
+    <div>
+      <a href="@portalUrl" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #d4b270 0%, #b45309 100%); color: #ffffff; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; text-decoration: none; box-shadow: 0 4px 12px rgba(180,83,9,0.35);">
+        Track on @(carrierName.Contains("UPS") ? "UPS.com" : carrierName.Contains("Aramex") ? "Aramex.com" : carrierName.Contains("USPS") ? "USPS.com" : "Carrier Portal") <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px;"></i>
+      </a>
+    </div>
   </div>
 
   <div style="padding: 32px 24px;">

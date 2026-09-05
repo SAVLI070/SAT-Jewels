@@ -112,6 +112,33 @@ namespace SAT1.BAL
             return userRole == "Admin" || user.IsInRole("Admin") || userEmail.Contains("admin") || name.Contains("admin");
         }
 
+        public async Task EnsureSequencesSyncedAsync()
+        {
+            try
+            {
+                var sql = @"
+                    DO $$
+                    BEGIN
+                        BEGIN PERFORM setval(pg_get_serial_sequence('products', 'id'), COALESCE((SELECT MAX(id) FROM products), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                        BEGIN PERFORM setval(pg_get_serial_sequence('product_variants', 'id'), COALESCE((SELECT MAX(id) FROM product_variants), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                        BEGIN PERFORM setval(pg_get_serial_sequence('product_images', 'id'), COALESCE((SELECT MAX(id) FROM product_images), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                        BEGIN PERFORM setval(pg_get_serial_sequence('categories', 'id'), COALESCE((SELECT MAX(id) FROM categories), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                        BEGIN PERFORM setval(pg_get_serial_sequence('diamond_shapes', 'id'), COALESCE((SELECT MAX(id) FROM diamond_shapes), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                        BEGIN PERFORM setval(pg_get_serial_sequence('metals', 'id'), COALESCE((SELECT MAX(id) FROM metals), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                        BEGIN PERFORM setval(pg_get_serial_sequence('carat_options', 'id'), COALESCE((SELECT MAX(id) FROM carat_options), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                        BEGIN PERFORM setval(pg_get_serial_sequence('dynamic_pricing_rules', 'id'), COALESCE((SELECT MAX(id) FROM dynamic_pricing_rules), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                        BEGIN PERFORM setval(pg_get_serial_sequence('product_reviews', 'id'), COALESCE((SELECT MAX(id) FROM product_reviews), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                        BEGIN PERFORM setval(pg_get_serial_sequence('order_tracking_history', 'id'), COALESCE((SELECT MAX(id) FROM order_tracking_history), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                    END $$;
+                ";
+                await _context.Database.ExecuteSqlRawAsync(sql);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[AdminBal Sequence Sync Note]: {ex.Message}");
+            }
+        }
+
         public async Task<Product> CreateProductWithVariantsAsync(CreateProductDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Title)) throw new ArgumentException("Product title is required.");
@@ -162,6 +189,8 @@ namespace SAT1.BAL
             }
             else
             {
+                await EnsureSequencesSyncedAsync();
+
                 // CREATE new product
                 var cleanSlug = System.Text.RegularExpressions.Regex.Replace(dto.Title.ToLowerInvariant(), @"[^a-z0-9\-]", "-").Trim('-');
                 cleanSlug = System.Text.RegularExpressions.Regex.Replace(cleanSlug, @"\-+", "-");
@@ -178,8 +207,20 @@ namespace SAT1.BAL
                     CreatedAt = DateTime.Now
                 };
 
-                _context.Products.Add(product);
-                await _context.SaveChangesAsync();
+                try
+                {
+                    _context.Products.Add(product);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    // If sequence collision occurs, resync sequence and retry
+                    await EnsureSequencesSyncedAsync();
+                    _context.Entry(product).State = EntityState.Detached;
+                    product.ProductId = 0;
+                    _context.Products.Add(product);
+                    await _context.SaveChangesAsync();
+                }
             }
 
             // Save Product Images
@@ -195,7 +236,15 @@ namespace SAT1.BAL
                         DisplayOrder = order++
                     });
                 }
-                await _context.SaveChangesAsync();
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    await EnsureSequencesSyncedAsync();
+                    await _context.SaveChangesAsync();
+                }
             }
 
             // Save Enabled Variants into product_variants table
@@ -204,9 +253,33 @@ namespace SAT1.BAL
 
             if (dto.EnabledVariants != null && dto.EnabledVariants.Count > 0)
             {
+                var existingMetals = await _context.Metals.ToDictionaryAsync(m => m.Id);
+                if (!existingMetals.ContainsKey(11))
+                {
+                    try
+                    {
+                        _context.Metals.Add(new Metal
+                        {
+                            Id = 11,
+                            Name = "925 Sterling Silver",
+                            Slug = "925-sterling-silver",
+                            ColorGroup = "Silver",
+                            ColorHex = "#C0C0C0"
+                        });
+                        await _context.SaveChangesAsync();
+                        existingMetals = await _context.Metals.ToDictionaryAsync(m => m.Id);
+                    }
+                    catch { }
+                }
+
+                var existingCarats = await _context.CaratOptions.ToDictionaryAsync(c => c.Id);
+
                 int skuIndex = 100;
                 foreach (var varDto in dto.EnabledVariants.Where(v => v.IsEnabled && v.MetalId > 0))
                 {
+                    if (!existingMetals.ContainsKey(varDto.MetalId)) continue;
+                    long? validCaratId = (varDto.CaratId > 0 && existingCarats.ContainsKey(varDto.CaratId)) ? varDto.CaratId : null;
+
                     decimal varPrice = varDto.PriceOverrideUSD > 0 ? varDto.PriceOverrideUSD : dto.PriceUSD;
                     decimal offset = varPrice - dto.PriceUSD;
 
@@ -215,24 +288,32 @@ namespace SAT1.BAL
                         metalOffsetDict[varDto.MetalId] = offset;
                     }
 
-                    if (varDto.CaratId > 0 && !caratOffsetDict.ContainsKey(varDto.CaratId))
+                    if (validCaratId.HasValue && !caratOffsetDict.ContainsKey(validCaratId.Value))
                     {
-                        caratOffsetDict[varDto.CaratId] = offset;
+                        caratOffsetDict[validCaratId.Value] = offset;
                     }
 
                     var variant = new ProductVariant
                     {
                         ProductId = product.ProductId,
                         MetalId = varDto.MetalId,
-                        CaratId = varDto.CaratId > 0 ? varDto.CaratId : null,
-                        SKU = $"SAT-{product.ProductId}-{varDto.MetalId}-{varDto.CaratId}-{skuIndex++}",
+                        CaratId = validCaratId,
+                        SKU = $"SAT-{product.ProductId}-{varDto.MetalId}-{(validCaratId ?? 0)}-{skuIndex++}",
                         Price = varPrice,
                         StockQuantity = 25,
                         IsAvailable = true
                     };
                     _context.ProductVariants.Add(variant);
                 }
-                await _context.SaveChangesAsync();
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateException)
+                {
+                    await EnsureSequencesSyncedAsync();
+                    await _context.SaveChangesAsync();
+                }
             }
 
             // Build synchronized MetalOptions & CaratOptions strings

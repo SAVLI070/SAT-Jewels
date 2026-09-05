@@ -51,6 +51,7 @@ namespace SAT1.BAL
                 RecipientPostalCode = order.ShippingPostalCode,
                 RecipientCountry = order.ShippingCountry,
                 ItemDescription = order.ItemName,
+                PreferredCarrier = !string.IsNullOrWhiteSpace(order.CarrierName) ? order.CarrierName : null,
                 DeclaredValueUSD = order.TotalAmountUSD,
                 WeightKg = 0.5
             };

@@ -147,11 +147,24 @@ namespace SAT1.BAL
                 .ToList();
 
             var items = await _context.CatalogItems.Where(i => i.IsActive).ToListAsync();
+            var productCounts = await _context.Products
+                .GroupBy(p => p.CategoryId)
+                .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(g => g.CategoryId, g => g.Count);
+
+            var catalogItemCounts = items
+                .GroupBy(i => (i.CategoryId ?? "").ToLower())
+                .ToDictionary(g => g.Key, g => g.Count());
 
             var result = new List<CategoryAdminDto>();
             foreach (var c in categories)
             {
-                var count = items.Count(i => i.CategoryId.Equals(c.Id, StringComparison.OrdinalIgnoreCase));
+                int prodCount = productCounts.GetValueOrDefault(c.CategoryId, 0);
+                int catCount = catalogItemCounts.GetValueOrDefault(c.Id.ToLower(), 0) 
+                             + catalogItemCounts.GetValueOrDefault(c.Slug.ToLower(), 0)
+                             + catalogItemCounts.GetValueOrDefault(c.Name.ToLower(), 0);
+                int count = Math.Max(prodCount, catCount);
+
                 var cdnUrl = imageRules.GetValueOrDefault(c.CategoryId.ToString()) ?? imageRules.GetValueOrDefault(c.Id) ?? c.ImageUrl;
 
                 result.Add(new CategoryAdminDto
@@ -198,8 +211,14 @@ namespace SAT1.BAL
             var result = new List<PublicCategoryStoreDto>();
             foreach (var c in categories)
             {
-                var catProducts = items.Where(i => i.CategoryId.Equals(c.Id, StringComparison.OrdinalIgnoreCase)).ToList();
                 var cdnUrl = imageRules.GetValueOrDefault(c.CategoryId.ToString()) ?? imageRules.GetValueOrDefault(c.Id) ?? c.ImageUrl;
+                var catIdLower = c.Id.ToLower();
+                var catSlugLower = c.Slug.ToLower();
+                var catNameLower = c.Name.ToLower();
+
+                var catProducts = items
+                    .Where(i => (i.CategoryId ?? "").ToLower() == catIdLower || (i.CategoryId ?? "").ToLower() == catSlugLower || (i.CategoryId ?? "").ToLower() == catNameLower)
+                    .ToList();
 
                 result.Add(new PublicCategoryStoreDto
                 {
@@ -234,6 +253,14 @@ namespace SAT1.BAL
                 .ToDictionaryAsync(r => r.Code, r => r.DisplayName);
 
             var items = await _context.CatalogItems.ToListAsync();
+            var productCounts = await _context.Products
+                .GroupBy(p => p.CategoryId)
+                .Select(g => new { CategoryId = g.Key, Count = g.Count() })
+                .ToDictionaryAsync(g => g.CategoryId, g => g.Count);
+
+            var catalogItemCounts = items
+                .GroupBy(i => (i.CategoryId ?? "").ToLower())
+                .ToDictionary(g => g.Key, g => g.Count());
 
             var result = new List<CategoryAdminDto>();
             foreach (var c in categories)
@@ -243,7 +270,12 @@ namespace SAT1.BAL
                               && !hiddenCodes.Contains(c.Slug.ToLower())
                               && !hiddenCodes.Contains(c.Id.ToLower());
 
-                var count = items.Count(i => i.CategoryId.Equals(c.Id, StringComparison.OrdinalIgnoreCase));
+                int prodCount = productCounts.GetValueOrDefault(c.CategoryId, 0);
+                int catCount = catalogItemCounts.GetValueOrDefault(c.Id.ToLower(), 0) 
+                             + catalogItemCounts.GetValueOrDefault(c.Slug.ToLower(), 0)
+                             + catalogItemCounts.GetValueOrDefault(c.Name.ToLower(), 0);
+                int count = Math.Max(prodCount, catCount);
+
                 var cdnUrl = imageRules.GetValueOrDefault(c.CategoryId.ToString()) ?? imageRules.GetValueOrDefault(c.Id) ?? c.ImageUrl;
 
                 result.Add(new CategoryAdminDto

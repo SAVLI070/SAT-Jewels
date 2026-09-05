@@ -685,6 +685,37 @@
 
   </div>
 
+  <!-- AWS SNS REGISTRATION OTP VERIFICATION MODAL -->
+  <div id="regOtpModal" style="display:none; position:fixed; inset:0; background:rgba(6,7,10,0.85); backdrop-filter:blur(16px); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#141218; border:1px solid rgba(212,175,55,0.4); border-radius:24px; max-width:440px; width:100%; padding:32px; box-shadow:0 30px 80px rgba(0,0,0,0.9); text-align:center; position:relative;">
+      <button type="button" onclick="closeRegOtpModal()" style="position:absolute; top:18px; right:18px; background:none; border:none; color:#94a3b8; font-size:20px; cursor:pointer;"><i class="fa-solid fa-xmark"></i></button>
+      
+      <div style="width:52px; height:52px; border-radius:50%; background:rgba(212,175,55,0.15); border:1px solid #d4af37; color:#d4af37; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:22px;">
+        <i class="fa-solid fa-shield-halved"></i>
+      </div>
+      
+      <h3 style="font-family:var(--font-serif-luxury); font-size:22px; font-weight:700; color:#ffffff; margin:0 0 8px;">Verify Your Mobile</h3>
+      <p style="font-size:13px; color:#cbd5e1; margin:0 0 6px; line-height:1.5;">We dispatched a 6-digit security code via AWS SNS to:</p>
+      <div id="regOtpTargetPhone" style="font-size:14px; font-weight:800; color:#d4b878; margin-bottom:20px; font-family:monospace;"></div>
+
+      <div style="margin-bottom:20px;">
+        <input type="text" id="regOtpInput" maxlength="6" placeholder="• • • • • •" 
+               style="width:100%; box-sizing:border-box; text-align:center; letter-spacing:10px; font-size:26px; font-weight:800; font-family:monospace; background:rgba(255,255,255,0.06); border:1px solid rgba(212,184,120,0.4); border-radius:14px; padding:14px; color:#ffffff; outline:none;" />
+      </div>
+
+      <div id="regOtpAlert" style="display:none; padding:10px; border-radius:10px; font-size:12.5px; margin-bottom:16px;"></div>
+
+      <button type="button" id="btnVerifyRegOtp" onclick="submitRegOtp()" style="width:100%; background:linear-gradient(135deg, #d4b878, #b8944d); color:#06070a; font-weight:800; border:none; padding:14px; border-radius:100px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 6px 20px rgba(212,184,120,0.4);">
+        <i class="fa-solid fa-check-circle"></i> Verify &amp; Activate Account
+      </button>
+
+      <div style="margin-top:18px; font-size:12.5px; color:#94a3b8;">
+        Didn't receive the code? <button type="button" id="btnResendRegOtp" onclick="resendRegOtp()" style="background:none; border:none; color:#d4b878; font-weight:700; cursor:pointer; text-decoration:underline;">Resend Code</button>
+        <span id="regOtpCountdown" style="display:none; color:#64748b; margin-left:4px;">(60s)</span>
+      </div>
+    </div>
+  </div>
+
   <script>
     function hideAuthAlerts() {
       document.querySelectorAll('.sat-auth-alert').forEach(el => el.style.display = 'none');
@@ -856,18 +887,145 @@
       }, 350);
     }
 
-    function handleSignUpSubmit(e) {
+    let regOtpCountdownTimer = null;
+    let pendingRegPayload = null;
+
+    function openRegOtpModal(phone, payload) {
+      pendingRegPayload = payload;
+      document.getElementById('regOtpTargetPhone').innerText = phone;
+      document.getElementById('regOtpInput').value = '';
+      document.getElementById('regOtpAlert').style.display = 'none';
+      document.getElementById('regOtpModal').style.display = 'flex';
+      startRegOtpTimer(60);
+      setTimeout(() => document.getElementById('regOtpInput')?.focus(), 200);
+    }
+
+    function closeRegOtpModal() {
+      document.getElementById('regOtpModal').style.display = 'none';
+      clearInterval(regOtpCountdownTimer);
+    }
+
+    function startRegOtpTimer(seconds) {
+      clearInterval(regOtpCountdownTimer);
+      const btnResend = document.getElementById('btnResendRegOtp');
+      const countSpan = document.getElementById('regOtpCountdown');
+      btnResend.disabled = true;
+      btnResend.style.opacity = '0.5';
+      countSpan.style.display = 'inline';
+      let rem = seconds;
+      countSpan.innerText = `(${rem}s)`;
+
+      regOtpCountdownTimer = setInterval(() => {
+        rem--;
+        if (rem <= 0) {
+          clearInterval(regOtpCountdownTimer);
+          btnResend.disabled = false;
+          btnResend.style.opacity = '1';
+          countSpan.style.display = 'none';
+        } else {
+          countSpan.innerText = `(${rem}s)`;
+        }
+      }, 1000);
+    }
+
+    async function resendRegOtp() {
+      if (!pendingRegPayload || !pendingRegPayload.phone) return;
+      const alertBox = document.getElementById('regOtpAlert');
+      try {
+        const res = await fetch('/Account/SendRegistrationOtp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(pendingRegPayload)
+        });
+        const data = await res.json();
+        alertBox.style.display = 'block';
+        if (data.success) {
+          alertBox.style.background = 'rgba(34, 197, 94, 0.2)';
+          alertBox.style.color = '#86efac';
+          alertBox.innerText = data.message || 'New verification code sent via AWS SNS.';
+          startRegOtpTimer(data.cooldownSeconds || 60);
+        } else {
+          alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+          alertBox.style.color = '#fca5a5';
+          alertBox.innerText = data.message || 'Unable to send code.';
+        }
+      } catch (e) {
+        alertBox.style.display = 'block';
+        alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.innerText = 'Network error sending verification code.';
+      }
+    }
+
+    async function submitRegOtp() {
+      const otpInput = document.getElementById('regOtpInput');
+      const alertBox = document.getElementById('regOtpAlert');
+      const btn = document.getElementById('btnVerifyRegOtp');
+      const otpVal = otpInput.value.trim();
+
+      if (!otpVal || otpVal.length < 6) {
+        alertBox.style.display = 'block';
+        alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.innerText = 'Please enter the complete 6-digit security code.';
+        otpInput.focus();
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Verifying Code...';
+
+      try {
+        const verifyPayload = {
+          ...pendingRegPayload,
+          otp: otpVal
+        };
+
+        const res = await fetch('/Account/VerifyRegistrationAndCreateUser', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(verifyPayload)
+        });
+        const data = await res.json();
+
+        alertBox.style.display = 'block';
+        if (data.success) {
+          alertBox.style.background = 'rgba(34, 197, 94, 0.2)';
+          alertBox.style.color = '#86efac';
+          alertBox.innerText = '✓ Verified! Establishing your secure session...';
+          setTimeout(() => {
+            window.location.href = data.redirectUrl || '/';
+          }, 800);
+        } else {
+          alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+          alertBox.style.color = '#fca5a5';
+          alertBox.innerText = data.message || 'Invalid verification code.';
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Verify & Activate Account';
+        }
+      } catch (e) {
+        alertBox.style.display = 'block';
+        alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+        alertBox.style.color = '#fca5a5';
+        alertBox.innerText = 'Network error verifying code.';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Verify & Activate Account';
+      }
+    }
+
+    async function handleSignUpSubmit(e) {
+      e.preventDefault();
       const fullName = document.getElementById('inputSignUpFullName');
       const email = document.getElementById('inputSignUpEmail');
+      const phone = document.getElementById('inputSignUpPhone');
       const pwd = document.getElementById('inputSignUpPassword');
       const cpwd = document.getElementById('inputSignUpConfirmPassword');
       const alertBox = document.getElementById('clientSignUpAlert');
       const alertMsg = document.getElementById('clientSignUpAlertMsg');
 
-      if (!fullName || !email || !pwd || !cpwd) return true;
+      if (!fullName || !email || !pwd || !cpwd) return false;
 
       if (!fullName.value.trim() || !email.value.trim() || !pwd.value.trim() || !cpwd.value.trim()) {
-        e.preventDefault();
         if (alertBox && alertMsg) {
           alertMsg.textContent = "All required fields must be filled.";
           alertBox.style.display = "flex";
@@ -881,7 +1039,6 @@
       }
 
       if (isEmailDuplicate) {
-        e.preventDefault();
         if (alertBox && alertMsg) {
           alertMsg.textContent = "An account with this email address already exists. Please Sign In.";
           alertBox.style.display = "flex";
@@ -892,18 +1049,16 @@
       }
 
       if (isPhoneDuplicate) {
-        e.preventDefault();
         if (alertBox && alertMsg) {
           alertMsg.textContent = "This mobile number is already registered to another account. Please use another number.";
           alertBox.style.display = "flex";
           alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-        document.getElementById('inputSignUpPhone')?.focus();
+        phone?.focus();
         return false;
       }
 
       if (pwd.value !== cpwd.value) {
-        e.preventDefault();
         if (alertBox && alertMsg) {
           alertMsg.textContent = "Passwords do not match. Please verify your password confirmation.";
           alertBox.style.display = "flex";
@@ -916,11 +1071,60 @@
       }
 
       if (alertBox) alertBox.style.display = 'none';
-      try {
-        const cleanEmail = email.value.trim().toLowerCase();
-        localStorage.setItem('sat_cart_' + encodeURIComponent(cleanEmail), '[]');
-        localStorage.removeItem('sat_shopping_cart_usd');
-      } catch (_) {}
+
+      const phoneVal = phone && phone.value.trim() ? phone.value.trim() : "";
+      const regPayload = {
+        fullName: fullName.value.trim(),
+        email: email.value.trim(),
+        phone: phoneVal,
+        password: pwd.value,
+        returnUrl: '@(ViewData["ReturnUrl"] ?? "")'
+      };
+
+      // If phone is provided, send AWS SNS OTP
+      if (phoneVal.length >= 10) {
+        const btn = document.querySelector('#paneSignUp .btn-sat-vault-action');
+        if (btn) {
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sending AWS SNS Code...';
+        }
+
+        try {
+          const res = await fetch('/Account/SendRegistrationOtp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(regPayload)
+          });
+          const data = await res.json();
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-gem"></i> Create VIP Sanctuary Account';
+          }
+
+          if (data.success) {
+            openRegOtpModal(phoneVal, regPayload);
+          } else {
+            if (alertBox && alertMsg) {
+              alertMsg.textContent = data.message || "Unable to send verification code.";
+              alertBox.style.display = "flex";
+              alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          }
+        } catch (err) {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-gem"></i> Create VIP Sanctuary Account';
+          }
+          if (alertBox && alertMsg) {
+            alertMsg.textContent = "Network error connecting to verification service.";
+            alertBox.style.display = "flex";
+          }
+        }
+        return false;
+      }
+
+      // Fallback form post if no phone
+      document.getElementById('formSignUp').submit();
       return true;
     }
   </script>

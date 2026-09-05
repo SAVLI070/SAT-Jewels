@@ -210,7 +210,8 @@ namespace SAT1.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, error = ex.Message });
+                var fullError = ex.InnerException != null ? $"{ex.Message} --> {ex.InnerException.Message}" : ex.Message;
+                return StatusCode(500, new { success = false, error = fullError, message = fullError });
             }
         }
 

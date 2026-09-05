@@ -477,11 +477,20 @@
         .then(res => res.json())
         .then(items => {
           allCatalogItems = items;
-          // Cache by category
-          items.forEach(it => {
-            const cId = (it.categoryId || '').toLowerCase();
-            if (!loadedCategoryItems[cId]) loadedCategoryItems[cId] = [];
-            loadedCategoryItems[cId].push(it);
+          // Cache by category & update live count badges
+          allCategories.forEach(cat => {
+            const cKey = cat.id.toString().toLowerCase();
+            const catSlug = (cat.slug || '').toLowerCase();
+            const catName = (cat.name || '').toLowerCase();
+            const matched = items.filter(it => {
+              const itCat = (it.categoryId || '').toLowerCase();
+              return itCat === cKey || itCat === catSlug || itCat === catName;
+            });
+            loadedCategoryItems[cKey] = matched;
+            const countTag = document.getElementById(`cat-count-${cat.id}`);
+            if (countTag && matched.length > 0) {
+              countTag.textContent = `${matched.length} items`;
+            }
           });
         })
         .catch(e => console.warn('Background items prefetch error:', e));
@@ -522,7 +531,7 @@
                 </div>
                 <div class="cat-meta-row">
                   <span class="cat-badge-tag">${cat.badge || 'Popular'}</span>
-                  <span class="cat-count-tag">${count} items</span>
+                  <span class="cat-count-tag" id="cat-count-${cat.id}">${count} items</span>
                 </div>
               </div>
             </div>
@@ -549,6 +558,11 @@
   }
 
   function renderCategoryItemsGrid(catId, catItems) {
+    const countTag = document.getElementById(`cat-count-${catId}`);
+    if (countTag && catItems) {
+      countTag.textContent = `${catItems.length} items`;
+    }
+
     const gridContainer = document.getElementById(`cat-grid-${catId}`);
     if (!gridContainer) return;
 

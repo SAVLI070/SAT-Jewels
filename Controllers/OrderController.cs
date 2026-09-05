@@ -91,8 +91,8 @@ namespace SAT1.Controllers
 
             var destCity = !string.IsNullOrWhiteSpace(order.ShippingCity) ? order.ShippingCity : "New York";
             var destCountry = !string.IsNullOrWhiteSpace(order.ShippingCountry) ? order.ShippingCountry : "United States";
-            var carrier = !string.IsNullOrWhiteSpace(order.CarrierName) ? order.CarrierName : "DHL Express International";
-            var awb = !string.IsNullOrWhiteSpace(order.TrackingNumber) ? order.TrackingNumber : $"SAT-AWB-{order.OrderNumber}";
+            var carrier = !string.IsNullOrWhiteSpace(order.CarrierName) ? order.CarrierName : (!string.IsNullOrWhiteSpace(order.TrackingNumber) ? DetectCarrier(order.TrackingNumber) : "UPS Worldwide Express");
+            var awb = !string.IsNullOrWhiteSpace(order.TrackingNumber) ? order.TrackingNumber : $"1ZSAT88901{order.OrderNumber}";
             var created = order.CreatedAt != default ? order.CreatedAt : DateTime.Now.AddDays(-3);
 
             var milestones = new List<SAT1.Models.OrderTrackingHistory>
@@ -173,6 +173,19 @@ namespace SAT1.Controllers
             else if (rawStatus.Contains("placed") || rawStatus.Contains("pending")) maxStep = 1;
 
             return milestones.Take(maxStep).ToList();
+        }
+
+        private static string DetectCarrier(string trackingNumber)
+        {
+            if (string.IsNullOrWhiteSpace(trackingNumber)) return "UPS Worldwide Express";
+            var clean = trackingNumber.Trim().ToUpperInvariant();
+
+            if (clean.StartsWith("1Z")) return "UPS Worldwide Express";
+            if (clean.StartsWith("EZ") || clean.EndsWith("IN") || clean.EndsWith("US") || clean.StartsWith("9400") || clean.Length == 22) return "USPS Priority Mail Express";
+            if (clean.Length == 11 && char.IsDigit(clean[0])) return "Aramex Priority Express";
+            if (clean.StartsWith("DHL")) return "DHL Express International";
+
+            return "UPS Worldwide Express";
         }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ namespace SAT1.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Route("api/products")]
     public class ProductApiController : ControllerBase
     {
         private readonly SatJewelDbContext _context;
@@ -406,6 +408,16 @@ namespace SAT1.Controllers
             return Ok(new { success = true, data = summary });
         }
 
+        // 7.1 GET /api/products/{id}/can-review
+        [HttpGet("{id}/can-review")]
+        public async Task<IActionResult> CheckCanReview([FromServices] BAL.ReviewBal reviewBal, string id, [FromQuery] string? email)
+        {
+            var userId = User.Identity?.IsAuthenticated == true ? User.FindFirst(ClaimTypes.NameIdentifier)?.Value : null;
+            var userEmail = User.Identity?.IsAuthenticated == true ? User.FindFirst(ClaimTypes.Email)?.Value : email;
+            var canReview = await reviewBal.CanUserReviewProductAsync(userId, userEmail, id);
+            return Ok(new { success = true, canReview, isAuthenticated = User.Identity?.IsAuthenticated == true });
+        }
+
         // =========================================================================
         // 8. POST /api/products/{id}/reviews
         // Submit customer product review
@@ -418,19 +430,27 @@ namespace SAT1.Controllers
             public int Rating { get; set; } = 5;
             public string ReviewTitle { get; set; } = string.Empty;
             public string ReviewText { get; set; } = string.Empty;
+            public string? PhotoUrl { get; set; }
         }
 
         [HttpPost("{id}/reviews")]
         public async Task<IActionResult> SubmitProductReview([FromServices] BAL.ReviewBal reviewBal, string id, [FromBody] SubmitReviewDto dto)
         {
+            var userId = User.Identity?.IsAuthenticated == true ? User.FindFirst(ClaimTypes.NameIdentifier)?.Value : null;
+            var email = !string.IsNullOrWhiteSpace(dto.CustomerEmail) ? dto.CustomerEmail : (User.Identity?.IsAuthenticated == true ? User.FindFirst(ClaimTypes.Email)?.Value ?? "" : "");
+            var name = !string.IsNullOrWhiteSpace(dto.CustomerName) ? dto.CustomerName : (User.Identity?.IsAuthenticated == true ? User.Identity.Name ?? "Valued Customer" : "Valued Customer");
+
             var (success, message, review) = await reviewBal.SubmitCustomerReviewAsync(
                 id,
                 dto.ProductName,
-                dto.CustomerName,
-                dto.CustomerEmail,
+                name,
+                email,
                 dto.Rating,
                 dto.ReviewTitle,
-                dto.ReviewText);
+                dto.ReviewText,
+                userId,
+                null,
+                dto.PhotoUrl);
 
             if (!success)
             {

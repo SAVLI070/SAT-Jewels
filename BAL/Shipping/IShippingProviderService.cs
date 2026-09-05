@@ -17,6 +17,7 @@ namespace SAT1.BAL.Shipping
         public string RecipientPostalCode { get; set; } = string.Empty;
         public string RecipientCountry { get; set; } = "United States";
         public string ItemDescription { get; set; } = "Fine Diamond Jewelry";
+        public string? PreferredCarrier { get; set; }
         public decimal DeclaredValueUSD { get; set; }
         public double WeightKg { get; set; } = 0.5;
     }

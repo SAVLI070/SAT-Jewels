@@ -69,8 +69,12 @@ builder.Services.AddScoped<SAT1.BAL.AdminBal>();
 builder.Services.AddScoped<SAT1.BAL.AuthBal>();
 builder.Services.AddScoped<SAT1.BAL.OtpService>();
 builder.Services.AddScoped<SAT1.BAL.ReviewBal>();
+builder.Services.AddScoped<SAT1.BAL.Shipping.UpsShippingProviderService>();
+builder.Services.AddScoped<SAT1.BAL.Shipping.AramexShippingProviderService>();
+builder.Services.AddScoped<SAT1.BAL.Shipping.UspsShippingProviderService>();
+builder.Services.AddScoped<SAT1.BAL.Shipping.DefaultShippingProviderService>();
+builder.Services.AddScoped<SAT1.BAL.Shipping.IShippingProviderService>(sp => sp.GetRequiredService<SAT1.BAL.Shipping.DefaultShippingProviderService>());
 builder.Services.AddScoped<SAT1.BAL.EmailNotificationService>();
-builder.Services.AddScoped<SAT1.BAL.Shipping.IShippingProviderService, SAT1.BAL.Shipping.DefaultShippingProviderService>();
 builder.Services.AddScoped<SAT1.BAL.OrderTrackingService>();
 builder.Services.AddScoped<SAT1.BAL.PayPalService>();
 builder.Services.AddScoped<SAT1.BAL.RazorpayService>();
@@ -200,7 +204,67 @@ using (var scope = app.Services.CreateScope())
 
             @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';",
             @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""SignatureVerified"" boolean NOT NULL DEFAULT false;",
-            @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""RawPayload"" text;"
+            @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""RawPayload"" text;",
+
+            // Ensure All 11 Fine Jewelry Metals (including 925 Sterling Silver)
+            @"INSERT INTO metals (id, name, slug, color_group, color_hex)
+            VALUES 
+                (1, '10K Yellow Gold', '10k-yellow-gold', 'Yellow Gold', '#E5CA8F'),
+                (2, '10K White Gold', '10k-white-gold', 'White Gold', '#D1D5DB'),
+                (3, '10K Rose Gold', '10k-rose-gold', 'Rose Gold', '#E8A598'),
+                (4, '14K Yellow Gold', '14k-yellow-gold', 'Yellow Gold', '#F2D06B'),
+                (5, '14K White Gold', '14k-white-gold', 'White Gold', '#E5E7EB'),
+                (6, '14K Rose Gold', '14k-rose-gold', 'Rose Gold', '#EAA396'),
+                (7, '18K Yellow Gold', '18k-yellow-gold', 'Yellow Gold', '#FFD700'),
+                (8, '18K White Gold', '18k-white-gold', 'White Gold', '#F5F5F5'),
+                (9, '18K Rose Gold', '18k-rose-gold', 'Rose Gold', '#E68A7C'),
+                (10, '950 Platinum', '950-platinum', 'Platinum', '#E5E4E2'),
+                (11, '925 Sterling Silver', '925-sterling-silver', 'Silver', '#C0C0C0')
+            ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, slug = EXCLUDED.slug, color_group = EXCLUDED.color_group, color_hex = EXCLUDED.color_hex;",
+
+            // Ensure All 10 Diamond Shapes
+            @"INSERT INTO diamond_shapes (id, name, slug, icon_url)
+            VALUES
+                (1, 'Round', 'round', '/assets/shapes/round.svg'),
+                (2, 'Oval', 'oval', '/assets/shapes/oval.svg'),
+                (3, 'Emerald', 'emerald', '/assets/shapes/emerald.svg'),
+                (4, 'Marquise', 'marquise', '/assets/shapes/marquise.svg'),
+                (5, 'Pear', 'pear', '/assets/shapes/pear.svg'),
+                (6, 'Princess', 'princess', '/assets/shapes/princess.svg'),
+                (7, 'Cushion', 'cushion', '/assets/shapes/cushion.svg'),
+                (8, 'Radiant', 'radiant', '/assets/shapes/radiant.svg'),
+                (9, 'Asscher', 'asscher', '/assets/shapes/asscher.svg'),
+                (10, 'Heart', 'heart', '/assets/shapes/heart.svg')
+            ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, slug = EXCLUDED.slug;",
+
+            // Ensure All 9 Carat Options
+            @"INSERT INTO carat_options (id, carat_weight, label, slug)
+            VALUES
+                (1, 0.50, '0.50 CT', '0.50-ct'),
+                (2, 0.75, '0.75 CT', '0.75-ct'),
+                (3, 1.00, '1.00 CT', '1.00-ct'),
+                (4, 1.25, '1.25 CT', '1.25-ct'),
+                (5, 1.50, '1.50 CT', '1.50-ct'),
+                (6, 2.00, '2.00 CT', '2.00-ct'),
+                (7, 3.00, '3.00 CT', '3.00-ct'),
+                (8, 4.00, '4.00 CT', '4.00-ct'),
+                (9, 5.00, '5.00 CT', '5.00-ct')
+            ON CONFLICT (id) DO UPDATE SET carat_weight = EXCLUDED.carat_weight, label = EXCLUDED.label, slug = EXCLUDED.slug;",
+
+            // Synchronize PostgreSQL Primary Key Sequences with MAX(id)
+            @"DO $$
+            BEGIN
+                BEGIN PERFORM setval(pg_get_serial_sequence('products', 'id'), COALESCE((SELECT MAX(id) FROM products), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                BEGIN PERFORM setval(pg_get_serial_sequence('product_variants', 'id'), COALESCE((SELECT MAX(id) FROM product_variants), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                BEGIN PERFORM setval(pg_get_serial_sequence('product_images', 'id'), COALESCE((SELECT MAX(id) FROM product_images), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                BEGIN PERFORM setval(pg_get_serial_sequence('categories', 'id'), COALESCE((SELECT MAX(id) FROM categories), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                BEGIN PERFORM setval(pg_get_serial_sequence('diamond_shapes', 'id'), COALESCE((SELECT MAX(id) FROM diamond_shapes), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                BEGIN PERFORM setval(pg_get_serial_sequence('metals', 'id'), COALESCE((SELECT MAX(id) FROM metals), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                BEGIN PERFORM setval(pg_get_serial_sequence('carat_options', 'id'), COALESCE((SELECT MAX(id) FROM carat_options), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                BEGIN PERFORM setval(pg_get_serial_sequence('dynamic_pricing_rules', 'id'), COALESCE((SELECT MAX(id) FROM dynamic_pricing_rules), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                BEGIN PERFORM setval(pg_get_serial_sequence('product_reviews', 'id'), COALESCE((SELECT MAX(id) FROM product_reviews), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+                BEGIN PERFORM setval(pg_get_serial_sequence('order_tracking_history', 'id'), COALESCE((SELECT MAX(id) FROM order_tracking_history), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
+            END $$;"
         };
 
         foreach (var sql in ddlStatements)

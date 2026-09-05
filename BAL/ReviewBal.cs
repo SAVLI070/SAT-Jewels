@@ -107,6 +107,26 @@ namespace SAT1.BAL
             };
         }
 
+        // Check if user has purchased this product
+        public async Task<bool> CanUserReviewProductAsync(string? userId, string? customerEmail, string productId)
+        {
+            var cleanEmail = (customerEmail ?? "").Trim().ToLower();
+            var cleanUserId = (userId ?? "").Trim();
+            var cleanProd = productId.Trim();
+            var numericIdStr = cleanProd.Replace("sat-prod-", "").Replace("sat-local-", "");
+
+            var validStatuses = new[] { "Paid", "Completed", "Dispatched", "Delivered", "ShipmentBooked", "InTransit" };
+
+            var query = _context.Orders.AsNoTracking().Where(o => 
+                ((!string.IsNullOrEmpty(cleanEmail) && o.CustomerEmail.ToLower() == cleanEmail) ||
+                 (!string.IsNullOrEmpty(cleanUserId) && o.UserId == cleanUserId)));
+
+            var orders = await query.ToListAsync();
+            return orders.Any(o => 
+                validStatuses.Any(s => (o.OrderStatus ?? "").Contains(s, StringComparison.OrdinalIgnoreCase) || 
+                                       (o.CurrentTrackingStatus ?? "").Contains(s, StringComparison.OrdinalIgnoreCase)));
+        }
+
         // Storefront: Submit Customer Review
         public async Task<(bool success, string message, ProductReview? review)> SubmitCustomerReviewAsync(
             string productId, 
@@ -116,7 +136,9 @@ namespace SAT1.BAL
             int rating, 
             string reviewTitle, 
             string reviewText, 
-            string? userId = null)
+            string? userId = null,
+            string? avatarUrl = null,
+            string? photoUrl = null)
         {
             if (string.IsNullOrWhiteSpace(customerName) || string.IsNullOrWhiteSpace(customerEmail))
             {
@@ -129,29 +151,42 @@ namespace SAT1.BAL
 
             rating = Math.Clamp(rating, 1, 5);
 
+            var cleanEmail = customerEmail.Trim().ToLower();
+            var cleanUserId = (userId ?? "").Trim();
+
             // Check if verified buyer from Orders table
-            bool isVerified = await _context.Orders.AnyAsync(o => 
-                o.CustomerEmail.ToLower() == customerEmail.Trim().ToLower() && o.OrderStatus == "Paid");
+            bool isVerified = await _context.Orders.AsNoTracking().AnyAsync(o => 
+                ((!string.IsNullOrEmpty(cleanEmail) && o.CustomerEmail.ToLower() == cleanEmail) ||
+                 (!string.IsNullOrEmpty(cleanUserId) && o.UserId == cleanUserId)) &&
+                (o.OrderStatus == "Paid" || 
+                 o.OrderStatus.Contains("Completed") || 
+                 o.OrderStatus.Contains("Dispatched") || 
+                 o.OrderStatus.Contains("Delivered") || 
+                 o.OrderStatus.Contains("ShipmentBooked") || 
+                 o.OrderStatus.Contains("InTransit")));
 
             var review = new ProductReview
             {
                 ProductId = productId.Trim(),
-                ProductName = productName.Trim(),
-                UserId = userId,
+                ProductName = string.IsNullOrWhiteSpace(productName) ? "Fine Diamond Jewelry" : productName.Trim(),
+                UserId = string.IsNullOrWhiteSpace(userId) ? null : userId.Trim(),
                 CustomerName = customerName.Trim(),
-                CustomerEmail = customerEmail.Trim(),
+                CustomerEmail = cleanEmail,
+                AvatarUrl = avatarUrl,
+                PhotoUrl = photoUrl,
                 Rating = rating,
                 ReviewTitle = reviewTitle.Trim(),
                 ReviewText = reviewText.Trim(),
                 IsVerifiedBuyer = isVerified,
-                Status = "Approved", // Auto-approved or set to Pending
+                Status = "Approved", // Auto-approved so customer sees review immediately
                 CreatedAt = DateTime.Now
             };
 
             _context.ProductReviews.Add(review);
             await _context.SaveChangesAsync();
 
-            return (true, "Thank you! Your review has been submitted successfully.", review);
+            var verifiedMsg = isVerified ? " (Verified Purchase ✨)" : "";
+            return (true, $"Thank you {customerName.Trim()}! Your review has been submitted successfully{verifiedMsg}.", review);
         }
 
         // Admin: Get All Reviews with Status Filter

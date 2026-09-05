@@ -24,6 +24,8 @@ namespace SAT1.Controllers
         {
             public string ProductId { get; set; } = string.Empty;
             public int Quantity { get; set; } = 1;
+            public string? UserId { get; set; }
+            public string? ShippingEmail { get; set; }
 
             // Shipping Details
             public string ShippingFullName { get; set; } = string.Empty;
@@ -73,8 +75,8 @@ namespace SAT1.Controllers
 
             try
             {
-                var userId = User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "guest" : "guest";
-                var userEmail = User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.Email) ?? "client@satjewels.com" : "client@satjewels.com";
+                var userId = !string.IsNullOrWhiteSpace(req.UserId) ? req.UserId.Trim() : (User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "guest" : "guest");
+                var userEmail = !string.IsNullOrWhiteSpace(req.ShippingEmail) ? req.ShippingEmail.Trim() : (User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.Email) ?? "client@satjewels.com" : "client@satjewels.com");
 
                 var shipping = MapShipping(req);
                 var (payPalOrderId, internalOrderId, serverCalculatedPriceUSD, approveUrl) = await _orderBusinessService.CreatePayPalOrderFlowAsync(
@@ -173,8 +175,8 @@ namespace SAT1.Controllers
 
             try
             {
-                var userId = User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "guest" : "guest";
-                var userEmail = User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.Email) ?? "client@satjewels.com" : "client@satjewels.com";
+                var userId = !string.IsNullOrWhiteSpace(req.UserId) ? req.UserId.Trim() : (User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "guest" : "guest");
+                var userEmail = !string.IsNullOrWhiteSpace(req.ShippingEmail) ? req.ShippingEmail.Trim() : (User.Identity?.IsAuthenticated == true ? User.FindFirstValue(ClaimTypes.Email) ?? "client@satjewels.com" : "client@satjewels.com");
 
                 var shipping = MapShipping(req);
                 var (razorpayOrderId, internalOrderId, serverCalculatedPriceUSD, razorpayKeyId) = await _orderBusinessService.CreateRazorpayOrderFlowAsync(

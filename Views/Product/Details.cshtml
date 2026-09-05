@@ -1557,9 +1557,14 @@
   <!-- INFINITE GOOGLE & CUSTOMER PHOTO REVIEWS SECTION -->
   <!-- (PLACED IMMEDIATELY AFTER HOW OUR PRODUCTS ARE MADE) -->
   <section class="sat-reviews-marquee-section">
-    <div class="marquee-heading-wrap">
-      <h2 class="marquee-title">Real Customer Stories &amp; Unboxing</h2>
-      <p class="marquee-subtitle">See real fine jewelry delivered to our cherished global clients.</p>
+    <div class="marquee-heading-wrap" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:24px;">
+      <div>
+        <h2 class="marquee-title" style="margin:0;">Real Customer Stories &amp; Unboxing</h2>
+        <p class="marquee-subtitle" style="margin:4px 0 0;">See real fine jewelry delivered to our cherished global clients.</p>
+      </div>
+      <button type="button" onclick="openWriteReviewModal()" class="btn-write-review" style="background:linear-gradient(135deg, #d4af37, #aa820a); color:#000000; font-weight:800; border:none; padding:12px 24px; border-radius:30px; font-size:13px; cursor:pointer; display:inline-flex; align-items:center; gap:8px; box-shadow:0 6px 20px rgba(212,175,55,0.35); transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+        <i class="fa-solid fa-pen-nib"></i> Write a Customer Review
+      </button>
     </div>
 
     <div class="marquee-track-container">
@@ -1651,6 +1656,69 @@
           <p id="modalReviewText" style="font-size:13.5px; line-height:1.65; color:#475569; margin:0;"></p>
         </div>
       </div>
+    </div>
+  </div>
+
+  <!-- POPUP MODAL FOR WRITING A CUSTOMER REVIEW -->
+  <div id="writeReviewModal" class="sat-review-modal-overlay" style="display:none;" onclick="if(event.target === this) closeWriteReviewModal()">
+    <div class="sat-review-modal-card" style="max-width:540px; background:#141218; border:1px solid rgba(212,175,55,0.4); border-radius:24px; padding:32px; color:#ffffff;">
+      <button type="button" class="sat-review-modal-close" style="color:#94a3b8; font-size:24px;" onclick="closeWriteReviewModal()">&times;</button>
+      <div style="text-align:center; margin-bottom:20px;">
+        <div style="width:48px; height:48px; border-radius:50%; background:rgba(212,175,55,0.15); border:1px solid #d4af37; color:#d4af37; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:20px;">
+          <i class="fa-solid fa-star"></i>
+        </div>
+        <h3 style="font-family:'Playfair Display',serif; font-size:22px; color:#ffffff; margin:0 0 6px;">Review Your Fine Jewelry</h3>
+        <p style="font-size:13px; color:#94a3b8; margin:0;">Share your experience with <b>@Model.Name</b>.</p>
+      </div>
+
+      <form id="frmWriteReview" onsubmit="handleReviewSubmit(event)">
+        <!-- Star Rating Selector -->
+        <div style="text-align:center; margin-bottom:20px;">
+          <label style="font-size:12px; text-transform:uppercase; letter-spacing:1px; color:#d4af37; font-weight:700; display:block; margin-bottom:8px;">Your Rating</label>
+          <div id="starRatingContainer" style="display:inline-flex; gap:8px; font-size:26px; cursor:pointer;">
+            <i class="fa-solid fa-star star-opt" data-rating="1" style="color:#f59e0b;" onclick="setReviewRating(1)"></i>
+            <i class="fa-solid fa-star star-opt" data-rating="2" style="color:#f59e0b;" onclick="setReviewRating(2)"></i>
+            <i class="fa-solid fa-star star-opt" data-rating="3" style="color:#f59e0b;" onclick="setReviewRating(3)"></i>
+            <i class="fa-solid fa-star star-opt" data-rating="4" style="color:#f59e0b;" onclick="setReviewRating(4)"></i>
+            <i class="fa-solid fa-star star-opt" data-rating="5" style="color:#f59e0b;" onclick="setReviewRating(5)"></i>
+          </div>
+          <input type="hidden" id="revRatingInput" value="5" />
+        </div>
+
+        <!-- Name & Email -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px;">
+          <div>
+            <label style="font-size:12px; color:#cbd5e1; font-weight:600; display:block; margin-bottom:4px;">Full Name *</label>
+            <input type="text" id="revCustomerName" required placeholder="e.g. Sarah Jenkins" value="@(User.Identity?.Name ?? "")" 
+                   style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:10px 14px; font-size:13px; color:#ffffff; outline:none;" />
+          </div>
+          <div>
+            <label style="font-size:12px; color:#cbd5e1; font-weight:600; display:block; margin-bottom:4px;">Email Address *</label>
+            <input type="email" id="revCustomerEmail" required placeholder="e.g. sarah@example.com" value="@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "")" 
+                   style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:10px 14px; font-size:13px; color:#ffffff; outline:none;" />
+          </div>
+        </div>
+
+        <!-- Review Headline -->
+        <div style="margin-bottom:14px;">
+          <label style="font-size:12px; color:#cbd5e1; font-weight:600; display:block; margin-bottom:4px;">Review Title / Headline *</label>
+          <input type="text" id="revTitle" required placeholder="e.g. Flawless brilliance and magnificent 18K setting!" 
+                 style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:10px 14px; font-size:13px; color:#ffffff; outline:none;" />
+        </div>
+
+        <!-- Review Comments -->
+        <div style="margin-bottom:20px;">
+          <label style="font-size:12px; color:#cbd5e1; font-weight:600; display:block; margin-bottom:4px;">Your Detailed Review *</label>
+          <textarea id="revText" required rows="4" placeholder="Tell us about the sparkle, packaging, delivery speed, and craft..." 
+                    style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:12px 14px; font-size:13px; color:#ffffff; outline:none; resize:vertical;"></textarea>
+        </div>
+
+        <div id="revMsgBox" style="display:none; padding:12px; border-radius:10px; font-size:13px; margin-bottom:16px; text-align:center;"></div>
+
+        <button type="submit" id="btnSubmitReview" style="width:100%; background:linear-gradient(135deg, #d4af37, #aa820a); color:#000000; font-weight:800; border:none; padding:14px; border-radius:30px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 6px 20px rgba(212,175,55,0.4);">
+          <i class="fa-solid fa-paper-plane"></i> Submit Customer Review
+        </button>
+      </form>
     </div>
   </div>
 
@@ -2009,6 +2077,96 @@
     function closeReviewModal() {
       const modal = document.getElementById('reviewDetailModal');
       if (modal) modal.style.display = 'none';
+    }
+
+    function openWriteReviewModal() {
+      const modal = document.getElementById('writeReviewModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeWriteReviewModal() {
+      const modal = document.getElementById('writeReviewModal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    function setReviewRating(rating) {
+      document.getElementById('revRatingInput').value = rating;
+      const stars = document.querySelectorAll('#starRatingContainer .star-opt');
+      stars.forEach(star => {
+        const r = parseInt(star.getAttribute('data-rating') || '1');
+        if (r <= rating) {
+          star.style.color = '#f59e0b';
+        } else {
+          star.style.color = '#475569';
+        }
+      });
+    }
+
+    async function handleReviewSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnSubmitReview');
+      const msgBox = document.getElementById('revMsgBox');
+      const name = document.getElementById('revCustomerName').value.trim();
+      const email = document.getElementById('revCustomerEmail').value.trim();
+      const title = document.getElementById('revTitle').value.trim();
+      const text = document.getElementById('revText').value.trim();
+      const rating = parseInt(document.getElementById('revRatingInput').value || '5');
+
+      if (!name || !email || !title || !text) {
+        msgBox.style.display = 'block';
+        msgBox.style.background = 'rgba(239, 68, 68, 0.2)';
+        msgBox.style.border = '1px solid #ef4444';
+        msgBox.style.color = '#fca5a5';
+        msgBox.innerText = 'Please fill out all required fields.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting Review...';
+
+      try {
+        const payload = {
+          productName: '@Model.Name',
+          customerName: name,
+          customerEmail: email,
+          rating: rating,
+          reviewTitle: title,
+          reviewText: text
+        };
+
+        const res = await fetch('/api/products/@Model.Id/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        msgBox.style.display = 'block';
+        if (data.success) {
+          msgBox.style.background = 'rgba(16, 185, 129, 0.2)';
+          msgBox.style.border = '1px solid #10b981';
+          msgBox.style.color = '#6ee7b7';
+          msgBox.innerText = data.message || 'Review submitted successfully!';
+          setTimeout(() => {
+            closeWriteReviewModal();
+            window.location.reload();
+          }, 1500);
+        } else {
+          msgBox.style.background = 'rgba(239, 68, 68, 0.2)';
+          msgBox.style.border = '1px solid #ef4444';
+          msgBox.style.color = '#fca5a5';
+          msgBox.innerText = data.message || 'Failed to submit review.';
+        }
+      } catch (err) {
+        msgBox.style.display = 'block';
+        msgBox.style.background = 'rgba(239, 68, 68, 0.2)';
+        msgBox.style.border = '1px solid #ef4444';
+        msgBox.style.color = '#fca5a5';
+        msgBox.innerText = 'Network error while submitting review.';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Customer Review';
+      }
     }
 
     recalculatePrice();

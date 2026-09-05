@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -11,74 +12,104 @@ namespace SAT1.BAL.Shipping
     public class DefaultShippingProviderService : IShippingProviderService
     {
         private readonly IConfiguration _configuration;
-        private readonly string _carrierName;
+        private readonly UpsShippingProviderService _upsService;
+        private readonly AramexShippingProviderService _aramexService;
+        private readonly UspsShippingProviderService _uspsService;
+        private readonly string _activeCarrier;
         private readonly string _webhookSecret;
 
-        public string ProviderName => _carrierName;
-
-        public DefaultShippingProviderService(IConfiguration configuration)
+        public string ProviderName
         {
-            _configuration = configuration;
-            _carrierName = _configuration["Shipping:CarrierName"] ?? "DHL Express International";
-            _webhookSecret = _configuration["Shipping:WebhookSecret"] ?? "dhl_sat_webhook_secret_key_2026";
+            get
+            {
+                return _activeCarrier.ToUpperInvariant() switch
+                {
+                    "UPS" => _upsService.ProviderName,
+                    "ARAMEX" => _aramexService.ProviderName,
+                    "USPS" => _uspsService.ProviderName,
+                    _ => _upsService.ProviderName
+                };
+            }
         }
 
+        public DefaultShippingProviderService(
+            IConfiguration configuration,
+            UpsShippingProviderService upsService,
+            AramexShippingProviderService aramexService,
+            UspsShippingProviderService uspsService)
+        {
+            _configuration = configuration;
+            _upsService = upsService;
+            _aramexService = aramexService;
+            _uspsService = uspsService;
+            _activeCarrier = _configuration["Shipping:ActiveCarrier"] ?? "UPS";
+            _webhookSecret = _configuration["Shipping:WebhookSecret"] ?? "sat_shipping_webhook_secret_key_2026";
+        }
+
+        public static string DetectCarrierFromTrackingNumber(string trackingNumber)
+        {
+            if (string.IsNullOrWhiteSpace(trackingNumber)) return "UPS Worldwide Express";
+            var clean = trackingNumber.Trim().ToUpperInvariant();
+
+            if (clean.StartsWith("1Z")) return "UPS Worldwide Express";
+            if (clean.StartsWith("EZ") || clean.EndsWith("IN") || clean.EndsWith("US") || clean.StartsWith("9400") || clean.Length == 22) return "USPS Priority Mail Express";
+            if (clean.Length == 11 && char.IsDigit(clean[0])) return "Aramex Priority Express";
+            if (clean.StartsWith("DHL")) return "DHL Express International";
+
+            return "UPS Worldwide Express";
+        }
+
+        public static string GetCarrierTrackingPortalUrl(string carrierName, string trackingNumber)
+        {
+            if (string.IsNullOrWhiteSpace(trackingNumber)) return "https://www.ups.com";
+            var cleanTracking = trackingNumber.Trim();
+            var carrier = (carrierName ?? "").ToLowerInvariant();
+
+            if (carrier.Contains("ups") || cleanTracking.ToUpperInvariant().StartsWith("1Z"))
+            {
+                return $"https://www.ups.com/track?tracknum={cleanTracking}";
+            }
+            if (carrier.Contains("aramex") || (cleanTracking.Length == 11 && char.IsDigit(cleanTracking[0])))
+            {
+                return $"https://www.aramex.com/us/en/track/shipments?ShipmentNumber={cleanTracking}";
+            }
+            if (carrier.Contains("usps") || cleanTracking.ToUpperInvariant().StartsWith("EZ") || cleanTracking.ToUpperInvariant().StartsWith("9400"))
+            {
+                return $"https://tools.usps.com/go/TrackConfirmAction?tLabels={cleanTracking}";
+            }
+
+            return $"https://www.ups.com/track?tracknum={cleanTracking}";
+        }
+
+        // Book shipment using active configured carrier or product/order preferred carrier
         public async Task<ShipmentBookingResult> BookShipmentAsync(ShipmentRequest request)
         {
-            await Task.Delay(50); // Simulates network I/O to Carrier API
+            var carrierChoice = (!string.IsNullOrWhiteSpace(request?.PreferredCarrier) 
+                ? request.PreferredCarrier 
+                : (_configuration["Shipping:ActiveCarrier"] ?? _activeCarrier)).Trim().ToUpperInvariant();
 
-            try
+            return carrierChoice switch
             {
-                // Validate recipient address
-                if (string.IsNullOrWhiteSpace(request.RecipientStreet) || string.IsNullOrWhiteSpace(request.RecipientCity))
-                {
-                    return new ShipmentBookingResult
-                    {
-                        Success = false,
-                        ErrorMessage = "Shipping validation failed: Missing street address or city."
-                    };
-                }
-
-                // Generate authoritative AWB / Tracking number
-                var randomNum = Random.Shared.Next(10000000, 99999999);
-                var awb = $"DHL{DateTime.Now:yyyyMMdd}{randomNum}";
-                var trackingUrl = $"https://www.dhl.com/en/express/tracking.html?AWB={awb}";
-                var estDelivery = DateTime.Now.AddDays(4); // Standard India -> USA DHL Express duration (3-5 days)
-
-                return new ShipmentBookingResult
-                {
-                    Success = true,
-                    CarrierName = _carrierName,
-                    TrackingNumber = awb,
-                    TrackingUrl = trackingUrl,
-                    EstimatedDeliveryDate = estDelivery,
-                    InitialStatusNote = "Shipment data received. Parcel assigned for international courier dispatch."
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ShipmentBookingResult
-                {
-                    Success = false,
-                    ErrorMessage = $"Carrier API Error: {ex.Message}"
-                };
-            }
+                "ARAMEX" => await _aramexService.BookShipmentAsync(request!),
+                "USPS" => await _uspsService.BookShipmentAsync(request!),
+                _ => await _upsService.BookShipmentAsync(request!)
+            };
         }
 
         public async Task<TrackingStatusResult> GetTrackingStatusAsync(string trackingNumber)
         {
-            await Task.Delay(50);
+            var detected = DetectCarrierFromTrackingNumber(trackingNumber);
 
-            return new TrackingStatusResult
+            if (detected.Contains("Aramex"))
             {
-                Success = true,
-                InternalStatus = "InTransit",
-                CarrierStatus = "PROCESSED_AT_TRANSIT_HUB",
-                StatusNote = "Processed through Mumbai Air Cargo Hub. En route to JFK International Airport, USA.",
-                Location = "Mumbai Air Cargo Hub, India",
-                EventTimestamp = DateTime.Now,
-                EstimatedDeliveryDate = DateTime.Now.AddDays(3)
-            };
+                return await _aramexService.GetTrackingStatusAsync(trackingNumber);
+            }
+            if (detected.Contains("USPS"))
+            {
+                return await _uspsService.GetTrackingStatusAsync(trackingNumber);
+            }
+
+            return await _upsService.GetTrackingStatusAsync(trackingNumber);
         }
 
         public bool VerifyWebhookSignature(HttpRequest request, string rawBody)
@@ -88,8 +119,7 @@ namespace SAT1.BAL.Shipping
             var receivedSignature = request.Headers["X-Carrier-Signature"].ToString();
             if (string.IsNullOrWhiteSpace(receivedSignature))
             {
-                // In development sandbox, allow trusted local calls
-                return true;
+                return true; // Sandbox bypass
             }
 
             using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(_webhookSecret));
@@ -101,57 +131,19 @@ namespace SAT1.BAL.Shipping
 
         public TrackingStatusResult ParseWebhookPayload(string rawBody)
         {
-            try
+            var carrierChoice = (_configuration["Shipping:ActiveCarrier"] ?? _activeCarrier).Trim().ToUpperInvariant();
+
+            return carrierChoice switch
             {
-                using var doc = JsonDocument.Parse(rawBody);
-                var root = doc.RootElement;
-
-                var carrierStatus = root.TryGetProperty("status", out var s) ? s.GetString() ?? "" : "";
-                var note = root.TryGetProperty("note", out var n) ? n.GetString() ?? "" : "Carrier status updated.";
-                var location = root.TryGetProperty("location", out var l) ? l.GetString() ?? "" : "";
-
-                DateTime eventTime = DateTime.Now;
-                if (root.TryGetProperty("timestamp", out var t) && DateTime.TryParse(t.GetString(), out var dt))
-                {
-                    eventTime = dt;
-                }
-
-                return new TrackingStatusResult
-                {
-                    Success = true,
-                    CarrierStatus = carrierStatus,
-                    InternalStatus = MapProviderStatusToInternalStatus(carrierStatus),
-                    StatusNote = note,
-                    Location = location,
-                    EventTimestamp = eventTime,
-                    RawPayload = rawBody
-                };
-            }
-            catch (Exception ex)
-            {
-                return new TrackingStatusResult
-                {
-                    Success = false,
-                    StatusNote = $"Payload parse error: {ex.Message}"
-                };
-            }
+                "ARAMEX" => _aramexService.ParseWebhookPayload(rawBody),
+                "USPS" => _uspsService.ParseWebhookPayload(rawBody),
+                _ => _upsService.ParseWebhookPayload(rawBody)
+            };
         }
 
         public string MapProviderStatusToInternalStatus(string providerStatus)
         {
-            var clean = (providerStatus ?? "").Trim().ToUpperInvariant();
-            return clean switch
-            {
-                "SHIPMENT_BOOKED" or "LABEL_CREATED" or "PICKUP_SCHEDULED" => "ShipmentBooked",
-                "PICKED_UP" or "IN_TRANSIT" or "DEPARTED_FACILITY" or "PROCESSED_AT_TRANSIT_HUB" => "InTransit",
-                "CUSTOMS_CLEARANCE" or "CUSTOMS_CLEARED" or "INSPECTION_COMPLETED" or "IMPORT_CLEARANCE" => "CustomsClearance",
-                "OUT_FOR_DELIVERY" or "WITH_COURIER" or "LOCAL_DISPATCH" => "OutForDelivery",
-                "DELIVERED" or "SHIPMENT_DELIVERED" or "SIGNED_BY_RECIPIENT" => "Delivered",
-                "EXCEPTION" or "DELIVERY_ATTEMPT_FAILED" or "ADDRESS_ISSUE" => "Exception",
-                "CANCELLED" or "VOIDED" => "Cancelled",
-                "RETURNED" or "RETURN_TO_SENDER" => "Returned",
-                _ => "InTransit"
-            };
+            return _upsService.MapProviderStatusToInternalStatus(providerStatus);
         }
     }
 }

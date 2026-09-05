@@ -145,6 +145,125 @@ namespace SAT1.Controllers
             public string? ReturnUrl { get; set; }
         }
 
+        public class RegisterOtpRequest
+        {
+            public string FullName { get; set; } = string.Empty;
+            public string Email { get; set; } = string.Empty;
+            public string Phone { get; set; } = string.Empty;
+            public string Password { get; set; } = string.Empty;
+            public string? ReturnUrl { get; set; }
+            public string? Otp { get; set; }
+        }
+
+        // Send AWS SNS OTP specifically for User Registration
+        [HttpPost]
+        public async Task<IActionResult> SendRegistrationOtp([FromBody] RegisterOtpRequest req)
+        {
+            if (string.IsNullOrWhiteSpace(req.FullName) || string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Phone) || string.IsNullOrWhiteSpace(req.Password))
+            {
+                return Json(new { success = false, message = "Please fill in all required fields (Name, Email, Mobile Phone, Password)." });
+            }
+
+            // Name Regex
+            if (!Regex.IsMatch(req.FullName.Trim(), @"^[a-zA-Z\s]{2,50}$"))
+            {
+                return Json(new { success = false, message = "Full Name can only contain letters and spaces." });
+            }
+
+            // Email Regex
+            if (!Regex.IsMatch(req.Email.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                return Json(new { success = false, message = "Please enter a valid email address." });
+            }
+
+            // Duplicate Email
+            var cleanEmail = req.Email.Trim().ToLower();
+            var emailExists = await _context.Users.AnyAsync(u => u.Email.ToLower() == cleanEmail);
+            if (emailExists)
+            {
+                return Json(new { success = false, message = "An account with this email already exists. Please Sign In." });
+            }
+
+            // Phone digits
+            var phoneDigits = Regex.Replace(req.Phone, @"[^\d]", "");
+            if (phoneDigits.Length < 10)
+            {
+                return Json(new { success = false, message = "Please enter a valid 10-digit mobile number." });
+            }
+
+            var suffix = phoneDigits.Substring(phoneDigits.Length - 10);
+            var phoneExists = await _context.Users.AnyAsync(u => u.Phone != null && u.Phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("+", "").EndsWith(suffix));
+            if (phoneExists)
+            {
+                return Json(new { success = false, message = "This mobile number is already registered. Please Sign In or use another number." });
+            }
+
+            // Password Complexity
+            if (req.Password.Length < 8 || !Regex.IsMatch(req.Password, @"[a-z]") || !Regex.IsMatch(req.Password, @"[A-Za-z]") || !Regex.IsMatch(req.Password, @"[\W_]"))
+            {
+                return Json(new { success = false, message = "Password must be at least 8 characters long and contain at least 1 lowercase letter, 1 letter, and 1 special character." });
+            }
+
+            // Dispatch OTP via AWS SNS
+            var result = await _otpService.GenerateAndSendOtpAsync(req.Phone);
+            return Json(new
+            {
+                success = result.Success,
+                message = result.Message,
+                cooldownSeconds = result.CooldownSeconds,
+                demoOtp = result.DemoOtp
+            });
+        }
+
+        // Verify OTP and complete User Registration
+        [HttpPost]
+        public async Task<IActionResult> VerifyRegistrationAndCreateUser([FromBody] RegisterOtpRequest req)
+        {
+            if (string.IsNullOrWhiteSpace(req.Phone) || string.IsNullOrWhiteSpace(req.Otp))
+            {
+                return Json(new { success = false, message = "Phone number and 6-digit OTP are required." });
+            }
+
+            var verifyResult = await _otpService.VerifyOtpAsync(req.Phone, req.Otp);
+            if (!verifyResult.Success)
+            {
+                return Json(new { success = false, message = verifyResult.Message });
+            }
+
+            var user = await _authBal.RegisterNewUserAsync(req.FullName, req.Email, req.Phone, req.Password, req.Password);
+            if (user == null)
+            {
+                return Json(new { success = false, message = "Unable to create account. Email may already be in use." });
+            }
+
+            // Automatically sign in the newly verified user
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role ?? "Client")
+            };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, new AuthenticationProperties
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.Now.AddDays(30)
+            });
+
+            var targetUrl = !string.IsNullOrWhiteSpace(req.ReturnUrl) && Url.IsLocalUrl(req.ReturnUrl) ? req.ReturnUrl : "/";
+            return Json(new
+            {
+                success = true,
+                message = "Account verified and registered successfully!",
+                redirectUrl = targetUrl,
+                userName = user.FullName
+            });
+        }
+
         [HttpPost]
         public async Task<IActionResult> QuickPhoneLogin([FromBody] PhoneOtpRequest req)
         {

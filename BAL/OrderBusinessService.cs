@@ -130,7 +130,7 @@ namespace SAT1.BAL
             // Automatic Amazon/Flipkart-Style Shipment Booking (No Admin Manual Step Required)
             if (updatedOrder != null)
             {
-                _ = Task.Run(() => _orderTrackingService.BookShipmentAsync(updatedOrder.OrderId));
+                await _orderTrackingService.BookShipmentAsync(updatedOrder.OrderId);
             }
 
             return (true, wasAlreadyPaid ? "Order already verified and completed." : "PayPal payment verified and order marked as Paid!", updatedOrder);
@@ -241,7 +241,7 @@ namespace SAT1.BAL
             // Automatic Amazon/Flipkart-Style Shipment Booking (No Admin Manual Step Required)
             if (updatedOrder != null)
             {
-                _ = Task.Run(() => _orderTrackingService.BookShipmentAsync(updatedOrder.OrderId));
+                await _orderTrackingService.BookShipmentAsync(updatedOrder.OrderId);
             }
 
             return (true, wasAlreadyPaid ? "Order already verified and completed." : "Razorpay payment verified and order marked as Paid!", updatedOrder);
