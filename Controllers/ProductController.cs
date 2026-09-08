@@ -25,6 +25,7 @@ namespace SAT1.Controllers
         public async Task<IActionResult> Index()
         {
             var products = await _context.CatalogItems
+                .AsNoTracking()
                 .Where(p => p.IsActive)
                 .OrderByDescending(p => p.CreatedAt)
                 .ToListAsync();
@@ -50,6 +51,7 @@ namespace SAT1.Controllers
                     try
                     {
                         ViewBag.SavedAddresses = await _context.UserAddresses
+                            .AsNoTracking()
                             .Where(a => a.UserId == userId)
                             .OrderByDescending(a => a.IsDefault)
                             .ToListAsync();

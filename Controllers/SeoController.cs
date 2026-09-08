@@ -47,7 +47,7 @@ namespace SAT1.Controllers
             }
 
             // 3. Static Pages & Craft Process (Priority 0.6)
-            var staticPages = new[] { "/Home/CustomRings", "/Home/Index#collections", "/Home/Index#craft-video-section", "/Home/Index#ai-features", "/Home/Index#why" };
+            var staticPages = new[] { "/Home/CustomRings", "/Home/Index#collections", "/Home/Index#craft-video-section", "/Home/Index#why" };
             foreach (var sp in staticPages)
             {
                 urlElements.Add(new XElement(ns + "url",

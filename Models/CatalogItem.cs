@@ -93,6 +93,9 @@ namespace SAT1.Models
         public virtual ICollection<CaratOption> CaratOptionList { get; set; } = new List<CaratOption>();
 
         [NotMapped]
+        public long? DiamondShapeId { get; set; }
+
+        [NotMapped]
         public List<ProductVariantMatrixItemDto>? Variants { get; set; } = new List<ProductVariantMatrixItemDto>();
     }
 }

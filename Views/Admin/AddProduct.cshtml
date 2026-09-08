@@ -351,22 +351,22 @@
         <div style="margin-bottom:20px;">
           <label style="font-size:13px; font-weight:700; color:var(--champagne-gold); display:block; margin-bottom:6px;">Select Main Collection Category *</label>
           <div class="cat-cards-grid">
-            <div class="cat-select-card active" onclick="setCategory(1, 'Engagement Rings', this)">
+            <div class="cat-select-card active" data-category-id="1" data-category-slug="engagement-rings" data-category-name="Engagement Rings" data-category-name-lower="engagement rings" onclick="setCategory(1, 'Engagement Rings', this)">
               <i class="fa-solid fa-gem"></i> <span>1. Engagement Rings</span>
             </div>
-            <div class="cat-select-card" onclick="setCategory(2, 'Wedding Rings', this)">
+            <div class="cat-select-card" data-category-id="2" data-category-slug="wedding-rings" data-category-name="Wedding Rings" data-category-name-lower="wedding rings" onclick="setCategory(2, 'Wedding Rings', this)">
               <i class="fa-solid fa-ring"></i> <span>2. Wedding Rings</span>
             </div>
-            <div class="cat-select-card" onclick="setCategory(3, 'Bridal Sets', this)">
+            <div class="cat-select-card" data-category-id="3" data-category-slug="bridal-sets" data-category-name="Bridal Sets" data-category-name-lower="bridal sets" onclick="setCategory(3, 'Bridal Sets', this)">
               <i class="fa-solid fa-heart"></i> <span>3. Bridal Sets</span>
             </div>
-            <div class="cat-select-card" onclick="setCategory(4, 'Earrings', this)">
+            <div class="cat-select-card" data-category-id="4" data-category-slug="earrings" data-category-name="Earrings" data-category-name-lower="earrings" onclick="setCategory(4, 'Earrings', this)">
               <i class="fa-solid fa-sparkles"></i> <span>4. Earrings</span>
             </div>
-            <div class="cat-select-card" onclick="setCategory(5, 'Bracelets', this)">
+            <div class="cat-select-card" data-category-id="5" data-category-slug="bracelets" data-category-name="Bracelets" data-category-name-lower="bracelets" onclick="setCategory(5, 'Bracelets', this)">
               <i class="fa-solid fa-link"></i> <span>5. Bracelets</span>
             </div>
-            <div class="cat-select-card" onclick="setCategory(6, 'Necklaces', this)">
+            <div class="cat-select-card" data-category-id="6" data-category-slug="necklaces" data-category-name="Necklaces" data-category-name-lower="necklaces" onclick="setCategory(6, 'Necklaces', this)">
               <i class="fa-solid fa-crown"></i> <span>6. Necklaces</span>
             </div>
           </div>
@@ -417,16 +417,16 @@
         <div style="margin-bottom:20px;">
           <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Select Diamond Cut Shape *</label>
           <div class="shape-chips-wrap">
-            <button type="button" class="shape-chip-btn active" onclick="setShape(1, 'Round', this)"><i class="fa-regular fa-circle"></i> Round</button>
-            <button type="button" class="shape-chip-btn" onclick="setShape(2, 'Oval', this)"><i class="fa-solid fa-egg"></i> Oval</button>
-            <button type="button" class="shape-chip-btn" onclick="setShape(3, 'Emerald', this)"><i class="fa-regular fa-square"></i> Emerald</button>
-            <button type="button" class="shape-chip-btn" onclick="setShape(4, 'Marquise', this)"><i class="fa-solid fa-diamond"></i> Marquise</button>
-            <button type="button" class="shape-chip-btn" onclick="setShape(5, 'Pear', this)"><i class="fa-solid fa-droplet"></i> Pear</button>
-            <button type="button" class="shape-chip-btn" onclick="setShape(6, 'Princess', this)"><i class="fa-solid fa-stop"></i> Princess</button>
-            <button type="button" class="shape-chip-btn" onclick="setShape(7, 'Cushion', this)"><i class="fa-solid fa-square-full"></i> Cushion</button>
-            <button type="button" class="shape-chip-btn" onclick="setShape(8, 'Radiant', this)"><i class="fa-solid fa-border-all"></i> Radiant</button>
-            <button type="button" class="shape-chip-btn" onclick="setShape(9, 'Asscher', this)"><i class="fa-solid fa-gem"></i> Asscher</button>
-            <button type="button" class="shape-chip-btn" onclick="setShape(10, 'Heart', this)"><i class="fa-solid fa-heart"></i> Heart</button>
+            <button type="button" class="shape-chip-btn active" data-shape-id="1" data-shape-name="Round" data-shape-name-lower="round" onclick="setShape(1, 'Round', this)"><i class="fa-regular fa-circle"></i> Round</button>
+            <button type="button" class="shape-chip-btn" data-shape-id="2" data-shape-name="Oval" data-shape-name-lower="oval" onclick="setShape(2, 'Oval', this)"><i class="fa-solid fa-egg"></i> Oval</button>
+            <button type="button" class="shape-chip-btn" data-shape-id="3" data-shape-name="Emerald" data-shape-name-lower="emerald" onclick="setShape(3, 'Emerald', this)"><i class="fa-regular fa-square"></i> Emerald</button>
+            <button type="button" class="shape-chip-btn" data-shape-id="4" data-shape-name="Marquise" data-shape-name-lower="marquise" onclick="setShape(4, 'Marquise', this)"><i class="fa-solid fa-diamond"></i> Marquise</button>
+            <button type="button" class="shape-chip-btn" data-shape-id="5" data-shape-name="Pear" data-shape-name-lower="pear" onclick="setShape(5, 'Pear', this)"><i class="fa-solid fa-droplet"></i> Pear</button>
+            <button type="button" class="shape-chip-btn" data-shape-id="6" data-shape-name="Princess" data-shape-name-lower="princess" onclick="setShape(6, 'Princess', this)"><i class="fa-solid fa-stop"></i> Princess</button>
+            <button type="button" class="shape-chip-btn" data-shape-id="7" data-shape-name="Cushion" data-shape-name-lower="cushion" onclick="setShape(7, 'Cushion', this)"><i class="fa-solid fa-square-full"></i> Cushion</button>
+            <button type="button" class="shape-chip-btn" data-shape-id="8" data-shape-name="Radiant" data-shape-name-lower="radiant" onclick="setShape(8, 'Radiant', this)"><i class="fa-solid fa-border-all"></i> Radiant</button>
+            <button type="button" class="shape-chip-btn" data-shape-id="9" data-shape-name="Asscher" data-shape-name-lower="asscher" onclick="setShape(9, 'Asscher', this)"><i class="fa-solid fa-gem"></i> Asscher</button>
+            <button type="button" class="shape-chip-btn" data-shape-id="10" data-shape-name="Heart" data-shape-name-lower="heart" onclick="setShape(10, 'Heart', this)"><i class="fa-solid fa-heart"></i> Heart</button>
           </div>
           <input type="hidden" id="adminShapeId" value="1" />
         </div>
@@ -985,8 +985,27 @@
       document.getElementById('adminMoissanitePrice').value = item.moissanitePriceUSD || item.moissanitePrice || Math.round((item.priceUSD || item.price || 0) * 0.55);
       
       if (item.categoryId) {
-        const catCard = document.querySelector(`.cat-select-card[onclick*="'${item.categoryId}'"]`);
-        if (catCard) setCategory(item.categoryId, item.categoryId, catCard);
+        const catStr = String(item.categoryId).trim().toLowerCase();
+        const catCard = document.querySelector(`.cat-select-card[data-category-id="${catStr}"]`) ||
+                        document.querySelector(`.cat-select-card[data-category-slug="${catStr}"]`) ||
+                        document.querySelector(`.cat-select-card[data-category-name-lower="${catStr}"]`);
+        if (catCard) {
+          const catId = catCard.getAttribute('data-category-id');
+          const catName = catCard.getAttribute('data-category-name');
+          setCategory(catId, catName, catCard);
+        }
+      }
+
+      const targetShapeId = item.diamondShapeId || item.shapeId || item.diamondShape || 1;
+      if (targetShapeId) {
+        const shapeStr = String(targetShapeId).trim().toLowerCase();
+        const shapeBtn = document.querySelector(`.shape-chip-btn[data-shape-id="${shapeStr}"]`) ||
+                         document.querySelector(`.shape-chip-btn[data-shape-name-lower="${shapeStr}"]`);
+        if (shapeBtn) {
+          const shapeId = shapeBtn.getAttribute('data-shape-id');
+          const shapeName = shapeBtn.getAttribute('data-shape-name');
+          setShape(shapeId, shapeName, shapeBtn);
+        }
       }
 
       // Step 2: Photo Studio - Load ALL existing product images

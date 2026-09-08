@@ -202,7 +202,9 @@
 
     /* Tabs Bar */
     .moiss-tabs-container {
-        background: #08111e; border: 1px solid rgba(212, 178, 112, 0.2);
+        background: #0e0d10;
+        border-top: 1px solid rgba(212, 178, 112, 0.2);
+        border-bottom: 1px solid rgba(212, 178, 112, 0.2);
         padding: 20px 24px;
     }
 
@@ -218,7 +220,8 @@
     }
 
     .moiss-tab-btn {
-        background: #0b1524; color: #ffffff;
+        background: #06070a;
+        color: #94a3b8;
         border: 1px solid rgba(212, 178, 112, 0.25);
         border-radius: 12px;
         padding: 14px 22px;
@@ -232,25 +235,28 @@
     }
 
     .moiss-tab-btn:hover {
-        border-color: #ffffff;
+        border-color: #d4b270;
+        color: #ffffff;
         transform: translateY(-2px);
     }
 
     .moiss-tab-btn.active {
-        border: 2px solid #111827;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        border: 2px solid #d4b270;
+        background: rgba(212, 178, 112, 0.1);
+        color: #d4b270;
+        box-shadow: 0 4px 16px rgba(212, 178, 112, 0.2);
     }
 
     .shape-svg {
         width: 32px;
         height: 32px;
-        color: #ffffff;
+        color: inherit;
     }
 
     .moiss-tab-btn span {
         font-size: 0.88rem;
         font-weight: 700;
-        color: #ffffff;
+        color: inherit;
     }
 
     /* Main Table Section */
@@ -284,40 +290,45 @@
 
     .moiss-table-wrap {
         overflow-x: auto;
-        border-radius: 12px;
-        border: 1px solid rgba(212, 178, 112, 0.25);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        border-radius: 14px;
+        border: 1px solid rgba(212, 178, 112, 0.3);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        background: #06070a;
     }
 
     .moiss-table {
         width: 100%;
         border-collapse: collapse;
         text-align: center;
-        background: #0b1524; color: #ffffff;
+        background: #06070a;
+        color: #ffffff;
         font-size: 0.95rem;
     }
 
     .moiss-table th {
-        background: #050b14;
-        color: #ffffff;
-        padding: 16px 20px;
+        background: #0e0d10;
+        color: #d4b270;
+        padding: 18px 20px;
         font-weight: 700;
         font-size: 0.92rem;
-        border-bottom: 2px solid #e2e8f0;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid rgba(212, 178, 112, 0.35);
     }
 
     .moiss-table td {
         padding: 14px 20px;
-        border-bottom: 1px solid #f1f5f9;
-        color: #334155;
+        border-bottom: 1px solid rgba(212, 178, 112, 0.15);
+        color: #e2e8f0;
+        font-weight: 500;
     }
 
     .moiss-table tbody tr:nth-child(even) {
-        background: #050b14;
+        background: rgba(255, 255, 255, 0.02);
     }
 
     .moiss-table tbody tr:hover {
-        background: #fef3c7;
+        background: rgba(212, 178, 112, 0.12);
+        color: #ffffff;
     }
 
     /* Values Section */

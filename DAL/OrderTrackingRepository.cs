@@ -19,6 +19,7 @@ namespace SAT1.DAL
         public async Task<Order?> GetOrderByOrderIdAsync(string orderId)
         {
             return await _context.Orders
+                .AsNoTracking()
                 .Include(o => o.TrackingHistory)
                 .FirstOrDefaultAsync(o => o.OrderId == orderId || o.OrderNumber == orderId);
         }
@@ -26,6 +27,7 @@ namespace SAT1.DAL
         public async Task<Order?> GetOrderByTrackingNumberAsync(string trackingNumber)
         {
             return await _context.Orders
+                .AsNoTracking()
                 .Include(o => o.TrackingHistory)
                 .FirstOrDefaultAsync(o => o.TrackingNumber == trackingNumber);
         }
@@ -34,6 +36,7 @@ namespace SAT1.DAL
         {
             var cleanEmail = email.Trim().ToLower();
             return await _context.Orders
+                .AsNoTracking()
                 .Include(o => o.TrackingHistory)
                 .Where(o => o.CustomerEmail.ToLower() == cleanEmail || (o.CustomerEmail != null && o.CustomerEmail.ToLower().Contains(cleanEmail)))
                 .OrderByDescending(o => o.CreatedAt)
@@ -44,6 +47,7 @@ namespace SAT1.DAL
         {
             var clean = query.Trim().ToLower();
             return await _context.Orders
+                .AsNoTracking()
                 .Include(o => o.TrackingHistory)
                 .Where(o => o.OrderId.ToLower() == clean || 
                             o.OrderNumber.ToLower() == clean || 
@@ -57,6 +61,7 @@ namespace SAT1.DAL
         public async Task<List<OrderTrackingHistory>> GetTrackingHistoryByOrderIdAsync(string orderId)
         {
             return await _context.OrderTrackingHistory
+                .AsNoTracking()
                 .Where(h => h.OrderId == orderId)
                 .OrderBy(h => h.CreatedAt)
                 .ToListAsync();

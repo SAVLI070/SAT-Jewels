@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using SAT1.Models;
 
 namespace SAT1.Controllers
@@ -15,10 +16,12 @@ namespace SAT1.Controllers
     public class ProductApiController : ControllerBase
     {
         private readonly SatJewelDbContext _context;
+        private readonly IMemoryCache _cache;
 
-        public ProductApiController(SatJewelDbContext context)
+        public ProductApiController(SatJewelDbContext context, IMemoryCache cache)
         {
             _context = context;
+            _cache = cache;
         }
 
         // =========================================================================
@@ -122,14 +125,11 @@ namespace SAT1.Controllers
                     query = query.Where(p => _context.ProductVariants.Any(v => v.ProductId == p.ProductId && v.CaratId.HasValue && caratIdList.Contains(v.CaratId.Value)));
                 }
 
-                // Total Count for Pagination Metadata
-                int totalItems = await query.CountAsync();
-
                 // Calculate Pagination Limit & Offset
                 int actualLimit = limit > 0 ? Math.Min(limit, 100) : Math.Clamp(pageSize, 1, 100);
                 int actualOffset = offset > 0 ? offset : (Math.Max(1, page) - 1) * actualLimit;
 
-                // Execute Paginated Query
+                // Execute Paginated Query First
                 var products = await query
                     .OrderByDescending(p => p.CreatedAt)
                     .ThenBy(p => p.ProductId)
@@ -151,6 +151,17 @@ namespace SAT1.Controllers
                         createdAt = p.CreatedAt
                     })
                     .ToListAsync();
+
+                // Total Count Optimization: If on first page and count < limit, total is simply products.Count (saves 1 WAN round-trip)
+                int totalItems;
+                if (actualOffset == 0 && products.Count < actualLimit)
+                {
+                    totalItems = products.Count;
+                }
+                else
+                {
+                    totalItems = await query.CountAsync();
+                }
 
                 return Ok(new
                 {
@@ -175,20 +186,26 @@ namespace SAT1.Controllers
         [HttpGet("metals")]
         public async Task<IActionResult> GetMetals()
         {
-            var metals = await _context.Metals
-                .AsNoTracking()
-                .OrderBy(m => m.Id)
-                .Select(m => new
-                {
-                    id = m.Id,
-                    name = m.Name,
-                    slug = m.Slug,
-                    colorGroup = m.ColorGroup,
-                    colorHex = m.ColorHex
-                })
-                .ToListAsync();
+            const string cacheKey = "Api_Metals_Dto";
+            if (!_cache.TryGetValue(cacheKey, out object? data) || data == null)
+            {
+                var metals = await _context.Metals
+                    .AsNoTracking()
+                    .OrderBy(m => m.Id)
+                    .Select(m => new
+                    {
+                        id = m.Id,
+                        name = m.Name,
+                        slug = m.Slug,
+                        colorGroup = m.ColorGroup,
+                        colorHex = m.ColorHex
+                    })
+                    .ToListAsync();
+                data = metals;
+                _cache.Set(cacheKey, data, TimeSpan.FromMinutes(30));
+            }
 
-            return Ok(new { success = true, data = metals });
+            return Ok(new { success = true, data });
         }
 
         // =========================================================================
@@ -198,19 +215,25 @@ namespace SAT1.Controllers
         [HttpGet("carat-options")]
         public async Task<IActionResult> GetCaratOptions()
         {
-            var carats = await _context.CaratOptions
-                .AsNoTracking()
-                .OrderBy(c => c.CaratWeight)
-                .Select(c => new
-                {
-                    id = c.Id,
-                    weight = c.CaratWeight,
-                    label = c.Label,
-                    slug = c.Slug
-                })
-                .ToListAsync();
+            const string cacheKey = "Api_Carats_Dto";
+            if (!_cache.TryGetValue(cacheKey, out object? data) || data == null)
+            {
+                var carats = await _context.CaratOptions
+                    .AsNoTracking()
+                    .OrderBy(c => c.CaratWeight)
+                    .Select(c => new
+                    {
+                        id = c.Id,
+                        weight = c.CaratWeight,
+                        label = c.Label,
+                        slug = c.Slug
+                    })
+                    .ToListAsync();
+                data = carats;
+                _cache.Set(cacheKey, data, TimeSpan.FromMinutes(30));
+            }
 
-            return Ok(new { success = true, data = carats });
+            return Ok(new { success = true, data });
         }
 
         // =========================================================================
@@ -231,8 +254,19 @@ namespace SAT1.Controllers
                 return NotFound(new { success = false, message = $"Product with ID {id} not found." });
             }
 
-            var metals = await _context.Metals.AsNoTracking().OrderBy(m => m.Id).ToListAsync();
-            var carats = await _context.CaratOptions.AsNoTracking().OrderBy(c => c.CaratWeight).ToListAsync();
+            const string metalsCacheKey = "Global_Metals_Entities";
+            if (!_cache.TryGetValue(metalsCacheKey, out List<Metal>? metals) || metals == null)
+            {
+                metals = await _context.Metals.AsNoTracking().OrderBy(m => m.Id).ToListAsync();
+                _cache.Set(metalsCacheKey, metals, TimeSpan.FromMinutes(30));
+            }
+
+            const string caratsCacheKey = "Global_Carats_Entities";
+            if (!_cache.TryGetValue(caratsCacheKey, out List<CaratOption>? carats) || carats == null)
+            {
+                carats = await _context.CaratOptions.AsNoTracking().OrderBy(c => c.CaratWeight).ToListAsync();
+                _cache.Set(caratsCacheKey, carats, TimeSpan.FromMinutes(30));
+            }
 
             var variants = await _context.ProductVariants
                 .AsNoTracking()
@@ -275,18 +309,24 @@ namespace SAT1.Controllers
         [HttpGet("categories")]
         public async Task<IActionResult> GetCategories()
         {
-            var categories = await _context.Categories
-                .AsNoTracking()
-                .OrderBy(c => c.CategoryId)
-                .Select(c => new
-                {
-                    id = c.CategoryId,
-                    name = c.Name,
-                    slug = c.Slug
-                })
-                .ToListAsync();
+            const string cacheKey = "Api_Categories_Dto";
+            if (!_cache.TryGetValue(cacheKey, out object? data) || data == null)
+            {
+                var categories = await _context.Categories
+                    .AsNoTracking()
+                    .OrderBy(c => c.CategoryId)
+                    .Select(c => new
+                    {
+                        id = c.CategoryId,
+                        name = c.Name,
+                        slug = c.Slug
+                    })
+                    .ToListAsync();
+                data = categories;
+                _cache.Set(cacheKey, data, TimeSpan.FromMinutes(30));
+            }
 
-            return Ok(new { success = true, data = categories });
+            return Ok(new { success = true, data });
         }
 
         // =========================================================================
@@ -296,19 +336,25 @@ namespace SAT1.Controllers
         [HttpGet("diamond-shapes")]
         public async Task<IActionResult> GetDiamondShapes()
         {
-            var shapes = await _context.DiamondShapes
-                .AsNoTracking()
-                .OrderBy(s => s.Id)
-                .Select(s => new
-                {
-                    id = s.Id,
-                    name = s.Name,
-                    slug = s.Slug,
-                    iconUrl = s.IconUrl
-                })
-                .ToListAsync();
+            const string cacheKey = "Api_Shapes_Dto";
+            if (!_cache.TryGetValue(cacheKey, out object? data) || data == null)
+            {
+                var shapes = await _context.DiamondShapes
+                    .AsNoTracking()
+                    .OrderBy(s => s.Id)
+                    .Select(s => new
+                    {
+                        id = s.Id,
+                        name = s.Name,
+                        slug = s.Slug,
+                        iconUrl = s.IconUrl
+                    })
+                    .ToListAsync();
+                data = shapes;
+                _cache.Set(cacheKey, data, TimeSpan.FromMinutes(30));
+            }
 
-            return Ok(new { success = true, data = shapes });
+            return Ok(new { success = true, data });
         }
 
         // =========================================================================

@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using SAT1.Models;
 
 namespace SAT1.BAL
@@ -45,12 +46,58 @@ namespace SAT1.BAL
         private readonly SatJewelDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly AdminBal _adminBal;
+        private readonly IMemoryCache _cache;
+        private static bool _categoriesEnsured = false;
 
-        public CatalogBal(SatJewelDbContext context, IConfiguration configuration, AdminBal adminBal)
+        public CatalogBal(SatJewelDbContext context, IConfiguration configuration, AdminBal adminBal, IMemoryCache cache)
         {
             _context = context;
             _configuration = configuration;
             _adminBal = adminBal;
+            _cache = cache;
+        }
+
+        public void InvalidateCache()
+        {
+            _cache.Remove("Catalog_PublicCategories");
+            _cache.Remove("Catalog_AdminCategories");
+            _cache.Remove("Catalog_FullStore");
+            _cache.Remove("Global_PricingRules");
+            _cache.Remove("Global_Metals");
+            _cache.Remove("Global_Carats");
+        }
+
+        public async Task<List<DynamicPricingRule>> GetCachedActivePricingRulesAsync()
+        {
+            const string cacheKey = "Global_PricingRules";
+            if (!_cache.TryGetValue(cacheKey, out List<DynamicPricingRule>? rules) || rules == null)
+            {
+                rules = await _context.DynamicPricingRules.AsNoTracking().Where(r => r.IsActive).ToListAsync();
+                _cache.Set(cacheKey, rules, TimeSpan.FromMinutes(15));
+            }
+            return rules;
+        }
+
+        public async Task<List<Metal>> GetCachedMetalsAsync()
+        {
+            const string cacheKey = "Global_Metals";
+            if (!_cache.TryGetValue(cacheKey, out List<Metal>? metals) || metals == null)
+            {
+                metals = await _context.Metals.AsNoTracking().OrderBy(m => m.Id).ToListAsync();
+                _cache.Set(cacheKey, metals, TimeSpan.FromMinutes(30));
+            }
+            return metals;
+        }
+
+        public async Task<List<CaratOption>> GetCachedCaratsAsync()
+        {
+            const string cacheKey = "Global_Carats";
+            if (!_cache.TryGetValue(cacheKey, out List<CaratOption>? carats) || carats == null)
+            {
+                carats = await _context.CaratOptions.AsNoTracking().OrderBy(c => c.CaratWeight).ToListAsync();
+                _cache.Set(cacheKey, carats, TimeSpan.FromMinutes(30));
+            }
+            return carats;
         }
 
         private string Sanitize(string? input)
@@ -71,6 +118,8 @@ namespace SAT1.BAL
 
         private async Task EnsureDefaultCategoriesAsync()
         {
+            if (_categoriesEnsured) return;
+
             if (!await _context.Categories.AnyAsync())
             {
                 var defaultCats = new List<Category>
@@ -86,57 +135,31 @@ namespace SAT1.BAL
                 await _context.SaveChangesAsync();
             }
 
-            // Sync Cloudinary CDN URLs into database (DynamicPricingRules with RuleType = CategoryImageUrl)
-            var existingRules = await _context.DynamicPricingRules
-                .Where(r => r.RuleType == "CategoryImageUrl")
-                .ToListAsync();
-
-            bool dbChanged = false;
-            foreach (var kvp in DefaultCloudinaryCategoryImages)
-            {
-                var rule = existingRules.FirstOrDefault(r => r.Code == kvp.Key);
-                if (rule == null)
-                {
-                    _context.DynamicPricingRules.Add(new DynamicPricingRule
-                    {
-                        RuleType = "CategoryImageUrl",
-                        Code = kvp.Key,
-                        DisplayName = kvp.Value,
-                        PriceOffsetUSD = 0,
-                        DisplayOrder = int.TryParse(kvp.Key, out int order) ? order : 1,
-                        IsActive = true
-                    });
-                    dbChanged = true;
-                }
-                else if (rule.DisplayName != kvp.Value)
-                {
-                    rule.DisplayName = kvp.Value;
-                    rule.IsActive = true;
-                    _context.DynamicPricingRules.Update(rule);
-                    dbChanged = true;
-                }
-            }
-
-            if (dbChanged)
-            {
-                await _context.SaveChangesAsync();
-            }
+            _categoriesEnsured = true;
         }
 
         // PUBLIC STOREFRONT CATEGORIES: Returns ONLY categories where IsActive == true
         public async Task<List<CategoryAdminDto>> GetPublicCategoriesAsync()
         {
-            await EnsureDefaultCategoriesAsync();
-            var allCategories = await _context.Categories.ToListAsync();
+            const string cacheKey = "Catalog_PublicCategories";
+            if (_cache.TryGetValue(cacheKey, out List<CategoryAdminDto>? cached) && cached != null)
+            {
+                return cached;
+            }
 
-            var hiddenCodes = await _context.DynamicPricingRules
+            await EnsureDefaultCategoriesAsync();
+            var allCategories = await _context.Categories.AsNoTracking().ToListAsync();
+
+            var pricingRules = await GetCachedActivePricingRulesAsync();
+            var hiddenCodes = pricingRules
                 .Where(r => r.RuleType == "CategoryVisibility" && !r.IsActive)
                 .Select(r => r.Code.ToLower())
-                .ToListAsync();
+                .ToHashSet();
 
-            var imageRules = await _context.DynamicPricingRules
+            var imageRules = pricingRules
                 .Where(r => r.RuleType == "CategoryImageUrl")
-                .ToDictionaryAsync(r => r.Code, r => r.DisplayName);
+                .GroupBy(r => r.Code)
+                .ToDictionary(g => g.Key, g => g.First().DisplayName);
 
             var categories = allCategories
                 .Where(c => !hiddenCodes.Contains(c.CategoryId.ToString().ToLower()) 
@@ -146,14 +169,19 @@ namespace SAT1.BAL
                 .OrderBy(c => c.CategoryId)
                 .ToList();
 
-            var items = await _context.CatalogItems.Where(i => i.IsActive).ToListAsync();
-            var productCounts = await _context.Products
+            var productCounts = (await _context.Products.AsNoTracking()
                 .GroupBy(p => p.CategoryId)
-                .Select(g => new { CategoryId = g.Key, Count = g.Count() })
-                .ToDictionaryAsync(g => g.CategoryId, g => g.Count);
+                .Select(g => new KeyValuePair<long, int>(g.Key, g.Count()))
+                .ToListAsync())
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
 
-            var catalogItemCounts = items
-                .GroupBy(i => (i.CategoryId ?? "").ToLower())
+            var catalogItemCategoryIds = await _context.CatalogItems.AsNoTracking()
+                .Where(i => i.IsActive)
+                .Select(i => (i.CategoryId ?? "").ToLower())
+                .ToListAsync();
+
+            var catalogItemCounts = catalogItemCategoryIds
+                .GroupBy(id => id)
                 .ToDictionary(g => g.Key, g => g.Count());
 
             var result = new List<CategoryAdminDto>();
@@ -180,23 +208,32 @@ namespace SAT1.BAL
                 });
             }
 
+            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(10));
             return result;
         }
 
         // PUBLIC FULL STORE DATA: Returns ONLY categories where IsActive == true
         public async Task<List<PublicCategoryStoreDto>> GetFullStoreAsync()
         {
-            await EnsureDefaultCategoriesAsync();
-            var allCategories = await _context.Categories.ToListAsync();
+            const string cacheKey = "Catalog_FullStore";
+            if (_cache.TryGetValue(cacheKey, out List<PublicCategoryStoreDto>? cached) && cached != null)
+            {
+                return cached;
+            }
 
-            var hiddenCodes = await _context.DynamicPricingRules
+            await EnsureDefaultCategoriesAsync();
+            var allCategories = await _context.Categories.AsNoTracking().ToListAsync();
+
+            var pricingRules = await GetCachedActivePricingRulesAsync();
+            var hiddenCodes = pricingRules
                 .Where(r => r.RuleType == "CategoryVisibility" && !r.IsActive)
                 .Select(r => r.Code.ToLower())
-                .ToListAsync();
+                .ToHashSet();
 
-            var imageRules = await _context.DynamicPricingRules
+            var imageRules = pricingRules
                 .Where(r => r.RuleType == "CategoryImageUrl")
-                .ToDictionaryAsync(r => r.Code, r => r.DisplayName);
+                .GroupBy(r => r.Code)
+                .ToDictionary(g => g.Key, g => g.First().DisplayName);
 
             var categories = allCategories
                 .Where(c => !hiddenCodes.Contains(c.CategoryId.ToString().ToLower()) 
@@ -206,7 +243,7 @@ namespace SAT1.BAL
                 .OrderBy(c => c.CategoryId)
                 .ToList();
 
-            var items = await _context.CatalogItems.Where(i => i.IsActive).ToListAsync();
+            var items = await _context.CatalogItems.AsNoTracking().Where(i => i.IsActive).ToListAsync();
 
             var result = new List<PublicCategoryStoreDto>();
             foreach (var c in categories)
@@ -233,33 +270,46 @@ namespace SAT1.BAL
                 });
             }
 
+            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(10));
             return result;
         }
 
         // ADMIN CATEGORIES: Returns ALL categories (Active + Hidden)
         public async Task<List<CategoryAdminDto>> GetAdminCategoriesAsync()
         {
+            const string cacheKey = "Catalog_AdminCategories";
+            if (_cache.TryGetValue(cacheKey, out List<CategoryAdminDto>? cached) && cached != null)
+            {
+                return cached;
+            }
+
             await EnsureDefaultCategoriesAsync();
-            var rawCategories = await _context.Categories.ToListAsync();
+            var rawCategories = await _context.Categories.AsNoTracking().ToListAsync();
             var categories = rawCategories.OrderBy(c => c.CategoryId).ToList();
 
-            var hiddenCodes = await _context.DynamicPricingRules
+            var pricingRules = await GetCachedActivePricingRulesAsync();
+            var hiddenCodes = pricingRules
                 .Where(r => r.RuleType == "CategoryVisibility" && !r.IsActive)
                 .Select(r => r.Code.ToLower())
+                .ToHashSet();
+
+            var imageRules = pricingRules
+                .Where(r => r.RuleType == "CategoryImageUrl")
+                .GroupBy(r => r.Code)
+                .ToDictionary(g => g.Key, g => g.First().DisplayName);
+
+            var productCounts = (await _context.Products.AsNoTracking()
+                .GroupBy(p => p.CategoryId)
+                .Select(g => new KeyValuePair<long, int>(g.Key, g.Count()))
+                .ToListAsync())
+                .ToDictionary(kv => kv.Key, kv => kv.Value);
+
+            var catalogItemCategoryIds = await _context.CatalogItems.AsNoTracking()
+                .Select(i => (i.CategoryId ?? "").ToLower())
                 .ToListAsync();
 
-            var imageRules = await _context.DynamicPricingRules
-                .Where(r => r.RuleType == "CategoryImageUrl")
-                .ToDictionaryAsync(r => r.Code, r => r.DisplayName);
-
-            var items = await _context.CatalogItems.ToListAsync();
-            var productCounts = await _context.Products
-                .GroupBy(p => p.CategoryId)
-                .Select(g => new { CategoryId = g.Key, Count = g.Count() })
-                .ToDictionaryAsync(g => g.CategoryId, g => g.Count);
-
-            var catalogItemCounts = items
-                .GroupBy(i => (i.CategoryId ?? "").ToLower())
+            var catalogItemCounts = catalogItemCategoryIds
+                .GroupBy(id => id)
                 .ToDictionary(g => g.Key, g => g.Count());
 
             var result = new List<CategoryAdminDto>();
@@ -291,6 +341,7 @@ namespace SAT1.BAL
                 });
             }
 
+            _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
             return result;
         }
 
@@ -372,6 +423,7 @@ namespace SAT1.BAL
             }
 
             await _context.SaveChangesAsync();
+            InvalidateCache();
             return true;
         }
 
@@ -420,6 +472,7 @@ namespace SAT1.BAL
             }
 
             await _context.SaveChangesAsync();
+            InvalidateCache();
             return true;
         }
 
@@ -461,6 +514,7 @@ namespace SAT1.BAL
 
             _context.Categories.Remove(cat);
             await _context.SaveChangesAsync();
+            InvalidateCache();
             return true;
         }
 
@@ -926,9 +980,8 @@ namespace SAT1.BAL
                         }
                     }
 
-                    var pricingRules = await _context.DynamicPricingRules.AsNoTracking().Where(r => r.IsActive).ToListAsync();
-
-                    var defaultMetals = await _context.Metals.OrderBy(m => m.Id).ToListAsync();
+                    var pricingRules = await GetCachedActivePricingRulesAsync();
+                    var defaultMetals = await GetCachedMetalsAsync();
                     metalVariants = defaultMetals.Select(m => {
                         var rule = pricingRules.FirstOrDefault(r => r.RuleType == "Metal" && (
                             (m.Name.Contains("10K") && r.Code.Contains("10k")) ||
@@ -941,7 +994,7 @@ namespace SAT1.BAL
                         return $"{m.Name} (+{offset:F0} USD)";
                     }).ToList();
 
-                    var defaultCarats = await _context.CaratOptions.OrderBy(c => c.CaratWeight).ToListAsync();
+                    var defaultCarats = await GetCachedCaratsAsync();
                     caratVariants = defaultCarats.Select(c => {
                         var rule = pricingRules.FirstOrDefault(r => r.RuleType == "Carat" && (
                             r.DisplayName.Contains(c.CaratWeight.ToString("0.00")) || 
@@ -957,6 +1010,7 @@ namespace SAT1.BAL
                         Id = $"sat-prod-{p.ProductId}",
                         Name = p.ProductName,
                         CategoryId = p.CategoryId.ToString(),
+                        DiamondShapeId = p.DiamondShapeId,
                         Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}",
                         PriceUSD = p.BasePriceUSD,
                         ImageUrl = mainImg,

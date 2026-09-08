@@ -14,7 +14,7 @@ var rawConn = builder.Configuration["DATABASE_URL"]
     ?? builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? Environment.GetEnvironmentVariable("DATABASE_URL");
 
-string connectionString = "Host=satjewels-postgres.c4r4s48oeqi1.us-east-1.rds.amazonaws.com;Port=5432;Database=satjewels_db;Username=satjewels_admin;Password=SatJewels#Db2026!Secure;Ssl Mode=Require;Trust Server Certificate=true;";
+string connectionString = "Host=satjewels-postgres.c4r4s48oeqi1.us-east-1.rds.amazonaws.com;Port=5432;Database=satjewels_db;Username=satjewels_admin;Password=SatJewels#Db2026!Secure;Ssl Mode=Require;Trust Server Certificate=true;Pooling=true;Minimum Pool Size=5;Maximum Pool Size=50;Connection Lifetime=300;Connection Idle Lifetime=60;KeepAlive=30;Timeout=15;Command Timeout=30;";
 
 if (!string.IsNullOrWhiteSpace(rawConn))
 {
@@ -29,16 +29,20 @@ if (!string.IsNullOrWhiteSpace(rawConn))
             var host = uri.Host;
             var port = uri.Port > 0 ? uri.Port : 5432;
             var dbName = uri.AbsolutePath.TrimStart('/');
-            connectionString = $"Host={host};Port={port};Database={dbName};Username={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true;";
+            connectionString = $"Host={host};Port={port};Database={dbName};Username={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true;Pooling=true;Minimum Pool Size=5;Maximum Pool Size=50;Connection Lifetime=300;Connection Idle Lifetime=60;KeepAlive=30;Timeout=15;Command Timeout=30;";
         }
         catch
         {
-            // Fallback to active Neon DB connection string if URL parsing fails
+            // Fallback to active DB connection string if URL parsing fails
         }
     }
     else
     {
         connectionString = rawConn;
+        if (!connectionString.Contains("Pooling=", StringComparison.OrdinalIgnoreCase))
+        {
+            connectionString += ";Pooling=true;Minimum Pool Size=5;Maximum Pool Size=50;Connection Lifetime=300;Connection Idle Lifetime=60;KeepAlive=30;Timeout=15;Command Timeout=30;";
+        }
     }
 }
 
@@ -46,8 +50,8 @@ builder.Services.AddDbContext<SatJewelDbContext>(options =>
     options.UseNpgsql(connectionString, npgsqlOptions =>
     {
         npgsqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 5,
-            maxRetryDelay: TimeSpan.FromSeconds(10),
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
             errorCodesToAdd: null);
         npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
     }));
@@ -103,10 +107,9 @@ using (var scope = app.Services.CreateScope())
     {
         var db = scope.ServiceProvider.GetRequiredService<SatJewelDbContext>();
         
-        // Execute DDL Statements individually to guarantee tables/columns exist in Neon PostgreSQL
-        string[] ddlStatements = new[]
-        {
-            @"CREATE TABLE IF NOT EXISTS ""Users"" (
+        // Execute DDL Statements in a single batch to minimize cross-region network round-trips
+        string singleBatchInitSql = @"
+            CREATE TABLE IF NOT EXISTS ""Users"" (
                 ""Id"" text NOT NULL,
                 ""FullName"" text NOT NULL,
                 ""Email"" text NOT NULL,
@@ -115,9 +118,9 @@ using (var scope = app.Services.CreateScope())
                 ""Role"" text NOT NULL DEFAULT 'Customer',
                 ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_Users"" PRIMARY KEY (""Id"")
-            );",
+            );
 
-            @"CREATE TABLE IF NOT EXISTS ""Orders"" (
+            CREATE TABLE IF NOT EXISTS ""Orders"" (
                 ""OrderId"" text NOT NULL,
                 ""ItemName"" text NOT NULL,
                 ""Amount"" numeric NOT NULL DEFAULT 0.0,
@@ -127,9 +130,9 @@ using (var scope = app.Services.CreateScope())
                 ""Status"" text NOT NULL DEFAULT 'Processing',
                 ""CreatedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_Orders"" PRIMARY KEY (""OrderId"")
-            );",
+            );
 
-            @"CREATE TABLE IF NOT EXISTS ""UserAddresses"" (
+            CREATE TABLE IF NOT EXISTS ""UserAddresses"" (
                 ""AddressId"" text NOT NULL,
                 ""UserId"" text NOT NULL,
                 ""FullName"" text NOT NULL,
@@ -142,9 +145,9 @@ using (var scope = app.Services.CreateScope())
                 ""Country"" text NOT NULL DEFAULT 'United States',
                 ""IsDefault"" boolean NOT NULL DEFAULT false,
                 CONSTRAINT ""PK_UserAddresses"" PRIMARY KEY (""AddressId"")
-            );",
+            );
 
-            @"CREATE TABLE IF NOT EXISTS ""dynamic_pricing_rules"" (
+            CREATE TABLE IF NOT EXISTS ""dynamic_pricing_rules"" (
                 ""id"" bigserial NOT NULL,
                 ""rule_type"" text NOT NULL DEFAULT 'Metal',
                 ""code"" text NOT NULL,
@@ -154,9 +157,9 @@ using (var scope = app.Services.CreateScope())
                 ""is_active"" boolean NOT NULL DEFAULT true,
                 ""updated_at"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_dynamic_pricing_rules"" PRIMARY KEY (""id"")
-            );",
+            );
 
-            @"CREATE TABLE IF NOT EXISTS ""order_tracking_history"" (
+            CREATE TABLE IF NOT EXISTS ""order_tracking_history"" (
                 ""id"" bigserial NOT NULL,
                 ""order_id"" text NOT NULL,
                 ""status"" text NOT NULL DEFAULT 'OrderPlaced',
@@ -168,9 +171,9 @@ using (var scope = app.Services.CreateScope())
                 ""source"" text NOT NULL DEFAULT 'System',
                 ""created_at"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_order_tracking_history"" PRIMARY KEY (""id"")
-            );",
+            );
 
-            @"CREATE TABLE IF NOT EXISTS ""product_reviews"" (
+            CREATE TABLE IF NOT EXISTS ""product_reviews"" (
                 ""id"" bigserial NOT NULL,
                 ""product_id"" text NOT NULL,
                 ""product_name"" text NOT NULL DEFAULT '',
@@ -184,30 +187,29 @@ using (var scope = app.Services.CreateScope())
                 ""status"" text NOT NULL DEFAULT 'Approved',
                 ""created_at"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_product_reviews"" PRIMARY KEY (""id"")
-            );",
+            );
 
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaymentProvider"" text NOT NULL DEFAULT 'PayPal';",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderPaymentId"" text NOT NULL DEFAULT '';",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ExpectedAmount"" numeric NOT NULL DEFAULT 0.0;",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""AmountPaid"" numeric NOT NULL DEFAULT 0.0;",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaidAt"" timestamp with time zone;",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""BuyerInfo"" text NOT NULL DEFAULT '';",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""IsSuspicious"" boolean NOT NULL DEFAULT false;",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""SuspiciousReason"" text;",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""CurrentTrackingStatus"" text NOT NULL DEFAULT 'OrderPlaced';",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""TrackingNumber"" text NOT NULL DEFAULT '';",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""CarrierName"" text NOT NULL DEFAULT 'DHL Express';",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""TrackingUrl"" text NOT NULL DEFAULT '';",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""EstimatedDeliveryDate"" timestamp with time zone;",
-            @"ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ShipmentBookedAt"" timestamp with time zone;",
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaymentProvider"" text NOT NULL DEFAULT 'PayPal';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderPaymentId"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ExpectedAmount"" numeric NOT NULL DEFAULT 0.0;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""AmountPaid"" numeric NOT NULL DEFAULT 0.0;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaidAt"" timestamp with time zone;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""BuyerInfo"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""IsSuspicious"" boolean NOT NULL DEFAULT false;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""SuspiciousReason"" text;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""CurrentTrackingStatus"" text NOT NULL DEFAULT 'OrderPlaced';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""TrackingNumber"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""CarrierName"" text NOT NULL DEFAULT 'DHL Express';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""TrackingUrl"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""EstimatedDeliveryDate"" timestamp with time zone;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ShipmentBookedAt"" timestamp with time zone;
 
-            @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';",
-            @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""SignatureVerified"" boolean NOT NULL DEFAULT false;",
-            @"ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""RawPayload"" text;",
+            ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""SignatureVerified"" boolean NOT NULL DEFAULT false;
+            ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""RawPayload"" text;
 
-            // Ensure All 11 Fine Jewelry Metals (including 925 Sterling Silver)
-            @"INSERT INTO metals (id, name, slug, color_group, color_hex)
+            INSERT INTO metals (id, name, slug, color_group, color_hex)
             VALUES 
                 (1, '10K Yellow Gold', '10k-yellow-gold', 'Yellow Gold', '#E5CA8F'),
                 (2, '10K White Gold', '10k-white-gold', 'White Gold', '#D1D5DB'),
@@ -220,10 +222,9 @@ using (var scope = app.Services.CreateScope())
                 (9, '18K Rose Gold', '18k-rose-gold', 'Rose Gold', '#E68A7C'),
                 (10, '950 Platinum', '950-platinum', 'Platinum', '#E5E4E2'),
                 (11, '925 Sterling Silver', '925-sterling-silver', 'Silver', '#C0C0C0')
-            ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, slug = EXCLUDED.slug, color_group = EXCLUDED.color_group, color_hex = EXCLUDED.color_hex;",
+            ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, slug = EXCLUDED.slug, color_group = EXCLUDED.color_group, color_hex = EXCLUDED.color_hex;
 
-            // Ensure All 10 Diamond Shapes
-            @"INSERT INTO diamond_shapes (id, name, slug, icon_url)
+            INSERT INTO diamond_shapes (id, name, slug, icon_url)
             VALUES
                 (1, 'Round', 'round', '/assets/shapes/round.svg'),
                 (2, 'Oval', 'oval', '/assets/shapes/oval.svg'),
@@ -235,10 +236,9 @@ using (var scope = app.Services.CreateScope())
                 (8, 'Radiant', 'radiant', '/assets/shapes/radiant.svg'),
                 (9, 'Asscher', 'asscher', '/assets/shapes/asscher.svg'),
                 (10, 'Heart', 'heart', '/assets/shapes/heart.svg')
-            ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, slug = EXCLUDED.slug;",
+            ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, slug = EXCLUDED.slug;
 
-            // Ensure All 9 Carat Options
-            @"INSERT INTO carat_options (id, carat_weight, label, slug)
+            INSERT INTO carat_options (id, carat_weight, label, slug)
             VALUES
                 (1, 0.50, '0.50 CT', '0.50-ct'),
                 (2, 0.75, '0.75 CT', '0.75-ct'),
@@ -249,10 +249,26 @@ using (var scope = app.Services.CreateScope())
                 (7, 3.00, '3.00 CT', '3.00-ct'),
                 (8, 4.00, '4.00 CT', '4.00-ct'),
                 (9, 5.00, '5.00 CT', '5.00-ct')
-            ON CONFLICT (id) DO UPDATE SET carat_weight = EXCLUDED.carat_weight, label = EXCLUDED.label, slug = EXCLUDED.slug;",
+            ON CONFLICT (id) DO UPDATE SET carat_weight = EXCLUDED.carat_weight, label = EXCLUDED.label, slug = EXCLUDED.slug;
 
-            // Synchronize PostgreSQL Primary Key Sequences with MAX(id)
-            @"DO $$
+            -- High-Performance Indexes for PostgreSQL RDS
+            CREATE INDEX IF NOT EXISTS ""IX_products_category_id"" ON ""products"" (""category_id"");
+            CREATE INDEX IF NOT EXISTS ""IX_products_created_at"" ON ""products"" (""created_at"" DESC);
+            CREATE INDEX IF NOT EXISTS ""IX_products_diamond_shape_id"" ON ""products"" (""diamond_shape_id"");
+            CREATE INDEX IF NOT EXISTS ""IX_product_images_product_id"" ON ""product_images"" (""product_id"");
+            CREATE INDEX IF NOT EXISTS ""IX_product_variants_product_id"" ON ""product_variants"" (""product_id"");
+            CREATE INDEX IF NOT EXISTS ""IX_CatalogItems_CategoryId"" ON ""CatalogItems"" (""CategoryId"");
+            CREATE INDEX IF NOT EXISTS ""IX_CatalogItems_IsActive"" ON ""CatalogItems"" (""IsActive"");
+            CREATE INDEX IF NOT EXISTS ""IX_dynamic_pricing_rules_rule_type"" ON ""dynamic_pricing_rules"" (""rule_type"");
+            CREATE INDEX IF NOT EXISTS ""IX_product_reviews_product_id"" ON ""product_reviews"" (""product_id"");
+            CREATE INDEX IF NOT EXISTS ""IX_product_reviews_status"" ON ""product_reviews"" (""status"");
+            CREATE INDEX IF NOT EXISTS ""IX_Orders_CustomerEmail"" ON ""Orders"" (""CustomerEmail"");
+            CREATE INDEX IF NOT EXISTS ""IX_Orders_OrderStatus"" ON ""Orders"" (""OrderStatus"");
+            CREATE INDEX IF NOT EXISTS ""IX_order_tracking_history_order_id"" ON ""order_tracking_history"" (""order_id"");
+            CREATE INDEX IF NOT EXISTS ""IX_UserAddresses_UserId"" ON ""UserAddresses"" (""UserId"");
+            CREATE INDEX IF NOT EXISTS ""IX_Users_Email"" ON ""Users"" (""Email"");
+
+            DO $$
             BEGIN
                 BEGIN PERFORM setval(pg_get_serial_sequence('products', 'id'), COALESCE((SELECT MAX(id) FROM products), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
                 BEGIN PERFORM setval(pg_get_serial_sequence('product_variants', 'id'), COALESCE((SELECT MAX(id) FROM product_variants), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
@@ -264,24 +280,21 @@ using (var scope = app.Services.CreateScope())
                 BEGIN PERFORM setval(pg_get_serial_sequence('dynamic_pricing_rules', 'id'), COALESCE((SELECT MAX(id) FROM dynamic_pricing_rules), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
                 BEGIN PERFORM setval(pg_get_serial_sequence('product_reviews', 'id'), COALESCE((SELECT MAX(id) FROM product_reviews), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
                 BEGIN PERFORM setval(pg_get_serial_sequence('order_tracking_history', 'id'), COALESCE((SELECT MAX(id) FROM order_tracking_history), 0) + 1, false); EXCEPTION WHEN OTHERS THEN NULL; END;
-            END $$;"
-        };
+            END $$;
+        ";
 
-        foreach (var sql in ddlStatements)
+        try
         {
-            try
-            {
-                db.Database.ExecuteSqlRaw(sql);
-            }
-            catch (Exception)
-            {
-                // Silently ignore DDL notes if columns/tables already exist
-            }
+            db.Database.ExecuteSqlRaw(singleBatchInitSql);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Database init note: {ex.Message}");
         }
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Neon PostgreSQL database init note: {ex.Message}");
+        Console.WriteLine($"Database scope init note: {ex.Message}");
     }
 }
 

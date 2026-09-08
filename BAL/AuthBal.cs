@@ -72,12 +72,13 @@ namespace SAT1.BAL
         public async Task<User?> GetUserByIdAsync(string? userId)
         {
             if (string.IsNullOrWhiteSpace(userId)) return null;
-            return await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            return await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
         }
 
         public async Task<List<Order>> GetUserOrdersAsync(string? userId, string? email)
         {
             return await _context.Orders
+                .AsNoTracking()
                 .Where(o => (userId != null && o.UserId == userId) || (!string.IsNullOrEmpty(email) && o.CustomerEmail.ToLower() == email.ToLower()))
                 .OrderByDescending(o => o.CreatedAt)
                 .ToListAsync();
