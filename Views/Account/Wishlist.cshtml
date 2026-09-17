@@ -46,7 +46,7 @@
                                 <a href="/Product/Details/@item.CatalogItemId" class="btn-wishlist-view">
                                     View Details
                                 </a>
-                                <button type="button" class="btn-wishlist-cart" onclick="addWishlistItemToCart('@item.CatalogItemId', '@item.ProductName', @item.PriceUSD, '@item.ImageUrl')">
+                                <button type="button" class="btn-wishlist-cart" onclick="addWishlistItemToCart('@item.CatalogItemId', '@item.ProductName', @item.PriceUSD, '@item.ImageUrl', this)">
                                     <i class="fa-solid fa-bag-shopping"></i> Add to Cart
                                 </button>
                             </div>
@@ -347,7 +347,7 @@
         return 'sat_cart_guest';
     }
 
-    function addWishlistItemToCart(id, name, price, img) {
+    function addWishlistItemToCart(id, name, price, img, btn) {
         try {
             const key = getCartStorageKey();
             let cart = JSON.parse(localStorage.getItem(key) || '[]');
@@ -366,10 +366,32 @@
                 });
             }
             localStorage.setItem(key, JSON.stringify(cart));
-            alert(`"${name}" added to your cart!`);
-            window.location.href = '/Product/Cart';
+
+            if (window.syncCartBadge) {
+                window.syncCartBadge();
+            }
+
+            document.querySelectorAll('#navCartCount, .auth-nav-cart-count').forEach(el => {
+                el.style.transform = 'scale(1.5)';
+                el.style.transition = 'transform 0.3s ease';
+                setTimeout(() => el.style.transform = 'scale(1)', 300);
+            });
+
+            if (btn) {
+                const orig = btn.innerHTML;
+                btn.style.background = '#10b981';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = '#ffffff';
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
+                setTimeout(() => {
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                    btn.style.color = '';
+                    btn.innerHTML = orig;
+                }, 1800);
+            }
         } catch (e) {
-            alert('Error adding item to cart.');
+            console.error('Error adding wishlist item to cart:', e);
         }
     }
 </script>

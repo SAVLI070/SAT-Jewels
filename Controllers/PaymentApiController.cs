@@ -84,8 +84,15 @@ namespace SAT1.Controllers
                     PaymentMethod = "PayPal Express USD (" + req.PayPalOrderId + ")",
                     PayPalTransactionId = req.PayPalOrderId,
                     Status = "Completed (Insured GIA Home Delivery Dispatch)",
+                    IncludesPhysicalGiaCert = req.IncludePhysicalCertificate,
+                    GiaCertFeeUSD = req.IncludePhysicalCertificate ? 50.00m : 0.00m,
                     CreatedAt = DateTime.Now
                 };
+
+                if (req.IncludePhysicalCertificate && !order.ItemName.Contains("[Includes Physical GIA Hardcopy Certificate]"))
+                {
+                    order.ItemName += " [Includes Physical GIA Hardcopy Certificate]";
+                }
 
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
@@ -163,8 +170,15 @@ namespace SAT1.Controllers
                     PaymentMethod = "PayPal.Me Direct Transfer (" + (req.PayPalTransactionId ?? "Pending Verification") + ")",
                     PayPalTransactionId = req.PayPalTransactionId ?? "PPME-" + orderId,
                     Status = "Payment Pending Verification (PayPal Direct Transfer)",
+                    IncludesPhysicalGiaCert = req.IncludePhysicalCertificate,
+                    GiaCertFeeUSD = req.IncludePhysicalCertificate ? 50.00m : 0.00m,
                     CreatedAt = DateTime.Now
                 };
+
+                if (req.IncludePhysicalCertificate && !order.ItemName.Contains("[Includes Physical GIA Hardcopy Certificate]"))
+                {
+                    order.ItemName += " [Includes Physical GIA Hardcopy Certificate]";
+                }
 
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
@@ -207,5 +221,8 @@ namespace SAT1.Controllers
         public string? ShippingState { get; set; }
         public string? ShippingPostalCode { get; set; }
         public string? ShippingCountry { get; set; }
+
+        // GIA Certificate Option
+        public bool IncludePhysicalCertificate { get; set; } = false;
     }
 }

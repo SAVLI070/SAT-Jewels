@@ -1,7 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using SAT1.BAL.Shipping;
 using SAT1.DAL;
 using SAT1.Models;
 
@@ -10,182 +8,105 @@ namespace SAT1.BAL
     public class OrderTrackingService
     {
         private readonly OrderTrackingRepository _trackingRepo;
-        private readonly IShippingProviderService _shippingProvider;
         private readonly EmailNotificationService _emailService;
 
         public OrderTrackingService(
             OrderTrackingRepository trackingRepo, 
-            IShippingProviderService shippingProvider, 
             EmailNotificationService emailService)
         {
             _trackingRepo = trackingRepo;
-            _shippingProvider = shippingProvider;
             _emailService = emailService;
         }
 
-        // B1. Fully Automated Shipment Booking (Triggered by Payment Success)
+        // 1. Update Order Status and Tracking Link (Admin / Direct Flow)
+        public async Task<(bool success, string message)> UpdateOrderTrackingAsync(
+            string orderId, 
+            string status, 
+            string? trackingUrl, 
+            string? trackingNumber, 
+            string? carrierName, 
+            string? note = null)
+        {
+            var order = await _trackingRepo.GetOrderByOrderIdAsync(orderId);
+            if (order == null)
+            {
+                return (false, $"Order '{orderId}' not found in database.");
+            }
+
+            var cleanStatus = string.IsNullOrWhiteSpace(status) ? order.OrderStatus : status.Trim();
+            var cleanTrackingUrl = !string.IsNullOrWhiteSpace(trackingUrl) ? trackingUrl.Trim() : order.TrackingUrl;
+            var cleanTrackingNo = !string.IsNullOrWhiteSpace(trackingNumber) ? trackingNumber.Trim() : order.TrackingNumber;
+            var cleanCarrier = !string.IsNullOrWhiteSpace(carrierName) ? carrierName.Trim() : (!string.IsNullOrWhiteSpace(order.CarrierName) ? order.CarrierName : "Direct Parcel Dispatch");
+            var cleanNote = !string.IsNullOrWhiteSpace(note) ? note.Trim() : $"Order status updated to {cleanStatus}.";
+
+            // Update order record
+            await _trackingRepo.UpdateOrderTrackingStatusAsync(
+                order.OrderId,
+                cleanStatus,
+                cleanTrackingNo,
+                cleanCarrier,
+                cleanTrackingUrl,
+                null,
+                DateTime.Now);
+
+            // Add history milestone
+            var historyEntry = new OrderTrackingHistory
+            {
+                OrderId = order.OrderId,
+                Status = cleanStatus,
+                StatusNote = cleanNote,
+                CarrierName = cleanCarrier,
+                TrackingNumber = cleanTrackingNo,
+                TrackingUrl = cleanTrackingUrl,
+                Location = "Surat Atelier, India",
+                Source = "Admin",
+                CreatedAt = DateTime.Now
+            };
+
+            await _trackingRepo.AddTrackingHistoryAsync(historyEntry);
+
+            // Send automated email alert with tracking link if available
+            try
+            {
+                order.OrderStatus = cleanStatus;
+                order.CurrentTrackingStatus = cleanStatus;
+                order.TrackingNumber = cleanTrackingNo;
+                order.CarrierName = cleanCarrier;
+                order.TrackingUrl = cleanTrackingUrl;
+                await _emailService.SendTrackingUpdateEmailAsync(order, cleanStatus, cleanNote, cleanTrackingUrl);
+            }
+            catch
+            {
+                // Non-fatal if email fails
+            }
+
+            return (true, "Order tracking updated successfully.");
+        }
+
+        // Backward-compatible method called after payment (marks order as placed)
         public async Task<(bool success, string trackingNumber, string message)> BookShipmentAsync(string orderId)
         {
             var order = await _trackingRepo.GetOrderByOrderIdAsync(orderId);
             if (order == null)
             {
-                return (false, "", $"Order '{orderId}' not found in database.");
+                return (false, "", $"Order '{orderId}' not found.");
             }
 
-            // Check if already booked
-            if (!string.IsNullOrWhiteSpace(order.TrackingNumber) && order.CurrentTrackingStatus != "OrderPlaced" && order.CurrentTrackingStatus != "Pending")
-            {
-                return (true, order.TrackingNumber, "Shipment already booked with carrier.");
-            }
-
-            var request = new ShipmentRequest
+            var historyEntry = new OrderTrackingHistory
             {
                 OrderId = order.OrderId,
-                OrderNumber = order.OrderNumber,
-                RecipientName = order.ShippingFullName,
-                RecipientEmail = order.CustomerEmail,
-                RecipientPhone = order.ShippingPhone,
-                RecipientStreet = order.ShippingStreet,
-                RecipientCity = order.ShippingCity,
-                RecipientState = order.ShippingState,
-                RecipientPostalCode = order.ShippingPostalCode,
-                RecipientCountry = order.ShippingCountry,
-                ItemDescription = order.ItemName,
-                PreferredCarrier = !string.IsNullOrWhiteSpace(order.CarrierName) ? order.CarrierName : null,
-                DeclaredValueUSD = order.TotalAmountUSD,
-                WeightKg = 0.5
+                Status = "Order Placed",
+                StatusNote = "Order received and confirmed. Jewelry artisan crafting scheduled at Surat atelier.",
+                CarrierName = "Direct Parcel Dispatch",
+                TrackingNumber = order.OrderNumber,
+                TrackingUrl = "",
+                Location = "Surat Diamond Hub, India",
+                Source = "System",
+                CreatedAt = DateTime.Now
             };
 
-            var result = await _shippingProvider.BookShipmentAsync(request);
-
-            if (result.Success)
-            {
-                await _trackingRepo.UpdateOrderTrackingStatusAsync(
-                    order.OrderId,
-                    "ShipmentBooked",
-                    result.TrackingNumber,
-                    result.CarrierName,
-                    result.TrackingUrl,
-                    result.EstimatedDeliveryDate,
-                    DateTime.Now);
-
-                var historyEntry = new OrderTrackingHistory
-                {
-                    OrderId = order.OrderId,
-                    Status = "ShipmentBooked",
-                    StatusNote = result.InitialStatusNote,
-                    CarrierName = result.CarrierName,
-                    TrackingNumber = result.TrackingNumber,
-                    TrackingUrl = result.TrackingUrl,
-                    Location = "Surat Diamond Hub, India",
-                    Source = "System",
-                    CreatedAt = DateTime.Now
-                };
-
-                await _trackingRepo.AddTrackingHistoryAsync(historyEntry);
-
-                // Send Automated Confirmation Email
-                order.TrackingNumber = result.TrackingNumber;
-                order.CarrierName = result.CarrierName;
-                order.TrackingUrl = result.TrackingUrl;
-                order.EstimatedDeliveryDate = result.EstimatedDeliveryDate;
-                await _emailService.SendTrackingUpdateEmailAsync(order, "ShipmentBooked", result.InitialStatusNote, result.TrackingUrl);
-
-                return (true, result.TrackingNumber, "Shipment booked automatically with carrier!");
-            }
-            else
-            {
-                // Record failure exception in tracking log for Admin Exception Monitor
-                var exceptionEntry = new OrderTrackingHistory
-                {
-                    OrderId = order.OrderId,
-                    Status = "Exception",
-                    StatusNote = $"Shipment booking failed: {result.ErrorMessage}",
-                    CarrierName = _shippingProvider.ProviderName,
-                    Source = "System",
-                    CreatedAt = DateTime.Now
-                };
-                await _trackingRepo.AddTrackingHistoryAsync(exceptionEntry);
-
-                return (false, "", result.ErrorMessage);
-            }
-        }
-
-        // B2. Process Inbound Carrier Webhook Event (Idempotent)
-        public async Task<(bool success, string message)> ProcessCarrierWebhookAsync(HttpRequest request, string rawBody)
-        {
-            if (!_shippingProvider.VerifyWebhookSignature(request, rawBody))
-            {
-                return (false, "Invalid carrier webhook signature.");
-            }
-
-            var parsed = _shippingProvider.ParseWebhookPayload(rawBody);
-            if (!parsed.Success)
-            {
-                return (false, parsed.StatusNote);
-            }
-
-            // Extract tracking number or order ID from payload
-            using var doc = System.Text.Json.JsonDocument.Parse(rawBody);
-            var root = doc.RootElement;
-            var trackingNo = root.TryGetProperty("tracking_number", out var tn) ? tn.GetString() : "";
-            var orderId = root.TryGetProperty("order_id", out var oi) ? oi.GetString() : "";
-
-            Order? order = null;
-            if (!string.IsNullOrWhiteSpace(trackingNo))
-            {
-                order = await _trackingRepo.GetOrderByTrackingNumberAsync(trackingNo);
-            }
-            if (order == null && !string.IsNullOrWhiteSpace(orderId))
-            {
-                order = await _trackingRepo.GetOrderByOrderIdAsync(orderId);
-            }
-
-            if (order == null)
-            {
-                return (false, "Matching order not found for carrier webhook.");
-            }
-
-            return await ProcessStatusUpdateAsync(order.OrderId, parsed, "System");
-        }
-
-        // Process status update (from webhook or polling job)
-        public async Task<(bool success, string message)> ProcessStatusUpdateAsync(
-            string orderId, 
-            TrackingStatusResult statusResult, 
-            string source = "System")
-        {
-            var order = await _trackingRepo.GetOrderByOrderIdAsync(orderId);
-            if (order == null) return (false, "Order not found");
-
-            await _trackingRepo.UpdateOrderTrackingStatusAsync(
-                order.OrderId,
-                statusResult.InternalStatus,
-                null,
-                null,
-                null,
-                statusResult.EstimatedDeliveryDate,
-                null);
-
-            var entry = new OrderTrackingHistory
-            {
-                OrderId = order.OrderId,
-                Status = statusResult.InternalStatus,
-                StatusNote = statusResult.StatusNote,
-                CarrierName = order.CarrierName,
-                TrackingNumber = order.TrackingNumber,
-                TrackingUrl = order.TrackingUrl,
-                Location = statusResult.Location,
-                Source = source,
-                CreatedAt = statusResult.EventTimestamp
-            };
-
-            await _trackingRepo.AddTrackingHistoryAsync(entry);
-
-            // Send notification to buyer
-            await _emailService.SendTrackingUpdateEmailAsync(order, statusResult.InternalStatus, statusResult.StatusNote, order.TrackingUrl);
-
-            return (true, $"Order tracking updated to {statusResult.InternalStatus}");
+            await _trackingRepo.AddTrackingHistoryAsync(historyEntry);
+            return (true, order.OrderNumber, "Order registered and confirmed.");
         }
     }
 }

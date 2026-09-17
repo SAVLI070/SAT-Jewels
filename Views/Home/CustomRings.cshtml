@@ -451,12 +451,198 @@
         Schedule a private 1-on-1 consultation with our master jewelry artisans and turn your vision into a breathtaking heirloom piece.
       </p>
       <div class="cta-btn-group">
-        <a href="/Product/Category?id=1" class="btn-sat-gold">
-          EXPLORE CATALOGUE
+        <button type="button" onclick="openCustomDesignModal()" class="btn-sat-gold" style="display:inline-flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+          <span>Share Design &amp; Custom Details</span>
+        </button>
+        <a href="/Product/Category?id=1" class="btn-sat-outline" style="display:inline-flex; align-items:center; gap:8px;">
+          <i class="fa-solid fa-gem"></i>
+          <span>Explore Ready Designs</span>
         </a>
       </div>
     </div>
   </section>
 
+  <!-- BESPOKE CUSTOMIZATION & IMAGE SHARING MODAL -->
+  <div id="customDesignModal" style="display:none; position:fixed; inset:0; background:rgba(6,7,10,0.85); backdrop-filter:blur(16px); z-index:999999; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#121118; border:1px solid rgba(212,178,112,0.4); border-radius:24px; max-width:640px; width:100%; max-height:90vh; overflow-y:auto; padding:32px; box-shadow:0 30px 80px rgba(0,0,0,0.9); position:relative;">
+      <button type="button" onclick="closeCustomDesignModal()" style="position:absolute; top:20px; right:20px; background:none; border:none; color:#94a3b8; font-size:22px; cursor:pointer; padding:4px;"><i class="fa-solid fa-xmark"></i></button>
+
+      <div style="text-align:center; margin-bottom:24px;">
+        <span class="bespoke-badge" style="letter-spacing:0.25em;">BESPOKE ATELIER</span>
+        <h3 style="font-family:var(--font-serif, 'Playfair Display', serif); font-size:26px; font-weight:600; color:#ffffff; margin:8px 0 6px;">Request Custom Jewelry Design</h3>
+        <p style="font-size:13.5px; color:rgba(255,255,255,0.7); margin:0; line-height:1.6;">Share your dream jewelry sketch, photo, or reference details. Our master artisans in India will craft it to perfection.</p>
+      </div>
+
+      <div id="customModalAlert" style="display:none; padding:12px 16px; border-radius:12px; font-size:13px; font-weight:600; margin-bottom:18px;"></div>
+
+      <form id="customDesignForm" onsubmit="handleCustomDesignSubmit(event)" style="display:flex; flex-direction:column; gap:16px;">
+        <!-- Full Name & Email -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Your Name *</label>
+            <input type="text" id="custName" required placeholder="e.g. Sophia Miller"
+                   style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; color:#ffffff; font-size:13.5px; outline:none;" />
+          </div>
+          <div>
+            <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Your Email *</label>
+            <input type="email" id="custEmail" required placeholder="sophia@example.com"
+                   style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; color:#ffffff; font-size:13.5px; outline:none;" />
+          </div>
+        </div>
+
+        <!-- Phone / WhatsApp & Jewelry Type -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">WhatsApp / Phone</label>
+            <input type="tel" id="custPhone" placeholder="+1 (555) 000-0000"
+                   style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; color:#ffffff; font-size:13.5px; outline:none;" />
+          </div>
+          <div>
+            <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Jewelry Category</label>
+            <select id="custCategory" style="width:100%; box-sizing:border-box; background:#1c1a24; border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; color:#ffffff; font-size:13.5px; outline:none;">
+              <option value="Custom Engagement Ring">Engagement Ring</option>
+              <option value="Wedding Band">Wedding Band</option>
+              <option value="Diamond Pendant / Necklace">Diamond Pendant / Necklace</option>
+              <option value="Tennis Bracelet / Bangle">Tennis Bracelet / Bangle</option>
+              <option value="Earrings / Studs">Earrings / Studs</option>
+              <option value="Complete Custom Piece">Other Custom Piece</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Metal & Target Budget -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+          <div>
+            <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Preferred Metal</label>
+            <select id="custMetal" style="width:100%; box-sizing:border-box; background:#1c1a24; border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; color:#ffffff; font-size:13.5px; outline:none;">
+              <option value="18K Yellow Gold">18K Yellow Gold</option>
+              <option value="18K White Gold">18K White Gold</option>
+              <option value="18K Rose Gold">18K Rose Gold</option>
+              <option value="14K Yellow Gold">14K Yellow Gold</option>
+              <option value="14K White Gold">14K White Gold</option>
+              <option value="950 Platinum">950 Platinum</option>
+              <option value="925 Sterling Silver">925 Sterling Silver</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Target Budget (USD)</label>
+            <input type="text" id="custBudget" placeholder="e.g. $1,500 - $3,000"
+                   style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; color:#ffffff; font-size:13.5px; outline:none;" />
+          </div>
+        </div>
+
+        <!-- Item Details & Description -->
+        <div>
+          <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Design Details &amp; Custom Requirements *</label>
+          <textarea id="custDetails" required rows="3" placeholder="Describe the center stone shape, prong style, ring size, engraving, or specific dimensions you want..."
+                    style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; color:#ffffff; font-size:13.5px; outline:none; resize:vertical;"></textarea>
+        </div>
+
+        <!-- Image Upload Box -->
+        <div>
+          <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Attach Reference Image / Sketch</label>
+          <div style="border:1.5px dashed rgba(212,178,112,0.4); border-radius:12px; padding:18px; text-align:center; background:rgba(255,255,255,0.02); cursor:pointer;" onclick="document.getElementById('custImageInput').click()">
+            <input type="file" id="custImageInput" accept="image/*" style="display:none;" onchange="previewCustImage(this)" />
+            <i class="fa-solid fa-cloud-arrow-up" style="font-size:24px; color:#d4b270; margin-bottom:8px;"></i>
+            <div id="custUploadText" style="font-size:13px; color:#ffffff;">Click to choose an image file (PNG, JPG, WEBP)</div>
+            <div style="font-size:11px; color:#94a3b8; margin-top:4px;">You can upload reference jewelry photos, sketches, or CAD drawings</div>
+            <img id="custImgPreview" style="display:none; max-height:140px; max-width:100%; margin:12px auto 0; border-radius:8px; border:1px solid rgba(212,178,112,0.3); object-fit:contain;" alt="Preview" />
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:8px;">
+          <!-- Submit online -->
+          <button type="submit" id="btnSubmitCustom"
+                  style="width:100%; background:linear-gradient(135deg, #d4b270, #b45309); color:#060c14; font-weight:800; border:none; padding:14px; border-radius:40px; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 8px 24px rgba(212,178,112,0.35);">
+            <i class="fa-solid fa-gem"></i> Submit Custom Request Online
+          </button>
+
+          <!-- WhatsApp Chat -->
+          <button type="button" onclick="sendCustomOnWhatsApp()"
+                  style="width:100%; background:#25d366; color:#ffffff; font-weight:800; border:none; padding:13px; border-radius:40px; font-size:13.5px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 16px rgba(37,211,102,0.3);">
+            <i class="fa-brands fa-whatsapp" style="font-size:17px;"></i> Chat &amp; Share Photo on WhatsApp
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function openCustomDesignModal() {
+      document.getElementById('customDesignModal').style.display = 'flex';
+      document.getElementById('custName').focus();
+    }
+
+    function closeCustomDesignModal() {
+      document.getElementById('customDesignModal').style.display = 'none';
+    }
+
+    function previewCustImage(input) {
+      const file = input.files && input.files[0];
+      const preview = document.getElementById('custImgPreview');
+      const uploadText = document.getElementById('custUploadText');
+      if (file) {
+        uploadText.innerText = 'Selected: ' + file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        preview.style.display = 'none';
+        uploadText.innerText = 'Click to choose an image file (PNG, JPG, WEBP)';
+      }
+    }
+
+    function sendCustomOnWhatsApp() {
+      const name = document.getElementById('custName').value.trim() || 'Valued Customer';
+      const category = document.getElementById('custCategory').value;
+      const metal = document.getElementById('custMetal').value;
+      const budget = document.getElementById('custBudget').value.trim();
+      const details = document.getElementById('custDetails').value.trim();
+
+      let msg = `Hello SAT Jewel! I would like to order a custom jewelry piece.\n\n` +
+                `*Name:* ${name}\n` +
+                `*Item:* ${category}\n` +
+                `*Metal:* ${metal}\n`;
+      if (budget) msg += `*Target Budget:* ${budget}\n`;
+      if (details) msg += `*Details/Specs:* ${details}\n`;
+      msg += `\nI have attached my reference image and would love to discuss crafting this with your master jewelers!`;
+
+      const waUrl = `https://wa.me/918320972779?text=${encodeURIComponent(msg)}`;
+      window.open(waUrl, '_blank');
+    }
+
+    function handleCustomDesignSubmit(e) {
+      e.preventDefault();
+      const alertBox = document.getElementById('customModalAlert');
+      const btn = document.getElementById('btnSubmitCustom');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
+
+      setTimeout(() => {
+        alertBox.style.display = 'block';
+        alertBox.style.background = 'rgba(34, 197, 94, 0.2)';
+        alertBox.style.border = '1px solid #22c55e';
+        alertBox.style.color = '#86efac';
+        alertBox.innerHTML = '<i class="fa-solid fa-circle-check"></i> Thank you! Your bespoke jewelry design request has been received. Our concierge team will reach out with 3D renderings and estimates within 24 hours.';
+        
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Request Submitted!';
+        
+        setTimeout(() => {
+          closeCustomDesignModal();
+          alertBox.style.display = 'none';
+          document.getElementById('customDesignForm').reset();
+          document.getElementById('custImgPreview').style.display = 'none';
+          document.getElementById('custUploadText').innerText = 'Click to choose an image file (PNG, JPG, WEBP)';
+          btn.innerHTML = '<i class="fa-solid fa-gem"></i> Submit Custom Request Online';
+        }, 3000);
+      }, 700);
+    }
+  </script>
 </body>
 </html>

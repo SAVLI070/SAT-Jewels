@@ -71,13 +71,7 @@ builder.Services.AddScoped<SAT1.DAL.OrderTrackingRepository>();
 builder.Services.AddScoped<SAT1.BAL.CatalogBal>();
 builder.Services.AddScoped<SAT1.BAL.AdminBal>();
 builder.Services.AddScoped<SAT1.BAL.AuthBal>();
-builder.Services.AddScoped<SAT1.BAL.OtpService>();
 builder.Services.AddScoped<SAT1.BAL.ReviewBal>();
-builder.Services.AddScoped<SAT1.BAL.Shipping.UpsShippingProviderService>();
-builder.Services.AddScoped<SAT1.BAL.Shipping.AramexShippingProviderService>();
-builder.Services.AddScoped<SAT1.BAL.Shipping.UspsShippingProviderService>();
-builder.Services.AddScoped<SAT1.BAL.Shipping.DefaultShippingProviderService>();
-builder.Services.AddScoped<SAT1.BAL.Shipping.IShippingProviderService>(sp => sp.GetRequiredService<SAT1.BAL.Shipping.DefaultShippingProviderService>());
 builder.Services.AddScoped<SAT1.BAL.EmailNotificationService>();
 builder.Services.AddScoped<SAT1.BAL.OrderTrackingService>();
 builder.Services.AddScoped<SAT1.BAL.PayPalService>();
@@ -204,6 +198,9 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""TrackingUrl"" text NOT NULL DEFAULT '';
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""EstimatedDeliveryDate"" timestamp with time zone;
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ShipmentBookedAt"" timestamp with time zone;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""TrackingInfoSentAt"" timestamp with time zone;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""IncludesPhysicalGiaCert"" boolean NOT NULL DEFAULT false;
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""GiaCertFeeUSD"" numeric NOT NULL DEFAULT 0.0;
 
             ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';
             ALTER TABLE ""Payments"" ADD COLUMN IF NOT EXISTS ""SignatureVerified"" boolean NOT NULL DEFAULT false;

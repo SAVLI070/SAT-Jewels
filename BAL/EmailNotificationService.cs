@@ -70,7 +70,7 @@ namespace SAT1.BAL
        <strong>Estimated Delivery:</strong> {(order.EstimatedDeliveryDate?.ToString("MMMM dd, yyyy") ?? "In 3-5 Business Days")}</p>
 
     <div style='text-align:center;'>
-      <a href='https://satjewel.com/Order/Track?orderId={order.OrderId}' class='btn'>Track Parcel Live</a>
+      <a href='{trackingUrl}' target='_blank' class='btn'>Track Parcel on Courier Site</a>
     </div>
 
     <p style='font-size:11px; color:#64748b; margin-top:32px; text-align:center;'>
@@ -84,6 +84,82 @@ namespace SAT1.BAL
                 Console.WriteLine($"[EmailNotificationService] Dispatched tracking update email to {order.CustomerEmail} for order {order.OrderNumber} ({status})");
 
                 // In production with valid credentials, send SMTP message
+                if (!string.IsNullOrWhiteSpace(_smtpUser) && !string.IsNullOrWhiteSpace(_smtpPass))
+                {
+                    using var client = new SmtpClient(_smtpHost, _smtpPort)
+                    {
+                        Credentials = new NetworkCredential(_smtpUser, _smtpPass),
+                        EnableSsl = true
+                    };
+                    var mail = new MailMessage(_fromEmail, order.CustomerEmail, subject, bodyHtml)
+                    {
+                        IsBodyHtml = true
+                    };
+                    await client.SendMailAsync(mail);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[EmailNotificationService Error]: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<bool> SendOrderShippedEmailAsync(Order order, string courierName, string trackingNumber, string trackingUrl)
+        {
+            if (string.IsNullOrWhiteSpace(order.CustomerEmail)) return false;
+
+            try
+            {
+                var subject = $"✨ Your SAT Fine Jewelry Order #{order.OrderNumber} Has Shipped!";
+                var customerName = !string.IsNullOrWhiteSpace(order.ShippingFullName) ? order.ShippingFullName : "Valued Customer";
+
+                var bodyHtml = $@"
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body {{ font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background:#0f172a; color:#ffffff; padding:24px; }}
+  .card {{ max-width:600px; margin:0 auto; background:#1e293b; border-radius:16px; padding:32px; border:1px solid #334155; }}
+  .gold-text {{ color:#d4b270; font-weight:bold; }}
+  .btn {{ display:inline-block; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#ffffff; padding:12px 28px; text-decoration:none; border-radius:8px; font-weight:bold; margin-top:20px; }}
+</style>
+</head>
+<body>
+  <div class='card'>
+    <h2 style='margin-top:0; color:#d4b270;'>SAT Fine Jewelry</h2>
+    <p>Dear {customerName},</p>
+    <p>We are delighted to inform you that your handcrafted jewelry order <strong class='gold-text'>#{order.OrderNumber}</strong> has been dispatched and is on its way to you.</p>
+    
+    <div style='background:#0f172a; padding:16px; border-radius:10px; border-left:4px solid #d4b270; margin:20px 0;'>
+      <div style='font-size:12px; color:#94a3b8; text-transform:uppercase;'>Delivery Status:</div>
+      <div style='font-size:18px; font-weight:bold; color:#ffffff;'>Dispatched &amp; In Transit</div>
+      <div style='font-size:13px; color:#cbd5e1; margin-top:6px;'>Your package is securely en route via {courierName}.</div>
+    </div>
+
+    <p><strong>Courier:</strong> {courierName}<br/>
+       <strong>Tracking Number:</strong> {trackingNumber}</p>
+
+    {(string.IsNullOrWhiteSpace(trackingUrl) ? "" : $@"
+    <div style='text-align:center;'>
+      <a href='{trackingUrl}' target='_blank' class='btn'>Track Parcel on Courier Site</a>
+    </div>")}
+
+    <p style='font-size:13px; color:#94a3b8; margin-top:24px;'>
+      If you have any questions or need assistance with your delivery, simply reply to this email or reach out to our concierge team.
+    </p>
+
+    <p style='font-size:11px; color:#64748b; margin-top:32px; text-align:center;'>
+      &copy; {DateTime.Now.Year} SAT Fine Jewelry. Handcrafted with GIA certified excellence.
+    </p>
+  </div>
+</body>
+</html>";
+
+                Console.WriteLine($"[EmailNotificationService] Dispatched shipped email to {order.CustomerEmail} for order {order.OrderNumber} (Courier: {courierName})");
+
                 if (!string.IsNullOrWhiteSpace(_smtpUser) && !string.IsNullOrWhiteSpace(_smtpPass))
                 {
                     using var client = new SmtpClient(_smtpHost, _smtpPort)

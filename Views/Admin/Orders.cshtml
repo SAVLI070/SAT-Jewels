@@ -10,15 +10,15 @@
   <!-- Header & Action Bar -->
   <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px;">
     <div>
-      <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">Customer Orders & Live Tracking</h1>
-      <p style="font-size: 14px; color: #64748b; margin: 4px 0 0;">View customer identity, payment receipts, and real-time shipping carrier tracking.</p>
+      <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">Customer Orders &amp; Dispatch Tracking</h1>
+      <p style="font-size: 14px; color: #64748b; margin: 4px 0 0;">Manage customer orders, save courier tracking details, and notify buyers via email and WhatsApp.</p>
     </div>
     
     <!-- Filter Tabs -->
     <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap;">
       <a href="/Admin/Orders?status=All" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Orders (@(ViewBag.TotalCount ?? Model.Count))</a>
       <a href="/Admin/Orders?status=Paid" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Paid" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Paid (@(ViewBag.PaidCount ?? 0))</a>
-      <a href="/Admin/Orders?status=ShipmentBooked" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "ShipmentBooked" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Dispatched (@(ViewBag.DispatchedCount ?? 0))</a>
+      <a href="/Admin/Orders?status=Shipped" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Shipped" || statusFilter == "ShipmentBooked" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Shipped (@(ViewBag.DispatchedCount ?? 0))</a>
       <a href="/Admin/Orders?status=InTransit" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "InTransit" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">In Transit (@(ViewBag.InTransitCount ?? 0))</a>
       <a href="/Admin/Orders?status=Delivered" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Delivered" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Delivered (@(ViewBag.DeliveredCount ?? 0))</a>
     </div>
@@ -93,13 +93,35 @@
                 </td>
 
                 <!-- Item Description -->
-                <td style="padding: 16px 20px; vertical-align: top; max-width: 220px;">
+                <td style="padding: 16px 20px; vertical-align: top; max-width: 230px;">
                   <div style="font-weight: 600; color: #334155; line-height: 1.4;">@o.ItemName</div>
+                  @if (o.IncludesPhysicalGiaCert)
+                  {
+                    <div style="margin-top: 6px;">
+                      <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 700; background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;">
+                        <i class="fa-solid fa-stamp" style="color: #d97706;"></i> Physical GIA Hardcopy Enclosed (+$50)
+                      </span>
+                    </div>
+                  }
+                  else
+                  {
+                    <div style="margin-top: 4px;">
+                      <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b;">
+                        <i class="fa-solid fa-file-shield" style="color: #3b82f6;"></i> Digital GIA Cert
+                      </span>
+                    </div>
+                  }
                 </td>
 
                 <!-- Financials -->
                 <td style="padding: 16px 20px; vertical-align: top;">
                   <div style="font-size: 15px; font-weight: 800; color: #0f172a;">$@o.TotalAmountUSD.ToString("N2") USD</div>
+                  @if (o.IncludesPhysicalGiaCert && o.GiaCertFeeUSD > 0)
+                  {
+                    <div style="font-size: 10px; color: #b45309; font-weight: 600; margin-top: 1px;">
+                      (Includes $@o.GiaCertFeeUSD.ToString("N2") GIA Cert Fee)
+                    </div>
+                  }
                   <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-top: 2px;">
                     <i class="fa-brands @(o.PaymentProvider?.ToLower() == "paypal" ? "fa-paypal" : "fa-credit-card")" style="margin-right: 3px;"></i>
                     @o.PaymentProvider
@@ -134,31 +156,69 @@
                   }
                 </td>
 
-                <!-- Carrier & AWB -->
+                <!-- Carrier & Tracking -->
                 <td style="padding: 16px 20px; vertical-align: top;">
                   @if (!string.IsNullOrWhiteSpace(o.TrackingNumber))
                   {
                     <div style="font-weight: 700; color: #0f172a; font-family: monospace;">@o.TrackingNumber</div>
-                    <div style="font-size: 11px; color: #64748b;">@o.CarrierName</div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 1px;">@(string.IsNullOrWhiteSpace(o.CarrierName) ? "Courier" : o.CarrierName)</div>
                     @if (!string.IsNullOrWhiteSpace(o.TrackingUrl))
                     {
-                      <a href="@o.TrackingUrl" target="_blank" style="display: inline-block; font-size: 11px; color: #2563eb; text-decoration: none; font-weight: 600; margin-top: 3px;">
-                        Track on Courier <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 9px;"></i>
+                      <a href="@o.TrackingUrl" target="_blank" style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #2563eb; text-decoration: none; font-weight: 600; margin-top: 3px;">
+                        <span>Track Parcel</span> <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 9px;"></i>
                       </a>
+                    }
+                    @if (o.TrackingInfoSentAt.HasValue)
+                    {
+                      <div style="font-size: 10.5px; color: #16a34a; font-weight: 600; margin-top: 3px;">
+                        <i class="fa-solid fa-circle-check"></i> Emailed @o.TrackingInfoSentAt.Value.ToString("MMM dd")
+                      </div>
                     }
                   }
                   else
                   {
-                    <span style="color: #94a3b8; font-size: 12px; font-style: italic;">Auto-booking upon payment</span>
+                    <span style="display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: #fef3c7; color: #b45309;">
+                      <i class="fa-solid fa-hourglass-half" style="font-size: 10px; margin-right: 3px;"></i> Awaiting Tracking
+                    </span>
                   }
                 </td>
 
-                <!-- Action Button -->
+                <!-- Actions -->
                 <td style="padding: 16px 20px; vertical-align: top; text-align: right;">
-                  <button type="button" onclick="openOrderTimeline('@o.OrderId', '@o.OrderNumber', '@o.CurrentTrackingStatus', '@o.TrackingNumber')" 
-                          style="background: #0f172a; color: #ffffff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer;">
-                    <i class="fa-solid fa-timeline"></i> Timeline
-                  </button>
+                  <div style="display: inline-flex; gap: 6px; align-items: center;">
+                    <button type="button" class="btn-open-tracking"
+                            data-id="@o.OrderId"
+                            data-number="@o.OrderNumber"
+                            data-name="@o.ShippingFullName"
+                            data-email="@o.CustomerEmail"
+                            data-phone="@o.ShippingPhone"
+                            data-city="@o.ShippingCity"
+                            data-carrier="@o.CarrierName"
+                            data-awb="@o.TrackingNumber"
+                            data-url="@o.TrackingUrl"
+                            data-sent="@(o.TrackingInfoSentAt?.ToString("MMM dd, yyyy hh:mm tt") ?? "")"
+                            data-cert="@(o.IncludesPhysicalGiaCert ? "true" : "false")"
+                            onclick="openTrackingModalFromBtn(this)"
+                            style="background: #0f172a; color: #ffffff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                      <i class="fa-solid fa-truck-fast"></i> Tracking
+                    </button>
+
+                    @if (!string.IsNullOrWhiteSpace(o.ShippingPhone))
+                    {
+                      <button type="button" class="btn-quick-wa"
+                              data-number="@o.OrderNumber"
+                              data-name="@o.ShippingFullName"
+                              data-phone="@o.ShippingPhone"
+                              data-carrier="@o.CarrierName"
+                              data-awb="@o.TrackingNumber"
+                              data-url="@o.TrackingUrl"
+                              data-cert="@(o.IncludesPhysicalGiaCert ? "true" : "false")"
+                              onclick="sendWhatsAppFromBtn(this)"
+                              style="background: #25d366; color: #ffffff; border: none; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center;" title="Send Delivery Message via WhatsApp">
+                        <i class="fa-brands fa-whatsapp" style="font-size: 15px;"></i>
+                      </button>
+                    }
+                  </div>
                 </td>
               </tr>
             }
@@ -170,113 +230,289 @@
 
 </div>
 
-<!-- Timeline Modal -->
-<div id="timelineModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(8px); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
-  <div style="background: #ffffff; border-radius: 24px; max-width: 680px; width: 100%; max-height: 88vh; overflow-y: auto; padding: 32px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35); position: relative; border: 1px solid #e2e8f0;">
+<!-- Courier Tracking & Dispatch Modal -->
+<div id="trackingModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); z-index: 999999; align-items: center; justify-content: center; padding: 20px;">
+  <div style="background: #ffffff; border-radius: 20px; max-width: 600px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 28px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35); position: relative; border: 1px solid #e2e8f0;">
+    
+    <!-- Modal Header -->
     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
       <div>
         <div style="display: flex; align-items: center; gap: 10px;">
-          <h3 id="modalOrderTitle" style="margin: 0; font-size: 20px; font-weight: 800; color: #0f172a;">Order Tracking Timeline</h3>
-          <span id="modalCarrierBadge" style="padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #eff6ff; color: #2563eb;"></span>
+          <h3 id="modalOrderTitle" style="margin: 0; font-size: 19px; font-weight: 800; color: #0f172a;">Manage Courier Tracking</h3>
         </div>
-        <p id="modalOrderSubtitle" style="margin: 6px 0 0; font-size: 13px; color: #64748b;"></p>
+        <p id="modalCustomerInfo" style="margin: 4px 0 0; font-size: 13px; color: #64748b;"></p>
       </div>
-      <button onclick="closeTimelineModal()" style="background: none; border: none; font-size: 22px; color: #94a3b8; cursor: pointer; padding: 4px;"><i class="fa-solid fa-xmark"></i></button>
+      <button type="button" onclick="closeTrackingModal()" style="background: none; border: none; font-size: 22px; color: #94a3b8; cursor: pointer; padding: 4px;"><i class="fa-solid fa-xmark"></i></button>
     </div>
 
-    <!-- Carrier & AWB Quick Bar -->
-    <div id="modalCarrierBar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 12px 18px; margin-bottom: 24px;">
-      <div>
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">Waybill / AWB</div>
-        <div id="modalAwbNum" style="font-size: 14px; font-weight: 800; color: #0f172a; font-family: monospace; margin-top: 2px;"></div>
-      </div>
-      <div>
-        <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.5px;">Destination</div>
-        <div id="modalDestCity" style="font-size: 13px; font-weight: 700; color: #334155; margin-top: 2px;"></div>
-      </div>
-      <a id="modalCarrierTrackBtn" href="#" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #0f172a; color: #ffffff; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none;">
-        <span>Track on Courier</span> <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 10px;"></i>
-      </a>
+    <!-- Alert / Status Notice -->
+    <div id="trackingModalAlert" style="display: none; padding: 12px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; margin-bottom: 16px;"></div>
+
+    <!-- Previous Notification Info -->
+    <div id="modalSentInfo" style="display: none; padding: 10px 14px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; font-size: 12.5px; color: #065f46; margin-bottom: 18px; align-items: center; gap: 8px;">
+      <i class="fa-solid fa-circle-check" style="color: #059669;"></i>
+      <span id="modalSentInfoText"></span>
     </div>
 
-    <div id="timelineEventsContainer">
-      <div style="text-align: center; padding: 40px; color: #94a3b8;">
-        <i class="fa-solid fa-spinner fa-spin" style="font-size: 28px; color: #b45309;"></i>
-        <div style="margin-top: 10px; font-size: 14px; font-weight: 600;">Loading live delivery checkpoints...</div>
+    <!-- Physical GIA Certificate Packing Alert -->
+    <div id="modalCertNotice" style="display: none; padding: 12px 16px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 10px; font-size: 12.5px; color: #92400e; font-weight: 700; margin-bottom: 18px; align-items: flex-start; gap: 10px;">
+      <i class="fa-solid fa-stamp" style="font-size: 18px; color: #d97706; margin-top: 2px;"></i>
+      <div>
+        <div style="font-size: 13px; font-weight: 800; color: #92400e;">PACKING REQUIREMENT: Hardcopy Physical GIA Certificate Included (+ $50)</div>
+        <div style="font-size: 11.5px; font-weight: 500; color: #78350f; margin-top: 2px; line-height: 1.4;">
+          The customer has purchased the official physical GIA grading card. You MUST enclose the sealed laboratory report inside the parcel before handing over to the courier in India.
+        </div>
       </div>
     </div>
+
+    <input type="hidden" id="trackingModalOrderId" />
+    <input type="hidden" id="trackingModalPhone" />
+    <input type="hidden" id="trackingModalOrderNumber" />
+    <input type="hidden" id="trackingModalCustomerName" />
+
+    <!-- Form Inputs -->
+    <div style="display: flex; flex-direction: column; gap: 16px;">
+      <div>
+        <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Courier / Logistics Provider</label>
+        <input type="text" id="trackingModalCourier" list="courierList" placeholder="e.g. DHL Express, FedEx, India Post, Aramex"
+               style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; font-weight: 600; color: #0f172a;" />
+        <datalist id="courierList">
+          <option value="DHL Express"></option>
+          <option value="FedEx"></option>
+          <option value="India Post / EMS"></option>
+          <option value="Blue Dart"></option>
+          <option value="Aramex"></option>
+          <option value="UPS"></option>
+          <option value="DTDC"></option>
+        </datalist>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Tracking / Waybill (AWB) Number</label>
+        <input type="text" id="trackingModalAwb" placeholder="e.g. 1234567890 or IN123456789IN"
+               style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: monospace; outline: none; font-weight: 700; color: #0f172a;" />
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Official Tracking Link / URL</label>
+        <div style="display: flex; gap: 8px;">
+          <input type="url" id="trackingModalUrl" placeholder="https://www.dhl.com/en/express/tracking.html?AWB=..."
+                 style="flex: 1; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13px; outline: none; color: #0f172a;" />
+          <button type="button" onclick="testTrackingLink()" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; padding: 0 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> Test
+          </button>
+        </div>
+        <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Paste the official tracking web page link provided by the courier for the customer.</div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 10px;">
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <button type="button" id="btnSaveAndEmail" onclick="saveTrackingDetails(true)"
+                style="flex: 1; min-width: 180px; background: linear-gradient(135deg, #0f172a, #1e293b); color: #ffffff; border: none; padding: 12px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <i class="fa-solid fa-paper-plane" style="color: #d4b270;"></i> Save &amp; Email Customer
+        </button>
+        <button type="button" id="btnSaveOnly" onclick="saveTrackingDetails(false)"
+                style="background: #f8fafc; color: #334155; border: 1px solid #cbd5e1; padding: 12px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">
+          Save Only
+        </button>
+      </div>
+
+      <!-- WhatsApp Action -->
+      <button type="button" id="btnModalWhatsApp" onclick="sendWhatsAppFromModal()"
+              style="width: 100%; background: #25d366; color: #ffffff; border: none; padding: 12px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37,211,102,0.25);">
+        <i class="fa-brands fa-whatsapp" style="font-size: 17px;"></i> Message Customer on WhatsApp
+      </button>
+    </div>
+
   </div>
 </div>
 
 <script>
-  function openOrderTimeline(orderId, orderNumber, currentStatus, trackingNo) {
-    document.getElementById('modalOrderTitle').innerText = 'Order #' + orderNumber + ' Timeline';
-    document.getElementById('modalOrderSubtitle').innerText = 'Status: ' + currentStatus;
-    document.getElementById('modalCarrierBadge').innerText = 'Loading...';
-    document.getElementById('modalAwbNum').innerText = trackingNo || 'Pending';
-    document.getElementById('timelineModal').style.display = 'flex';
-    document.getElementById('timelineEventsContainer').innerHTML = `
-      <div style="text-align: center; padding: 40px; color: #94a3b8;">
-        <i class="fa-solid fa-spinner fa-spin" style="font-size: 28px; color: #b45309;"></i>
-        <div style="margin-top: 10px; font-size: 14px; font-weight: 600;">Loading live delivery checkpoints...</div>
-      </div>
-    `;
+  function buildWhatsAppUrl(phone, orderNumber, customerName, courier, awb, url, hasCert) {
+    let cleanPhone = (phone || '').replace(/[^\d]/g, '');
+    if (cleanPhone.length === 10) {
+      cleanPhone = '1' + cleanPhone; // standard default country code if 10-digit
+    }
+    
+    let courierName = courier || 'Courier';
+    let msg = `Hello ${customerName || 'Valued Customer'}! Your SAT Fine Jewelry order #${orderNumber} has been dispatched for delivery via ${courierName}.`;
+    if (awb) {
+      msg += ` Tracking Number: ${awb}.`;
+    }
+    if (url) {
+      msg += ` Track your parcel live here: ${url}.`;
+    }
+    if (hasCert) {
+      msg += ` Your official sealed physical GIA Gemological Certificate is enclosed inside your package.`;
+    }
+    msg += ` Thank you for choosing SAT Fine Jewelry!`;
 
-    fetch('/api/orders/' + orderId + '/tracking')
-      .then(res => res.json())
-      .then(data => {
-        const container = document.getElementById('timelineEventsContainer');
-        if (!data || !data.history || data.history.length === 0) {
-          container.innerHTML = '<div style="padding:30px; text-align:center; color:#64748b;">No detailed tracking events logged yet. Order is placed.</div>';
-          return;
-        }
-
-        document.getElementById('modalCarrierBadge').innerText = data.carrierName || 'UPS Worldwide Express';
-        document.getElementById('modalAwbNum').innerText = data.trackingNumber || trackingNo || 'Pending';
-        document.getElementById('modalDestCity').innerText = data.destination || 'United States';
-        
-        const trackBtn = document.getElementById('modalCarrierTrackBtn');
-        if (data.trackingUrl) {
-          trackBtn.href = data.trackingUrl;
-          trackBtn.style.display = 'inline-flex';
-        } else {
-          trackBtn.style.display = 'none';
-        }
-
-        let html = '<div style="display:flex; flex-direction:column; gap:20px; position:relative; padding-left:32px; border-left:2px solid #e2e8f0; margin-left:14px; margin-top:8px;">';
-        
-        data.history.forEach((evt, idx) => {
-          let dotBg = evt.isCompleted ? '#16a34a' : (evt.isCurrent ? '#b45309' : '#cbd5e1');
-          let dotBorder = evt.isCurrent ? '3px solid #fef3c7' : '2px solid #ffffff';
-          let statusColor = evt.isCompleted ? '#0f172a' : (evt.isCurrent ? '#b45309' : '#64748b');
-          let iconBadge = evt.isCompleted ? '<i class="fa-solid fa-check" style="font-size:10px; color:#ffffff;"></i>' : '';
-
-          html += `
-            <div style="position:relative;">
-              <div style="position:absolute; left:-41px; top:0; width:18px; height:18px; border-radius:50%; background:${dotBg}; border:${dotBorder}; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 5px rgba(0,0,0,0.15);">
-                ${iconBadge}
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:6px;">
-                <div style="font-size:14px; font-weight:800; color:${statusColor};">${evt.status}</div>
-                <div style="font-size:11px; font-weight:600; color:#94a3b8;">${evt.timestamp || ''}</div>
-              </div>
-              <div style="font-size:12.5px; color:#475569; margin-top:3px; line-height:1.4;">${evt.statusNote || 'Milestone registered.'}</div>
-              <div style="font-size:11.5px; color:#64748b; margin-top:4px; display:flex; align-items:center; gap:5px;">
-                <i class="fa-solid fa-location-dot" style="color:#b45309; font-size:10px;"></i> <b>${evt.location || 'In Transit'}</b>
-              </div>
-            </div>
-          `;
-        });
-        
-        html += '</div>';
-        container.innerHTML = html;
-      })
-      .catch(err => {
-        document.getElementById('timelineEventsContainer').innerHTML = '<div style="color:#ef4444; padding:30px; text-align:center;">Failed to load tracking history.</div>';
-      });
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   }
 
-  function closeTimelineModal() {
-    document.getElementById('timelineModal').style.display = 'none';
+  function openTrackingModalFromBtn(btn) {
+    const id = btn.dataset.id;
+    const num = btn.dataset.number;
+    const name = btn.dataset.name;
+    const email = btn.dataset.email;
+    const phone = btn.dataset.phone;
+    const city = btn.dataset.city;
+    const carrier = btn.dataset.carrier;
+    const awb = btn.dataset.awb;
+    const url = btn.dataset.url;
+    const sent = btn.dataset.sent;
+    const cert = btn.dataset.cert;
+
+    document.getElementById('trackingModalOrderId').value = id;
+    document.getElementById('trackingModalOrderNumber').value = num;
+    document.getElementById('trackingModalCustomerName').value = name;
+    document.getElementById('trackingModalPhone').value = phone;
+
+    // Show/hide GIA certificate packing reminder
+    const certBox = document.getElementById('modalCertNotice');
+    if (certBox) {
+      certBox.style.display = (cert === 'true') ? 'flex' : 'none';
+    }
+    btn.dataset.hasCert = cert;
+
+    document.getElementById('modalOrderTitle').innerText = `Order #${num} — Tracking`;
+    document.getElementById('modalCustomerInfo').innerText = `${name || 'Customer'} • ${email || ''} • ${city || ''} ${phone ? '• ' + phone : ''}`;
+
+    document.getElementById('trackingModalCourier').value = carrier || 'DHL Express';
+    document.getElementById('trackingModalAwb').value = awb || '';
+    document.getElementById('trackingModalUrl').value = url || '';
+
+    const sentBox = document.getElementById('modalSentInfo');
+    const sentText = document.getElementById('modalSentInfoText');
+    if (sent) {
+      sentBox.style.display = 'flex';
+      sentText.innerText = `Tracking info was sent to customer via email on ${sent}.`;
+    } else {
+      sentBox.style.display = 'none';
+    }
+
+    const alertBox = document.getElementById('trackingModalAlert');
+    alertBox.style.display = 'none';
+
+    const btnSaveAndEmail = document.getElementById('btnSaveAndEmail');
+    btnSaveAndEmail.disabled = false;
+    btnSaveAndEmail.innerHTML = '<i class="fa-solid fa-paper-plane" style="color: #d4b270;"></i> Save &amp; Email Customer';
+
+    const btnSaveOnly = document.getElementById('btnSaveOnly');
+    btnSaveOnly.disabled = false;
+    btnSaveOnly.innerHTML = 'Save Only';
+
+    document.getElementById('trackingModal').style.display = 'flex';
+  }
+
+  function closeTrackingModal() {
+    document.getElementById('trackingModal').style.display = 'none';
+  }
+
+  function testTrackingLink() {
+    const url = document.getElementById('trackingModalUrl').value.trim();
+    if (!url) {
+      alert('Please enter a tracking URL first.');
+      return;
+    }
+    window.open(url, '_blank');
+  }
+
+  function sendWhatsAppFromModal() {
+    const phone = document.getElementById('trackingModalPhone').value;
+    if (!phone || phone.replace(/[^\d]/g, '').length < 7) {
+      alert('This order does not have a valid mobile phone number on file.');
+      return;
+    }
+
+    const num = document.getElementById('trackingModalOrderNumber').value;
+    const name = document.getElementById('trackingModalCustomerName').value;
+    const courier = document.getElementById('trackingModalCourier').value.trim();
+    const awb = document.getElementById('trackingModalAwb').value.trim();
+    const url = document.getElementById('trackingModalUrl').value.trim();
+    const certBox = document.getElementById('modalCertNotice');
+    const hasCert = certBox && certBox.style.display !== 'none';
+
+    const waUrl = buildWhatsAppUrl(phone, num, name, courier, awb, url, hasCert);
+    window.open(waUrl, '_blank');
+  }
+
+  function sendWhatsAppFromBtn(btn) {
+    const phone = btn.dataset.phone;
+    if (!phone || phone.replace(/[^\d]/g, '').length < 7) {
+      alert('This order does not have a valid mobile phone number on file.');
+      return;
+    }
+    const num = btn.dataset.number;
+    const name = btn.dataset.name;
+    const courier = btn.dataset.carrier;
+    const awb = btn.dataset.awb;
+    const url = btn.dataset.url;
+    const hasCert = btn.dataset.cert === 'true';
+
+    const waUrl = buildWhatsAppUrl(phone, num, name, courier, awb, url, hasCert);
+    window.open(waUrl, '_blank');
+  }
+
+  async function saveTrackingDetails(sendEmail) {
+    const orderId = document.getElementById('trackingModalOrderId').value;
+    const courier = document.getElementById('trackingModalCourier').value.trim();
+    const trackingNo = document.getElementById('trackingModalAwb').value.trim();
+    const trackingUrl = document.getElementById('trackingModalUrl').value.trim();
+    const alertBox = document.getElementById('trackingModalAlert');
+    const btn = sendEmail ? document.getElementById('btnSaveAndEmail') : document.getElementById('btnSaveOnly');
+
+    if (!trackingNo && sendEmail) {
+      alertBox.style.display = 'block';
+      alertBox.style.background = '#fee2e2';
+      alertBox.style.color = '#b91c1c';
+      alertBox.innerText = 'Please enter a Tracking / AWB Number before notifying the customer.';
+      return;
+    }
+
+    btn.disabled = true;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+    alertBox.style.display = 'none';
+
+    try {
+      const res = await fetch('/admin/orders/save-tracking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: parseInt(orderId),
+          courierName: courier,
+          trackingNumber: trackingNo,
+          trackingUrl: trackingUrl,
+          sendEmail: sendEmail
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alertBox.style.display = 'block';
+        alertBox.style.background = '#dcfce7';
+        alertBox.style.color = '#15803d';
+        alertBox.innerText = data.message;
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        alertBox.style.display = 'block';
+        alertBox.style.background = '#fee2e2';
+        alertBox.style.color = '#b91c1c';
+        alertBox.innerText = data.message || 'Error saving tracking information.';
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    } catch (err) {
+      alertBox.style.display = 'block';
+      alertBox.style.background = '#fee2e2';
+      alertBox.style.color = '#b91c1c';
+      alertBox.innerText = 'Network error communicating with server.';
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
   }
 </script>

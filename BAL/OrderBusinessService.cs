@@ -10,18 +10,15 @@ namespace SAT1.BAL
         private readonly OrderRepository _orderRepo;
         private readonly PayPalService _payPalService;
         private readonly RazorpayService _razorpayService;
-        private readonly OrderTrackingService _orderTrackingService;
 
         public OrderBusinessService(
             OrderRepository orderRepo, 
             PayPalService payPalService, 
-            RazorpayService razorpayService,
-            OrderTrackingService orderTrackingService)
+            RazorpayService razorpayService)
         {
             _orderRepo = orderRepo;
             _payPalService = payPalService;
             _razorpayService = razorpayService;
-            _orderTrackingService = orderTrackingService;
         }
 
         // DTO for Shipping Details
@@ -42,7 +39,8 @@ namespace SAT1.BAL
             int quantity, 
             string userId, 
             string userEmail, 
-            ShippingAddressDto shipping)
+            ShippingAddressDto shipping,
+            bool includePhysicalCertificate = false)
         {
             if (quantity <= 0) quantity = 1;
 
@@ -54,7 +52,8 @@ namespace SAT1.BAL
             }
 
             decimal unitPrice = product.PriceUSD;
-            decimal totalAmountUSD = Math.Max(0.01m, unitPrice * quantity);
+            decimal giaCertFee = includePhysicalCertificate ? 50.00m : 0.00m;
+            decimal totalAmountUSD = Math.Max(0.01m, (unitPrice * quantity) + giaCertFee);
 
             var internalOrderId = "SAT-ORD-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
 
@@ -68,9 +67,13 @@ namespace SAT1.BAL
                 OrderNumber = $"SAT-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}",
                 UserId = userId,
                 CustomerEmail = userEmail,
-                ItemName = $"{product.Name} (Qty: {quantity})",
+                ItemName = includePhysicalCertificate 
+                    ? $"{product.Name} (Qty: {quantity}) [Includes Physical GIA Hardcopy Certificate]" 
+                    : $"{product.Name} (Qty: {quantity})",
                 ExpectedAmount = totalAmountUSD,
                 TotalAmountUSD = totalAmountUSD,
+                IncludesPhysicalGiaCert = includePhysicalCertificate,
+                GiaCertFeeUSD = giaCertFee,
                 Currency = "USD",
                 PaymentProvider = "PayPal",
                 ProviderOrderId = payPalOrderId,
@@ -127,12 +130,6 @@ namespace SAT1.BAL
                 return (false, "Payment confirmation failed or flagged as suspicious.", updatedOrder);
             }
 
-            // Automatic Amazon/Flipkart-Style Shipment Booking (No Admin Manual Step Required)
-            if (updatedOrder != null)
-            {
-                await _orderTrackingService.BookShipmentAsync(updatedOrder.OrderId);
-            }
-
             return (true, wasAlreadyPaid ? "Order already verified and completed." : "PayPal payment verified and order marked as Paid!", updatedOrder);
         }
 
@@ -142,7 +139,8 @@ namespace SAT1.BAL
             int quantity, 
             string userId, 
             string userEmail, 
-            ShippingAddressDto shipping)
+            ShippingAddressDto shipping,
+            bool includePhysicalCertificate = false)
         {
             if (quantity <= 0) quantity = 1;
 
@@ -154,7 +152,8 @@ namespace SAT1.BAL
             }
 
             decimal unitPrice = product.PriceUSD;
-            decimal totalAmountUSD = Math.Max(0.01m, unitPrice * quantity);
+            decimal giaCertFee = includePhysicalCertificate ? 50.00m : 0.00m;
+            decimal totalAmountUSD = Math.Max(0.01m, (unitPrice * quantity) + giaCertFee);
 
             var internalOrderId = "SAT-ORD-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
 
@@ -168,9 +167,13 @@ namespace SAT1.BAL
                 OrderNumber = $"SAT-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}",
                 UserId = userId,
                 CustomerEmail = userEmail,
-                ItemName = $"{product.Name} (Qty: {quantity})",
+                ItemName = includePhysicalCertificate 
+                    ? $"{product.Name} (Qty: {quantity}) [Includes Physical GIA Hardcopy Certificate]" 
+                    : $"{product.Name} (Qty: {quantity})",
                 ExpectedAmount = totalAmountUSD,
                 TotalAmountUSD = totalAmountUSD,
+                IncludesPhysicalGiaCert = includePhysicalCertificate,
+                GiaCertFeeUSD = giaCertFee,
                 Currency = "USD",
                 PaymentProvider = "Razorpay",
                 ProviderOrderId = razorpayOrderId,
@@ -236,12 +239,6 @@ namespace SAT1.BAL
             if (!isPaid)
             {
                 return (false, "Razorpay payment processing failed or flagged as suspicious.", updatedOrder);
-            }
-
-            // Automatic Amazon/Flipkart-Style Shipment Booking (No Admin Manual Step Required)
-            if (updatedOrder != null)
-            {
-                await _orderTrackingService.BookShipmentAsync(updatedOrder.OrderId);
             }
 
             return (true, wasAlreadyPaid ? "Order already verified and completed." : "Razorpay payment verified and order marked as Paid!", updatedOrder);

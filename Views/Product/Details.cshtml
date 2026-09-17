@@ -1254,6 +1254,11 @@
           <span class="pd-trust-pill"><i class="fa-solid fa-shield-check"></i> BIS Hallmarked</span>
           <span class="pd-trust-pill"><i class="fa-solid fa-truck-fast"></i> Free Insured Express</span>
         </div>
+        <div style="margin-top: 8px;">
+          <a href="/Product/GiaCertificate/@Model.Id" target="_blank" style="display:inline-flex; align-items:center; gap:6px; color:#fbbf24; text-decoration:none; font-size:12px; font-weight:600; padding:5px 12px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); border-radius:6px; transition:all 0.2s ease;">
+            <i class="fa-solid fa-file-shield"></i> View &amp; Download Digital GIA Certificate <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;"></i>
+          </a>
+        </div>
 
         <!-- LUXURY ANIMATED STONE SWITCH -->
         <div class="stone-switch-wrap">
@@ -1320,6 +1325,22 @@
         <div>
           <div class="opt-label">Free Laser Engraving</div>
           <input type="text" class="pd-input" id="txtEngraving" placeholder="Engrave Text (e.g. Forever & Always ♡)" maxlength="30" />
+        </div>
+
+        <!-- Physical GIA Hardcopy Certificate Add-on Option -->
+        <div style="background: rgba(212, 178, 112, 0.08); border: 1px solid rgba(212, 178, 112, 0.35); border-radius: 10px; padding: 12px 16px; margin: 16px 0;">
+          <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; user-select: none;">
+            <input type="checkbox" id="chkPhysicalGiaCert" onchange="handlePhysicalCertToggle()" style="width: 18px; height: 18px; margin-top: 2px; accent-color: #d4b270; cursor: pointer;" />
+            <div>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span style="font-weight: 700; color: #ffffff; font-size: 13.5px;">Include Hardcopy Physical GIA Certificate</span>
+                <span style="background: #fbbf24; color: #0f172a; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px;">+$50 USD</span>
+              </div>
+              <div style="font-size: 11.5px; color: #cbd5e1; margin-top: 3px; line-height: 1.4;">
+                Sealed, laminated physical GIA Gemological dossier with holographic tamper seal, packaged in parcel from Surat, India.
+              </div>
+            </div>
+          </label>
         </div>
 
         <!-- CTA Action Buttons -->
@@ -2017,6 +2038,15 @@
 
     const isUserAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
 
+    function handlePhysicalCertToggle() {
+      const chk = document.getElementById('chkPhysicalGiaCert');
+      const addOn = (chk && chk.checked) ? 50 : 0;
+      const baseVal = window.activeVariantPriceUSD || basePriceUSD;
+      const totalVal = baseVal + addOn;
+      const btnOrderPrice = document.getElementById('btnOrderPrice');
+      if (btnOrderPrice) btnOrderPrice.textContent = '$' + totalVal.toLocaleString();
+    }
+
     function executeAddToCart() {
       try {
         const finalPrice = window.activeVariantPriceUSD || basePriceUSD;
@@ -2025,6 +2055,8 @@
         const txtEngraving = document.getElementById('txtEngraving');
         const engraving = txtEngraving ? txtEngraving.value.trim() : '';
         const stoneName = currentStoneType === 'Moissanite' ? 'Moissanite' : 'Lab Grown Diamond';
+        const chkCert = document.getElementById('chkPhysicalGiaCert');
+        const includeCert = chkCert ? chkCert.checked : false;
 
         const variantTitle = `@Model.Name (${stoneName}, ${selectedMetal}, ${selectedCarat}, Size: ${ringSize}${engraving ? `, Engraved: "${engraving}"` : ''})`;
 
@@ -2050,9 +2082,13 @@
           size: ringSize,
           engraving: engraving,
           img: '@mainImage',
-          quantity: 1
+          quantity: 1,
+          includePhysicalGiaCert: includeCert
         });
         localStorage.setItem(key, JSON.stringify(items));
+        if (includeCert) {
+          localStorage.setItem('sat_cart_physical_cert', 'true');
+        }
 
         if (!isUserAuthenticated) {
           alert('🔒 Please sign in to your account first to complete your bespoke order.');

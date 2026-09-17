@@ -190,5 +190,31 @@ namespace SAT1.Controllers
 
             return View(product);
         }
+
+        // GET: /Product/GiaCertificate/{id} or /Product/GiaCertificate?productId=...
+        [HttpGet]
+        [AllowAnonymous]
+        public async Task<IActionResult> GiaCertificate(string? id, string? productId)
+        {
+            var targetId = id ?? productId ?? "sat-prod-8f3a9b2c1d4e";
+            CatalogItem? product = await _catalogBal.GetCatalogItemByIdAsync(targetId);
+
+            if (product == null)
+            {
+                var defaultItems = await _catalogBal.GetProductsByNumericIdAsync(2, _env.WebRootPath);
+                product = defaultItems.FirstOrDefault() ?? new CatalogItem
+                {
+                    Id = targetId,
+                    Name = "Exquisite Custom Diamond Ring",
+                    CategoryId = "2",
+                    Spec = "18K Gold | 1.5ct GIA VVS1 | Brilliant Cut",
+                    PriceUSD = 2400,
+                    ImageUrl = "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg",
+                    IsActive = true
+                };
+            }
+
+            return View(product);
+        }
     }
 }

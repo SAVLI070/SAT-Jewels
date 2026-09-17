@@ -140,13 +140,46 @@ namespace SAT1.Controllers
             return View(pagedReviews);
         }
 
-        [HttpGet("shippingexceptions")]
-        public async Task<IActionResult> ShippingExceptions([FromServices] SAT1.DAL.OrderTrackingRepository trackingRepo)
+        public class SaveTrackingRequest
         {
-            if (!CheckAccess()) return HandleUnauthorized();
-            ViewBag.Title = "Shipping Alerts & Carrier Exceptions";
-            var exceptions = await trackingRepo.GetShippingExceptionsAsync();
-            return View(exceptions);
+            public long OrderId { get; set; }
+            public string? CourierName { get; set; }
+            public string? TrackingNumber { get; set; }
+            public string? TrackingUrl { get; set; }
+            public bool SendEmail { get; set; } = true;
+        }
+
+        [HttpPost("orders/save-tracking")]
+        public async Task<IActionResult> SaveTrackingInfo([FromBody] SaveTrackingRequest req, [FromServices] SatJewelDbContext db, [FromServices] EmailNotificationService emailService)
+        {
+            if (!CheckAccess()) return Unauthorized(new { success = false, message = "Admin privileges required." });
+            if (req == null || req.OrderId <= 0) return BadRequest(new { success = false, message = "Invalid order ID." });
+
+            var order = await db.Orders.FindAsync(req.OrderId);
+            if (order == null) return NotFound(new { success = false, message = "Order not found." });
+
+            order.CarrierName = !string.IsNullOrWhiteSpace(req.CourierName) ? req.CourierName.Trim() : "Courier";
+            order.TrackingNumber = req.TrackingNumber?.Trim() ?? string.Empty;
+            order.TrackingUrl = req.TrackingUrl?.Trim() ?? string.Empty;
+            order.OrderStatus = "Shipped";
+            order.CurrentTrackingStatus = "InTransit";
+
+            if (req.SendEmail)
+            {
+                order.TrackingInfoSentAt = DateTime.Now;
+                await emailService.SendOrderShippedEmailAsync(order, order.CarrierName, order.TrackingNumber, order.TrackingUrl);
+            }
+
+            await db.SaveChangesAsync();
+
+            return Json(new
+            {
+                success = true,
+                message = req.SendEmail
+                    ? "Tracking saved & shipped notification email sent to customer!"
+                    : "Tracking information saved successfully!",
+                sentAt = order.TrackingInfoSentAt?.ToString("MMM dd, yyyy hh:mm tt")
+            });
         }
 
         // ==========================================

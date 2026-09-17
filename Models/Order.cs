@@ -95,6 +95,11 @@ namespace SAT1.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+        // GIA Certification Add-on Fields
+        public bool IncludesPhysicalGiaCert { get; set; } = false;
+        [Column(TypeName = "numeric(18,2)")]
+        public decimal GiaCertFeeUSD { get; set; } = 0.00m;
+
         // Shipping & Fulfillment Tracking Fields (Amazon/Flipkart Automatic Workflow)
         [MaxLength(50)]
         public string CurrentTrackingStatus { get; set; } = "OrderPlaced";
@@ -111,6 +116,7 @@ namespace SAT1.Models
         public DateTime? EstimatedDeliveryDate { get; set; }
 
         public DateTime? ShipmentBookedAt { get; set; }
+        public DateTime? TrackingInfoSentAt { get; set; }
 
         public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
         public virtual ICollection<Payment> Payments { get; set; } = new List<Payment>();

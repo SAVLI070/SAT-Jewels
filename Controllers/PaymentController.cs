@@ -35,6 +35,9 @@ namespace SAT1.Controllers
             public string ShippingState { get; set; } = string.Empty;
             public string ShippingPostalCode { get; set; } = string.Empty;
             public string ShippingCountry { get; set; } = "United States";
+
+            // GIA Certificate Option
+            public bool IncludePhysicalCertificate { get; set; } = false;
         }
 
         public class VerifyPayPalRequest
@@ -80,7 +83,7 @@ namespace SAT1.Controllers
 
                 var shipping = MapShipping(req);
                 var (payPalOrderId, internalOrderId, serverCalculatedPriceUSD, approveUrl) = await _orderBusinessService.CreatePayPalOrderFlowAsync(
-                    req.ProductId, req.Quantity, userId, userEmail, shipping);
+                    req.ProductId, req.Quantity, userId, userEmail, shipping, req.IncludePhysicalCertificate);
 
                 return Ok(new
                 {
@@ -180,7 +183,7 @@ namespace SAT1.Controllers
 
                 var shipping = MapShipping(req);
                 var (razorpayOrderId, internalOrderId, serverCalculatedPriceUSD, razorpayKeyId) = await _orderBusinessService.CreateRazorpayOrderFlowAsync(
-                    req.ProductId, req.Quantity, userId, userEmail, shipping);
+                    req.ProductId, req.Quantity, userId, userEmail, shipping, req.IncludePhysicalCertificate);
 
                 return Ok(new
                 {
