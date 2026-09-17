@@ -185,22 +185,191 @@
     background: #fafafa;
   }
 
-  /* Square Box Product Grid Design */
+  /* Square Box Product Grid Design (Strict 1 Line of 4 Items on Desktop) */
   .product-square-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    animation: fadeInLine 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
+  @@keyframes fadeInLine {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* One Line Pagination Bar */
+  .cat-pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+    font-size: 13px;
+  }
+
+  .cat-pagination-info {
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cat-line-badge {
+    background: #fef3c7;
+    color: #92400e;
+    font-weight: 700;
+    font-size: 11.5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid #fde68a;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .cat-range-text {
+    font-size: 12.5px;
+    color: #64748b;
+  }
+
+  .cat-range-text strong {
+    color: #0f172a;
+  }
+
+  .cat-pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-line-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-line-nav:hover:not(:disabled) {
+    background: #f8fafc;
+    border-color: #b45309;
+    color: #b45309;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(180, 83, 9, 0.15);
+  }
+
+  .btn-line-nav:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f1f5f9;
+    border-color: #e2e8f0;
+    color: #94a3b8;
+  }
+
+  .cat-pills-list {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .cat-pill-btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 6px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .cat-pill-btn:hover:not(.active) {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #0f172a;
+  }
+
+  .cat-pill-btn.active {
+    background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+    border-color: #b45309;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(180, 83, 9, 0.3);
+  }
+
+  .cat-pill-ellipsis {
+    padding: 0 4px;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  /* Quick Header Line Controls */
+  .cat-header-nav-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 2px 8px;
+    margin-right: 6px;
+  }
+
+  .cat-header-page-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: #475569;
+    padding: 0 4px;
+    white-space: nowrap;
+  }
+
+  .btn-header-nav {
+    background: transparent;
+    border: none;
+    padding: 2px 6px;
+    color: #64748b;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 10.5px;
+    transition: all 0.15s ease;
+  }
+
+  .btn-header-nav:hover:not(:disabled) {
+    color: #b45309;
+    background: #f1f5f9;
+  }
+
+  .btn-header-nav:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  /* Original FarmBridge Style Luxury Product Card */
   .product-square-card {
     background: #ffffff;
     border: 1px solid #e2e8f0;
-    border-radius: 14px;
-    padding: 12px;
+    border-radius: 16px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
     transition: all 0.25s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
     position: relative;
   }
 
@@ -213,11 +382,11 @@
   .product-square-img-wrap {
     width: 100%;
     aspect-ratio: 1 / 1;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
     background: #f8fafc;
-    border: 1px solid #f1f5f9;
-    margin-bottom: 10px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 12px;
   }
 
   .product-square-img {
@@ -228,46 +397,48 @@
   }
 
   .product-square-card:hover .product-square-img {
-    transform: scale(1.04);
+    transform: scale(1.05);
   }
 
   .product-square-title {
     color: #0f172a;
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 700;
-    line-height: 1.3;
-    margin: 0 0 4px;
+    line-height: 1.35;
+    margin: 0 0 6px;
+    text-align: center;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    min-height: 34px;
+    min-height: 36px;
   }
 
   .product-square-spec {
     font-size: 11.5px;
     color: #64748b;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   .product-square-price {
-    font-size: 14.5px;
+    font-size: 15.5px;
     font-weight: 800;
     color: #b45309;
   }
 
   .product-square-card-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
   }
 
   .btn-card-edit {
-    padding: 7px 10px;
+    flex: 1;
+    padding: 8px 12px;
     background: #f0fdf4;
     border: 1px solid #86efac;
     color: #16a34a;
@@ -280,7 +451,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 6px;
   }
 
   .btn-card-edit:hover {
@@ -289,8 +460,9 @@
   }
 
   .btn-card-delete {
-    padding: 7px 10px;
-    background: #fef2f2;
+    flex: 1;
+    padding: 8px 12px;
+    background: #ffffff;
     border: 1px solid #fca5a5;
     color: #dc2626;
     border-radius: 8px;
@@ -301,7 +473,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 6px;
   }
 
   .btn-card-delete:hover {
@@ -309,7 +481,14 @@
     color: #ffffff;
   }
 
-  /* RESPONSIVE MOBILE OPTIMIZATION (< 768px) */
+  /* Responsive Adjustments */
+  @@media (max-width: 1200px) {
+    .product-square-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+  }
+
   @@media (max-width: 768px) {
     .cat-accordion-header {
       padding: 12px 14px;
@@ -329,71 +508,44 @@
       padding: 1px 6px;
     }
 
-    .btn-sync-category {
-      padding: 5px 9px;
-      font-size: 11px;
-      gap: 4px;
-    }
-
-    .btn-add-section-item {
+    .btn-sync-category, .btn-add-section-item {
       padding: 5px 9px;
       font-size: 11px;
       gap: 4px;
     }
 
     .cat-accordion-body {
-      padding: 10px !important;
+      padding: 14px !important;
     }
 
-    /* 2-Column Mobile Product Grid */
     .product-square-grid {
-      grid-template-columns: repeat(2, 1fr) !important;
-      gap: 10px !important;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
 
     .product-square-card {
-      padding: 8px !important;
-      border-radius: 12px !important;
+      padding: 12px;
     }
 
-    .product-square-img-wrap {
-      border-radius: 8px !important;
-      margin-bottom: 6px !important;
+    .cat-pagination-bar {
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
     }
 
-    .product-square-title {
-      font-size: 11.5px !important;
-      line-height: 1.25 !important;
-      min-height: 29px !important;
-      margin-bottom: 2px !important;
-    }
-
-    .product-square-spec {
-      display: none !important;
-    }
-
-    .product-square-price {
-      font-size: 12.5px !important;
-    }
-
-    .status-pill-badge {
-      font-size: 9px !important;
-      padding: 1px 4px !important;
-    }
-
-    .product-square-card-actions {
-      gap: 4px !important;
-      margin-top: 6px !important;
-    }
-
-    .btn-card-edit, .btn-card-delete {
-      padding: 5px 4px !important;
-      font-size: 10.5px !important;
-      border-radius: 6px !important;
-      gap: 3px !important;
+    .cat-pagination-controls {
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
     }
   }
-</style>
+
+  @@media (max-width: 480px) {
+    .product-square-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
 
 <div style="max-width: 1240px; margin: 0 auto;">
@@ -421,16 +573,14 @@
 
     <select id="filterCategory" class="cat-filter-select" onchange="filterCatalogTable()">
       <option value="all" selected>All Main Categories</option>
-      <option value="1">1. Engagement Rings</option>
-      <option value="2">2. Wedding Rings</option>
-      <option value="3">3. Men's Wedding Bands</option>
-      <option value="4">4. Earrings</option>
-      <option value="5">5. Bracelets</option>
-      <option value="6">6. Necklaces</option>
     </select>
 
-    <div style="flex:1; min-width:240px; position:relative;">
-      <input type="text" id="searchCatalog" placeholder="Search product name..." oninput="filterCatalogTable()" style="width:100%; box-sizing:border-box; padding:10px 16px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; color:#0f172a; font-size:13px; outline:none;" />
+    <div style="flex:1; min-width:260px; position:relative; display:flex; align-items:center;">
+      <i class="fa-solid fa-magnifying-glass" style="position:absolute; left:14px; color:#94a3b8; font-size:13px; pointer-events:none;"></i>
+      <input type="text" id="searchCatalog" placeholder="Search across all jewelry products, diamond shapes, karats, specs..." oninput="filterCatalogTable()" style="width:100%; box-sizing:border-box; padding:10px 38px 10px 38px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; color:#0f172a; font-size:13px; outline:none; transition:all 0.2s ease;" onfocus="this.style.borderColor='#b45309'; this.style.background='#ffffff';" onblur="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc';" />
+      <button type="button" id="btnClearSearch" onclick="clearCatalogSearch()" style="display:none; position:absolute; right:12px; background:none; border:none; color:#94a3b8; cursor:pointer; font-size:14px; padding:2px;" title="Clear search">
+        <i class="fa-solid fa-circle-xmark"></i>
+      </button>
     </div>
   </div>
 
@@ -448,6 +598,9 @@
   let allCatalogItems = [];
   let allCategories = [];
   const loadedCategoryItems = {};
+  const ITEMS_PER_LINE = 4; // Exactly 1 line of products (4 cards) on desktop
+  const categoryPageMap = {};
+  const categoryFilteredItemsMap = {};
 
   function fixImgUrl(path) {
     if (!path) return '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';
@@ -455,6 +608,40 @@
     if (path.startsWith('~/')) return '/' + path.substring(2);
     if (!path.startsWith('/')) return '/' + path;
     return path;
+  }
+
+  // Multi-attribute category matcher (handles IDs, names, slugs, and variations)
+  function itemBelongsToCategory(item, cat) {
+    if (!item || !cat) return false;
+    const itCat = (item.categoryId || '').toString().toLowerCase().trim();
+    const cId = (cat.id || '').toString().toLowerCase().trim();
+    const cName = (cat.name || '').toLowerCase().trim();
+    const cSlug = (cat.slug || '').toLowerCase().trim();
+
+    if (itCat === cId) return true;
+    if (cSlug && (itCat === cSlug || itCat.includes(cSlug))) return true;
+    if (cName && (itCat === cName || itCat.includes(cName) || cName.includes(itCat))) return true;
+
+    const nameMap = {
+      'engagement rings': '1', 'engagement-rings': '1', 'rings': '1', 'ring': '1',
+      'wedding rings': '2', 'wedding-rings': '2',
+      'bridal sets': '3', 'bridal-sets': '3', 'men': '3', "men's wedding bands": '3',
+      'earrings': '4', 'earring': '4',
+      'bracelets': '5', 'bracelet': '5',
+      'necklaces': '6', 'necklace': '6', 'pendants': '6'
+    };
+    if (nameMap[itCat] && nameMap[itCat] === cId) return true;
+    if (nameMap[cName] && nameMap[cName] === itCat) return true;
+
+    return false;
+  }
+
+  function getCategoryProducts(cat) {
+    const cKey = cat.id.toString().toLowerCase();
+    if (loadedCategoryItems[cKey] && loadedCategoryItems[cKey].length > 0) {
+      return loadedCategoryItems[cKey];
+    }
+    return (allCatalogItems || []).filter(item => itemBelongsToCategory(item, cat));
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -466,35 +653,38 @@
     if (!container) return;
 
     try {
-      // Step 1: Instant load categories & real counts (<100ms)
-      const catRes = await fetch('/api/catalogapi/admin-categories');
+      // Step 1: Concurrently load categories & full catalog items for immediate instant search
+      const [catRes, itemsRes] = await Promise.all([
+        fetch('/api/catalogapi/admin-categories'),
+        fetch('/api/catalogapi/items')
+      ]);
+
       allCategories = await catRes.json();
+      allCatalogItems = await itemsRes.json();
+
+      // Populate filterCategory dropdown dynamically from database
+      const filterDropdown = document.getElementById('filterCategory');
+      if (filterDropdown && allCategories && allCategories.length > 0) {
+        filterDropdown.innerHTML = `
+          <option value="all" selected>All Main Categories (${allCatalogItems.length} items)</option>
+          ${allCategories.map((c, idx) => `<option value="${c.id.toString().toLowerCase()}">${idx + 1}. ${c.name} (${c.itemCount || 0} items)</option>`).join('')}
+        `;
+      }
+
+      // Pre-cache items per category
+      allCategories.forEach(cat => {
+        const cKey = cat.id.toString().toLowerCase();
+        loadedCategoryItems[cKey] = (allCatalogItems || []).filter(it => itemBelongsToCategory(it, cat));
+      });
 
       renderInitialCategoryHeaders(allCategories);
 
-      // Step 2: Background prefetch items for instant search filtering
-      fetch('/api/catalogapi/items')
-        .then(res => res.json())
-        .then(items => {
-          allCatalogItems = items;
-          // Cache by category & update live count badges
-          allCategories.forEach(cat => {
-            const cKey = cat.id.toString().toLowerCase();
-            const catSlug = (cat.slug || '').toLowerCase();
-            const catName = (cat.name || '').toLowerCase();
-            const matched = items.filter(it => {
-              const itCat = (it.categoryId || '').toLowerCase();
-              return itCat === cKey || itCat === catSlug || itCat === catName;
-            });
-            loadedCategoryItems[cKey] = matched;
-            const countTag = document.getElementById(`cat-count-${cat.id}`);
-            if (countTag && matched.length > 0) {
-              countTag.textContent = `${matched.length} items`;
-            }
-          });
-        })
-        .catch(e => console.warn('Background items prefetch error:', e));
-
+      // If user typed into search input while loading, trigger search immediately
+      const initialQuery = (document.getElementById('searchCatalog')?.value || '').trim();
+      const initialCat = (document.getElementById('filterCategory')?.value || 'all');
+      if (initialQuery !== '' || initialCat !== 'all') {
+        filterCatalogTable();
+      }
     } catch (err) {
       console.error('Error loading grouped catalog:', err);
       container.innerHTML = '<div style="background:#ffffff;padding:32px;border-radius:16px;text-align:center;color:#ef4444;border:1px solid #e2e8f0;">Failed to load catalog data from Neon DB database.</div>';
@@ -517,7 +707,8 @@
 
     container.innerHTML = categories.map(cat => {
       const icon = iconMap[cat.id] || 'fa-gem';
-      const count = cat.itemCount || 0;
+      const cKey = cat.id.toString().toLowerCase();
+      const cachedCount = loadedCategoryItems[cKey] ? loadedCategoryItems[cKey].length : (cat.itemCount || 0);
 
       return `
         <div class="cat-section-card" id="cat-card-${cat.id}">
@@ -531,12 +722,13 @@
                 </div>
                 <div class="cat-meta-row">
                   <span class="cat-badge-tag">${cat.badge || 'Popular'}</span>
-                  <span class="cat-count-tag" id="cat-count-${cat.id}">${count} items</span>
+                  <span class="cat-count-tag" id="cat-count-${cat.id}">${cachedCount} items</span>
                 </div>
               </div>
             </div>
 
             <div class="cat-header-actions" onclick="event.stopPropagation();">
+              <div class="cat-header-nav-wrap" id="cat-head-nav-${cat.id}" style="display:none;"></div>
               <button type="button" class="btn-sync-category" onclick="syncCategoryDone('${cat.id}', '${cat.name}', event)">
                 <i class="fa-solid fa-rotate-right"></i> <span>Sync</span>
               </button>
@@ -548,7 +740,7 @@
 
           <!-- COLLAPSED BY DEFAULT -->
           <div class="cat-accordion-body" id="cat-body-${cat.id}" style="display: none;">
-            <div id="cat-grid-${cat.id}" style="padding:20px; text-align:center; color:#64748b;">
+            <div id="cat-grid-${cat.id}" style="padding:24px; text-align:center; color:#64748b;">
               <i class="fa-solid fa-spinner fa-spin" style="color:#b45309;"></i> Loading ${cat.name} collection...
             </div>
           </div>
@@ -557,10 +749,76 @@
     }).join('');
   }
 
-  function renderCategoryItemsGrid(catId, catItems) {
+  function buildPaginationPills(catId, currentPage, totalPages) {
+    if (totalPages <= 1) return '';
+    let pillsHtml = '';
+    const maxVisible = 5;
+
+    let startPage = Math.max(1, currentPage - 2);
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    if (endPage - startPage < maxVisible - 1) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+
+    if (startPage > 1) {
+      pillsHtml += `<button type="button" class="cat-pill-btn ${currentPage === 1 ? 'active' : ''}" onclick="changeCategoryPage('${catId}', 1, event)">1</button>`;
+      if (startPage > 2) {
+        pillsHtml += `<span class="cat-pill-ellipsis">&hellip;</span>`;
+      }
+    }
+
+    for (let p = startPage; p <= endPage; p++) {
+      pillsHtml += `<button type="button" class="cat-pill-btn ${p === currentPage ? 'active' : ''}" onclick="changeCategoryPage('${catId}', ${p}, event)">${p}</button>`;
+    }
+
+    if (endPage < totalPages) {
+      if (endPage < totalPages - 1) {
+        pillsHtml += `<span class="cat-pill-ellipsis">&hellip;</span>`;
+      }
+      pillsHtml += `<button type="button" class="cat-pill-btn ${currentPage === totalPages ? 'active' : ''}" onclick="changeCategoryPage('${catId}', ${totalPages}, event)">${totalPages}</button>`;
+    }
+
+    return pillsHtml;
+  }
+
+  function renderCategoryItemsGrid(catId, catItems, targetPage = null) {
+    categoryFilteredItemsMap[catId] = catItems || [];
+    const totalItems = catItems ? catItems.length : 0;
+    const totalPages = Math.max(1, Math.ceil(totalItems / ITEMS_PER_LINE));
+
+    if (targetPage !== null) {
+      categoryPageMap[catId] = targetPage;
+    } else if (!categoryPageMap[catId]) {
+      categoryPageMap[catId] = 1;
+    }
+
+    let currentPage = Math.max(1, Math.min(categoryPageMap[catId], totalPages));
+    categoryPageMap[catId] = currentPage;
+
     const countTag = document.getElementById(`cat-count-${catId}`);
-    if (countTag && catItems) {
-      countTag.textContent = `${catItems.length} items`;
+    if (countTag) {
+      countTag.textContent = totalItems > 0 
+        ? `${totalItems} items • Page ${currentPage} of ${totalPages}`
+        : `0 items`;
+    }
+
+    // Update Header quick nav controls
+    const headNav = document.getElementById(`cat-head-nav-${catId}`);
+    if (headNav) {
+      if (totalPages > 1) {
+        headNav.style.display = 'inline-flex';
+        headNav.innerHTML = `
+          <button type="button" class="btn-header-nav" onclick="changeCategoryPage('${catId}', -1, event, true)" ${currentPage === 1 ? 'disabled' : ''} title="Previous Line">
+            <i class="fa-solid fa-chevron-left"></i>
+          </button>
+          <span class="cat-header-page-text">Page ${currentPage}/${totalPages}</span>
+          <button type="button" class="btn-header-nav" onclick="changeCategoryPage('${catId}', 1, event, true)" ${currentPage === totalPages ? 'disabled' : ''} title="Next Line">
+            <i class="fa-solid fa-chevron-right"></i>
+          </button>
+        `;
+      } else {
+        headNav.style.display = 'none';
+      }
     }
 
     const gridContainer = document.getElementById(`cat-grid-${catId}`);
@@ -568,27 +826,32 @@
 
     if (!catItems || catItems.length === 0) {
       gridContainer.innerHTML = `
-        <div style="padding:24px;text-align:center;color:#64748b;font-size:13px;background:#ffffff;border-radius:12px;border:1px solid #e2e8f0;">
+        <div style="padding:28px;text-align:center;color:#64748b;font-size:14px;background:#ffffff;border-radius:12px;border:1px solid #e2e8f0;">
           No jewelry items in this section. Click <strong style="color:#b45309;">+ Add</strong> to list one.
         </div>
       `;
       return;
     }
 
+    // Exactly 1 line of products (4 cards on desktop)
+    const startIndex = (currentPage - 1) * ITEMS_PER_LINE;
+    const currentLineItems = catItems.slice(startIndex, startIndex + ITEMS_PER_LINE);
+    const endIndex = Math.min(startIndex + ITEMS_PER_LINE, totalItems);
+
     gridContainer.innerHTML = `
       <div class="product-square-grid">
-        ${catItems.map(item => `
+        ${currentLineItems.map(item => `
           <div class="product-square-card">
             <div class="product-square-img-wrap">
               <img src="${fixImgUrl(item.imageUrl)}" class="product-square-img" onerror="this.src='/assets/ivevar/exclusive_regal_star_diamond_ring.jpg'" alt="${item.name}" loading="lazy" />
             </div>
             
             <h4 class="product-square-title" title="${item.name}">${item.name}</h4>
-            <div class="product-square-spec">${item.spec || ''}</div>
+            <div class="product-square-spec" title="${item.spec || ''}">${item.spec || ''}</div>
             
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:6px;border-top:1px solid #f1f5f9;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;border-top:1px solid #f1f5f9;">
               <span class="product-square-price">$${Number(item.priceUSD || item.price || 0).toLocaleString()}</span>
-              <span class="status-pill-badge" style="font-weight:700;padding:2px 6px;border-radius:8px;background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">Active</span>
+              <span class="status-pill-badge" style="font-weight:700;font-size:11px;padding:3px 8px;border-radius:8px;background:#f0fdf4;color:#16a34a;border:1px solid #86efac;">Active</span>
             </div>
 
             <div class="product-square-card-actions">
@@ -602,7 +865,39 @@
           </div>
         `).join('')}
       </div>
+
+      ${totalPages > 1 ? `
+        <div class="cat-pagination-bar">
+          <div class="cat-pagination-info">
+            <span class="cat-line-badge"><i class="fa-solid fa-layer-group"></i> Page ${currentPage} of ${totalPages}</span>
+            <span class="cat-range-text">Showing <strong>${startIndex + 1}&ndash;${endIndex}</strong> of <strong>${totalItems}</strong> products</span>
+          </div>
+
+          <div class="cat-pagination-controls">
+            <button type="button" class="btn-line-nav" onclick="changeCategoryPage('${catId}', -1, event, true)" ${currentPage === 1 ? 'disabled' : ''}>
+              <i class="fa-solid fa-chevron-left"></i> Previous
+            </button>
+            <div class="cat-pills-list">
+              ${buildPaginationPills(catId, currentPage, totalPages)}
+            </div>
+            <button type="button" class="btn-line-nav" onclick="changeCategoryPage('${catId}', 1, event, true)" ${currentPage === totalPages ? 'disabled' : ''}>
+              Next <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      ` : ''}
     `;
+  }
+
+  function changeCategoryPage(catId, targetPage, event, isOffset = false) {
+    if (event) event.stopPropagation();
+    const cKey = catId.toString().toLowerCase();
+    const items = categoryFilteredItemsMap[catId] || loadedCategoryItems[cKey] || [];
+    const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_LINE));
+    let newPage = isOffset ? (categoryPageMap[catId] || 1) + targetPage : targetPage;
+    newPage = Math.max(1, Math.min(newPage, totalPages));
+    categoryPageMap[catId] = newPage;
+    renderCategoryItemsGrid(catId, items, newPage);
   }
 
   async function toggleCategoryAccordion(catId) {
@@ -617,16 +912,15 @@
       header.classList.add('active');
       arrow.style.transform = 'rotate(90deg)';
 
-      // Fetch or render items on demand
       const cKey = catId.toString().toLowerCase();
-      if (loadedCategoryItems[cKey]) {
-        renderCategoryItemsGrid(catId, loadedCategoryItems[cKey]);
+      if (loadedCategoryItems[cKey] && loadedCategoryItems[cKey].length > 0) {
+        renderCategoryItemsGrid(catId, loadedCategoryItems[cKey], categoryPageMap[catId] || 1);
       } else {
         try {
           const res = await fetch(`/api/catalogapi/category-items/${catId}`);
           const items = await res.json();
           loadedCategoryItems[cKey] = items;
-          renderCategoryItemsGrid(catId, items);
+          renderCategoryItemsGrid(catId, items, categoryPageMap[catId] || 1);
         } catch (e) {
           console.error(e);
         }
@@ -646,39 +940,97 @@
   }
 
   function filterCatalogTable() {
-    const selectedCat = document.getElementById('filterCategory').value.toLowerCase();
-    const query = document.getElementById('searchCatalog').value.toLowerCase().trim();
+    const selectedCat = (document.getElementById('filterCategory')?.value || 'all').toLowerCase();
+    const rawQuery = (document.getElementById('searchCatalog')?.value || '').trim();
+    const query = rawQuery.toLowerCase();
+    const searchTokens = query ? query.split(/\s+/).filter(t => t.length > 0) : [];
 
-    if (!allCatalogItems || allCatalogItems.length === 0) return;
+    const btnClear = document.getElementById('btnClearSearch');
+    if (btnClear) {
+      btnClear.style.display = rawQuery ? 'block' : 'none';
+    }
+
+    let totalMatches = 0;
 
     allCategories.forEach(cat => {
       const cKey = cat.id.toString().toLowerCase();
-      const catItems = allCatalogItems.filter(i => (i.categoryId || '').toLowerCase() === cKey);
-      const filtered = catItems.filter(item => {
-        const matchesCat = selectedCat === 'all' || cKey === selectedCat;
-        const matchesSearch = !query || (item.name || '').toLowerCase().includes(query) || (item.spec || '').toLowerCase().includes(query);
-        return matchesCat && matchesSearch;
+      const catCard = document.getElementById(`cat-card-${cat.id}`);
+      const catBody = document.getElementById(`cat-body-${cat.id}`);
+      const catHeader = document.getElementById(`cat-header-${cat.id}`);
+      const catArrow = document.getElementById(`cat-arrow-${cat.id}`);
+
+      const catAllItems = getCategoryProducts(cat);
+      const isCatSelected = (selectedCat === 'all' || selectedCat === cKey);
+
+      // Multi-token search across item name, spec, price, and category name
+      const filtered = catAllItems.filter(item => {
+        if (searchTokens.length === 0) return true;
+        const name = (item.name || '').toLowerCase();
+        const spec = (item.spec || '').toLowerCase();
+        const price = (item.priceUSD || item.price || '').toString();
+        const catName = (cat.name || '').toLowerCase();
+        const combined = `${name} ${spec} ${price} ${catName}`;
+        return searchTokens.every(tok => combined.includes(tok));
       });
 
-      const body = document.getElementById(`cat-body-${cat.id}`);
-      const header = document.getElementById(`cat-header-${cat.id}`);
-      const arrow = document.getElementById(`cat-arrow-${cat.id}`);
-
-      if (selectedCat !== 'all' || query) {
-        if (filtered.length > 0 && (selectedCat === 'all' || selectedCat === cKey)) {
-          if (body) body.style.display = 'block';
-          if (header) header.classList.add('active');
-          if (arrow) arrow.style.transform = 'rotate(90deg)';
-          renderCategoryItemsGrid(cat.id, filtered);
+      if (rawQuery !== '') {
+        // Active search mode
+        if (isCatSelected && filtered.length > 0) {
+          totalMatches += filtered.length;
+          if (catCard) catCard.style.display = 'block';
+          if (catBody) catBody.style.display = 'block';
+          if (catHeader) catHeader.classList.add('active');
+          if (catArrow) catArrow.style.transform = 'rotate(90deg)';
+          categoryPageMap[cat.id] = 1;
+          renderCategoryItemsGrid(cat.id, filtered, 1);
         } else {
-          if (body) body.style.display = 'none';
-          if (header) header.classList.remove('active');
-          if (arrow) arrow.style.transform = 'rotate(0deg)';
+          if (catCard) catCard.style.display = 'none';
         }
       } else {
-        renderCategoryItemsGrid(cat.id, catItems);
+        // Normal browsing mode
+        if (isCatSelected) {
+          if (catCard) catCard.style.display = 'block';
+          if (selectedCat !== 'all') {
+            if (catBody) catBody.style.display = 'block';
+            if (catHeader) catHeader.classList.add('active');
+            if (catArrow) catArrow.style.transform = 'rotate(90deg)';
+          }
+          renderCategoryItemsGrid(cat.id, catAllItems, categoryPageMap[cat.id] || 1);
+        } else {
+          if (catCard) catCard.style.display = 'none';
+        }
       }
     });
+
+    // Empty state notice when search has 0 results across all categories
+    let noResultsNotice = document.getElementById('cat-no-search-results');
+    if (rawQuery !== '' && totalMatches === 0) {
+      if (!noResultsNotice) {
+        noResultsNotice = document.createElement('div');
+        noResultsNotice.id = 'cat-no-search-results';
+        noResultsNotice.style.cssText = 'background:#ffffff; border:1px solid #e2e8f0; padding:48px 24px; border-radius:16px; text-align:center; color:#64748b; margin-top:20px; box-shadow:0 4px 20px rgba(0,0,0,0.03);';
+        document.getElementById('catalogSectionsContainer').appendChild(noResultsNotice);
+      }
+      noResultsNotice.innerHTML = `
+        <i class="fa-solid fa-magnifying-glass" style="font-size:32px; color:#cbd5e1; margin-bottom:12px; display:block;"></i>
+        <h3 style="font-size:16px; font-weight:700; color:#0f172a; margin:0 0 6px;">No jewelry items found</h3>
+        <p style="font-size:13px; color:#64748b; margin:0 0 16px;">We couldn't find any products matching "<strong>${rawQuery}</strong>".</p>
+        <button type="button" onclick="clearCatalogSearch()" style="padding:8px 18px; background:#b45309; color:#ffffff; border:none; border-radius:8px; font-size:12.5px; font-weight:700; cursor:pointer;">
+          <i class="fa-solid fa-xmark"></i> Clear Search
+        </button>
+      `;
+      noResultsNotice.style.display = 'block';
+    } else if (noResultsNotice) {
+      noResultsNotice.style.display = 'none';
+    }
+  }
+
+  function clearCatalogSearch() {
+    const searchInput = document.getElementById('searchCatalog');
+    if (searchInput) searchInput.value = '';
+    const filterDropdown = document.getElementById('filterCategory');
+    if (filterDropdown) filterDropdown.value = 'all';
+    filterCatalogTable();
   }
 
   async function deleteCatalogItem(id, name, event) {
