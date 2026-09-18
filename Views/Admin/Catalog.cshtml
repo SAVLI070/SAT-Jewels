@@ -559,9 +559,14 @@
         Manage, filter, sync, and review catalog items grouped by category in clean square box grids.
       </p>
     </div>
-    <a href="/Admin/AddProduct" style="padding:12px 24px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); border-radius:12px; color:#ffffff; text-decoration:none; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 16px rgba(180, 83, 9, 0.25);">
-      <i class="fa-solid fa-plus"></i> + Add New Jewelry Item
-    </a>
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <button type="button" onclick="openGoogleMerchantModal()" style="padding:12px 20px; background:#ffffff; border:1px solid #cbd5e1; border-radius:12px; color:#0f172a; font-weight:700; font-size:13.5px; display:inline-flex; align-items:center; gap:8px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.04); transition:all 0.2s ease;" onmouseover="this.style.borderColor='#4285F4'; this.style.color='#1a73e8'" onmouseout="this.style.borderColor='#cbd5e1'; this.style.color='#0f172a'">
+        <i class="fa-brands fa-google" style="color:#4285F4; font-size:16px;"></i> Google Shopping Feed
+      </button>
+      <a href="/Admin/AddProduct" style="padding:12px 24px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); border-radius:12px; color:#ffffff; text-decoration:none; font-weight:700; font-size:14px; display:inline-flex; align-items:center; gap:8px; box-shadow:0 4px 16px rgba(180, 83, 9, 0.25);">
+        <i class="fa-solid fa-plus"></i> + Add New Jewelry Item
+      </a>
+    </div>
   </div>
 
   <!-- Filter & Search Bar -->
@@ -592,6 +597,67 @@
     </div>
   </div>
 
+</div>
+
+<!-- Google Merchant Center Integration Modal -->
+<div id="googleMerchantModal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); backdrop-filter:blur(5px); z-index:9999; align-items:center; justify-content:center; padding:16px;">
+  <div style="background:#ffffff; width:100%; max-width:620px; border-radius:20px; box-shadow:0 24px 50px rgba(0,0,0,0.25); overflow:hidden; border:1px solid #e2e8f0; animation:fadeInLine 0.2s ease;">
+    <div style="padding:20px 24px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color:#ffffff; display:flex; align-items:center; justify-content:space-between;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:42px; height:42px; border-radius:12px; background:#ffffff; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,0,0,0.15); flex-shrink:0;">
+          <i class="fa-brands fa-google" style="color:#4285F4; font-size:22px;"></i>
+        </div>
+        <div>
+          <h3 style="margin:0; font-size:17px; font-weight:800; letter-spacing:-0.01em;">Google Merchant Center &amp; Shopping</h3>
+          <p style="margin:2px 0 0; font-size:12px; color:#94a3b8;">Automated live XML product feed for Google Ads &amp; Free Shopping listings</p>
+        </div>
+      </div>
+      <button type="button" onclick="closeGoogleMerchantModal()" style="background:transparent; border:none; color:#94a3b8; font-size:18px; cursor:pointer; padding:6px; line-height:1;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='#94a3b8'">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <div style="padding:24px; color:#334155;">
+      <label style="display:block; font-size:13px; font-weight:700; color:#0f172a; margin-bottom:8px;">
+        <i class="fa-solid fa-rss" style="color:#f59e0b;"></i> Your Live Google Product Feed URL:
+      </label>
+      <div style="display:flex; gap:8px; margin-bottom:16px;">
+        <input type="text" id="gFeedUrlInput" readonly value="" style="flex:1; padding:10px 14px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; font-size:12.5px; font-family:monospace; color:#0f172a; outline:none;" />
+        <button type="button" onclick="copyGoogleFeedUrl()" style="padding:10px 16px; background:#4285F4; color:#ffffff; border:none; border-radius:10px; font-weight:700; font-size:12.5px; cursor:pointer; display:inline-flex; align-items:center; gap:6px; transition:background 0.2s ease;">
+          <i class="fa-regular fa-copy"></i> <span id="copyBtnText">Copy URL</span>
+        </button>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+        <a id="gFeedPreviewLink" href="/feeds/google-merchant.xml" target="_blank" style="padding:8px 14px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:8px; color:#0f172a; text-decoration:none; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Preview Live XML Feed
+        </a>
+        <a href="https://merchants.google.com/" target="_blank" style="padding:8px 14px; background:#f0fdf4; border:1px solid #86efac; border-radius:8px; color:#16a34a; text-decoration:none; font-size:12px; font-weight:700; display:inline-flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-store"></i> Open Google Merchant Center
+        </a>
+      </div>
+
+      <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:16px;">
+        <h4 style="margin:0 0 8px; font-size:13px; font-weight:800; color:#0f172a; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-circle-info" style="color:#b45309;"></i> 3 Simple Steps to Connect:
+        </h4>
+        <ol style="margin:0; padding-left:20px; font-size:12.5px; line-height:1.6; color:#475569;">
+          <li>Log in to your client's free <strong style="color:#0f172a;">Google Merchant Center</strong> account.</li>
+          <li>Go to <strong style="color:#0f172a;">Products &rarr; Data Sources / Feeds &rarr; Add Product Feed</strong>.</li>
+          <li>Select <strong style="color:#0f172a;">Scheduled Fetch</strong>, paste the Copied Feed URL above, and choose <strong style="color:#0f172a;">Daily Fetch</strong>.</li>
+        </ol>
+        <p style="margin:8px 0 0; font-size:11.5px; color:#64748b;">
+          ✓ Google will automatically refresh and list all your jewelry items, high-res photos, and live USD prices across Google Shopping and Free Listings.
+        </p>
+      </div>
+    </div>
+
+    <div style="padding:16px 24px; background:#f8fafc; border-top:1px solid #e2e8f0; display:flex; justify-content:flex-end;">
+      <button type="button" onclick="closeGoogleMerchantModal()" style="padding:8px 20px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; color:#475569; font-weight:700; font-size:13px; cursor:pointer;">
+        Close
+      </button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -1069,5 +1135,43 @@
         showToast('Error deleting item from database.', 'error');
       }
     }
+  }
+
+  // Google Merchant Center Feed Modal Controls
+  function openGoogleMerchantModal() {
+    const fullUrl = `${window.location.origin}/feeds/google-merchant.xml`;
+    const input = document.getElementById('gFeedUrlInput');
+    const link = document.getElementById('gFeedPreviewLink');
+    if (input) input.value = fullUrl;
+    if (link) link.href = fullUrl;
+    const modal = document.getElementById('googleMerchantModal');
+    if (modal) modal.style.display = 'flex';
+  }
+
+  function closeGoogleMerchantModal() {
+    const modal = document.getElementById('googleMerchantModal');
+    if (modal) modal.style.display = 'none';
+  }
+
+  function copyGoogleFeedUrl() {
+    const input = document.getElementById('gFeedUrlInput');
+    if (!input) return;
+    input.select();
+    navigator.clipboard.writeText(input.value).then(() => {
+      const btnText = document.getElementById('copyBtnText');
+      if (btnText) {
+        btnText.textContent = 'Copied! ✓';
+        setTimeout(() => { btnText.textContent = 'Copy URL'; }, 2500);
+      }
+      if (typeof showToast === 'function') {
+        showToast('Google Merchant Feed URL copied to clipboard!', 'success', 'Copied');
+      }
+    }).catch(() => {
+      input.select();
+      document.execCommand('copy');
+      if (typeof showToast === 'function') {
+        showToast('Feed URL copied!', 'success');
+      }
+    });
   }
 </script>

@@ -129,8 +129,141 @@ namespace SAT1.Controllers
             sb.AppendLine("Disallow: /Product/Checkout");
             sb.AppendLine();
             sb.AppendLine($"Sitemap: {baseUrl}/sitemap.xml");
+            sb.AppendLine($"# Google Merchant Center Feed: {baseUrl}/feeds/google-merchant.xml");
 
             return Content(sb.ToString(), "text/plain", Encoding.UTF8);
+        }
+
+        [HttpGet]
+        [Route("feeds/google-merchant.xml")]
+        [Route("google-shopping-feed.xml")]
+        [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
+        public async Task<IActionResult> GoogleMerchantFeed()
+        {
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            XNamespace g = "http://base.google.com/ns/1.0";
+
+            var channelElements = new List<XElement>
+            {
+                new XElement("title", "IVEVAR Fine Jewelry - Live Google Merchant Catalog"),
+                new XElement("link", $"{baseUrl}/"),
+                new XElement("description", "Live jewelry catalog feed for Google Merchant Center & Google Shopping."),
+                new XElement("lastBuildDate", DateTime.UtcNow.ToString("r"))
+            };
+
+            try
+            {
+                // 1. Fetch relational products with images
+                var products = await _context.Products
+                    .AsNoTracking()
+                    .Include(p => p.Images)
+                    .OrderByDescending(p => p.CreatedAt)
+                    .ToListAsync();
+
+                // 2. Fetch category names
+                var categories = await _context.Categories.AsNoTracking().ToListAsync();
+                var catMap = categories.ToDictionary(c => c.CategoryId, c => c.Name);
+
+                if (products.Count > 0)
+                {
+                    foreach (var p in products)
+                    {
+                        var prodId = $"sat-prod-{p.ProductId}";
+                        var title = p.ProductName;
+                        var catName = catMap.GetValueOrDefault(p.CategoryId, "Engagement Rings");
+                        var spec = string.IsNullOrWhiteSpace(p.Description)
+                            ? $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}"
+                            : p.Description;
+                        var prodUrl = $"{baseUrl}/Product/Details/{p.ProductId}";
+                        var mainImg = p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImagePath).FirstOrDefault() ?? "/assets/ring_1.jpg";
+                        var fullImgUrl = mainImg.StartsWith("http") ? mainImg : $"{baseUrl}{mainImg}";
+                        var priceVal = p.BasePriceUSD > 0 ? p.BasePriceUSD : 1500m;
+                        var priceStr = $"{priceVal:F2} USD";
+
+                        var itemElem = new XElement("item",
+                            new XElement(g + "id", prodId),
+                            new XElement(g + "title", title),
+                            new XElement(g + "description", spec),
+                            new XElement(g + "link", prodUrl),
+                            new XElement(g + "image_link", fullImgUrl),
+                            new XElement(g + "availability", "in_stock"),
+                            new XElement(g + "price", priceStr),
+                            new XElement(g + "brand", "IVEVAR"),
+                            new XElement(g + "condition", "new"),
+                            new XElement(g + "google_product_category", "188"),
+                            new XElement(g + "product_type", catName),
+                            new XElement(g + "identifier_exists", "no")
+                        );
+
+                        // Additional gallery images (up to 5)
+                        var gallery = p.Images.OrderBy(i => i.DisplayOrder).Skip(1).Take(5).ToList();
+                        foreach (var gImg in gallery)
+                        {
+                            if (!string.IsNullOrWhiteSpace(gImg.ImagePath))
+                            {
+                                var gImgUrl = gImg.ImagePath.StartsWith("http") ? gImg.ImagePath : $"{baseUrl}{gImg.ImagePath}";
+                                itemElem.Add(new XElement(g + "additional_image_link", gImgUrl));
+                            }
+                        }
+
+                        channelElements.Add(itemElem);
+                    }
+                }
+                else
+                {
+                    // Fallback to CatalogItems
+                    var catalogItems = await _context.CatalogItems
+                        .AsNoTracking()
+                        .Where(i => i.IsActive)
+                        .OrderByDescending(i => i.CreatedAt)
+                        .ToListAsync();
+
+                    foreach (var ci in catalogItems)
+                    {
+                        var prodId = ci.Id;
+                        var title = ci.Name;
+                        var spec = string.IsNullOrWhiteSpace(ci.Spec) ? ci.Name : ci.Spec;
+                        var prodUrl = $"{baseUrl}/Product/Details/{ci.Id}";
+                        var fullImgUrl = string.IsNullOrWhiteSpace(ci.ImageUrl) 
+                            ? $"{baseUrl}/assets/ring_1.jpg" 
+                            : (ci.ImageUrl.StartsWith("http") ? ci.ImageUrl : $"{baseUrl}{ci.ImageUrl}");
+                        var priceVal = ci.PriceUSD > 0 ? ci.PriceUSD : ci.Price;
+                        var priceStr = $"{(priceVal > 0 ? priceVal : 1500m):F2} USD";
+
+                        var itemElem = new XElement("item",
+                            new XElement(g + "id", prodId),
+                            new XElement(g + "title", title),
+                            new XElement(g + "description", spec),
+                            new XElement(g + "link", prodUrl),
+                            new XElement(g + "image_link", fullImgUrl),
+                            new XElement(g + "availability", "in_stock"),
+                            new XElement(g + "price", priceStr),
+                            new XElement(g + "brand", "IVEVAR"),
+                            new XElement(g + "condition", "new"),
+                            new XElement(g + "google_product_category", "188"),
+                            new XElement(g + "product_type", ci.CategoryId ?? "Jewelry"),
+                            new XElement(g + "identifier_exists", "no")
+                        );
+
+                        channelElements.Add(itemElem);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GoogleMerchantFeed Error]: {ex.Message}");
+            }
+
+            var rssDoc = new XDocument(
+                new XDeclaration("1.0", "utf-8", "yes"),
+                new XElement("rss",
+                    new XAttribute("version", "2.0"),
+                    new XAttribute(XNamespace.Xmlns + "g", g.NamespaceName),
+                    new XElement("channel", channelElements)
+                )
+            );
+
+            return Content(rssDoc.ToString(), "application/xml", Encoding.UTF8);
         }
     }
 }
