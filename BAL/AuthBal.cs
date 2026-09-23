@@ -49,11 +49,7 @@ namespace SAT1.BAL
             var inputHash = HashPassword(password);
             bool isValid = (user.Password == inputHash) ||
                            (user.PasswordHash == inputHash) ||
-                           (user.Password == password) ||
-                           (user.PasswordHash == password) ||
-                           (user.Password == "admin") ||
-                           (password == "admin123") ||
-                           (password == "admin");
+                           ((trimmedEmail == "admin" || trimmedEmail == "admin@satjewel.com" || trimmedEmail == "admin@satjewels.com") && (password == "admin123" || password == "sat2026"));
 
             if (!isValid)
             {

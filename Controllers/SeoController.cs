@@ -145,7 +145,7 @@ namespace SAT1.Controllers
 
             var channelElements = new List<XElement>
             {
-                new XElement("title", "IVEVAR Fine Jewelry - Live Google Merchant Catalog"),
+                new XElement("title", "SAT Jewel — Fine Jewelry & Certified Diamonds Catalog"),
                 new XElement("link", $"{baseUrl}/"),
                 new XElement("description", "Live jewelry catalog feed for Google Merchant Center & Google Shopping."),
                 new XElement("lastBuildDate", DateTime.UtcNow.ToString("r"))
@@ -188,7 +188,7 @@ namespace SAT1.Controllers
                             new XElement(g + "image_link", fullImgUrl),
                             new XElement(g + "availability", "in_stock"),
                             new XElement(g + "price", priceStr),
-                            new XElement(g + "brand", "IVEVAR"),
+                            new XElement(g + "brand", "SAT Jewel"),
                             new XElement(g + "condition", "new"),
                             new XElement(g + "google_product_category", "188"),
                             new XElement(g + "product_type", catName),
@@ -238,7 +238,7 @@ namespace SAT1.Controllers
                             new XElement(g + "image_link", fullImgUrl),
                             new XElement(g + "availability", "in_stock"),
                             new XElement(g + "price", priceStr),
-                            new XElement(g + "brand", "IVEVAR"),
+                            new XElement(g + "brand", "SAT Jewel"),
                             new XElement(g + "condition", "new"),
                             new XElement(g + "google_product_category", "188"),
                             new XElement(g + "product_type", ci.CategoryId ?? "Jewelry"),

@@ -1,0 +1,19 @@
+version: 1.0
+runtime: dotnet8
+build:
+  commands:
+    build:
+      - dotnet publish SAT1.csproj -c Release -o /app/publish
+run:
+  command: dotnet /app/publish/SAT1.dll
+  network:
+    port: 8080
+  env:
+    - name: ASPNETCORE_ENVIRONMENT
+      value: Production
+    - name: ASPNETCORE_URLS
+      value: http://+:8080
+    - name: DOTNET_USE_POLLING_FILE_WATCHER
+      value: "true"
+    - name: DOTNET_HOSTBUILDER__RELOADCONFIGONCHANGE
+      value: "false"

@@ -27,7 +27,11 @@ namespace SAT1.Controllers
 
                 if (order != null && !string.IsNullOrWhiteSpace(order.TrackingUrl))
                 {
-                    return Redirect(order.TrackingUrl);
+                    if (Uri.TryCreate(order.TrackingUrl, UriKind.Absolute, out var uri) && 
+                        (uri.Scheme == Uri.UriSchemeHttps || uri.Scheme == Uri.UriSchemeHttp))
+                    {
+                        return Redirect(order.TrackingUrl);
+                    }
                 }
             }
 

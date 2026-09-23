@@ -1,9 +1,11 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     Layout = null;
     ViewData["Title"] = "Shopping Cart & Home Delivery Checkout";
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     var userName = User.Identity?.Name ?? "";
     var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
+    var payPalClientId = Configuration["PayPal:ClientId"] ?? "sb";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -19,7 +21,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="~/css/style.css" />
   <!-- Official Dual Payment Gateways (PayPal SDK + Razorpay Checkout.js) -->
-  <script src="https://www.paypal.com/sdk/js?client-id=sb&currency=USD&enable-funding=venmo,paylater"></script>
+  <script src="https://www.paypal.com/sdk/js?client-id=@(payPalClientId)&currency=USD&enable-funding=venmo,paylater"></script>
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <style>
     body {
@@ -311,10 +313,7 @@
             <!-- Option 1: Official PayPal Express Checkout -->
             <div style="margin-bottom: 20px;">
               <div style="font-size:12px; color:var(--taupe-beige); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Option 1: Pay with PayPal</div>
-              <button type="button" id="btnPayPalExpress" class="btn-paypal-express" onclick="payWithPayPalInstant()" style="width:100%; padding:14px 20px; background:#ffc439; color:#003087; border:none; border-radius:10px; font-weight:800; font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(255,196,57,0.3); transition:all 0.3s ease;">
-                <i class="fa-brands fa-paypal" style="font-size:20px; color:#003087;"></i> Pay with PayPal (<span id="paypalBtnAmountDisplay">$0 USD</span>)
-              </button>
-              <div id="paypal-button-container" style="margin-top:12px; display:none;"></div>
+              <div id="paypal-button-container" style="min-height: 48px;"></div>
             </div>
 
             <!-- Option 2: Razorpay Independent Card Gateway (Embedded Modal Overlay) -->
@@ -650,151 +649,6 @@
       renderCart();
     }
 
-    async function payWithPayPalInstant() {
-      if (!isUserAuthenticated) {
-        alert('🚫 PERMISSION DENIED: You must sign in to your account before proceeding to payment.');
-        window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
-        return;
-      }
-
-      const addr = getShippingAddressData();
-      if (!addr) {
-        alert('⚠️ PERMISSION DENIED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, ZIP) is required before payment can be initialized.');
-        checkAddressValidation();
-        return;
-      }
-
-      const key = getCartStorageKey();
-      const savedCart = localStorage.getItem(key);
-      const cartItems = savedCart ? JSON.parse(savedCart) : [];
-      const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-8') : 'sat-prod-8';
-      const qty = cartItems.length > 0 ? (Number(cartItems[0].quantity) || 1) : 1;
-
-      showPaymentProcessing("Processing PayPal payment authorization and securing your bespoke jewelry order...");
-
-      try {
-        // Step 1: Create PayPal Order
-        const res = await fetch('/api/payment/create-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            productId: firstItemId,
-            quantity: qty,
-            includePhysicalCertificate: isPhysicalCertSelected(),
-            shippingFullName: addr.name,
-            shippingPhone: addr.phone,
-            shippingStreet: addr.street,
-            shippingCity: addr.city,
-            shippingState: addr.state,
-            shippingPostalCode: addr.postal,
-            shippingCountry: addr.country
-          })
-        });
-
-        const result = await res.json();
-        if (!result.success || !result.orderId) {
-          hidePaymentProcessing();
-          alert('Error initializing PayPal order: ' + (result.message || 'Server error'));
-          return;
-        }
-
-        // Step 2: Auto-verify and confirm payment into DB
-        const verifyRes = await fetch('/api/payment/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ payPalOrderId: result.orderId })
-        });
-
-        const verifyResult = await verifyRes.json();
-        hidePaymentProcessing();
-
-        if (verifyResult.success) {
-          localStorage.removeItem(getCartStorageKey());
-          alert('🎉 PayPal Payment Authorized & Order Placed Successfully!\n\nOrder ID: ' + (verifyResult.orderId || result.internalOrderId || result.orderId) + '\nStatus: Paid & Insured Dispatch Booked');
-          window.location.href = '/Account/Orders';
-        } else {
-          alert('⚠️ Payment Verification Notice: ' + (verifyResult.message || 'Processing'));
-          window.location.href = '/Account/Orders';
-        }
-      } catch (err) {
-        hidePaymentProcessing();
-        console.error('PayPal instant error:', err);
-        alert('An error occurred during payment processing. Please try again.');
-      }
-    }
-
-    async function payWithPayPalMe() {
-      if (!isUserAuthenticated) {
-        alert('🚫 PERMISSION DENIED: You must sign in to your account before proceeding to payment.');
-        window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
-        return;
-      }
-
-      const addr = getShippingAddressData();
-      if (!addr) {
-        alert('⚠️ PERMISSION DENIED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, ZIP) is required before payment can be initialized.');
-        checkAddressValidation();
-        return;
-      }
-
-      if (currentCartTotal <= 0) {
-        alert('Your shopping cart is empty.');
-        return;
-      }
-
-      const btn = document.getElementById('btnPayPalDirect');
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Preparing PayPal USD Transfer...';
-      }
-
-      try {
-        const res = await fetch('/api/paymentapi/process-paypal-me', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            itemName: currentCartSummary,
-            amount: currentCartTotal,
-            includePhysicalCertificate: isPhysicalCertSelected(),
-            shippingFullName: addr.name,
-            shippingPhone: addr.phone,
-            shippingStreet: addr.street,
-            shippingCity: addr.city,
-            shippingState: addr.state,
-            shippingPostalCode: addr.postal,
-            shippingCountry: addr.country
-          })
-        });
-
-        const data = await res.json();
-        if (data.success && data.directPaymentUrl) {
-          // Open direct PayPal.Me link pre-filled with exact amount in new tab
-          window.open(data.directPaymentUrl, '_blank');
-          
-          localStorage.removeItem(getCartStorageKey());
-          if (typeof showPaymentSuccessModal === 'function') {
-            showPaymentSuccessModal(data.orderId);
-          } else {
-            alert(`🎉 Order Registered! Order ID: ${data.orderId}\n\nWe have opened PayPal.Me in a new window pre-filled for your $${data.amount} USD transfer.`);
-            window.location.href = '/Account/Orders';
-          }
-        } else {
-          alert('Error initializing PayPal transfer: ' + (data.message || 'Server error'));
-          if (btn) {
-            btn.disabled = false;
-            btn.innerHTML = `<i class="fa-brands fa-paypal" style="font-size:22px; color:#003087;"></i> Pay with PayPal ($${currentCartTotal.toLocaleString()} USD)`;
-          }
-        }
-      } catch (err) {
-        console.error('PayPal.Me Checkout Error:', err);
-        alert('An error occurred. Please try again.');
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = `<i class="fa-brands fa-paypal" style="font-size:22px; color:#003087;"></i> Pay with PayPal ($${currentCartTotal.toLocaleString()} USD)`;
-        }
-      }
-    }
-
     function getShippingAddressData() {
       const nameEl = document.getElementById('shipFullName');
       const phoneEl = document.getElementById('shipPhone');
@@ -943,14 +797,19 @@
           .catch(err => {
             hidePaymentProcessing();
             console.error('PayPal Verify Error:', err);
-            alert('Payment received. Order is being processed under Order ID: ' + data.orderID);
+            alert('Verification Error: Unable to verify payment with PayPal. Please check your account or contact support.');
           });
+        },
+
+        onCancel: function(data) {
+          hidePaymentProcessing();
+          alert('PayPal checkout was cancelled. Your items remain in your cart.');
         },
 
         onError: function(err) {
           hidePaymentProcessing();
           console.error('PayPal Checkout Error:', err);
-          alert('An error occurred during PayPal checkout. Please ensure all shipping details are entered and try again.');
+          alert('An error occurred during PayPal checkout. Please ensure your shipping details are entered and try again.');
         }
       }).render('#paypal-button-container');
     }

@@ -24,14 +24,14 @@ namespace SAT1.BAL
             ? "https://api-m.paypal.com"
             : "https://api-m.sandbox.paypal.com";
 
-        // Fetch OAuth2 Access Token from PayPal with graceful sandbox simulation fallback
+        // Fetch OAuth2 Access Token from PayPal
         public async Task<string?> GetAccessTokenAsync()
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(ClientSecret) || ClientSecret.Contains("YOUR_PAYPAL") || ClientId == "sb")
+                if (string.IsNullOrWhiteSpace(ClientSecret) || string.IsNullOrWhiteSpace(ClientId))
                 {
-                    return null; // Indicates sandbox simulation mode
+                    return null;
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/v1/oauth2/token");
@@ -61,10 +61,7 @@ namespace SAT1.BAL
             var token = await GetAccessTokenAsync();
             if (string.IsNullOrEmpty(token))
             {
-                // Fallback simulation order for sandbox development when PayPal keys are placeholder
-                var mockOrderId = "SANDBOX-PAYPAL-" + Guid.NewGuid().ToString("N").Substring(0, 12).ToUpper();
-                var mockApproveUrl = $"https://www.sandbox.paypal.com/checkoutnow?token={mockOrderId}";
-                return (mockOrderId, mockApproveUrl);
+                throw new InvalidOperationException("PayPal authentication failed. Please configure valid PayPal ClientId and ClientSecret in configuration.");
             }
 
             var request = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/v2/checkout/orders");
@@ -125,15 +122,10 @@ namespace SAT1.BAL
         // 2. Get Order Details from PayPal Server (Verifies actual captured status and amount)
         public async Task<(string status, decimal capturedAmountUSD, string payerEmail, string payerName)> GetOrderDetailsAsync(string payPalOrderId)
         {
-            if (payPalOrderId.StartsWith("SANDBOX-") || payPalOrderId.StartsWith("MOCK-"))
-            {
-                return ("COMPLETED", 0m, "sandbox-buyer@satjewels.com", "SAT VIP Buyer");
-            }
-
             var token = await GetAccessTokenAsync();
             if (string.IsNullOrEmpty(token))
             {
-                return ("COMPLETED", 0m, "client@satjewels.com", "SAT Verified Client");
+                throw new InvalidOperationException("PayPal authentication failed. Cannot verify payment without valid access token.");
             }
 
             var request = new HttpRequestMessage(HttpMethod.Get, $"{BaseUrl}/v2/checkout/orders/{payPalOrderId}");
@@ -144,16 +136,30 @@ namespace SAT1.BAL
 
             if (!response.IsSuccessStatusCode)
             {
-                if (Mode.Equals("Sandbox", StringComparison.OrdinalIgnoreCase))
-                {
-                    return ("COMPLETED", 0m, "client@satjewels.com", "SAT Verified Client");
-                }
                 throw new Exception($"PayPal Get Order Failed: {response.StatusCode} - {responseJson}");
             }
 
             using var doc = JsonDocument.Parse(responseJson);
             var root = doc.RootElement;
             var status = root.GetProperty("status").GetString() ?? "UNKNOWN";
+
+            // If order was approved by customer on PayPal, capture the funds
+            if (status.Equals("APPROVED", StringComparison.OrdinalIgnoreCase))
+            {
+                var captureReq = new HttpRequestMessage(HttpMethod.Post, $"{BaseUrl}/v2/checkout/orders/{payPalOrderId}/capture");
+                captureReq.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                captureReq.Content = new StringContent("{}", Encoding.UTF8, "application/json");
+
+                var captureRes = await _httpClient.SendAsync(captureReq);
+                var captureJson = await captureRes.Content.ReadAsStringAsync();
+
+                if (captureRes.IsSuccessStatusCode)
+                {
+                    using var capDoc = JsonDocument.Parse(captureJson);
+                    root = capDoc.RootElement.Clone();
+                    status = root.GetProperty("status").GetString() ?? "UNKNOWN";
+                }
+            }
 
             decimal capturedAmount = 0m;
             if (root.TryGetProperty("purchase_units", out var units) && units.ValueKind == JsonValueKind.Array && units.GetArrayLength() > 0)
@@ -197,8 +203,7 @@ namespace SAT1.BAL
             var webhookId = _config["PayPal:WebhookId"];
             if (string.IsNullOrEmpty(webhookId))
             {
-                // In Sandbox testing if WebhookId not configured yet, validate structure
-                return true;
+                return false;
             }
 
             try
