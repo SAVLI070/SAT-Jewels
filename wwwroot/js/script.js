@@ -437,20 +437,10 @@ function processPayment(method) {
   closeCheckoutModal();
 }
 
-// 9. CLIENT PORTAL AUTHENTICATION & LOGIN MODAL
+// 9. CLIENT PORTAL AUTHENTICATION
 function openClientPortalLogin(e) {
   if (e) e.preventDefault();
-  
-  if (isAdminLoggedIn) {
-    openFbAdminPortal();
-  } else {
-    const loginModal = document.getElementById('loginModal');
-    if (loginModal) {
-      document.getElementById('loginErrorMsg').style.display = 'none';
-      document.getElementById('adminLoginForm').reset();
-      loginModal.classList.add('show');
-    }
-  }
+  window.location.href = '/Account/SignIn';
 }
 
 function closeLoginModal() {
@@ -459,34 +449,11 @@ function closeLoginModal() {
 }
 
 function handleAdminLogin(e) {
-  e.preventDefault();
-  const user = document.getElementById('loginUser').value.trim();
-  const pass = document.getElementById('loginPass').value.trim();
-  const errEl = document.getElementById('loginErrorMsg');
-
-  if ((user === 'admin' || user.includes('@')) && (pass === 'admin123' || pass === 'admin' || pass === 'sat2026')) {
-    isAdminLoggedIn = true;
-    closeLoginModal();
-    openFbAdminPortal();
-  } else {
-    errEl.textContent = '❌ Invalid Credentials! Use User: admin | Pass: admin123';
-    errEl.style.display = 'block';
-  }
+  if (e) e.preventDefault();
+  window.location.href = '/Account/SignIn';
 }
 
-// 10. FARMBRIDGE-STYLE FULL ADMIN DASHBOARD PORTAL
-function openFbAdminPortal() {
-  const portal = document.getElementById('farmbridgeAdminPortal');
-  if (portal) {
-    refreshFbAdminCatalogTable();
-    portal.classList.add('show');
-  }
-}
-
-function closeFbAdminPortal() {
-  const portal = document.getElementById('farmbridgeAdminPortal');
-  if (portal) portal.classList.remove('show');
-}
+// 10. ATELIER DASHBOARD ACTIONS
 
 function showFbAdminPage(pageName) {
   document.querySelectorAll('.adm-nav-link').forEach(link => link.classList.remove('active'));
@@ -689,9 +656,7 @@ async function deleteAdminItem(category, id) {
 }
 
 function logout() {
-  isAdminLoggedIn = false;
-  closeFbAdminPortal();
-  alert('You have been logged out of SAT Jewel Admin Portal.');
+  window.location.href = '/Account/Logout';
 }
 
 // 11. Mobile Menu Drawer Toggle

@@ -1,0 +1,360 @@
+<!-- Global SAT Jewel Live Search Modal / Overlay -->
+<div class="sat-search-modal-backdrop" id="satSearchModal" onclick="closeSatGlobalSearch(event)">
+  <div class="sat-search-modal-card" onclick="event.stopPropagation()">
+    <div class="sat-search-input-box">
+      <i class="fa-solid fa-magnifying-glass sat-search-input-icon"></i>
+      <input type="text" id="satSearchInput" placeholder="Search engagement rings, lab diamonds, moissanite, bracelets..." oninput="handleSatLiveSearch(this.value)" onkeydown="if(event.key === 'Enter'){ event.preventDefault(); submitSatSearch(this.value); }" autocomplete="off" />
+      <button type="button" class="sat-search-close-btn" onclick="closeSatGlobalSearch(event)" title="Close">&times;</button>
+    </div>
+
+    <!-- Quick Filter Chips -->
+    <div class="sat-search-chips-row">
+      <span class="sat-chip-title">Popular:</span>
+      <button type="button" class="sat-search-chip" onclick="applySearchQuery('Engagement Ring')">Engagement Rings</button>
+      <button type="button" class="sat-search-chip" onclick="applySearchQuery('Round')">Round Cut</button>
+      <button type="button" class="sat-search-chip" onclick="applySearchQuery('Oval')">Oval Cut</button>
+      <button type="button" class="sat-search-chip" onclick="applySearchQuery('Emerald')">Emerald Cut</button>
+      <button type="button" class="sat-search-chip" onclick="applySearchQuery('Moissanite')">Moissanite</button>
+      <button type="button" class="sat-search-chip" onclick="applySearchQuery('Bracelet')">Bracelets</button>
+    </div>
+
+    <!-- Live Auto-complete Search Results Container -->
+    <div class="sat-search-results-wrap" id="satSearchResults">
+      <div class="sat-search-empty-state">
+        <i class="fa-solid fa-gem" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 8px;"></i>
+        <p>Type to search SAT Jewel's fine jewelry collection...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Search Modal Styles */
+  .sat-search-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.78);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: 9999999;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 80px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sat-search-modal-backdrop.open {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .sat-search-modal-card {
+    width: 90%;
+    max-width: 680px;
+    background: #0f172a;
+    border: 1px solid rgba(212, 184, 120, 0.35);
+    border-radius: 18px;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85), 0 0 35px rgba(212, 184, 120, 0.15);
+    overflow: hidden;
+    transform: translateY(-20px) scale(0.97);
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .sat-search-modal-backdrop.open .sat-search-modal-card {
+    transform: translateY(0) scale(1);
+  }
+
+  .sat-search-input-box {
+    display: flex;
+    align-items: center;
+    padding: 18px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(30, 41, 59, 0.5);
+  }
+
+  .sat-search-input-icon {
+    font-size: 1.3rem;
+    color: #d4b270;
+    margin-right: 16px;
+  }
+
+  #satSearchInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 1.05rem;
+    color: #f8fafc;
+    font-family: inherit;
+  }
+
+  #satSearchInput::placeholder {
+    color: #94a3b8;
+  }
+
+  .sat-search-close-btn {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-size: 1.6rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+    transition: color 0.2s;
+  }
+
+  .sat-search-close-btn:hover {
+    color: #f8fafc;
+  }
+
+  .sat-search-chips-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: rgba(15, 23, 42, 0.8);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .sat-chip-title {
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  .sat-search-chip {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #e2e8f0;
+    padding: 5px 12px;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .sat-search-chip:hover {
+    background: rgba(212, 178, 112, 0.2);
+    border-color: #d4b270;
+    color: #f8fafc;
+  }
+
+  .sat-search-results-wrap {
+    max-height: 420px;
+    overflow-y: auto;
+    padding: 16px 20px;
+  }
+
+  .sat-search-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    color: #94a3b8;
+    text-align: center;
+    font-size: 0.95rem;
+  }
+
+  .sat-search-items-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .sat-search-item-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .sat-search-item-card:hover {
+    background: rgba(212, 178, 112, 0.12);
+    border-color: rgba(212, 178, 112, 0.4);
+    transform: translateX(4px);
+  }
+
+  .sat-search-item-img {
+    width: 52px;
+    height: 52px;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+  }
+
+  .sat-search-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .sat-search-item-title {
+    margin: 0 0 3px 0;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #f8fafc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .sat-search-item-cat {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .sat-search-item-price {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #d4b270;
+    margin-left: 12px;
+    white-space: nowrap;
+  }
+
+  .sat-search-view-all {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 11px;
+    background: rgba(212, 184, 120, 0.12);
+    border: 1px dashed rgba(212, 184, 120, 0.4);
+    border-radius: 10px;
+    color: #d4b878;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .sat-search-view-all:hover {
+    background: rgba(212, 184, 120, 0.25);
+    color: #ffffff;
+  }
+</style>
+
+<script>
+  let satSearchDebounceTimer = null;
+
+  function openSatGlobalSearch(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const modal = document.getElementById('satSearchModal');
+    if (modal) {
+      modal.classList.add('open');
+      const input = document.getElementById('satSearchInput');
+      if (input) {
+        input.focus();
+        if (input.value.trim()) {
+          handleSatLiveSearch(input.value);
+        }
+      }
+    }
+  }
+
+  function closeSatGlobalSearch(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const modal = document.getElementById('satSearchModal');
+    if (modal) {
+      modal.classList.remove('open');
+    }
+  }
+
+  function applySearchQuery(query) {
+    const input = document.getElementById('satSearchInput');
+    if (input) {
+      input.value = query;
+      handleSatLiveSearch(query);
+    }
+  }
+
+  function submitSatSearch(query) {
+    const term = (query || '').trim();
+    if (!term) return;
+    closeSatGlobalSearch();
+    window.location.href = '/Product/Category?q=' + encodeURIComponent(term);
+  }
+
+  function handleSatLiveSearch(val) {
+    clearTimeout(satSearchDebounceTimer);
+    const container = document.getElementById('satSearchResults');
+    if (!container) return;
+
+    if (!val || val.trim().length < 2) {
+      container.innerHTML = `
+        <div class="sat-search-empty-state">
+          <i class="fa-solid fa-gem" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 8px;"></i>
+          <p>Type to search SAT Jewel's fine jewelry collection...</p>
+        </div>`;
+      return;
+    }
+
+    satSearchDebounceTimer = setTimeout(async () => {
+      container.innerHTML = `<div class="sat-search-empty-state"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.8rem; color: #d4b270;"></i><p style="margin-top:8px;">Searching fine jewelry collection...</p></div>`;
+      try {
+        const res = await fetch(`/api/CatalogApi/search?q=${encodeURIComponent(val.trim())}`);
+        const data = await res.json();
+
+        if (data.success && data.results && data.results.length > 0) {
+          let html = '<div class="sat-search-items-grid">';
+          data.results.forEach(item => {
+            const price = item.priceUSD ? `$${item.priceUSD.toLocaleString()}` : '$1,299';
+            const img = item.imageUrl || '/assets/categories/cat_engagement_rings.png';
+            html += `
+              <a href="/Product/Details/${item.id}" class="sat-search-item-card">
+                <img src="${img}" alt="${item.name}" class="sat-search-item-img" />
+                <div class="sat-search-item-info">
+                  <h5 class="sat-search-item-title">${item.name}</h5>
+                  <span class="sat-search-item-cat">${item.categoryName || 'Fine Jewelry'}</span>
+                </div>
+                <span class="sat-search-item-price">${price}</span>
+              </a>`;
+          });
+          html += '</div>';
+          html += `
+            <a href="/Product/Category?q=${encodeURIComponent(val.trim())}" class="sat-search-view-all">
+              <i class="fa-solid fa-arrow-right"></i> View all matching products for "${val.trim()}"
+            </a>`;
+          container.innerHTML = html;
+        } else {
+          container.innerHTML = `
+            <div class="sat-search-empty-state">
+              <i class="fa-solid fa-face-frown" style="font-size: 2rem; color: #94a3b8; margin-bottom: 8px;"></i>
+              <p>No products found matching "${val}". Try searching "Ring", "Moissanite", or "Diamond".</p>
+            </div>`;
+        }
+      } catch (err) {
+        container.innerHTML = `<div class="sat-search-empty-state"><p style="color:#ef4444;">Search request failed. Please try again.</p></div>`;
+      }
+    }, 280);
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      openSatGlobalSearch();
+    } else if (e.key === 'Escape') {
+      closeSatGlobalSearch();
+    }
+  });
+</script>

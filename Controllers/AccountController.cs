@@ -9,6 +9,7 @@ using SAT1.Models;
 
 namespace SAT1.Controllers
 {
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class AccountController : Controller
     {
         private readonly AuthBal _authBal;

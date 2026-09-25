@@ -92,6 +92,20 @@ namespace SAT1.Controllers
         }
 
         [HttpGet]
+        public IActionResult ShippingPolicy()
+        {
+            ViewData["Title"] = "Worldwide Insured Shipping Policy — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult TermsOfService()
+        {
+            ViewData["Title"] = "Terms of Service & Atelier Agreement — SAT Jewel";
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult CustomRings()
         {
             ViewData["Title"] = "Design Your Own Custom Engagement Ring — SAT Jewel Sanctuary";

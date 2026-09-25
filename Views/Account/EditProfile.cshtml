@@ -109,9 +109,9 @@
 <button id="btnExpandSidebar" onclick="toggleSidebar()" type="button" class="hidden p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex items-center justify-center transition-colors" title="Open Navigation Menu">
   <span class="material-symbols-outlined text-[22px]">menu</span>
 </button>
-<a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group" href="/">
+<a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group cursor-pointer" href="javascript:void(0)" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }">
 <span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">west</span>
-<span class="">Back to Storefront</span>
+<span class="">Back</span>
 </a>
 </div>
 <div class="flex items-center gap-space-md">
@@ -121,8 +121,9 @@
 <input class="bg-transparent border-none outline-none text-on-surface placeholder:text-on-surface-variant/60 w-full text-xs" placeholder="Search orders, invoices, items..." type="text"/>
 </div>
 </div>
-<a href="/Product/Cart" aria-label="Cart" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-surface-container-high transition-all" role="button">
+<a href="/Product/Cart" aria-label="Cart" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-surface-container-high transition-all relative" role="button" title="Shopping Cart">
 <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+<span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
 </a>
 <div class="pl-space-xs border-l border-outline-variant/40 flex items-center gap-2">
 <div class="w-8 h-8 rounded-full bg-gradient-to-br from-surface-container-highest to-surface-container-low border border-secondary/40 flex items-center justify-center font-headline-sm text-secondary font-bold text-xs ring-1 ring-secondary/40">
@@ -646,6 +647,28 @@
       alert('Profile synced locally.');
     }
   }
+
+  function getCartStorageKey() {
+    const email = '@(email.ToLower().Trim())';
+    if (email) {
+      return 'sat_cart_' + encodeURIComponent(email);
+    }
+    return 'sat_cart_guest';
+  }
+
+  function syncCartBadge() {
+    try {
+      const key = getCartStorageKey();
+      const saved = localStorage.getItem(key);
+      const items = saved ? JSON.parse(saved) : [];
+      const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
+      document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count, .sat-cart-count-badge').forEach(el => {
+        el.textContent = String(count);
+      });
+    } catch (_) {}
+  }
+  document.addEventListener('DOMContentLoaded', syncCartBadge);
+  syncCartBadge();
 </script>
 
 </div></main>

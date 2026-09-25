@@ -170,13 +170,13 @@ namespace SAT1.BAL
                 ProductId = productId.Trim(),
                 ProductName = string.IsNullOrWhiteSpace(productName) ? "Fine Diamond Jewelry" : productName.Trim(),
                 UserId = string.IsNullOrWhiteSpace(userId) ? null : userId.Trim(),
-                CustomerName = customerName.Trim(),
+                CustomerName = System.Net.WebUtility.HtmlEncode(customerName.Trim()),
                 CustomerEmail = cleanEmail,
                 AvatarUrl = avatarUrl,
                 PhotoUrl = photoUrl,
                 Rating = rating,
-                ReviewTitle = reviewTitle.Trim(),
-                ReviewText = reviewText.Trim(),
+                ReviewTitle = System.Net.WebUtility.HtmlEncode(reviewTitle.Trim()),
+                ReviewText = System.Net.WebUtility.HtmlEncode(reviewText.Trim()),
                 IsVerifiedBuyer = isVerified,
                 Status = "Approved", // Auto-approved so customer sees review immediately
                 CreatedAt = DateTime.Now

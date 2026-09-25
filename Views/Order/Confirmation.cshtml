@@ -7,7 +7,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Order Confirmed — SAT Jewel Luxury Sanctuary</title>
   <link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -197,6 +197,12 @@
       <a href="/Account/MyAccount?tab=orders#orders" class="btn-gold">
         <i class="fa-solid fa-box-open"></i> Track in My Account
       </a>
+      @if (order != null)
+      {
+        <a href="/Product/GiaCertificate?orderId=@order.OrderId" target="_blank" class="btn-outline" style="border-color: rgba(251, 191, 36, 0.4); color: #fbbf24;">
+          <i class="fa-solid fa-file-shield"></i> View Digital GIA Certificate
+        </a>
+      }
       <a href="/" class="btn-outline">
         <i class="fa-solid fa-arrow-left"></i> Continue Shopping
       </a>

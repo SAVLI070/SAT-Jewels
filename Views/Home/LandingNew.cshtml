@@ -1436,34 +1436,7 @@
   <partial name="_MegaMenu" />
 
   <!-- Global SAT Jewel Live Search Modal / Overlay -->
-  <div class="sat-search-modal-backdrop" id="satSearchModal" onclick="closeSatGlobalSearch(event)">
-    <div class="sat-search-modal-card" onclick="event.stopPropagation()">
-      <div class="sat-search-input-box">
-        <i class="fa-solid fa-magnifying-glass sat-search-input-icon"></i>
-        <input type="text" id="satSearchInput" placeholder="Search engagement rings, lab diamonds, moissanite, bracelets..." oninput="handleSatLiveSearch(this.value)" autocomplete="off" />
-        <button type="button" class="sat-search-close-btn" onclick="closeSatGlobalSearch(event)">&times;</button>
-      </div>
-
-      <!-- Quick Filter Chips -->
-      <div class="sat-search-chips-row">
-        <span class="sat-chip-title">Popular:</span>
-        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Engagement Ring')">Engagement Rings</button>
-        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Round')">Round Cut</button>
-        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Oval')">Oval Cut</button>
-        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Emerald')">Emerald Cut</button>
-        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Moissanite')">Moissanite</button>
-        <button type="button" class="sat-search-chip" onclick="applySearchQuery('Bracelet')">Bracelets</button>
-      </div>
-
-      <!-- Live Auto-complete Search Results Container -->
-      <div class="sat-search-results-wrap" id="satSearchResults">
-        <div class="sat-search-empty-state">
-          <i class="fa-solid fa-gem" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 8px;"></i>
-          <p>Type to search SAT Jewel's fine jewelry collection...</p>
-        </div>
-      </div>
-    </div>
-  </div>
+  <partial name="_SearchModal" />
 
   <!-- Global Floating SAT Jewel WhatsApp Chat Widget -->
   <div class="sat-floating-whatsapp-wrap" id="satWhatsappWidget">
@@ -1624,91 +1597,8 @@
     })();
   </script>
 
-  <!-- Global Live Search & WhatsApp Floating Controller Scripts -->
+  <!-- WhatsApp Floating Controller Scripts -->
   <script>
-    let satSearchDebounceTimer = null;
-
-    function openSatGlobalSearch(e) {
-      if (e) e.preventDefault();
-      const modal = document.getElementById('satSearchModal');
-      if (modal) {
-        modal.classList.add('open');
-        const input = document.getElementById('satSearchInput');
-        if (input) {
-          input.focus();
-          if (input.value.trim()) {
-            handleSatLiveSearch(input.value);
-          }
-        }
-      }
-    }
-
-    function closeSatGlobalSearch(e) {
-      if (e) e.preventDefault();
-      const modal = document.getElementById('satSearchModal');
-      if (modal) {
-        modal.classList.remove('open');
-      }
-    }
-
-    function applySearchQuery(query) {
-      const input = document.getElementById('satSearchInput');
-      if (input) {
-        input.value = query;
-        handleSatLiveSearch(query);
-      }
-    }
-
-    function handleSatLiveSearch(val) {
-      clearTimeout(satSearchDebounceTimer);
-      const container = document.getElementById('satSearchResults');
-      if (!container) return;
-
-      if (!val || val.trim().length < 2) {
-        container.innerHTML = `
-          <div class="sat-search-empty-state">
-            <i class="fa-solid fa-gem" style="font-size: 2rem; color: #cbd5e1; margin-bottom: 8px;"></i>
-            <p>Type to search SAT Jewel's fine jewelry collection...</p>
-          </div>`;
-        return;
-      }
-
-      satSearchDebounceTimer = setTimeout(async () => {
-        container.innerHTML = `<div class="sat-search-empty-state"><i class="fa-solid fa-spinner fa-spin" style="font-size: 1.8rem; color: #d4b270;"></i><p>Searching collections...</p></div>`;
-        try {
-          const res = await fetch(`/api/CatalogApi/search?q=${encodeURIComponent(val.trim())}`);
-          const data = await res.json();
-
-          if (data.success && data.results && data.results.length > 0) {
-            let html = '<div class="sat-search-items-grid">';
-            data.results.forEach(item => {
-              const price = item.priceUSD ? `$${item.priceUSD.toLocaleString()}` : '$1,299';
-              const img = item.imageUrl || '/assets/categories/cat_engagement_rings.png';
-              html += `
-                <a href="/Product/Details/${item.id}" class="sat-search-item-card">
-                  <img src="${img}" alt="${item.name}" class="sat-search-item-img" />
-                  <div class="sat-search-item-info">
-                    <span class="sat-search-item-title">${item.name}</span>
-                    <span class="sat-search-item-meta">${item.categoryName || 'Fine Jewelry'} · ${item.gemstoneType || 'Diamond'}</span>
-                    <span class="sat-search-item-price">${price}</span>
-                  </div>
-                </a>`;
-            });
-            html += '</div>';
-            container.innerHTML = html;
-          } else {
-            container.innerHTML = `
-              <div class="sat-search-empty-state">
-                <i class="fa-regular fa-face-frown" style="font-size: 2rem; color: #94a3b8; margin-bottom: 8px;"></i>
-                <p>No fine jewelry found matching "<strong>${val}</strong>". Try another keyword or shape.</p>
-              </div>`;
-          }
-        } catch (err) {
-          container.innerHTML = `<div class="sat-search-empty-state"><p>Unable to retrieve search results. Please try again.</p></div>`;
-        }
-      }, 250);
-    }
-
     function dismissWaWidget(e) {
       if (e) {
         e.preventDefault();
@@ -1717,13 +1607,6 @@
       const badge = document.querySelector('.sat-wa-badge-popup');
       if (badge) badge.style.display = 'none';
     }
-
-    // Keyboard ESC listener to close search
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        closeSatGlobalSearch();
-      }
-    });
 
     // =========================================================================
     // SCROLLSPY & SMOOTH SCROLL NAVBAR CONTROLLER

@@ -25,10 +25,7 @@ from psycopg2.extras import execute_values
 DESKTOP_IMAGE_PATH = "/Users/sahil/Desktop/Image"
 WWWROOT_PRODUCTS_PATH = "/Users/sahil/Desktop/SAT1/wwwroot/assets/products"
 
-DEFAULT_CONN_STRING = (
-    "host=ep-soft-sound-azkeypgg-pooler.c-3.ap-southeast-1.aws.neon.tech "
-    "port=5432 dbname=neondb user=neondb_owner password=npg_yX8TV4rmHEqR sslmode=require"
-)
+DEFAULT_CONN_STRING = os.environ.get("DATABASE_URL", "")
 
 # 1. Master Categories Mapping
 CATEGORIES = [

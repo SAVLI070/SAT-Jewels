@@ -65,13 +65,15 @@ namespace SAT1.BAL
                     if (string.IsNullOrWhiteSpace(item.ProductId)) continue;
                     var prod = await _orderRepo.GetProductByIdAsync(item.ProductId);
                     int qty = Math.Clamp(item.Quantity, 1, 10);
-                    bool isMoiss = string.Equals(item.StoneType, "Moissanite", StringComparison.OrdinalIgnoreCase);
-                    decimal unitPrice = prod != null 
-                        ? (isMoiss ? prod.MoissanitePrice : prod.PriceUSD) 
-                        : (item.PriceUSD > 0 ? item.PriceUSD : 1200m);
+                    if (prod == null)
+                    {
+                        throw new InvalidOperationException($"SECURITY ALERT: Product '{item.ProductId}' not found in database.");
+                    }
+                    bool itemIsMoiss = string.Equals(item.StoneType, "Moissanite", StringComparison.OrdinalIgnoreCase);
+                    decimal unitPrice = itemIsMoiss ? prod.MoissanitePrice : prod.PriceUSD;
 
                     totalAmountUSD += (unitPrice * qty);
-                    var stoneLabel = isMoiss ? "Moissanite" : "Lab Grown Diamond";
+                    var stoneLabel = itemIsMoiss ? "Moissanite" : "Lab Grown Diamond";
                     itemDescriptions.Add($"{item.Name ?? prod?.Name ?? "Fine Jewelry"} ({stoneLabel}, Qty: {qty})");
                 }
             }
@@ -196,13 +198,15 @@ namespace SAT1.BAL
                     if (string.IsNullOrWhiteSpace(item.ProductId)) continue;
                     var prod = await _orderRepo.GetProductByIdAsync(item.ProductId);
                     int qty = Math.Clamp(item.Quantity, 1, 10);
-                    bool isMoiss = string.Equals(item.StoneType, "Moissanite", StringComparison.OrdinalIgnoreCase);
-                    decimal unitPrice = prod != null 
-                        ? (isMoiss ? prod.MoissanitePrice : prod.PriceUSD) 
-                        : (item.PriceUSD > 0 ? item.PriceUSD : 1200m);
+                    if (prod == null)
+                    {
+                        throw new InvalidOperationException($"SECURITY ALERT: Product '{item.ProductId}' not found in database.");
+                    }
+                    bool itemIsMoiss = string.Equals(item.StoneType, "Moissanite", StringComparison.OrdinalIgnoreCase);
+                    decimal unitPrice = itemIsMoiss ? prod.MoissanitePrice : prod.PriceUSD;
 
                     totalAmountUSD += (unitPrice * qty);
-                    var stoneLabel = isMoiss ? "Moissanite" : "Lab Grown Diamond";
+                    var stoneLabel = itemIsMoiss ? "Moissanite" : "Lab Grown Diamond";
                     itemDescriptions.Add($"{item.Name ?? prod?.Name ?? "Fine Jewelry"} ({stoneLabel}, Qty: {qty})");
                 }
             }

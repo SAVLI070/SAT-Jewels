@@ -78,6 +78,42 @@ namespace SAT1.Controllers
                 order = await _trackingRepo.GetOrderByOrderIdAsync(orderId);
             }
 
+            if (order == null)
+            {
+                return RedirectToAction("MyAccount", "Account");
+            }
+
+            // IDOR Protection: Verify caller is owner or admin; otherwise mask customer PII
+            bool isAuthorized = false;
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var authUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                var authEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+                var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+                if (userRole == "Admin" ||
+                    (!string.IsNullOrEmpty(authUserId) && order.UserId == authUserId) ||
+                    (!string.IsNullOrEmpty(authEmail) && order.CustomerEmail.Equals(authEmail, System.StringComparison.OrdinalIgnoreCase)))
+                {
+                    isAuthorized = true;
+                }
+            }
+
+            if (!isAuthorized)
+            {
+                // Mask sensitive customer PII to prevent data harvesting via guessed Order IDs
+                order.ShippingStreet = "Confidential Delivery Address";
+                if (!string.IsNullOrWhiteSpace(order.ShippingPhone) && order.ShippingPhone.Length >= 4)
+                {
+                    order.ShippingPhone = "***-***-" + order.ShippingPhone.Substring(order.ShippingPhone.Length - 4);
+                }
+                if (!string.IsNullOrEmpty(order.CustomerEmail) && order.CustomerEmail.Contains('@'))
+                {
+                    var parts = order.CustomerEmail.Split('@');
+                    order.CustomerEmail = (parts[0].Length > 2 ? parts[0].Substring(0, 2) : "*") + "***@" + parts[1];
+                }
+            }
+
             return View(order);
         }
     }

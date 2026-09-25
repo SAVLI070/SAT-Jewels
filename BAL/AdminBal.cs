@@ -527,6 +527,32 @@ namespace SAT1.BAL
         // ==========================================
         // 2. ORDERS & LIVE TRACKING MANAGEMENT
         // ==========================================
+        public class OrderStatusCountsDto
+        {
+            public int TotalCount { get; set; }
+            public int PaidCount { get; set; }
+            public int DispatchedCount { get; set; }
+            public int InTransitCount { get; set; }
+            public int DeliveredCount { get; set; }
+        }
+
+        public async Task<OrderStatusCountsDto> GetOrderStatusCountsAsync()
+        {
+            var statusSummaries = await _context.Orders
+                .AsNoTracking()
+                .Select(o => new { o.OrderStatus, o.CurrentTrackingStatus })
+                .ToListAsync();
+
+            return new OrderStatusCountsDto
+            {
+                TotalCount = statusSummaries.Count,
+                PaidCount = statusSummaries.Count(o => o.OrderStatus.Contains("Paid", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Completed", StringComparison.OrdinalIgnoreCase)),
+                DispatchedCount = statusSummaries.Count(o => o.OrderStatus.Contains("Dispatched", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Booked", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Shipped", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && (o.CurrentTrackingStatus.Contains("Dispatched", StringComparison.OrdinalIgnoreCase) || o.CurrentTrackingStatus.Contains("Booked", StringComparison.OrdinalIgnoreCase) || o.CurrentTrackingStatus.Contains("Shipped", StringComparison.OrdinalIgnoreCase)))),
+                InTransitCount = statusSummaries.Count(o => o.OrderStatus.Contains("Transit", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.Contains("Transit", StringComparison.OrdinalIgnoreCase))),
+                DeliveredCount = statusSummaries.Count(o => o.OrderStatus.Contains("Delivered", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.Contains("Delivered", StringComparison.OrdinalIgnoreCase)))
+            };
+        }
+
         public async Task<List<Order>> GetAllOrdersWithTrackingAsync(string? statusFilter = null, string? search = null)
         {
             var query = _context.Orders
@@ -581,6 +607,70 @@ namespace SAT1.BAL
             }
 
             return await query.OrderByDescending(o => o.CreatedAt).ToListAsync();
+        }
+
+        public async Task<(List<Order> Orders, int TotalCount)> GetOrdersPagedAsync(string? statusFilter = null, string? search = null, int page = 1, int pageSize = 15)
+        {
+            var query = _context.Orders
+                .Include(o => o.TrackingHistory)
+                .AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(statusFilter) && !statusFilter.Equals("all", StringComparison.OrdinalIgnoreCase))
+            {
+                var cleanStatus = statusFilter.Trim().ToLower();
+                if (cleanStatus == "paid")
+                {
+                    query = query.Where(o => 
+                        o.OrderStatus.ToLower().Contains("paid") || 
+                        o.OrderStatus.ToLower().Contains("completed"));
+                }
+                else if (cleanStatus == "shipmentbooked" || cleanStatus == "dispatched" || cleanStatus == "shipped")
+                {
+                    query = query.Where(o => 
+                        o.OrderStatus.ToLower().Contains("dispatched") || 
+                        o.OrderStatus.ToLower().Contains("booked") ||
+                        o.OrderStatus.ToLower().Contains("shipped") ||
+                        (o.CurrentTrackingStatus != null && (o.CurrentTrackingStatus.ToLower().Contains("dispatched") || o.CurrentTrackingStatus.ToLower().Contains("booked") || o.CurrentTrackingStatus.ToLower().Contains("shipped"))));
+                }
+                else if (cleanStatus == "intransit" || cleanStatus == "in transit")
+                {
+                    query = query.Where(o => 
+                        o.OrderStatus.ToLower().Contains("transit") || 
+                        (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.ToLower().Contains("transit")));
+                }
+                else if (cleanStatus == "delivered")
+                {
+                    query = query.Where(o => 
+                        o.OrderStatus.ToLower().Contains("delivered") || 
+                        (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.ToLower().Contains("delivered")));
+                }
+                else
+                {
+                    query = query.Where(o => 
+                        o.OrderStatus.ToLower() == cleanStatus || 
+                        (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.ToLower() == cleanStatus));
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var q = search.Trim().ToLower();
+                query = query.Where(o => 
+                    o.OrderNumber.ToLower().Contains(q) || 
+                    o.CustomerEmail.ToLower().Contains(q) || 
+                    o.ShippingFullName.ToLower().Contains(q) || 
+                    (o.TrackingNumber != null && o.TrackingNumber.ToLower().Contains(q)) ||
+                    o.OrderId.ToLower().Contains(q));
+            }
+
+            int totalCount = await query.CountAsync();
+            var pagedOrders = await query
+                .OrderByDescending(o => o.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (pagedOrders, totalCount);
         }
 
         public async Task<Order?> GetOrderDetailsWithTimelineAsync(string orderId)
@@ -679,6 +769,14 @@ namespace SAT1.BAL
             }
 
             return result.OrderByDescending(u => u.LifetimeSpendUSD).ThenByDescending(u => u.TotalOrders).ToList();
+        }
+
+        public async Task<(List<UserWithStatsDto> Users, int TotalCount)> GetUsersPagedAsync(int page = 1, int pageSize = 15)
+        {
+            var allUsers = await GetAllUsersWithStatsAsync();
+            int totalCount = allUsers.Count;
+            var paged = allUsers.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+            return (paged, totalCount);
         }
 
         public async Task<bool> DeleteProductAsync(string id)

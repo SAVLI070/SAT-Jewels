@@ -100,7 +100,7 @@
 <body>
   <div class="ord-container">
     <div style="margin-bottom: 20px;">
-      <a href="/" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back to Storefront</a>
+      <a href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back</a>
     </div>
     <div class="ord-card">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;">
@@ -141,7 +141,7 @@
                   <td>
                     <div>@o.ItemName</div>
                     <div style="display: flex; align-items: center; gap: 10px; margin-top: 6px; flex-wrap: wrap;">
-                      <a href="/Product/GiaCertificate?productId=@o.OrderId" target="_blank" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: #fbbf24; text-decoration: none; padding: 3px 8px; border-radius: 4px; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); font-weight: 600;">
+                      <a href="/Product/GiaCertificate?orderId=@o.OrderId" target="_blank" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: #fbbf24; text-decoration: none; padding: 3px 8px; border-radius: 4px; background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); font-weight: 600;">
                         <i class="fa-solid fa-file-shield"></i> Digital GIA Certificate <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 9px;"></i>
                       </a>
                       @if (o.IncludesPhysicalGiaCert)

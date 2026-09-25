@@ -254,9 +254,9 @@
         <span class="material-symbols-outlined text-[22px]">menu</span>
       </button>
 
-      <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group" href="/">
+      <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group cursor-pointer" href="javascript:void(0)" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }">
         <span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">west</span>
-        <span>Back to Storefront</span>
+        <span>Back</span>
       </a>
     </div>
 
@@ -267,8 +267,9 @@
           <input class="bg-transparent border-none outline-none text-on-surface placeholder:text-on-surface-variant/60 w-full text-xs" placeholder="Search orders, items..." type="text">
         </div>
       </div>
-      <a href="/Product/Cart" aria-label="Cart" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-surface-container-high transition-all relative" role="button">
+      <a href="/Product/Cart" aria-label="Cart" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-surface-container-high transition-all relative" role="button" title="Shopping Cart">
         <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+        <span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
       </a>
       <div class="pl-space-xs border-l border-outline-variant/40 flex items-center gap-2">
         <div class="w-8 h-8 rounded-full bg-gradient-to-br from-surface-container-highest to-surface-container-low border border-secondary/40 flex items-center justify-center font-headline-sm text-secondary font-bold text-xs ring-1 ring-secondary/40">
@@ -393,6 +394,23 @@
               ? order.EstimatedDeliveryDate.Value.ToString("MMM dd") 
               : order.CreatedAt.AddDays(14).ToString("MMM dd");
 
+            string cleanTitle = order.ItemName;
+            if (cleanTitle.Contains("(")) { cleanTitle = cleanTitle.Split('(')[0].Trim(); }
+            if (cleanTitle.Contains("[")) { cleanTitle = cleanTitle.Split('[')[0].Trim(); }
+            if (string.IsNullOrWhiteSpace(cleanTitle)) { cleanTitle = order.ItemName; }
+
+            string specSubtitle = "Bespoke Fine Jewelry • Includes GIA/IGI Certification";
+            if (order.ItemName.Contains("(") && order.ItemName.Contains(")"))
+            {
+                int sIdx = order.ItemName.IndexOf('(');
+                int eIdx = order.ItemName.IndexOf(')');
+                if (eIdx > sIdx) { specSubtitle = order.ItemName.Substring(sIdx + 1, eIdx - sIdx - 1); }
+            }
+            if (order.IncludesPhysicalGiaCert)
+            {
+                specSubtitle += " • Physical GIA Hardcopy";
+            }
+
             if (i == 1)
             {
               @:<div class="pt-2">
@@ -413,91 +431,70 @@
                     <span id="iconTogglePastOrders" class="material-symbols-outlined text-[22px] transition-transform duration-300">expand_more</span>
                   </div>
                 </button>
-              @:<div id="pastOrdersContainer" class="hidden space-y-space-md transition-all duration-300">
+              @:<div id="pastOrdersContainer" class="hidden space-y-3 transition-all duration-300">
             }
 
-            <article class="rounded-2xl bg-surface-container-lowest/90 border @(isDelivered ? "border-outline-variant/25 hover:border-secondary/35" : "border-secondary/30") p-space-lg md:p-space-xl shadow-lg relative overflow-hidden space-y-space-lg">
-              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm border-b border-outline-variant/20 pb-space-md">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="font-label-caps text-label-caps font-bold tracking-wider text-secondary">ORDER #@(order.OrderNumber ?? order.OrderId)</span>
-                    <span class="text-outline text-xs">•</span>
-                    <span class="font-body-sm text-body-sm text-on-surface-variant">Placed @order.CreatedAt.ToString("MMM dd, yyyy")</span>
-                  </div>
-                  <h3 class="font-headline-md text-headline-md text-on-surface mt-1">@order.ItemName</h3>
-                  <p class="font-body-sm text-body-sm text-on-surface-variant">Bespoke Jewelry Commission • Includes GIA/IGI Certification &amp; Presentation Box</p>
+            <article class="rounded-2xl bg-surface-container-lowest/90 border border-outline-variant/30 hover:border-secondary/40 p-4 sm:p-5 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-md group">
+              <!-- Left Side: Thumbnail & Product Specs -->
+              <div class="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1">
+                <div onclick="openOrderModal('@order.OrderId')" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl bg-surface-container overflow-hidden border border-outline-variant/30 flex-shrink-0 cursor-pointer relative group-hover:border-secondary/50 transition-all" title="Click to view full order details">
+                  <img class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" alt="@order.ItemName" src="/assets/ring_1.jpg">
                 </div>
-                <div class="flex flex-col sm:items-end">
-                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full @(isDelivered ? "bg-tertiary-container/30 border border-tertiary/40 text-tertiary" : "bg-secondary-container/40 border border-secondary/40 text-secondary") font-label-caps text-label-caps font-semibold">
-                    @if (!isDelivered && !isCancelled)
+                <div class="min-w-0 flex-1 space-y-1">
+                  <!-- Status + Order # Line -->
+                  <div class="flex items-center gap-2 flex-wrap">
+                    @if (isDelivered)
                     {
-                      <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                      <span class="inline-flex items-center gap-1 text-emerald-400 font-bold font-label-caps text-[11px] sm:text-[12px] tracking-wider uppercase">
+                        <span class="material-symbols-outlined text-[15px]">check_circle</span>
+                        DELIVERED @order.CreatedAt.ToString("MMM dd, yyyy").ToUpper()
+                      </span>
                     }
-                    else if (isDelivered)
+                    else if (isCancelled)
                     {
-                      <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                      <span class="inline-flex items-center gap-1 text-rose-400 font-bold font-label-caps text-[11px] sm:text-[12px] tracking-wider uppercase">
+                        <span class="material-symbols-outlined text-[15px]">cancel</span>
+                        CANCELLED
+                      </span>
                     }
-                    @order.OrderStatus • @(isDelivered ? "Delivered" : $"Est. Delivery {estDelivery}")
-                  </span>
-                  <span class="font-headline-sm text-headline-sm text-secondary font-bold mt-2">$@order.TotalAmountUSD.ToString("N2") USD</span>
+                    else
+                    {
+                      <span class="inline-flex items-center gap-1.5 text-amber-400 font-bold font-label-caps text-[11px] sm:text-[12px] tracking-wider uppercase">
+                        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse inline-block"></span>
+                        PENDING • EST. DELIVERY @estDelivery.ToUpper()
+                      </span>
+                    }
+                    <span class="text-outline/50 text-xs">•</span>
+                    <button type="button" onclick="openOrderModal('@order.OrderId')" class="text-on-surface-variant hover:text-secondary font-mono text-[11px] sm:text-[12px] tracking-wider transition-colors hover:underline cursor-pointer inline-flex items-center gap-1" title="Click to view all order details">
+                      Order #@(order.OrderNumber ?? order.OrderId)
+                      <span class="material-symbols-outlined text-[13px] opacity-70">open_in_new</span>
+                    </button>
+                  </div>
+
+                  <!-- Item Title -->
+                  <h3 onclick="openOrderModal('@order.OrderId')" class="font-serif text-[17px] sm:text-[19px] text-on-surface hover:text-secondary transition-colors cursor-pointer truncate font-medium block leading-snug" title="@order.ItemName">
+                    @cleanTitle
+                  </h3>
+
+                  <!-- Spec & Price Subtitle -->
+                  <p class="font-body-sm text-xs sm:text-[13px] text-on-surface-variant truncate">
+                    @specSubtitle • <span class="text-secondary font-semibold">$@order.TotalAmountUSD.ToString("N2") USD</span>
+                  </p>
                 </div>
               </div>
 
-              <!-- Product Preview & Progress Tracker -->
-              <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-center">
-                <div class="lg:col-span-3 flex items-center gap-4">
-                  <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-surface-container overflow-hidden border border-outline-variant/30 flex-shrink-0">
-                    <img class="w-full h-full object-cover" alt="@order.ItemName" src="/assets/ring_1.jpg">
-                  </div>
-                  <div class="space-y-1">
-                    <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-caps text-label-caps">GIA #@(order.OrderId.Length > 10 ? order.OrderId.Substring(0, 10).ToUpper() : order.OrderId)</span>
-                    <p class="font-label-sm text-label-sm text-tertiary flex items-center gap-1">
-                      <span class="material-symbols-outlined text-[14px]">verified</span> Insured Delivery
-                    </p>
-                    <p class="font-label-caps text-label-caps text-outline">Signature Required</p>
-                  </div>
-                </div>
+              <!-- Right Side: Action Buttons matching Image 2 -->
+              <div class="flex items-center gap-2.5 flex-shrink-0 flex-wrap sm:flex-nowrap pt-2 md:pt-0 border-t md:border-t-0 border-outline-variant/20">
+                <!-- View Invoice Button -->
+                <button type="button" onclick="openOrderModal('@order.OrderId')" class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-surface-container/70 hover:bg-surface-container-high border border-outline-variant/30 hover:border-secondary/40 text-on-surface font-label-md text-xs sm:text-sm transition-all cursor-pointer shadow-sm group/btn">
+                  <span class="material-symbols-outlined text-[16px] text-on-surface-variant group-hover/btn:text-secondary transition-colors">receipt_long</span>
+                  <span>View Invoice</span>
+                </button>
 
-                @if (!isDelivered && !isCancelled)
-                {
-                  <div class="lg:col-span-9 p-space-md rounded-xl bg-surface-container-low/80 border border-outline-variant/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-secondary-container/40 border border-secondary/40 text-secondary flex items-center justify-center flex-shrink-0">
-                        <span class="material-symbols-outlined text-[20px]">diamond</span>
-                      </div>
-                      <div>
-                        <p class="font-label-md text-label-md text-on-surface font-semibold">Commission Status: <span class="text-secondary">@order.OrderStatus</span></p>
-                        <p class="font-body-sm text-body-sm text-on-surface-variant">Insured Handcrafted Delivery • Includes Physical GIA/IGI Certification</p>
-                      </div>
-                    </div>
-                    <div class="text-left sm:text-right sm:border-l sm:border-outline-variant/30 sm:pl-4">
-                      <span class="font-label-caps text-label-caps uppercase text-outline block">Estimated Completion</span>
-                      <span class="font-label-md text-label-md text-secondary font-bold">@estDelivery</span>
-                    </div>
-                  </div>
-                }
-                else
-                {
-                  <div class="lg:col-span-9 flex items-center justify-end">
-                    <span class="px-4 py-2 rounded-xl bg-surface-container text-on-surface-variant font-label-md flex items-center gap-2">
-                      <span class="material-symbols-outlined text-tertiary text-[20px]">task_alt</span>
-                      Fulfilled &amp; Delivered with GIA physical hardcopy certificate
-                    </span>
-                  </div>
-                }
-              </div>
-
-              <!-- Order Actions -->
-              <div class="flex items-center justify-between gap-space-sm pt-space-sm border-t border-outline-variant/20 flex-wrap">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <button onclick="promptProductReview('@order.OrderId', '@order.ItemName', '/assets/ring_1.jpg')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-secondary to-primary-container text-on-primary font-label-md text-label-md font-semibold hover:brightness-105 transition-all shadow-[0_0_12px_rgba(212,175,55,0.25)]" type="button">
-                    <span class="material-symbols-outlined text-[16px]">rate_review</span>
-                    <span>Write a Review</span>
-                  </button>
-                </div>
-                <button onclick="switchAccountTab('contact', event)" class="text-secondary hover:underline font-label-sm text-label-sm flex items-center gap-1" type="button">
-                  <span class="material-symbols-outlined text-[16px]">help</span>
-                  <span>Need help with this piece?</span>
+                <!-- Ring Care / Spa Button -->
+                <button type="button" onclick="openRingCareModal()" class="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-xl bg-surface-container/70 hover:bg-surface-container-high border border-outline-variant/30 hover:border-secondary/40 text-on-surface font-label-md text-xs sm:text-sm transition-all cursor-pointer shadow-sm group/btn">
+                  <span class="material-symbols-outlined text-[16px] text-secondary">cleaning_services</span>
+                  <span>Ring Care / Spa</span>
                 </button>
               </div>
             </article>
@@ -855,6 +852,220 @@
   </div>
 </div>
 
+<!-- DYNAMIC ORDER DETAILS & INVOICE MODAL -->
+<div id="orderDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-6" style="display: none;">
+  <div class="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl bg-surface-container-lowest border border-secondary/40 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30 bg-surface-container-low/80 flex-shrink-0">
+      <div class="flex items-center gap-2.5">
+        <span class="material-symbols-outlined text-secondary text-[24px]">verified</span>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 id="modalOrderNumber" class="font-headline-sm text-headline-sm text-on-surface font-semibold font-mono">Order #SAT-0000</h3>
+            <span id="modalOrderStatusBadge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wider uppercase bg-emerald-950 text-emerald-400 border border-emerald-500/30">Delivered</span>
+          </div>
+          <p id="modalOrderDate" class="text-xs text-on-surface-variant font-body-sm mt-0.5">Placed on Sep 25, 2026</p>
+        </div>
+      </div>
+      <button onclick="closeOrderModal()" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-outline hover:text-on-surface flex items-center justify-center transition-colors" title="Close">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <!-- Modal Scrollable Content (Printable Area) -->
+    <div id="modalOrderPrintableArea" class="p-6 overflow-y-auto space-y-6 flex-1 text-on-surface">
+      <!-- 1. Product Item Details Card -->
+      <div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/20 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <img id="modalItemImg" src="/assets/ring_1.jpg" alt="Item Thumbnail" class="w-20 h-20 rounded-xl object-cover border border-outline-variant/30 flex-shrink-0" />
+        <div class="flex-1 min-w-0 space-y-1">
+          <h4 id="modalItemName" class="font-headline-md text-base sm:text-lg text-on-surface font-semibold leading-snug">Product Name</h4>
+          <p id="modalItemSpecs" class="text-xs text-secondary font-medium">Bespoke Jewelry Commission • Includes GIA/IGI Certification</p>
+          <div class="flex items-center gap-2 pt-1 flex-wrap">
+            <span id="modalGiaPill" class="px-2.5 py-0.5 rounded bg-surface-container text-on-surface font-label-caps text-[11px] border border-outline-variant/30">GIA #SAT-CERT</span>
+            <span class="px-2.5 py-0.5 rounded bg-surface-container text-tertiary font-label-caps text-[11px] border border-outline-variant/30 flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">shield</span> Insured Courier</span>
+            <span class="px-2.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-caps text-[11px] border border-outline-variant/30">Signature Required</span>
+          </div>
+        </div>
+        <div class="text-right sm:border-l sm:border-outline-variant/20 sm:pl-4 self-stretch sm:self-center flex sm:flex-col justify-between sm:justify-center items-end">
+          <span class="text-xs text-outline uppercase block">Order Total</span>
+          <span id="modalItemPrice" class="font-headline-sm text-headline-sm text-secondary font-bold">$0.00 USD</span>
+        </div>
+      </div>
+
+      <!-- 2. Tracking & Journey Status -->
+      <div class="p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 space-y-3">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary text-[20px]">local_shipping</span>
+            <span class="font-label-md text-sm font-semibold text-on-surface">Fulfillment &amp; Courier Tracking</span>
+          </div>
+          <span id="modalTrackingStatusText" class="text-xs text-emerald-400 font-semibold">Delivered &amp; Hand-Signed</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+          <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20">
+            <span class="text-outline block uppercase text-[10px] tracking-wider">Courier Carrier</span>
+            <span id="modalCarrier" class="font-semibold text-on-surface text-sm mt-0.5 block">DHL Express</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20">
+            <span class="text-outline block uppercase text-[10px] tracking-wider">Tracking Number</span>
+            <span id="modalTrackingNumber" class="font-mono font-semibold text-secondary text-sm mt-0.5 block">DHL-98421094</span>
+          </div>
+          <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20">
+            <span class="text-outline block uppercase text-[10px] tracking-wider">Delivery Date</span>
+            <span id="modalDeliveryDate" class="font-semibold text-on-surface text-sm mt-0.5 block">Delivered</span>
+          </div>
+        </div>
+
+        <!-- 4-step Timeline -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between text-[11px] font-medium text-on-surface-variant mb-2">
+            <span class="text-secondary font-semibold">1. Confirmed</span>
+            <span class="text-secondary font-semibold">2. Handcrafted</span>
+            <span class="text-secondary font-semibold">3. GIA Inspected</span>
+            <span id="step4Label" class="text-emerald-400 font-semibold">4. Delivered</span>
+          </div>
+          <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden flex">
+            <div id="timelineBar" class="h-full bg-gradient-to-r from-secondary to-emerald-400 w-full transition-all duration-500"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Shipping & Payment Details Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- Shipping Address -->
+        <div class="p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 space-y-1 text-xs">
+          <div class="flex items-center gap-1.5 text-secondary font-semibold mb-2">
+            <span class="material-symbols-outlined text-[16px]">location_on</span>
+            <span class="font-label-md text-xs uppercase tracking-wider">Shipping Destination</span>
+          </div>
+          <p id="modalShipName" class="font-semibold text-on-surface text-sm">Recipient Name</p>
+          <p id="modalShipStreet" class="text-on-surface-variant">Street Address</p>
+          <p id="modalShipCityState" class="text-on-surface-variant">City, State Zip</p>
+          <p id="modalShipCountry" class="text-on-surface-variant">United States</p>
+          <p id="modalShipPhone" class="text-outline pt-1">+1 (000) 000-0000</p>
+        </div>
+
+        <!-- Payment & Invoice Breakdown -->
+        <div class="p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 space-y-2 text-xs">
+          <div class="flex items-center gap-1.5 text-secondary font-semibold mb-2">
+            <span class="material-symbols-outlined text-[16px]">receipt</span>
+            <span class="font-label-md text-xs uppercase tracking-wider">Payment Breakdown</span>
+          </div>
+          <div class="flex justify-between text-on-surface-variant">
+            <span>Bespoke Jewelry Piece:</span>
+            <span id="modalSubtotal" class="font-medium text-on-surface">$0.00</span>
+          </div>
+          <div class="flex justify-between text-on-surface-variant">
+            <span>Physical GIA Certificate:</span>
+            <span id="modalGiaFee" class="font-medium text-on-surface">Included ($0.00)</span>
+          </div>
+          <div class="flex justify-between text-on-surface-variant">
+            <span>Insured Courier Delivery:</span>
+            <span class="text-emerald-400 font-medium">COMPLIMENTARY ($0.00)</span>
+          </div>
+          <div class="flex justify-between text-on-surface-variant">
+            <span>Presentation Box &amp; Cloth:</span>
+            <span class="text-emerald-400 font-medium">COMPLIMENTARY</span>
+          </div>
+          <div class="border-t border-outline-variant/20 pt-2 flex justify-between text-sm font-semibold">
+            <span class="text-on-surface">Total Paid:</span>
+            <span id="modalTotalPaid" class="text-secondary">$0.00 USD</span>
+          </div>
+          <p id="modalPayMethod" class="text-[11px] text-outline pt-1">Payment Method: PayPal Express</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div class="px-6 py-4 border-t border-outline-variant/30 bg-surface-container-low/90 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+      <div class="flex items-center gap-2 flex-wrap">
+        <button type="button" onclick="printOrderInvoice()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface text-xs font-semibold transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[15px]">print</span>
+          <span>Print Invoice</span>
+        </button>
+        <button type="button" id="modalReviewBtn" onclick="reviewModalOrder()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-secondary text-xs font-semibold transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[15px]">rate_review</span>
+          <span>Write a Review</span>
+        </button>
+        <a id="modalGiaCertLink" href="/Product/Certificate" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface text-xs font-semibold transition-all">
+          <span class="material-symbols-outlined text-[15px]">verified</span>
+          <span>View GIA Certificate</span>
+        </a>
+      </div>
+      <button type="button" onclick="closeOrderModal()" class="px-5 py-1.5 rounded-full bg-gradient-to-r from-secondary to-primary-container text-on-primary text-xs font-semibold hover:brightness-105 transition-all shadow-md cursor-pointer">
+        Close
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- RING CARE & SPA MODAL -->
+<div id="ringCareModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4" style="display: none;">
+  <div class="relative w-full max-w-lg rounded-2xl bg-surface-container-lowest border border-secondary/40 p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+    <div class="flex items-center justify-between border-b border-outline-variant/30 pb-3">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary text-[24px]">cleaning_services</span>
+        <div>
+          <h3 class="font-headline-sm text-headline-sm text-on-surface font-semibold">SAT Lifetime Ring Care &amp; Spa</h3>
+          <p class="font-body-sm text-xs text-secondary">Complimentary Atelier Maintenance Guarantee</p>
+        </div>
+      </div>
+      <button onclick="closeRingCareModal()" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-outline hover:text-on-surface flex items-center justify-center transition-colors" title="Close">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <div class="space-y-3 text-xs sm:text-sm">
+      <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 flex items-start gap-3">
+        <span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0 mt-0.5">waves</span>
+        <div>
+          <h4 class="font-semibold text-on-surface">Ultrasonic Deep Cleansing &amp; Steam Refresh</h4>
+          <p class="text-on-surface-variant text-xs mt-0.5">Restores the fire, brilliance, and scintillation of your diamond by removing microscopic oils, dust, and lotions.</p>
+        </div>
+      </div>
+
+      <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 flex items-start gap-3">
+        <span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0 mt-0.5">security</span>
+        <div>
+          <h4 class="font-semibold text-on-surface">Prong Tightening &amp; Structural Inspection</h4>
+          <p class="text-on-surface-variant text-xs mt-0.5">Master jewelers inspect all claw settings under high magnification to guarantee your diamond remains permanently secure.</p>
+        </div>
+      </div>
+
+      <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 flex items-start gap-3">
+        <span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0 mt-0.5">auto_awesome</span>
+        <div>
+          <h4 class="font-semibold text-on-surface">Rhodium Replating &amp; Mirror Polish</h4>
+          <p class="text-on-surface-variant text-xs mt-0.5">Eliminates surface micro-scratches from daily wear and restores an immaculate showroom mirror finish.</p>
+        </div>
+      </div>
+
+      <div class="p-3 rounded-xl bg-surface-container-low border border-outline-variant/20 flex items-start gap-3">
+        <span class="material-symbols-outlined text-secondary text-[20px] flex-shrink-0 mt-0.5">straighten</span>
+        <div>
+          <h4 class="font-semibold text-on-surface">Complimentary Ring Resizing</h4>
+          <p class="text-on-surface-variant text-xs mt-0.5">Complimentary precision resizing within 60 days of delivery to ensure a tailored, comfortable fit.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booking CTA -->
+    <div class="pt-2 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <span class="text-xs text-on-surface-variant">All services are complimentary for verified SAT clients.</span>
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <a href="https://wa.me/918320972779?text=Hello%20SAT%20Jewels,%20I%20would%20like%20to%20schedule%20a%20Ring%20Care%20and%20Spa%20service%20for%20my%20commission." target="_blank" class="w-full sm:w-auto px-4 py-2 rounded-full bg-[#25D366] text-black font-semibold text-xs flex items-center justify-center gap-1.5 hover:brightness-105 transition-all shadow-md">
+          <span>Book via WhatsApp</span>
+        </a>
+        <button type="button" onclick="closeRingCareModal()" class="px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface text-xs font-semibold cursor-pointer">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   let activeTab = 'account';
 
@@ -1046,25 +1257,50 @@
     }
   }
 
+  function getCartStorageKey() {
+    const email = '@(email.ToLower().Trim())';
+    if (email) {
+      return 'sat_cart_' + encodeURIComponent(email);
+    }
+    return 'sat_cart_guest';
+  }
+
+  function syncCartBadge() {
+    try {
+      const key = getCartStorageKey();
+      const saved = localStorage.getItem(key);
+      const items = saved ? JSON.parse(saved) : [];
+      const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
+      document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count, .sat-cart-count-badge').forEach(el => {
+        el.textContent = String(count);
+      });
+    } catch (_) {}
+  }
+  document.addEventListener('DOMContentLoaded', syncCartBadge);
+  syncCartBadge();
+
   function addWishlistItemToCart(id, name, price, img, btn) {
     try {
-      let cart = JSON.parse(localStorage.getItem('sat_cart_v1') || '[]');
+      const key = getCartStorageKey();
+      let cart = JSON.parse(localStorage.getItem(key) || '[]');
       const existing = cart.find(x => x.id === id);
       if (existing) {
-        existing.quantity = (existing.quantity || 1) + 1;
+        existing.quantity = (Number(existing.quantity) || 1) + 1;
       } else {
         cart.push({
           id: id,
+          name: name,
           title: name,
-          price: price,
-          image: img || '/assets/ring_1.jpg',
-          metal: '14k-white-gold',
-          carat: '1.50-ct',
+          priceUSD: Number(price) || 0,
+          img: img || '/assets/ring_1.jpg',
+          metal: '14K Yellow Gold',
+          carat: '1.50 CT',
           shape: 'Round',
           quantity: 1
         });
       }
-      localStorage.setItem('sat_cart_v1', JSON.stringify(cart));
+      localStorage.setItem(key, JSON.stringify(cart));
+      syncCartBadge();
       if (btn) {
         const orig = btn.innerHTML;
         btn.innerHTML = '<span class="material-symbols-outlined text-[15px]">check</span> Added!';
@@ -1143,6 +1379,191 @@
       btn.textContent = 'Submit Review';
     }
   }
+
+  // Dynamic Order Details Modal & Invoice Logic
+  @{
+    var ordersJsonList = orders.Select(o => new {
+        orderId = o.OrderId,
+        orderNumber = o.OrderNumber ?? o.OrderId,
+        itemName = o.ItemName,
+        totalAmountUSD = o.TotalAmountUSD,
+        orderStatus = o.OrderStatus,
+        currentTrackingStatus = o.CurrentTrackingStatus,
+        carrierName = string.IsNullOrEmpty(o.CarrierName) ? "DHL Express" : o.CarrierName,
+        trackingNumber = string.IsNullOrEmpty(o.TrackingNumber) ? ("DHL-" + (o.OrderId.Length > 8 ? o.OrderId.Substring(0, 8).ToUpper() : o.OrderId.ToUpper())) : o.TrackingNumber,
+        trackingUrl = o.TrackingUrl,
+        estimatedDeliveryDate = o.EstimatedDeliveryDate.HasValue ? o.EstimatedDeliveryDate.Value.ToString("MMM dd, yyyy") : o.CreatedAt.AddDays(14).ToString("MMM dd, yyyy"),
+        createdAt = o.CreatedAt.ToString("MMM dd, yyyy"),
+        customerEmail = o.CustomerEmail,
+        shippingFullName = string.IsNullOrEmpty(o.ShippingFullName) ? displayName : o.ShippingFullName,
+        shippingPhone = string.IsNullOrEmpty(o.ShippingPhone) ? phone : o.ShippingPhone,
+        shippingStreet = string.IsNullOrEmpty(o.ShippingStreet) ? (defaultAddr?.StreetAddress ?? "124 Atelier Way") : o.ShippingStreet,
+        shippingCity = string.IsNullOrEmpty(o.ShippingCity) ? (defaultAddr?.City ?? "New York") : o.ShippingCity,
+        shippingState = string.IsNullOrEmpty(o.ShippingState) ? (defaultAddr?.State ?? "NY") : o.ShippingState,
+        shippingPostalCode = string.IsNullOrEmpty(o.ShippingPostalCode) ? (defaultAddr?.PostalCode ?? "10001") : o.ShippingPostalCode,
+        shippingCountry = string.IsNullOrEmpty(o.ShippingCountry) ? (defaultAddr?.Country ?? "United States") : o.ShippingCountry,
+        paymentMethod = string.IsNullOrEmpty(o.PaymentMethod) ? "PayPal Express USD" : o.PaymentMethod,
+        paymentProvider = string.IsNullOrEmpty(o.PaymentProvider) ? "PayPal" : o.PaymentProvider,
+        providerOrderId = string.IsNullOrEmpty(o.ProviderOrderId) ? o.OrderId : o.ProviderOrderId,
+        includesPhysicalGiaCert = o.IncludesPhysicalGiaCert,
+        giaCertFeeUSD = o.GiaCertFeeUSD,
+        imgUrl = "/assets/ring_1.jpg"
+    }).ToList();
+    var ordersJson = System.Text.Json.JsonSerializer.Serialize(ordersJsonList);
+  }
+  window.SAT_USER_ORDERS = @Html.Raw(ordersJson);
+
+  let currentModalOrderId = null;
+  function openOrderModal(orderId) {
+    if (!window.SAT_USER_ORDERS || !window.SAT_USER_ORDERS.length) return;
+    const order = window.SAT_USER_ORDERS.find(o => o.orderId === orderId);
+    if (!order) return;
+    currentModalOrderId = orderId;
+
+    document.getElementById('modalOrderNumber').textContent = 'Order #' + order.orderNumber;
+    document.getElementById('modalOrderDate').textContent = 'Placed on ' + order.createdAt;
+    
+    const statusBadge = document.getElementById('modalOrderStatusBadge');
+    if (order.orderStatus === 'Delivered') {
+      statusBadge.textContent = 'Delivered';
+      statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wider uppercase bg-emerald-950 text-emerald-400 border border-emerald-500/30';
+      document.getElementById('modalTrackingStatusText').textContent = 'Delivered & Hand-Signed';
+      document.getElementById('step4Label').textContent = '4. Delivered';
+      document.getElementById('timelineBar').className = 'h-full bg-gradient-to-r from-secondary to-emerald-400 w-full transition-all duration-500';
+    } else if (order.orderStatus === 'Cancelled') {
+      statusBadge.textContent = 'Cancelled';
+      statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wider uppercase bg-rose-950 text-rose-400 border border-rose-500/30';
+      document.getElementById('modalTrackingStatusText').textContent = 'Order Cancelled';
+      document.getElementById('step4Label').textContent = 'Cancelled';
+      document.getElementById('timelineBar').className = 'h-full bg-rose-500 w-full transition-all duration-500';
+    } else {
+      statusBadge.textContent = order.orderStatus || 'Pending';
+      statusBadge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wider uppercase bg-amber-950 text-amber-400 border border-amber-500/30';
+      document.getElementById('modalTrackingStatusText').textContent = 'Handcrafting & Quality Verification';
+      document.getElementById('step4Label').textContent = '4. Est. ' + order.estimatedDeliveryDate;
+      document.getElementById('timelineBar').className = 'h-full bg-gradient-to-r from-secondary to-amber-400 w-2/3 transition-all duration-500';
+    }
+
+    document.getElementById('modalItemName').textContent = order.itemName;
+    document.getElementById('modalItemSpecs').textContent = order.includesPhysicalGiaCert 
+      ? 'Bespoke Jewelry Commission • Includes Physical GIA Hardcopy Certificate' 
+      : 'Bespoke Jewelry Commission • Includes GIA/IGI Digital Certification & Presentation Box';
+    document.getElementById('modalGiaPill').textContent = 'GIA #' + (order.orderId.length > 10 ? order.orderId.substring(0, 10).toUpperCase() : order.orderId);
+    document.getElementById('modalItemPrice').textContent = '$' + Number(order.totalAmountUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+    
+    document.getElementById('modalCarrier').textContent = order.carrierName || 'DHL Express';
+    document.getElementById('modalTrackingNumber').textContent = order.trackingNumber || ('DHL-' + order.orderId.substring(0, 8).toUpperCase());
+    document.getElementById('modalDeliveryDate').textContent = order.orderStatus === 'Delivered' ? 'Delivered (' + order.createdAt + ')' : ('Est. ' + order.estimatedDeliveryDate);
+
+    document.getElementById('modalShipName').textContent = order.shippingFullName || '@displayName';
+    document.getElementById('modalShipStreet').textContent = order.shippingStreet || '124 Atelier Way';
+    document.getElementById('modalShipCityState').textContent = (order.shippingCity || 'New York') + ', ' + (order.shippingState || 'NY') + ' ' + (order.shippingPostalCode || '10001');
+    document.getElementById('modalShipCountry').textContent = order.shippingCountry || 'United States';
+    document.getElementById('modalShipPhone').textContent = order.shippingPhone || '@phone';
+
+    const subtotal = order.totalAmountUSD - (order.giaCertFeeUSD || 0);
+    document.getElementById('modalSubtotal').textContent = '$' + Number(subtotal > 0 ? subtotal : order.totalAmountUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    document.getElementById('modalGiaFee').textContent = order.giaCertFeeUSD > 0 ? ('$' + Number(order.giaCertFeeUSD).toFixed(2)) : (order.includesPhysicalGiaCert ? 'Included ($0.00)' : 'N/A');
+    document.getElementById('modalTotalPaid').textContent = '$' + Number(order.totalAmountUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+    document.getElementById('modalPayMethod').textContent = 'Payment Method: ' + (order.paymentMethod || 'PayPal Express USD');
+
+    const giaCertLink = document.getElementById('modalGiaCertLink');
+    if (giaCertLink) {
+      giaCertLink.href = '/Product/Certificate?orderId=' + encodeURIComponent(order.orderId);
+    }
+
+    document.getElementById('orderDetailsModal').style.display = 'flex';
+  }
+
+  function closeOrderModal() {
+    document.getElementById('orderDetailsModal').style.display = 'none';
+  }
+
+  function reviewModalOrder() {
+    if (!currentModalOrderId) return;
+    const order = window.SAT_USER_ORDERS.find(o => o.orderId === currentModalOrderId);
+    if (order) {
+      closeOrderModal();
+      promptProductReview(order.orderId, order.itemName, '/assets/ring_1.jpg');
+    }
+  }
+
+  function openRingCareModal() {
+    document.getElementById('ringCareModal').style.display = 'flex';
+  }
+
+  function closeRingCareModal() {
+    document.getElementById('ringCareModal').style.display = 'none';
+  }
+
+  function printOrderInvoice() {
+    const printable = document.getElementById('modalOrderPrintableArea');
+    if (!printable) return;
+    const printWindow = window.open('', '', 'width=850,height=900');
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>SAT Jewels - Customer Order Invoice</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; color: #111; line-height: 1.6; background: #fff; }
+            .header { border-bottom: 2px solid #d4af37; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-start; }
+            .brand { font-size: 26px; font-weight: bold; color: #111; letter-spacing: 1px; }
+            .sub { font-size: 12px; color: #666; margin-top: 4px; }
+            .inv-badge { font-size: 14px; font-weight: bold; color: #d4af37; text-transform: uppercase; letter-spacing: 1px; }
+            .content-block { border: 1px solid #e5e5e5; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+            .footer { margin-top: 40px; border-top: 1px solid #eee; padding-top: 15px; font-size: 11px; color: #888; text-align: center; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <div class="brand">SAT JEWELS</div>
+              <div class="sub">Fine Jewelry &amp; Atelier • Varachha Diamond District, Surat</div>
+            </div>
+            <div style="text-align: right;">
+              <div class="inv-badge">Customer Invoice</div>
+              <div style="font-size: 12px; color: #888; margin-top: 4px;">Issued: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+            </div>
+          </div>
+          <div class="content-block">
+            ${printable.innerHTML}
+          </div>
+          <div class="footer">
+            SAT Jewels Official Client Folio • 100% Insured Delivery • GIA/IGI Certified Lab &amp; Natural Diamonds
+          </div>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+      printWindow.print();
+      printWindow.close();
+    }, 450);
+  }
+
+  // Backdrop click listener to close modals
+  window.addEventListener('click', (e) => {
+    const orderModal = document.getElementById('orderDetailsModal');
+    if (e.target === orderModal) closeOrderModal();
+    const careModal = document.getElementById('ringCareModal');
+    if (e.target === careModal) closeRingCareModal();
+    const addressModal = document.getElementById('addressModal');
+    if (e.target === addressModal) closeAddressModal();
+    const reviewModal = document.getElementById('reviewPromptModal');
+    if (e.target === reviewModal) closeReviewModal();
+  });
+
+  // ESC key to close any open modal
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeOrderModal();
+      closeRingCareModal();
+      closeAddressModal();
+      closeReviewModal();
+    }
+  });
 </script>
 </body>
 </html>

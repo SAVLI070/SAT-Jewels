@@ -758,6 +758,47 @@
       100% { transform: scale(1); }
     }
 
+    .product-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+      width: 100%;
+    }
+    .product-card-actions .btn-add-cart {
+      flex: 1;
+      margin-top: 0;
+    }
+    .btn-card-wishlist {
+      width: 44px;
+      height: 44px;
+      min-width: 44px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(212, 184, 120, 0.35);
+      color: rgba(255, 255, 255, 0.85);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+    }
+    .btn-card-wishlist:hover {
+      background: rgba(212, 184, 120, 0.15);
+      border-color: var(--champagne-gold, #d4b878);
+      color: #e11d48;
+      transform: translateY(-1px);
+    }
+    .btn-card-wishlist.active, .btn-card-wishlist.in-wishlist {
+      background: rgba(225, 29, 72, 0.18);
+      border-color: rgba(225, 29, 72, 0.6);
+      color: #e11d48 !important;
+    }
+    .btn-card-wishlist.active i, .btn-card-wishlist.in-wishlist i {
+      font-weight: 900;
+    }
+
     /* Luxury Added to Cart Toast Notification */
     .sat-cart-toast {
       position: fixed;
@@ -875,9 +916,9 @@
   <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
     <div class="max-w-[1180px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
       <div class="flex items-center gap-4 shrink-0">
-        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" data-path="home" href="/" style="text-decoration:none;">
+        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" data-path="back" href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="text-decoration:none;">
           <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-          <span class="hidden sm:inline">Storefront</span>
+          <span class="hidden sm:inline">Back</span>
         </a>
         <div class="h-4 w-[1px] bg-outline-variant/40 hidden sm:block"></div>
         <div class="flex items-center gap-2">
@@ -888,15 +929,21 @@
         </div>
       </div>
 
-      <div class="flex-1 max-w-md mx-2 hidden md:block">
+      <!-- Search Input in Category Header -->
+      <div class="flex-1 max-w-[420px] mx-3 hidden md:block">
         <div class="relative w-full">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant/60">search</span>
-          <input class="w-full h-9 pl-9 pr-4 rounded-full bg-surface-container border border-outline-variant/40 text-on-surface placeholder:text-on-surface-variant/50 text-body-sm font-body-sm focus:outline-none focus:border-primary transition-colors" placeholder="Search certified diamonds, pieces, items..." type="text" onkeydown="if(event.key==='Enter'){window.location.href='/Product/Category?id=@categoryId&search='+encodeURIComponent(this.value);}" />
+          <input type="text" 
+                 id="catHeaderSearchInput"
+                 placeholder="Search rings, diamonds, moissanite..." 
+                 value="@(ViewBag.SearchQuery ?? "")"
+                 onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.location.href = '/Product/Category?q=' + encodeURIComponent(this.value.trim()); }"
+                 class="w-full h-9 pl-9 pr-4 rounded-full bg-surface-container border border-outline-variant/40 text-on-surface placeholder:text-on-surface-variant/50 text-xs focus:outline-none focus:border-primary transition-all" />
+          <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant/60">search</span>
         </div>
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <button class="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors md:hidden" type="button" onclick="const q = prompt('Search pieces:'); if(q) window.location.href='/Product/Category?id=@categoryId&search='+encodeURIComponent(q);">
+        <button type="button" class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors md:hidden" onclick="openSatGlobalSearch(event)" title="Search">
           <span class="material-symbols-outlined text-[18px]">search</span>
         </button>
         <a class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors" data-path="cart" href="/Product/Cart" title="Shopping Cart" style="text-decoration:none;">
@@ -913,7 +960,6 @@
               <span class="font-label-sm text-label-sm text-on-surface font-medium leading-none">@authName</span>
               <span class="text-[9px] text-secondary font-label-caps tracking-wider leading-none mt-0.5">VIP Member</span>
             </div>
-            <span class="material-symbols-outlined text-[16px] text-on-surface-variant hidden sm:inline">expand_more</span>
           </a>
         }
         else
@@ -1137,14 +1183,25 @@
                 <i class="fa-solid fa-star"></i>
                 <span style="color:rgba(255,255,255,0.6); margin-left:4px;">(12 reviews)</span>
               </div>
-              <button type="button" class="btn-add-cart" 
-                      data-id="@item.Id" 
-                      data-name="@item.Name" 
-                      data-price="@item.PriceUSD" 
-                      data-img="@imgSrc"
-                      onclick="quickAddToCart(this)">
-                Add to Cart
-              </button>
+              <div class="product-card-actions">
+                <button type="button" class="btn-add-cart" 
+                        data-id="@item.Id" 
+                        data-name="@item.Name" 
+                        data-price="@item.PriceUSD" 
+                        data-img="@imgSrc"
+                        onclick="quickAddToCart(this)">
+                  Add to Cart
+                </button>
+                <button type="button" class="btn-card-wishlist" 
+                        data-id="@item.Id" 
+                        data-name="@item.Name" 
+                        data-price="@item.PriceUSD" 
+                        data-img="@imgSrc"
+                        title="Add to Wishlist"
+                        onclick="quickToggleWishlist(this, event)">
+                  <i class="fa-regular fa-heart"></i>
+                </button>
+              </div>
             </div>
           </div>
         }
@@ -1471,8 +1528,8 @@
         const key = getCartStorageKey();
         const saved = localStorage.getItem(key);
         const items = saved ? JSON.parse(saved) : [];
-        const count = items.length;
-        document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count').forEach(el => {
+        const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
+        document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count, .sat-cart-count-badge').forEach(el => {
           el.textContent = count;
         });
       } catch (e) {}
@@ -1506,6 +1563,11 @@
     }
 
     function quickAddToCart(firstArg, nameArg, priceArg, imgArg, btnArg) {
+      if (!isUserAuthenticated) {
+        showAuthRequiredModal('cart');
+        return;
+      }
+
       try {
         let id, name, priceUSD, img, btn;
         if (firstArg instanceof HTMLElement) {
@@ -1572,7 +1634,103 @@
         console.error('Error adding item to cart:', e);
       }
     }
+
+    const isUserAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+
+    async function quickToggleWishlist(btn, event) {
+      if (event) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+      if (!btn) return;
+      
+      // STRICT ACCOUNT LOGIN VALIDATION:
+      // If user is not logged in, DO NOT save into cache/localStorage.
+      // Show sign-in required message modal.
+      if (!isUserAuthenticated) {
+        try { localStorage.removeItem('sat_wishlist_ids'); } catch (e) {}
+        showAuthRequiredModal('wishlist');
+        return;
+      }
+
+      const id = btn.dataset.id;
+      const name = btn.dataset.name || 'Fine Jewelry Piece';
+      const priceUSD = Number(btn.dataset.price) || 0;
+      const img = btn.dataset.img || '/assets/categories/cat_engagement_rings.png';
+
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/WishlistApi/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            catalogItemId: id,
+            productName: name,
+            priceUSD: priceUSD,
+            imageUrl: img
+          })
+        });
+
+        if (res.status === 401) {
+          showAuthRequiredModal('wishlist');
+          return;
+        }
+
+        const data = await res.json();
+        if (data && data.success) {
+          if (data.isSaved) {
+            btn.classList.add('active', 'in-wishlist');
+            btn.innerHTML = '<i class="fa-solid fa-heart" style="color:#e11d48;"></i>';
+            showCartToast(name + ' (Saved to Wishlist)', priceUSD, img);
+          } else {
+            btn.classList.remove('active', 'in-wishlist');
+            btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+            showCartToast(name + ' (Removed from Wishlist)', priceUSD, img);
+          }
+        }
+      } catch (err) {
+        console.error('Wishlist toggle error:', err);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    function initWishlistState() {
+      // Purge any legacy localStorage cache so it never leaks between sessions/users
+      try { localStorage.removeItem('sat_wishlist_ids'); } catch (e) {}
+
+      // If user is not logged in, all hearts must remain empty (no caching)
+      if (!isUserAuthenticated) return;
+
+      // Pure account-based database lookup
+      fetch('/api/WishlistApi/my-wishlist')
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.success && data.isAuthenticated && data.items) {
+            const serverIds = new Set(data.items.map(x => String(x.catalogItemId)));
+            document.querySelectorAll('.btn-card-wishlist').forEach(btn => {
+              if (serverIds.has(String(btn.dataset.id))) {
+                btn.classList.add('active', 'in-wishlist');
+                btn.innerHTML = '<i class="fa-solid fa-heart" style="color:#e11d48;"></i>';
+              } else {
+                btn.classList.remove('active', 'in-wishlist');
+                btn.innerHTML = '<i class="fa-regular fa-heart"></i>';
+              }
+            });
+          }
+        })
+        .catch(err => console.warn('Wishlist load warning:', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', initWishlistState);
   </script>
+
+  <!-- Global Search Modal -->
+  <partial name="_SearchModal" />
+
+  <!-- Sign In Required Prompt Modal -->
+  <partial name="_AuthPromptModal" />
 
   <!-- Luxury Added to Cart Toast Notification -->
   <div id="satCartToast" class="sat-cart-toast">

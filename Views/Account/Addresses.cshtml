@@ -211,7 +211,7 @@
   <div class="acc-container">
     <div style="margin-bottom: 20px; display:flex; gap:16px;">
       <a href="/Account/MyAccount" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back to My Account</a>
-      <a href="/" style="color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px;">Storefront</a>
+      <a href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px;">Back</a>
     </div>
 
     <div class="acc-card">

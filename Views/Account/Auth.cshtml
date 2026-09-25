@@ -9,7 +9,7 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Client Sanctuary — SAT Jewel Haute Joaillerie</title>
 
   <!-- Favicon / Tab Icons -->
@@ -496,9 +496,9 @@
 
     <!-- Top Left Floating Back Button -->
     <div class="sat-top-left-back">
-      <a href="/" class="sat-back-pill-btn">
+      <a href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" class="sat-back-pill-btn">
         <i class="fa-solid fa-arrow-left"></i>
-        <span>Return to Storefront</span>
+        <span>Back</span>
       </a>
     </div>
 

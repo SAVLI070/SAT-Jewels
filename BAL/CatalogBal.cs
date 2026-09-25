@@ -57,6 +57,31 @@ namespace SAT1.BAL
             _cache = cache;
         }
 
+        public static string OptimizeCloudinaryUrl(string? url, int width = 800)
+        {
+            if (string.IsNullOrWhiteSpace(url) || !url.Contains("res.cloudinary.com") || url.Contains("f_auto"))
+                return url ?? string.Empty;
+            return url.Replace("/upload/", $"/upload/f_auto/q_auto/w_{width}/");
+        }
+
+        public async Task<Dictionary<long, int>> GetShapeCountsByCategoryAsync(long categoryId)
+        {
+            try
+            {
+                return await _context.Products
+                    .AsNoTracking()
+                    .Where(p => p.CategoryId == categoryId && p.DiamondShapeId > 0)
+                    .GroupBy(p => p.DiamondShapeId)
+                    .Select(g => new { ShapeId = g.Key, Count = g.Count() })
+                    .ToDictionaryAsync(x => x.ShapeId, x => x.Count);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GetShapeCountsByCategoryAsync Error]: {ex.Message}");
+                return new Dictionary<long, int>();
+            }
+        }
+
         public void InvalidateCache()
         {
             _cache.Remove("Catalog_PublicCategories");
@@ -597,6 +622,45 @@ namespace SAT1.BAL
             return LocalStore.GetLocalCategoryProducts(categoryQuery, webRootPath);
         }
 
+        private static CatalogItem MapToCatalogItem(Product p)
+        {
+            var orderedImgs = p.Images != null && p.Images.Count > 0
+                ? p.Images.OrderBy(img => img.DisplayOrder)
+                          .Select(img => OptimizeCloudinaryUrl(img.ImagePath))
+                          .Where(s => !string.IsNullOrWhiteSpace(s))
+                          .Distinct()
+                          .ToList()
+                : new List<string>();
+
+            if (!string.IsNullOrWhiteSpace(p.ImagePath))
+            {
+                var optMain = OptimizeCloudinaryUrl(p.ImagePath);
+                if (!string.IsNullOrWhiteSpace(optMain) && !orderedImgs.Contains(optMain))
+                {
+                    orderedImgs.Insert(0, optMain);
+                }
+            }
+
+            var primaryImg = orderedImgs.FirstOrDefault() 
+                             ?? OptimizeCloudinaryUrl(p.ImagePath)
+                             ?? OptimizeCloudinaryUrl(p.Images?.FirstOrDefault()?.ImagePath) 
+                             ?? "/assets/ring_1.jpg";
+
+            return new CatalogItem
+            {
+                Id = $"sat-prod-{p.ProductId}",
+                Name = p.ProductName,
+                CategoryId = p.CategoryId.ToString(),
+                DiamondShapeId = p.DiamondShapeId,
+                Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity}",
+                PriceUSD = p.BasePriceUSD,
+                ImageUrl = primaryImg,
+                GalleryImages = string.Join(",", orderedImgs),
+                IsActive = true,
+                CreatedAt = p.CreatedAt
+            };
+        }
+
         // Strongly-Typed Enum Category Filtering (Numeric long ID matching)
         public async Task<List<CatalogItem>> GetProductsByEnumCategoryAsync(RingCategoryEnum categoryEnum, string webRootPath)
         {
@@ -612,18 +676,7 @@ namespace SAT1.BAL
 
                 if (relationalProducts.Count > 0)
                 {
-                    return relationalProducts.Select(p => new CatalogItem
-                    {
-                        Id = $"sat-prod-{p.ProductId}",
-                        Name = p.ProductName,
-                        CategoryId = p.CategoryId.ToString(),
-                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}",
-                        PriceUSD = p.BasePriceUSD,
-                        ImageUrl = p.Images.OrderBy(img => img.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg",
-                        GalleryImages = string.Join(",", p.Images.Select(img => img.ImagePath)),
-                        IsActive = true,
-                        CreatedAt = p.CreatedAt
-                    }).ToList();
+                    return relationalProducts.Select(MapToCatalogItem).ToList();
                 }
             }
             catch (Exception ex)
@@ -675,18 +728,7 @@ namespace SAT1.BAL
 
                 if (dbItems.Count > 0)
                 {
-                    return dbItems.Select(p => new CatalogItem
-                    {
-                        Id = $"sat-prod-{p.ProductId}",
-                        Name = p.ProductName,
-                        CategoryId = p.CategoryId.ToString(),
-                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA VVS1",
-                        PriceUSD = p.BasePriceUSD,
-                        ImageUrl = p.Images.OrderBy(img => img.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg",
-                        GalleryImages = string.Join(",", p.Images.Select(i => i.ImagePath)),
-                        IsActive = true,
-                        CreatedAt = p.CreatedAt
-                    }).ToList();
+                    return dbItems.Select(MapToCatalogItem).ToList();
                 }
             }
             catch (Exception ex)
@@ -698,16 +740,24 @@ namespace SAT1.BAL
         }
 
         // Fast High-Performance Database-Level Paged Query
-        public async Task<PagedCatalogResult> GetCategoryProductsPagedAsync(long categoryId, int page, int pageSize, string? shape, string? sort, string webRootPath)
+        public async Task<PagedCatalogResult> GetCategoryProductsPagedAsync(long categoryId, int page, int pageSize, string? shape, string? sort, string webRootPath, string? search = null)
         {
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 12;
 
             try
             {
-                var query = _context.Products
-                    .AsNoTracking()
-                    .Where(p => p.CategoryId == categoryId);
+                var query = _context.Products.AsNoTracking();
+                if (categoryId > 0)
+                {
+                    query = query.Where(p => p.CategoryId == categoryId);
+                }
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var qTerm = search.Trim().ToLower();
+                    query = query.Where(p => p.Title.ToLower().Contains(qTerm) || p.Slug.ToLower().Contains(qTerm));
+                }
 
                 if (!string.IsNullOrWhiteSpace(shape) && shape.ToLower() != "all")
                 {
@@ -740,34 +790,25 @@ namespace SAT1.BAL
                 // Apply Sorting at the database query level
                 query = (sort?.ToLower()) switch
                 {
-                    "price-asc" or "priceasc" => query.OrderBy(p => p.Price),
-                    "price-desc" or "pricedesc" => query.OrderByDescending(p => p.Price),
-                    "alpha-asc" or "alphaasc" => query.OrderBy(p => p.Title),
-                    "alpha-desc" or "alphadesc" => query.OrderByDescending(p => p.Title),
-                    "date-asc" or "dateasc" => query.OrderBy(p => p.CreatedAt),
-                    "date-desc" or "datedesc" => query.OrderByDescending(p => p.CreatedAt),
-                    _ => query.OrderByDescending(p => p.CreatedAt)
+                    "price-asc" or "priceasc" => query.OrderBy(p => p.Price).ThenByDescending(p => p.ProductId),
+                    "price-desc" or "pricedesc" => query.OrderByDescending(p => p.Price).ThenByDescending(p => p.ProductId),
+                    "alpha-asc" or "alphaasc" => query.OrderBy(p => p.Title).ThenByDescending(p => p.ProductId),
+                    "alpha-desc" or "alphadesc" => query.OrderByDescending(p => p.Title).ThenByDescending(p => p.ProductId),
+                    "date-asc" or "dateasc" => query.OrderBy(p => p.CreatedAt).ThenBy(p => p.ProductId),
+                    "date-desc" or "datedesc" => query.OrderByDescending(p => p.CreatedAt).ThenByDescending(p => p.ProductId),
+                    _ => query.OrderByDescending(p => p.CreatedAt).ThenByDescending(p => p.ProductId)
                 };
 
                 int totalCount = await query.CountAsync();
 
-                var pagedProducts = await query
+                var dbProducts = await query
                     .Include(p => p.Images)
+                    .AsSingleQuery()
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
-                    .Select(p => new CatalogItem
-                    {
-                        Id = $"sat-prod-{p.ProductId}",
-                        Name = p.ProductName,
-                        CategoryId = p.CategoryId.ToString(),
-                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA VVS1",
-                        PriceUSD = p.BasePriceUSD,
-                        ImageUrl = p.Images.OrderBy(img => img.DisplayOrder).Select(img => img.ImagePath).FirstOrDefault() ?? "/assets/ring_1.jpg",
-                        GalleryImages = string.Join(",", p.Images.OrderBy(img => img.DisplayOrder).Select(img => img.ImagePath)),
-                        IsActive = true,
-                        CreatedAt = p.CreatedAt
-                    })
                     .ToListAsync();
+
+                var pagedProducts = dbProducts.Select(MapToCatalogItem).ToList();
 
                 return new PagedCatalogResult
                 {
@@ -809,18 +850,7 @@ namespace SAT1.BAL
 
                 if (dbItems.Count > 0)
                 {
-                    return dbItems.Select(p => new CatalogItem
-                    {
-                        Id = $"sat-prod-{p.ProductId}",
-                        Name = p.ProductName,
-                        CategoryId = p.CategoryId.ToString(),
-                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity}",
-                        PriceUSD = p.BasePriceUSD,
-                        ImageUrl = p.Images.OrderBy(img => img.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg",
-                        GalleryImages = string.Join(",", p.Images.Select(i => i.ImagePath)),
-                        IsActive = true,
-                        CreatedAt = p.CreatedAt
-                    }).ToList();
+                    return dbItems.Select(MapToCatalogItem).ToList();
                 }
             }
             catch (Exception ex)
@@ -932,8 +962,8 @@ namespace SAT1.BAL
 
                 if (p != null)
                 {
-                    var mainImg = p.Images.OrderBy(i => i.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg";
-                    var allImgs = p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImagePath).ToList();
+                    var mainImg = OptimizeCloudinaryUrl(p.Images.OrderBy(i => i.DisplayOrder).FirstOrDefault()?.ImagePath ?? "/assets/ring_1.jpg");
+                    var allImgs = p.Images.OrderBy(i => i.DisplayOrder).Select(i => OptimizeCloudinaryUrl(i.ImagePath)).Where(s => !string.IsNullOrWhiteSpace(s)).Distinct().ToList();
 
                     var metalVariants = new List<string>();
                     var caratVariants = new List<string>();
@@ -1154,6 +1184,40 @@ namespace SAT1.BAL
                 .OrderByDescending(i => i.CreatedAt)
                 .Take(20)
                 .ToListAsync();
+
+            if (items.Count == 0)
+            {
+                try
+                {
+                    var fallbackProducts = await _context.Products
+                        .AsNoTracking()
+                        .Include(p => p.Images)
+                        .Where(p => p.Title.ToLower().Contains(q) || p.Slug.ToLower().Contains(q))
+                        .OrderByDescending(p => p.CreatedAt)
+                        .Take(20)
+                        .Select(p => new CatalogItem
+                        {
+                            Id = p.ProductId.ToString(),
+                            Name = p.ProductName,
+                            CategoryId = p.CategoryId.ToString(),
+                            Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct | {p.ProductName}",
+                            PriceUSD = p.BasePriceUSD,
+                            ImageUrl = p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImagePath).FirstOrDefault() ?? p.ImagePath ?? "/assets/ring_1.jpg",
+                            IsActive = true,
+                            CreatedAt = p.CreatedAt
+                        })
+                        .ToListAsync();
+
+                    if (fallbackProducts.Count > 0)
+                    {
+                        return fallbackProducts;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[SearchProductsAsync Fallback Error]: {ex.Message}");
+                }
+            }
 
             return items;
         }

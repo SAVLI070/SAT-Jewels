@@ -62,6 +62,9 @@ namespace SAT1.Models
         [Column("created_at")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+        [Column("image_path")]
+        public string? ImagePath { get; set; }
+
         // Legacy / Presentation Helper Properties
         [NotMapped]
         public string SKU { get; set; } = string.Empty;

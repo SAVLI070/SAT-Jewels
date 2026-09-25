@@ -5,6 +5,7 @@ using SAT1.Models;
 namespace SAT1.Controllers
 {
     [Route("admin")]
+    [Microsoft.AspNetCore.Authorization.Authorize]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class AdminController : Controller
     {
@@ -79,30 +80,52 @@ namespace SAT1.Controllers
         }
 
         [HttpGet("orders")]
-        public async Task<IActionResult> Orders(string? status, string? q)
+        public async Task<IActionResult> Orders(string? status, string? q, int page = 1, int pageSize = 15)
         {
             if (!CheckAccess()) return HandleUnauthorized();
             ViewBag.Title = "Customer Orders & Live Tracking";
-            var allOrders = await _adminBal.GetAllOrdersWithTrackingAsync("All", null);
-            var filteredOrders = await _adminBal.GetAllOrdersWithTrackingAsync(status, q);
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 15;
+
+            var counts = await _adminBal.GetOrderStatusCountsAsync();
             
-            ViewBag.TotalCount = allOrders.Count;
-            ViewBag.PaidCount = allOrders.Count(o => o.OrderStatus.Contains("Paid", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Completed", StringComparison.OrdinalIgnoreCase));
-            ViewBag.DispatchedCount = allOrders.Count(o => o.OrderStatus.Contains("Dispatched", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Booked", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && (o.CurrentTrackingStatus.Contains("Dispatched", StringComparison.OrdinalIgnoreCase) || o.CurrentTrackingStatus.Contains("Booked", StringComparison.OrdinalIgnoreCase))));
-            ViewBag.InTransitCount = allOrders.Count(o => o.OrderStatus.Contains("Transit", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.Contains("Transit", StringComparison.OrdinalIgnoreCase)));
-            ViewBag.DeliveredCount = allOrders.Count(o => o.OrderStatus.Contains("Delivered", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.Contains("Delivered", StringComparison.OrdinalIgnoreCase)));
+            ViewBag.TotalCount = counts.TotalCount;
+            ViewBag.PaidCount = counts.PaidCount;
+            ViewBag.DispatchedCount = counts.DispatchedCount;
+            ViewBag.InTransitCount = counts.InTransitCount;
+            ViewBag.DeliveredCount = counts.DeliveredCount;
+
+            var (filteredOrders, totalFiltered) = await _adminBal.GetOrdersPagedAsync(status, q, page, pageSize);
+            int totalPages = (int)Math.Ceiling(totalFiltered / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
 
             ViewBag.StatusFilter = status ?? "All";
             ViewBag.SearchQuery = q ?? "";
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalFiltered = totalFiltered;
+
             return View(filteredOrders);
         }
 
         [HttpGet("users")]
-        public async Task<IActionResult> Users()
+        public async Task<IActionResult> Users(int page = 1, int pageSize = 15)
         {
             if (!CheckAccess()) return HandleUnauthorized();
             ViewBag.Title = "Customer Accounts & Directory";
-            var users = await _adminBal.GetAllUsersWithStatsAsync();
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 15;
+
+            var (users, totalCount) = await _adminBal.GetUsersPagedAsync(page, pageSize);
+            int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.TotalPages = totalPages;
+
             return View(users);
         }
 

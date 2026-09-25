@@ -12,7 +12,7 @@
 <html class="dark" lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
   <meta content="web_standard" name="shell-type" />
   <title>Bespoke Shopping Cart &amp; Secure Checkout — SAT Jewel Sanctuary</title>
   <link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
@@ -157,9 +157,9 @@
   <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
     <div class="h-16 max-w-[1240px] mx-auto px-6 flex items-center justify-between gap-6">
       <div class="flex items-center gap-4">
-        <a class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-label-sm font-label-md font-medium" href="/">
+        <a class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-label-sm font-label-md font-medium" href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }">
           <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-          <span>Storefront</span>
+          <span>Back</span>
         </a>
         <div class="h-4 w-[1px] bg-outline-variant/40"></div>
         <a class="flex items-center gap-2.5 group" href="/">
@@ -169,6 +169,9 @@
       </div>
 
       <div class="flex items-center gap-3">
+        <button type="button" class="relative p-2 text-on-surface-variant hover:text-primary transition-colors" onclick="openSatGlobalSearch(event)" title="Search Fine Jewelry">
+          <span class="material-symbols-outlined text-[20px]">search</span>
+        </button>
         <a class="relative p-2 text-on-surface-variant hover:text-primary transition-colors" href="/Product/Cart" title="Cart">
           <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
           <span id="navCartBadge" class="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
@@ -864,8 +867,11 @@
         const key = getCartStorageKey();
         const saved = localStorage.getItem(key);
         const items = saved ? JSON.parse(saved) : [];
-
-        if (badgeEl) badgeEl.textContent = items.length;
+        const totalQty = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
+        if (badgeEl) badgeEl.textContent = totalQty;
+        document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count, .sat-cart-count-badge').forEach(el => {
+          el.textContent = String(totalQty);
+        });
 
         if (items.length === 0) {
           container.innerHTML = `
@@ -899,15 +905,15 @@
         let names = [];
 
         items.forEach((item, index) => {
-          const itemPrice = Number(item.priceUSD) || 2925;
+          const itemPrice = Number(item.priceUSD) || Number(item.price) || 2925;
           const qty = Number(item.quantity) || 1;
           const subtotal = itemPrice * qty;
           rawTotal += subtotal;
-          names.push(item.name || 'Bespoke Solitaire Ring');
+          names.push(item.name || item.title || 'Bespoke Solitaire Ring');
 
+          const imgSrc = item.img || item.image || item.imageUrl || '/assets/ring_1.jpg';
           const formattedPrice = '$' + subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-          const imgSrc = item.img || 'https://lh3.googleusercontent.com/aida-public/AB6AXuA_DTo2CiKldBn9YJhBYGy9qeOAtspxUut1HIUuuQDuOeCnrSmH-tHAR8ymqB7sOQUsYmSZ7Z2-pBSmANCzyedoNSCfcmeSwvtNJeMsRYpYbPsnZJIrcGzr5bnnezNnrrktJXpG3CyyNa1iulAYCbRXWsm5LgpiyjQZNwy4b8xisGQ0R9imJ1pBz_NDEAYpy2MeO79rVhlxF00fin61MfDlBPyi3c00CBaaeFRqapyfkeZgCWKBqdgm0Q';
-          const certUrl = `/Product/GiaCertificate/${encodeURIComponent(item.id || 'sat-prod-8')}`;
+          const certUrl = `/Product/GiaCertificate/${encodeURIComponent(item.id || 'sat-prod-8')}?carat=${encodeURIComponent(item.carat || '')}&metal=${encodeURIComponent(item.metal || '')}&stone=${encodeURIComponent(item.stone || '')}&size=${encodeURIComponent(item.size || '')}${item.engraving ? `&engraving=${encodeURIComponent(item.engraving)}` : ''}`;
 
           html += `
             <div class="rounded-xl bg-surface-container p-6 shadow-md relative overflow-hidden">
@@ -1528,5 +1534,8 @@
       }
     }
   </script>
+
+  <!-- Global Search Modal -->
+  <partial name="_SearchModal" />
 </body>
 </html>

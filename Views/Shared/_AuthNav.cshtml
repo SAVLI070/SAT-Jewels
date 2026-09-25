@@ -183,7 +183,7 @@
       const saved = localStorage.getItem(key);
       const items = saved ? JSON.parse(saved) : [];
       const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
-      document.querySelectorAll('#navCartCount, .auth-nav-cart-count').forEach(el => {
+      document.querySelectorAll('#navCartCount, #navCartBadge, .auth-nav-cart-count, .sat-cart-count-badge').forEach(el => {
         el.textContent = String(count);
       });
     } catch (_) { }

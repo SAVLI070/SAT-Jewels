@@ -21,6 +21,7 @@
     {
         galleryList = Model.GalleryImages.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
             .Select(s => FixImg(s.Trim()))
+            .Where(s => !s.StartsWith("/q_auto") && !s.StartsWith("/w_") && !s.StartsWith("/c_limit") && !s.EndsWith("/f_auto") && s.Length > 8)
             .Distinct()
             .ToList();
     }
@@ -105,7 +106,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>@Model.Name — Buy Online in USA | SAT Jewel</title>
   <meta name="title" content="@Model.Name — Buy Online in USA | SAT Jewel" />
   <meta name="description" content="Shop @Model.Name at factory-direct value. 100% GIA/IGI certified lab-grown diamonds, customizable in 10K/14K/18K gold & 950 platinum with free worldwide insured delivery." />
@@ -381,6 +382,10 @@
       gap: 16px;
       align-self: flex-start;
       width: 100%;
+      position: -webkit-sticky;
+      position: sticky;
+      top: 85px;
+      z-index: 9;
     }
     .pd-gallery-card {
       position: relative;
@@ -1251,6 +1256,8 @@
         margin-bottom: 0 !important;
       }
       .pd-gallery-scroll-col {
+        position: static !important;
+        top: auto !important;
         display: flex !important;
         flex-direction: row !important;
         overflow-x: auto !important;
@@ -1293,11 +1300,11 @@
   <header class="sticky top-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
     <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
       
-      <!-- Left: Storefront backlink & brand & breadcrumb -->
+      <!-- Left: Back link & brand & breadcrumb -->
       <div class="flex items-center gap-4 shrink-0">
-        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="/" style="text-decoration:none;">
+        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="text-decoration:none;">
           <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-          <span class="hidden sm:inline font-bold uppercase tracking-wider text-[11px]">Storefront</span>
+          <span class="hidden sm:inline font-bold uppercase tracking-wider text-[11px]">Back</span>
         </a>
         <div class="h-4 w-[1px] bg-outline-variant/40 hidden sm:block"></div>
         <div class="flex items-center gap-3">
@@ -1308,8 +1315,11 @@
         </div>
       </div>
 
-      <!-- Right: Cart & profile -->
+      <!-- Right: Search, Cart & profile -->
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <button type="button" class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors" onclick="openSatGlobalSearch(event)" title="Search Fine Jewelry">
+          <span class="material-symbols-outlined text-[18px]">search</span>
+        </button>
         <a class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors" data-path="cart" href="/Product/Cart" title="Shopping Cart" style="text-decoration:none;">
           <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
           <span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
@@ -1346,7 +1356,7 @@
       <!-- 1. LEFT TALL STICKY COLUMN: Hero Primary Image (Stuck throughout scroll, scrolls only at the end) -->
       <div class="pd-hero-sticky-col">
         <div class="pd-hero-img-card">
-          <img id="heroMainImg" src="@mainImage" alt="@Model.Name" />
+          <img id="heroMainImg" src="@mainImage" alt="@Model.Name" onerror="this.onerror=null;this.src='/assets/ring_1.jpg';" />
           <span class="hero-badge-tag" id="heroBadgeTag">💎 Lab Grown Diamond</span>
         </div>
       </div>
@@ -1357,7 +1367,7 @@
         {
           var img = galleryList[i];
           <div class="pd-gallery-card @(i == 0 ? "active" : "")" data-index="@i" onclick="switchHeroImage('@img', @i)">
-            <img src="@img" alt="Angle @(i+1)" />
+            <img src="@img" alt="Angle @(i+1)" onerror="this.onerror=null;this.closest('.pd-gallery-card').style.display='none';" />
           </div>
         }
       </div>
@@ -1392,8 +1402,8 @@
           <span class="pd-trust-pill"><i class="fa-solid fa-truck-fast"></i> Free Insured Express</span>
         </div>
         <div style="margin-top: 8px;">
-          <a href="/Product/GiaCertificate/@Model.Id" target="_blank" style="display:inline-flex; align-items:center; gap:6px; color:#fbbf24; text-decoration:none; font-size:12px; font-weight:600; padding:5px 12px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); border-radius:6px; transition:all 0.2s ease;">
-            <i class="fa-solid fa-file-shield"></i> View &amp; Download Digital GIA Certificate <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;"></i>
+          <a href="/Product/GiaCertificate/@Model.Id" id="btnGiaCertLink" target="_blank" style="display:inline-flex; align-items:center; gap:6px; color:#fbbf24; text-decoration:none; font-size:12px; font-weight:600; padding:5px 12px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); border-radius:6px; transition:all 0.2s ease;">
+            <i class="fa-solid fa-file-shield"></i> <span id="btnGiaCertLinkText">View &amp; Download Digital GIA Certificate</span> <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;"></i>
           </a>
         </div>
 
@@ -1750,7 +1760,12 @@
               </div>
               <div class="review-stars">★★★★★</div>
               <p class="review-snippet">"@rev.ReviewText"</p>
-              <button type="button" class="btn-view-review" onclick="openReviewModal('@Html.Raw(rev.CustomerName.Replace("'", "\\'"))', '@rev.PhotoUrl', '@Html.Raw(rev.ReviewTitle.Replace("'", "\\'"))', '@Html.Raw(rev.ReviewText.Replace("'", "\\'"))')">
+              <button type="button" class="btn-view-review" 
+                      data-name="@rev.CustomerName" 
+                      data-photo="@rev.PhotoUrl" 
+                      data-title="@rev.ReviewTitle" 
+                      data-text="@rev.ReviewText" 
+                      onclick="openReviewModal(this.dataset.name, this.dataset.photo, this.dataset.title, this.dataset.text)">
                 View Review
               </button>
             </div>
@@ -1780,7 +1795,12 @@
               </div>
               <div class="review-stars">★★★★★</div>
               <p class="review-snippet">"@rev.ReviewText"</p>
-              <button type="button" class="btn-view-review" onclick="openReviewModal('@Html.Raw(rev.CustomerName.Replace("'", "\\'"))', '@rev.PhotoUrl', '@Html.Raw(rev.ReviewTitle.Replace("'", "\\'"))', '@Html.Raw(rev.ReviewText.Replace("'", "\\'"))')">
+              <button type="button" class="btn-view-review" 
+                      data-name="@rev.CustomerName" 
+                      data-photo="@rev.PhotoUrl" 
+                      data-title="@rev.ReviewTitle" 
+                      data-text="@rev.ReviewText" 
+                      onclick="openReviewModal(this.dataset.name, this.dataset.photo, this.dataset.title, this.dataset.text)">
                 View Review
               </button>
             </div>
@@ -2038,6 +2058,26 @@
       const stoneLabel = currentStoneType === 'Moissanite' ? 'Moissanite' : 'Lab Diamond';
       const sizeShort = (selectedRingSize || 'US 6.0').split(' ')[0] + ' ' + ((selectedRingSize || '').split(' ')[1] || '');
       document.getElementById('floatingSpecsSub').textContent = `${selectedMetal} • ${selectedCarat} • ${sizeShort} • ${stoneLabel}`;
+
+      updateGiaCertUrl();
+    }
+
+    function updateGiaCertUrl() {
+      const link = document.getElementById('btnGiaCertLink');
+      if (!link) return;
+      const stone = currentStoneType === 'Moissanite' ? 'Moissanite' : 'LabGrownDiamond';
+      const sizeSelect = document.getElementById('selRingSize');
+      const size = sizeSelect ? sizeSelect.value : '';
+      const txtEngraving = document.getElementById('txtEngraving');
+      const engraving = txtEngraving ? txtEngraving.value.trim() : '';
+      link.href = `/Product/GiaCertificate/@Model.Id?carat=${encodeURIComponent(selectedCarat)}&metal=${encodeURIComponent(selectedMetal)}&stone=${encodeURIComponent(stone)}&size=${encodeURIComponent(size)}${engraving ? `&engraving=${encodeURIComponent(engraving)}` : ''}`;
+
+      const linkText = document.getElementById('btnGiaCertLinkText');
+      if (linkText) {
+        linkText.textContent = (currentStoneType === 'Moissanite') 
+          ? 'View & Download Digital GRA / GIA Certificate' 
+          : 'View & Download Digital GIA Certificate';
+      }
     }
 
     const pdGalleryImages = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(galleryList));
@@ -2182,8 +2222,10 @@
         const key = (isAuth && email) ? ('sat_cart_' + encodeURIComponent(email)) : 'sat_cart_guest';
         const saved = localStorage.getItem(key);
         const items = saved ? JSON.parse(saved) : [];
-        const badge = document.getElementById('navCartBadge');
-        if (badge) badge.textContent = items.length;
+        const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
+        document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count, .sat-cart-count-badge').forEach(el => {
+          el.textContent = count;
+        });
       } catch (e) {}
     }
     document.addEventListener('DOMContentLoaded', syncCartBadge);
@@ -2198,6 +2240,12 @@
     }
 
     function executeAddToCart() {
+      const isAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+      if (!isAuth) {
+        showAuthRequiredModal('cart');
+        return;
+      }
+
       try {
         const finalPrice = window.activeVariantPriceUSD || basePriceUSD;
         const sizeSelect = document.getElementById('selRingSize');
@@ -2356,6 +2404,44 @@
     }
 
     recalculatePrice();
+
+    function updateStickyGallery() {
+      const gal = document.getElementById('detailGalleryCol');
+      if (!gal) return;
+      if (window.innerWidth <= 991) {
+        gal.style.position = '';
+        gal.style.top = '';
+        return;
+      }
+      const vh = window.innerHeight;
+      const h = gal.offsetHeight;
+      if (h <= 0) return;
+
+      if (h + 105 <= vh) {
+        gal.style.position = 'sticky';
+        gal.style.top = '85px';
+      } else {
+        // When gallery finishes scrolling into view, stick so the last images remain visible without blank space
+        const stickyTop = Math.min(85, vh - h - 24);
+        gal.style.position = 'sticky';
+        gal.style.top = stickyTop + 'px';
+      }
+    }
+
+    window.addEventListener('resize', updateStickyGallery);
+    window.addEventListener('load', updateStickyGallery);
+    if (window.ResizeObserver) {
+      const ro = new ResizeObserver(() => updateStickyGallery());
+      const galEl = document.getElementById('detailGalleryCol');
+      if (galEl) ro.observe(galEl);
+    }
+    updateStickyGallery();
   </script>
+
+  <!-- Global Search Modal -->
+  <partial name="_SearchModal" />
+
+  <!-- Sign In Required Prompt Modal -->
+  <partial name="_AuthPromptModal" />
 </body>
 </html>

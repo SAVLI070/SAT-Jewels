@@ -14,7 +14,7 @@ var rawConn = builder.Configuration["DATABASE_URL"]
     ?? builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? Environment.GetEnvironmentVariable("DATABASE_URL");
 
-string connectionString = "Host=satjewels-postgres.c4r4s48oeqi1.us-east-1.rds.amazonaws.com;Port=5432;Database=satjewels_db;Username=satjewels_admin;Password=SatJewels#Db2026!Secure;Ssl Mode=Require;Trust Server Certificate=true;Pooling=true;Minimum Pool Size=5;Maximum Pool Size=50;Connection Lifetime=300;Connection Idle Lifetime=60;KeepAlive=30;Timeout=15;Command Timeout=30;";
+string connectionString = "Host=satjewels-postgres.c4r4s48oeqi1.us-east-1.rds.amazonaws.com;Port=5432;Database=satjewels_db;Username=satjewels_admin;Password=SatJewels#Db2026!Secure;Ssl Mode=Require;Trust Server Certificate=true;";
 
 if (!string.IsNullOrWhiteSpace(rawConn))
 {
@@ -29,7 +29,7 @@ if (!string.IsNullOrWhiteSpace(rawConn))
             var host = uri.Host;
             var port = uri.Port > 0 ? uri.Port : 5432;
             var dbName = uri.AbsolutePath.TrimStart('/');
-            connectionString = $"Host={host};Port={port};Database={dbName};Username={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true;Pooling=true;Minimum Pool Size=5;Maximum Pool Size=50;Connection Lifetime=300;Connection Idle Lifetime=60;KeepAlive=30;Timeout=15;Command Timeout=30;";
+            connectionString = $"Host={host};Port={port};Database={dbName};Username={user};Password={password};Ssl Mode=Require;Trust Server Certificate=true;";
         }
         catch
         {
@@ -39,22 +39,42 @@ if (!string.IsNullOrWhiteSpace(rawConn))
     else
     {
         connectionString = rawConn;
-        if (!connectionString.Contains("Pooling=", StringComparison.OrdinalIgnoreCase))
-        {
-            connectionString += ";Pooling=true;Minimum Pool Size=5;Maximum Pool Size=50;Connection Lifetime=300;Connection Idle Lifetime=60;KeepAlive=30;Timeout=15;Command Timeout=30;";
-        }
     }
 }
 
+try
+{
+    var csb = new Npgsql.NpgsqlConnectionStringBuilder(connectionString)
+    {
+        Pooling = true,
+        MinPoolSize = 0,
+        MaxPoolSize = 50,
+        ConnectionLifetime = 300,
+        ConnectionIdleLifetime = 15,
+        ConnectionPruningInterval = 10,
+        KeepAlive = 15,
+        Timeout = 15,
+        CommandTimeout = 30
+    };
+    connectionString = csb.ConnectionString;
+}
+catch
+{
+    // Keep raw connection string if builder parsing encounters custom flags
+}
+
 builder.Services.AddDbContext<SatJewelDbContext>(options =>
+{
     options.UseNpgsql(connectionString, npgsqlOptions =>
     {
         npgsqlOptions.EnableRetryOnFailure(
-            maxRetryCount: 3,
+            maxRetryCount: 5,
             maxRetryDelay: TimeSpan.FromSeconds(5),
             errorCodesToAdd: null);
         npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
-    }));
+    });
+    options.ConfigureWarnings(w => w.Log((Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.ConnectionError, LogLevel.Debug)));
+});
 
 // Add Controllers and Views
 builder.Services.AddControllersWithViews();
@@ -318,17 +338,21 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    app.UseForwardedHeaders(new ForwardedHeadersOptions
+    var forwardedOptions = new ForwardedHeadersOptions
     {
         ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedFor | Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.XForwardedProto
-    });
+    };
+    forwardedOptions.KnownNetworks.Clear();
+    forwardedOptions.KnownProxies.Clear();
+    app.UseForwardedHeaders(forwardedOptions);
+
+    app.UseHsts();
 
     // Only redirect if an HTTPS port is configured (avoids warning when running HTTP-only or behind SSL-terminating proxies)
     if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTPS_PORT")) || 
         !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORT")) ||
         builder.Configuration.GetValue<int?>("https_port") != null)
     {
-        app.UseHsts();
         app.UseHttpsRedirection();
     }
 }
@@ -394,6 +418,8 @@ app.Use(async (context, next) =>
 
     await next();
 });
+
+app.MapControllers();
 
 app.MapControllerRoute(
     name: "default",

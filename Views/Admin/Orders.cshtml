@@ -228,6 +228,52 @@
     </div>
   }
 
+  @* Admin Orders Pagination Bar *@
+  @{
+    int curPage = ViewBag.CurrentPage is int cp ? cp : 1;
+    int totPages = ViewBag.TotalPages is int tp ? tp : 1;
+    int pSize = ViewBag.PageSize is int ps ? ps : 15;
+    int totFiltered = ViewBag.TotalFiltered is int tf ? tf : Model.Count;
+  }
+  @if (totPages > 1)
+  {
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-top: 24px; padding: 18px 24px; background: #ffffff; border-radius: 14px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+      <div style="font-size: 13.5px; color: #64748b;">
+        Showing <strong style="color: #0f172a;">@(((curPage - 1) * pSize) + 1)–@(Math.Min(curPage * pSize, totFiltered))</strong> of <strong style="color: #0f172a;">@totFiltered</strong> Orders
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 6px;">
+        @if (curPage > 1)
+        {
+          <a href="/Admin/Orders?status=@(statusFilter)&q=@System.Net.WebUtility.UrlEncode(searchQuery)&page=@(curPage - 1)" style="padding: 7px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; font-size: 13px; font-weight: 600; text-decoration: none;">
+            &larr; Prev
+          </a>
+        }
+
+        @for (int p = 1; p <= totPages; p++)
+        {
+          if (p == 1 || p == totPages || (p >= curPage - 2 && p <= curPage + 2))
+          {
+            <a href="/Admin/Orders?status=@(statusFilter)&q=@System.Net.WebUtility.UrlEncode(searchQuery)&page=@p" style="min-width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; @(p == curPage ? "background:#b45309; color:#ffffff; border:1px solid #b45309;" : "background:#ffffff; color:#334155; border:1px solid #cbd5e1;")">
+              @p
+            </a>
+          }
+          else if (p == curPage - 3 || p == curPage + 3)
+          {
+            <span style="padding: 0 4px; color: #94a3b8;">...</span>
+          }
+        }
+
+        @if (curPage < totPages)
+        {
+          <a href="/Admin/Orders?status=@(statusFilter)&q=@System.Net.WebUtility.UrlEncode(searchQuery)&page=@(curPage + 1)" style="padding: 7px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; font-size: 13px; font-weight: 600; text-decoration: none;">
+            Next &rarr;
+          </a>
+        }
+      </div>
+    </div>
+  }
+
 </div>
 
 <!-- Courier Tracking & Dispatch Modal -->

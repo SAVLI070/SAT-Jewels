@@ -17,10 +17,7 @@ import sys
 import psycopg2
 from psycopg2.extras import execute_values
 
-DEFAULT_CONN_STRING = (
-    "host=ep-soft-sound-azkeypgg-pooler.c-3.ap-southeast-1.aws.neon.tech "
-    "port=5432 dbname=neondb user=neondb_owner password=npg_yX8TV4rmHEqR sslmode=require"
-)
+DEFAULT_CONN_STRING = os.environ.get("DATABASE_URL", "")
 
 # 10 Official Metal Options from Aurous Fine Jewelry
 METALS = [

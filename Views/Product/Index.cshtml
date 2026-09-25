@@ -189,9 +189,9 @@
   <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
     <div class="max-w-[1180px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
       <div class="flex items-center gap-4 shrink-0">
-        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" data-path="home" href="/" style="text-decoration:none;">
+        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" data-path="back" href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="text-decoration:none;">
           <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-          <span class="hidden sm:inline">Storefront</span>
+          <span class="hidden sm:inline">Back</span>
         </a>
         <div class="h-4 w-[1px] bg-outline-variant/40 hidden sm:block"></div>
         <div class="flex items-center gap-2">
@@ -271,8 +271,10 @@
         const key = (isAuth && email) ? ('sat_cart_' + encodeURIComponent(email)) : 'sat_cart_guest';
         const saved = localStorage.getItem(key);
         const items = saved ? JSON.parse(saved) : [];
-        const badge = document.getElementById('navCartBadge');
-        if (badge) badge.textContent = items.length;
+        const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
+        document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count, .sat-cart-count-badge').forEach(el => {
+          el.textContent = count;
+        });
       } catch (e) {}
     }
     document.addEventListener('DOMContentLoaded', syncCartBadge);

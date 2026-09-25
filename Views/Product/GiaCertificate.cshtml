@@ -1,45 +1,13 @@
-@model SAT1.Models.CatalogItem
+@model SAT1.Models.GiaCertificateViewModel
 @{
     Layout = null;
-
-    // Generate deterministic report details based on product
-    var hash = Math.Abs((Model.Id ?? "GIA-223").GetHashCode());
-    var reportNumber = $"GIA-{2230000000L + (hash % 90000000L)}";
-    var issueDate = DateTime.Now.AddDays(- (hash % 120)).ToString("MMMM dd, yyyy");
-    
-    // Extract specs or defaults
-    var spec = Model.Spec ?? "";
-    var carat = "1.50 ct";
-    if (spec.Contains("ct"))
-    {
-        var match = System.Text.RegularExpressions.Regex.Match(spec, @"(\d+(\.\d+)?)\s*ct");
-        if (match.Success) carat = $"{match.Groups[1].Value} ct";
-    }
-
-    var colorGrade = "E (Colorless)";
-    if (spec.Contains("D-") || spec.Contains("D ")) colorGrade = "D (Colorless)";
-    else if (spec.Contains("F-") || spec.Contains("F ")) colorGrade = "F (Colorless)";
-    else if (spec.Contains("G-") || spec.Contains("G ")) colorGrade = "G (Near Colorless)";
-
-    var clarityGrade = "VVS1";
-    if (spec.Contains("VVS2")) clarityGrade = "VVS2";
-    else if (spec.Contains("VS1")) clarityGrade = "VS1";
-    else if (spec.Contains("VS2")) clarityGrade = "VS2";
-    else if (spec.Contains("IF")) clarityGrade = "Internally Flawless (IF)";
-
-    var shape = "Round Brilliant";
-    if (spec.ToLower().Contains("oval")) shape = "Oval Brilliant";
-    else if (spec.ToLower().Contains("emerald")) shape = "Emerald Cut";
-    else if (spec.ToLower().Contains("cushion")) shape = "Cushion Modified";
-    else if (spec.ToLower().Contains("radiant")) shape = "Radiant Cut";
-    else if (spec.ToLower().Contains("pear")) shape = "Pear Brilliant";
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GIA Gemological Report - @Model.Name</title>
+  <title>@Model.CertType Gemological Report - @Model.ProductName</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -190,6 +158,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
     }
     .product-title {
       font-size: 14px;
@@ -200,6 +170,7 @@
       font-size: 11px;
       color: #64748b;
       font-family: monospace;
+      margin-top: 2px;
     }
 
     /* Grid Layout */
@@ -247,7 +218,6 @@
       color: var(--gia-navy);
       text-align: right;
     }
-
     .spec-highlight {
       color: #b45309;
       font-weight: 800;
@@ -316,6 +286,8 @@
       align-items: center;
       font-size: 10.5px;
       color: #64748b;
+      gap: 16px;
+      flex-wrap: wrap;
     }
 
     .security-badge {
@@ -365,7 +337,7 @@
 
   <div class="toolbar">
     <a href="javascript:window.history.back()" class="btn-back">
-      <i class="fa-solid fa-arrow-left"></i> Back to Product
+      <i class="fa-solid fa-arrow-left"></i> Back to @(Model.IsPurchasedOrder ? "Orders" : "Product")
     </a>
     <div style="display:flex; gap:10px;">
       <button type="button" onclick="window.print()" class="btn-download-pdf">
@@ -379,27 +351,43 @@
     <div class="gia-header">
       <div class="gia-logo-box">
         <div>
-          <div class="gia-logo-text">GIA</div>
-          <div class="gia-sub-brand">Gemological Institute of America &bull; Official Report</div>
+          <div class="gia-logo-text">@Model.CertType</div>
+          <div class="gia-sub-brand">Gemological Institute of America &bull; Official Report Dossier</div>
         </div>
       </div>
       <div class="gia-report-badge">
-        <div class="gia-report-title">Diamond Grading Report</div>
-        <div class="gia-report-num">@reportNumber</div>
-        <div class="gia-report-date">Issued: @issueDate</div>
+        <div class="gia-report-title">@Model.ReportTitle</div>
+        <div class="gia-report-num">@Model.ReportNumber</div>
+        <div class="gia-report-date">Issued: @Model.IssueDate</div>
       </div>
     </div>
 
     <!-- Product Ribbon -->
     <div class="product-ribbon">
       <div>
-        <div class="product-title"><i class="fa-solid fa-gem" style="color:var(--gia-gold); margin-right:6px;"></i> @Model.Name</div>
-        <div class="product-sku">Atelier SKU: @Model.Id &bull; SAT Jewels Surat Atelier</div>
+        <div class="product-title"><i class="fa-solid fa-gem" style="color:var(--gia-gold); margin-right:6px;"></i> @Model.ProductName</div>
+        <div class="product-sku">
+          @if (Model.IsPurchasedOrder)
+          {
+            <span><strong>Order Ref:</strong> @Model.OrderNumber &bull; </span>
+          }
+          <span>Atelier SKU: @Model.Sku &bull; SAT Jewels Surat Atelier</span>
+          @if (!string.IsNullOrWhiteSpace(Model.ClientName))
+          {
+            <div><span style="color:#0f172a; font-weight:600;">Client:</span> @Model.ClientName</div>
+          }
+        </div>
       </div>
       <div style="text-align:right;">
         <span style="display:inline-flex; align-items:center; gap:6px; background:#ffffff; border:1px solid var(--gia-gold); padding:4px 10px; border-radius:4px; font-size:11px; font-weight:700; color:var(--gia-navy);">
-          <i class="fa-solid fa-circle-check" style="color:#16a34a;"></i> 100% Verified Natural/Lab
+          <i class="fa-solid fa-circle-check" style="color:#16a34a;"></i> @Model.VerificationBadge
         </span>
+        @if (!string.IsNullOrWhiteSpace(Model.MetalType))
+        {
+          <div style="font-size:11px; color:#475569; margin-top:4px; font-weight:600;">
+            <i class="fa-solid fa-ring" style="color:var(--gia-gold); margin-right:4px;"></i>@Model.MetalType @(!string.IsNullOrWhiteSpace(Model.RingSize) ? $" • Size {Model.RingSize}" : "")
+          </div>
+        }
       </div>
     </div>
 
@@ -411,19 +399,19 @@
         <table class="spec-table">
           <tr>
             <td class="spec-label">Carat Weight</td>
-            <td class="spec-value spec-highlight" style="font-size:14px;">@carat</td>
+            <td class="spec-value spec-highlight" style="font-size:14px;">@Model.CaratWeight</td>
           </tr>
           <tr>
             <td class="spec-label">Color Grade</td>
-            <td class="spec-value">@colorGrade</td>
+            <td class="spec-value">@Model.ColorGrade</td>
           </tr>
           <tr>
             <td class="spec-label">Clarity Grade</td>
-            <td class="spec-value">@clarityGrade</td>
+            <td class="spec-value">@Model.ClarityGrade</td>
           </tr>
           <tr>
             <td class="spec-label">Cut Grade</td>
-            <td class="spec-value" style="color:#16a34a;">Excellent</td>
+            <td class="spec-value" style="color:#16a34a;">@Model.CutGrade</td>
           </tr>
         </table>
 
@@ -431,23 +419,23 @@
         <table class="spec-table">
           <tr>
             <td class="spec-label">Polish</td>
-            <td class="spec-value">Excellent</td>
+            <td class="spec-value">@Model.Polish</td>
           </tr>
           <tr>
             <td class="spec-label">Symmetry</td>
-            <td class="spec-value">Excellent</td>
+            <td class="spec-value">@Model.Symmetry</td>
           </tr>
           <tr>
             <td class="spec-label">Fluorescence</td>
-            <td class="spec-value">None (Faint inert)</td>
+            <td class="spec-value">@Model.Fluorescence</td>
           </tr>
           <tr>
             <td class="spec-label">Shape &amp; Cutting Style</td>
-            <td class="spec-value">@shape</td>
+            <td class="spec-value">@Model.Shape</td>
           </tr>
           <tr>
             <td class="spec-label">Measurements</td>
-            <td class="spec-value">7.34 &times; 7.31 &times; 4.52 mm</td>
+            <td class="spec-value">@Model.Measurements</td>
           </tr>
         </table>
       </div>
@@ -459,12 +447,12 @@
           <div class="diamond-icon-wrap">
             <i class="fa-regular fa-gem"></i>
           </div>
-          <div style="font-size:12px; font-weight:700; color:var(--gia-navy);">Ideal Proportions Analysis</div>
+          <div style="font-size:12px; font-weight:700; color:var(--gia-navy);">Ideal Proportions Analysis (@Model.Shape)</div>
           <div class="proportions-list">
-            <div>Table<strong>57%</strong></div>
-            <div>Depth<strong>61.8%</strong></div>
-            <div>Crown<strong>35.0&deg;</strong></div>
-            <div>Pavilion<strong>40.8&deg;</strong></div>
+            <div>Table<strong>@Model.TablePercentage</strong></div>
+            <div>Depth<strong>@Model.DepthPercentage</strong></div>
+            <div>Crown<strong>@Model.CrownAngle</strong></div>
+            <div>Pavilion<strong>@Model.PavilionAngle</strong></div>
           </div>
         </div>
 
@@ -472,19 +460,19 @@
           <div class="laser-title">
             <i class="fa-solid fa-microchip" style="color:var(--gia-gold);"></i> Girdle Laser Inscription Registry
           </div>
-          <div style="font-family: monospace; font-size:12px; color:var(--gia-navy); font-weight:700; margin-top:3px;">
-            @reportNumber &bull; SAT-JEWELS
+          <div style="font-family: monospace; font-size:12px; color:var(--gia-navy); font-weight:700; margin-top:3px; word-break: break-all;">
+            @Model.LaserInscription
           </div>
           <div style="font-size:10.5px; color:#64748b; margin-top:2px;">
-            Microscopically engraved on diamond girdle for anti-tamper client verification.
+            Microscopically laser-inscribed on gem girdle for anti-tamper client verification.
           </div>
         </div>
 
         <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:6px; padding:10px 14px; display:flex; align-items:center; gap:12px;">
           <i class="fa-solid fa-qrcode" style="font-size:38px; color:var(--gia-navy);"></i>
           <div>
-            <div style="font-size:11px; font-weight:700; color:var(--gia-navy);">GIA Report Check Online</div>
-            <div style="font-size:10px; color:#64748b;">Verify authenticity at gia.edu/report-check using report #@reportNumber</div>
+            <div style="font-size:11px; font-weight:700; color:var(--gia-navy);">@Model.CertType Report Check Online</div>
+            <div style="font-size:10px; color:#64748b;">Verify authenticity at gia.edu/report-check using report #@Model.ReportNumber</div>
           </div>
         </div>
       </div>
@@ -494,11 +482,11 @@
     <div class="gia-footer">
       <div class="security-badge">
         <div class="security-stamp">
-          <span>GIA</span>
+          <span>@Model.CertType</span>
           <span>SEAL</span>
         </div>
         <div>
-          <div style="font-weight:700; color:var(--gia-navy);">OFFICIAL GIA LABORATORY REPORT DOSSIER</div>
+          <div style="font-weight:700; color:var(--gia-navy);">OFFICIAL @Model.CertType LABORATORY REPORT DOSSIER</div>
           <div>This digital certificate is cryptographically matched to physical laser inscriptions and SAT Jewels records.</div>
         </div>
       </div>
