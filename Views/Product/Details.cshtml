@@ -137,12 +137,18 @@
       "@@type": "Brand",
       "name": "SAT Jewel"
     },
+    @if (photoReviews != null && photoReviews.Count > 0)
+    {
+      var avgScore = photoReviews.Average(r => r.Rating > 0 ? (double)r.Rating : 5.0).ToString("0.0", System.Globalization.CultureInfo.InvariantCulture);
+      <text>
     "aggregateRating": {
       "@@type": "AggregateRating",
-      "ratingValue": "4.9",
-      "reviewCount": "128",
+      "ratingValue": "@avgScore",
+      "reviewCount": "@(photoReviews.Count)",
       "bestRating": "5"
     },
+      </text>
+    }
     "offers": {
       "@@type": "Offer",
       "url": "@prodCanonical",
@@ -155,10 +161,93 @@
   }
   </script>
 
+  <link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="shortcut icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="apple-touch-icon" href="/assets/sat_emblem_clean.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="~/css/style.css" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      corePlugins: {
+        preflight: false
+      },
+      theme: {
+        extend: {
+          colors: {
+            "secondary": "#e4c277",
+            "on-secondary-container": "#d5b46b",
+            "on-primary-fixed-variant": "#574500",
+            "surface-container-high": "#2a2a2b",
+            "on-surface-variant": "#d0c5af",
+            "tertiary-fixed-dim": "#26e19a",
+            "secondary-fixed-dim": "#e4c277",
+            "tertiary": "#36eaa1",
+            "primary-container": "#d4af37",
+            "surface-dim": "#131314",
+            "on-error": "#690005",
+            "primary-fixed": "#ffe088",
+            "surface-container-low": "#1c1b1c",
+            "surface-variant": "#353436",
+            "inverse-on-surface": "#313031",
+            "on-tertiary-fixed-variant": "#005234",
+            "inverse-surface": "#e5e2e3",
+            "primary": "#f2ca50",
+            "surface-tint": "#e9c349",
+            "background": "#131314",
+            "error": "#ffb4ab",
+            "on-surface": "#e5e2e3",
+            "surface": "#131314",
+            "on-secondary-fixed": "#251a00",
+            "surface-container-lowest": "#0e0e0f",
+            "tertiary-fixed": "#53feb4",
+            "outline": "#99907c",
+            "surface-container": "#201f20",
+            "on-tertiary": "#003823",
+            "secondary-fixed": "#ffdf9b",
+            "on-primary-container": "#554300",
+            "on-secondary-fixed-variant": "#5a4302",
+            "on-primary-fixed": "#241a00",
+            "surface-bright": "#3a393a",
+            "on-primary": "#3c2f00",
+            "on-tertiary-fixed": "#002112",
+            "secondary-container": "#5d4604",
+            "error-container": "#93000a",
+            "on-secondary": "#3f2e00",
+            "surface-container-highest": "#353436",
+            "on-tertiary-container": "#005033",
+            "primary-fixed-dim": "#e9c349",
+            "on-error-container": "#ffdad6",
+            "on-background": "#e5e2e3",
+            "inverse-primary": "#735c00",
+            "tertiary-container": "#00cc89",
+            "outline-variant": "#4d4635"
+          },
+          fontFamily: {
+            "headline-sm": ["Playfair Display", "serif"],
+            "label-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "sans-serif"],
+            "label-caps": ["Plus Jakarta Sans", "sans-serif"]
+          },
+          fontSize: {
+            "headline-sm": ["16px", { lineHeight: "24px", fontWeight: "600" }],
+            "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-sm": ["13px", { lineHeight: "20px", fontWeight: "400" }],
+            "label-md": ["13px", { lineHeight: "18px", fontWeight: "600" }],
+            "label-caps": ["10px", { lineHeight: "14px", letterSpacing: "0.1em", fontWeight: "700" }]
+          }
+        }
+      }
+    };
+  </script>
 
   <style>
     *, *:before, *:after { box-sizing: border-box; }
@@ -1060,6 +1149,7 @@
     .sat-floating-order-card {
       position: fixed;
       bottom: 24px;
+      bottom: max(24px, env(safe-area-inset-bottom, 24px));
       right: 24px;
       max-width: 420px;
       width: calc(100% - 48px);
@@ -1182,6 +1272,7 @@
       }
       .sat-floating-order-card {
         bottom: 16px;
+        bottom: max(16px, env(safe-area-inset-bottom, 16px));
         right: 16px;
         width: calc(100% - 32px);
       }
@@ -1190,20 +1281,60 @@
 </head>
 <body>
 
-  <!-- Top Announcement Bar -->
-  <div class="sat-announcement-bar">
-    <i class="fa-solid fa-gem" style="margin-right:6px;"></i> 100% GIA &amp; IGI CERTIFIED DIAMONDS • FREE WORLDWIDE INSURED SHIPPING
+  <!-- Top Luxury Ticker Bar -->
+  <div class="w-full bg-surface-container-lowest border-b border-outline-variant/30 py-2 text-center">
+    <p class="font-label-caps text-[11px] text-primary tracking-widest font-bold uppercase m-0 flex items-center justify-center gap-2">
+      <span class="text-[13px]">💎</span>
+      <span>100% GIA &amp; IGI CERTIFIED DIAMONDS • FREE WORLDWIDE INSURED SHIPPING</span>
+    </p>
   </div>
 
-  <!-- Header Navigation -->
-  <header class="sat-nav-header">
-    <div class="sat-nav-inner">
-      <a href="/" class="brand-title">
-        SAT <span class="gold-text">Jewel</span>
-      </a>
-      <a href="/Product/Category?id=1" style="color:#d4b270; font-size:13px; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:6px;">
-        <i class="fa-solid fa-arrow-left"></i> Back to Catalog
-      </a>
+  <!-- Header Navigation (Unified Luxury Header - As Designed) -->
+  <header class="sticky top-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
+    <div class="max-w-[1400px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Left: Storefront backlink & brand & breadcrumb -->
+      <div class="flex items-center gap-4 shrink-0">
+        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="/" style="text-decoration:none;">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+          <span class="hidden sm:inline font-bold uppercase tracking-wider text-[11px]">Storefront</span>
+        </a>
+        <div class="h-4 w-[1px] bg-outline-variant/40 hidden sm:block"></div>
+        <div class="flex items-center gap-3">
+          <a href="/" class="flex items-center gap-2.5 group" style="text-decoration:none;">
+            <img src="/assets/sat_emblem_clean.png" alt="SAT Jewels Logo" class="w-8 h-8 rounded-full object-contain border border-primary/30" />
+            <span style="font-family: var(--font-serif, 'Playfair Display', serif); font-size: 19px; font-weight: 700; color: #ffffff; letter-spacing: 0.03em; line-height: 1; white-space: nowrap; display: flex; align-items: center;">SAT <span style="margin-left: 4px; color: #d4b878;">Jewel</span></span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Right: Cart & profile -->
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <a class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors" data-path="cart" href="/Product/Cart" title="Shopping Cart" style="text-decoration:none;">
+          <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+          <span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
+        </a>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+          var authName = User.Identity?.Name ?? "Sahil";
+          var authInitial = (!string.IsNullOrWhiteSpace(authName) ? authName.Substring(0, 1) : "S").ToUpper();
+          <a class="flex items-center gap-2 pl-2 pr-2.5 py-1 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-colors" data-path="account" href="/Account/MyAccount" style="text-decoration:none;">
+            <div class="w-7 h-7 rounded-full bg-primary text-on-primary font-headline-sm text-[13px] font-bold flex items-center justify-center">@authInitial</div>
+            <div class="flex flex-col text-left hidden sm:flex">
+              <span class="font-label-sm text-label-sm text-on-surface font-medium leading-none">@authName</span>
+              <span class="text-[9px] text-secondary font-label-caps tracking-wider leading-none mt-0.5">VIP Member</span>
+            </div>
+          </a>
+        }
+        else
+        {
+          <a class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-bold hover:bg-primary-fixed transition-colors" href="/Account/SignIn?returnUrl=@Context.Request.Path@Context.Request.QueryString" style="text-decoration:none;">
+            <span class="material-symbols-outlined text-[16px]">person</span>
+            <span>Sign In</span>
+          </a>
+        }
+      </div>
+
     </div>
   </header>
 
@@ -2043,6 +2174,19 @@
     });
 
     const isUserAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+
+    function syncCartBadge() {
+      try {
+        const isAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+        const email = '@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower()?.Trim() ?? "")';
+        const key = (isAuth && email) ? ('sat_cart_' + encodeURIComponent(email)) : 'sat_cart_guest';
+        const saved = localStorage.getItem(key);
+        const items = saved ? JSON.parse(saved) : [];
+        const badge = document.getElementById('navCartBadge');
+        if (badge) badge.textContent = items.length;
+      } catch (e) {}
+    }
+    document.addEventListener('DOMContentLoaded', syncCartBadge);
 
     function handlePhysicalCertToggle() {
       const chk = document.getElementById('chkPhysicalGiaCert');

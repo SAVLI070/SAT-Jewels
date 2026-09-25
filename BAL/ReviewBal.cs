@@ -202,6 +202,29 @@ namespace SAT1.BAL
             return await query.OrderByDescending(r => r.CreatedAt).ToListAsync();
         }
 
+        // Database-Level Paged Query for Admin Reviews Moderation (Eliminating In-Memory Slicing)
+        public async Task<(List<ProductReview> items, int totalCount)> GetReviewsPagedAsync(string? status, int page, int pageSize)
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 12;
+
+            var query = _context.ProductReviews.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(status) && !status.Equals("All", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(r => r.Status == status);
+            }
+
+            int totalCount = await query.CountAsync();
+            var items = await query
+                .OrderByDescending(r => r.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
         // Admin: Update Review Status (Approve / Reject)
         public async Task<bool> UpdateReviewStatusAsync(long reviewId, string newStatus)
         {

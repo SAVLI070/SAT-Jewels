@@ -13,9 +13,9 @@
   <title>Client Sanctuary — SAT Jewel Haute Joaillerie</title>
 
   <!-- Favicon / Tab Icons -->
-  <link rel="icon" type="image/png" href="/assets/sat_logo_transparent.png" />
-  <link rel="shortcut icon" type="image/png" href="/assets/sat_logo_transparent.png" />
-  <link rel="apple-touch-icon" href="/assets/sat_logo_transparent.png" />
+  <link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="shortcut icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="apple-touch-icon" href="/assets/sat_emblem_clean.png" />
 
   <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -58,6 +58,7 @@
       inset: 0;
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       background: #000000 url('/assets/auth_luxury_highjewelry.jpg') center center / cover no-repeat;
       z-index: 1;
       display: flex;
@@ -444,6 +445,7 @@
       .sat-auth-stage {
         position: relative;
         min-height: 100vh;
+        min-height: 100dvh;
         height: auto;
         width: 100%;
         background-attachment: fixed;
@@ -481,7 +483,7 @@
         z-index: 100;
       }
       .sat-input-ctrl {
-        font-size: 15px; /* Prevents iOS auto-zoom on input focus */
+        font-size: 16px; /* 16px prevents iOS Safari viewport auto-zoom on input focus */
       }
     }
   </style>

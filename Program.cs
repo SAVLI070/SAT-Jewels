@@ -62,7 +62,7 @@ builder.Services.AddControllersWithViews();
 // Add HttpClient for External Payment Gateways (PayPal & Razorpay)
 builder.Services.AddHttpClient();
 
-// Add In-Memory Caching (for OTP security, rate limiting, and temporary token vaults)
+// Add In-Memory Caching (for catalog performance, rate limiting, and temporary token vaults)
 builder.Services.AddMemoryCache();
 
 // Register BAL & DAL Payment Services
@@ -140,6 +140,19 @@ using (var scope = app.Services.CreateScope())
                 ""IsDefault"" boolean NOT NULL DEFAULT false,
                 CONSTRAINT ""PK_UserAddresses"" PRIMARY KEY (""AddressId"")
             );
+
+            CREATE TABLE IF NOT EXISTS ""WishlistItems"" (
+                ""Id"" serial NOT NULL,
+                ""UserId"" text NOT NULL,
+                ""CatalogItemId"" text NOT NULL,
+                ""ProductName"" text NOT NULL DEFAULT '',
+                ""PriceUSD"" numeric(18,2) NOT NULL DEFAULT 0.00,
+                ""ImageUrl"" text NOT NULL DEFAULT '',
+                ""AddedAt"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT ""PK_WishlistItems"" PRIMARY KEY (""Id"")
+            );
+            CREATE INDEX IF NOT EXISTS ""IX_WishlistItems_UserId"" ON ""WishlistItems"" (""UserId"");
+
 
             CREATE TABLE IF NOT EXISTS ""dynamic_pricing_rules"" (
                 ""id"" bigserial NOT NULL,
@@ -264,6 +277,9 @@ using (var scope = app.Services.CreateScope())
             CREATE INDEX IF NOT EXISTS ""IX_order_tracking_history_order_id"" ON ""order_tracking_history"" (""order_id"");
             CREATE INDEX IF NOT EXISTS ""IX_UserAddresses_UserId"" ON ""UserAddresses"" (""UserId"");
             CREATE INDEX IF NOT EXISTS ""IX_Users_Email"" ON ""Users"" (""Email"");
+            CREATE INDEX IF NOT EXISTS ""IX_products_cat_shape_created"" ON ""products"" (""category_id"", ""diamond_shape_id"", ""created_at"" DESC);
+            CREATE INDEX IF NOT EXISTS ""IX_products_cat_price"" ON ""products"" (""category_id"", ""price"");
+            CREATE INDEX IF NOT EXISTS ""IX_product_variants_prod_metal_carat"" ON ""product_variants"" (""product_id"", ""metal_id"", ""carat_id"");
 
             DO $$
             BEGIN

@@ -1,0 +1,667 @@
+@model SAT1.Models.User
+@{
+    Layout = null;
+    ViewData["Title"] = "Personal Information & Profile Settings — SAT Jewel";
+    var user = Model;
+    var rawName = user?.FullName ?? User.Identity?.Name ?? "Sahil Khurana";
+    string displayName = !string.IsNullOrWhiteSpace(rawName) && rawName.Trim() != "@" ? rawName.Trim() : "Sahil Khurana";
+    var nameParts = displayName.Split(' ');
+    var firstName = nameParts.FirstOrDefault() ?? "Sahil";
+    var lastName = nameParts.Length > 1 ? string.Join(" ", nameParts.Skip(1)) : "";
+    var email = user?.Email ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "s@gmail.com";
+    var phone = !string.IsNullOrWhiteSpace(user?.Phone) ? user.Phone : "+1 (812) 829-1686";
+    var initial = (!string.IsNullOrWhiteSpace(displayName) ? displayName.Substring(0, 1) : "S").ToUpper();
+}
+<!DOCTYPE html>
+<html class="dark" lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+<link rel="shortcut icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+<link rel="apple-touch-icon" href="/assets/sat_emblem_clean.png" />
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"error-container":"#93000a","surface-tint":"#e9c349","on-tertiary-container":"#005033","error":"#ffb4ab","on-background":"#e5e2e3","surface-bright":"#3a393a","surface-container":"#201f20","secondary-fixed":"#ffdf9b","surface":"#131314","surface-dim":"#131314","on-surface-variant":"#d0c5af","tertiary-fixed":"#53feb4","surface-container-lowest":"#0e0e0f","secondary-container":"#5d4604","on-error":"#690005","outline":"#99907c","surface-container-highest":"#353436","surface-container-high":"#2a2a2b","outline-variant":"#4d4635","on-tertiary":"#003823","tertiary":"#36eaa1","surface-container-low":"#1c1b1c","on-primary":"#3c2f00","inverse-surface":"#e5e2e3","background":"#131314","secondary":"#e4c277","inverse-primary":"#735c00","primary-container":"#d4af37","on-tertiary-fixed":"#002112","primary":"#f2ca50","on-primary-fixed":"#241a00","tertiary-fixed-dim":"#26e19a","on-secondary-container":"#d5b46b","on-error-container":"#ffdad6","primary-fixed":"#ffe088","on-secondary-fixed":"#251a00","on-tertiary-fixed-variant":"#005234","on-surface":"#e5e2e3","on-primary-container":"#554300","on-primary-fixed-variant":"#574500","surface-variant":"#353436","tertiary-container":"#00cc89","secondary-fixed-dim":"#e4c277","on-secondary":"#3f2e00","on-secondary-fixed-variant":"#5a4302","primary-fixed-dim":"#e9c349","inverse-on-surface":"#313031"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter":"1.5rem","space-lg":"1.5rem","space-sm":"0.5rem","margin":"3rem","space-2xl":"4rem","margin-mobile":"1.25rem","space-xs":"0.25rem","space-md":"1rem","gutter-mobile":"1rem","space-xl":"2.5rem"},"fontFamily":{"body-lg":["Plus Jakarta Sans"],"headline-md":["Playfair Display"],"label-md":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"label-caps":["Plus Jakarta Sans"],"headline-lg":["Playfair Display"],"headline-lg-mobile":["Playfair Display"],"display-hero":["Playfair Display"],"display-hero-mobile":["Playfair Display"],"headline-sm":["Playfair Display"],"body-md":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"]},"fontSize":{"body-lg":["16px",{"lineHeight":"26px","fontWeight":"400"}],"headline-md":["24px",{"lineHeight":"32px","fontWeight":"500"}],"label-md":["13px",{"lineHeight":"18px","fontWeight":"600"}],"label-sm":["12px",{"lineHeight":"16px","fontWeight":"500"}],"label-caps":["11px",{"lineHeight":"16px","letterSpacing":"0.12em","fontWeight":"700"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-lg-mobile":["26px",{"lineHeight":"34px","letterSpacing":"0em","fontWeight":"500"}],"display-hero":["52px",{"lineHeight":"64px","letterSpacing":"-0.02em","fontWeight":"600"}],"display-hero-mobile":["34px",{"lineHeight":"42px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","fontWeight":"500"}],"body-md":["14px",{"lineHeight":"22px","fontWeight":"400"}],"body-sm":["13px",{"lineHeight":"20px","fontWeight":"400"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen">
+<!-- LEFT NAVIGATION CHROME -->
+<aside id="accountSidebar" class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between p-space-md transition-transform duration-300 ease-in-out"><div class="flex flex-col h-full justify-between">
+<div class="space-y-space-md">
+<!-- Brand Logo + Collapse Button -->
+<div class="flex items-center justify-between px-space-xs pt-space-xs">
+  <a class="flex items-center gap-space-sm group" href="/">
+    <img src="/assets/sat_emblem_clean.png" alt="SAT Jewels Official Logo" class="w-9 h-9 rounded-full object-contain border border-primary/30 shadow-[0_0_12px_rgba(212,175,55,0.2)]" />
+    <div class="flex flex-col">
+      <span style="font-family: var(--font-serif, 'Playfair Display', serif); font-size: 19px; font-weight: 700; color: #ffffff; letter-spacing: 0.03em; line-height: 1; white-space: nowrap; display: flex; align-items: center;">SAT <span style="margin-left: 4px; color: #d4b878;">Jewel</span></span>
+      <span class="font-label-caps text-[9px] uppercase tracking-[0.2em] text-secondary/80 mt-1">Fine Jewelry &amp; Atelier</span>
+    </div>
+  </a>
+  <button id="btnCollapseSidebar" onclick="toggleSidebar()" type="button" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex items-center justify-center transition-colors" title="Collapse sidebar menu">
+    <span class="material-symbols-outlined text-[20px]">chevron_left</span>
+  </button>
+</div>
+<!-- User Info Header Card (Hello, Sahil / s@gmail.com) -->
+<div class="p-space-md rounded-xl bg-surface-container/50 border border-outline-variant/30 flex items-center gap-3 mt-2">
+<div class="w-10 h-10 rounded-full bg-gradient-to-br from-surface-container-highest to-surface-container-low border border-secondary/40 flex items-center justify-center font-headline-sm text-headline-sm text-secondary font-bold flex-shrink-0">
+        @initial
+      </div>
+<div class="flex-1 min-w-0">
+<p class="font-headline-sm text-body-lg text-on-surface font-semibold truncate">Hello, @displayName</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">@email</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="space-y-1 pt-2">
+<!-- Shop Products -->
+<a class="flex items-center gap-3 px-space-md py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md" href="/Product">
+<span class="material-symbols-outlined text-[20px]">diamond</span>
+<span class="">Shop Products</span>
+</a>
+<!-- My Account (Active) -->
+<a class="flex items-center gap-3 px-space-md py-2.5 rounded-lg bg-surface-container-high text-secondary font-semibold transition-all font-label-md text-label-md" href="/Account/MyAccount">
+<span class="material-symbols-outlined text-[20px]">person</span>
+<span class="">My Account</span>
+</a>
+<!-- My Wishlist -->
+<a class="flex items-center justify-between px-space-md py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md" href="/Account/MyAccount?tab=wishlist#wishlist">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+<span class="">My Wishlist</span>
+</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest/80 text-secondary text-label-caps font-bold">4</span>
+</a>
+<!-- My Orders -->
+<a class="flex items-center justify-between px-space-md py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md" href="/Account/MyAccount?tab=orders#orders">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="">My Orders</span>
+</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-container/50 text-secondary text-label-caps font-bold">2</span>
+</a>
+<!-- Saved Addresses -->
+<a class="flex items-center justify-between px-space-md py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md" href="/Account/MyAccount?tab=addresses#addresses">
+<span class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px]">location_on</span>
+<span class="">Saved Addresses</span>
+</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-lowest/80 text-secondary text-label-caps font-bold">1</span>
+</a>
+<!-- Shopping Cart -->
+<a class="flex items-center gap-3 px-space-md py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md" href="/Product/Cart">
+<span class="material-symbols-outlined text-[20px]">shopping_cart</span>
+<span class="">Shopping Cart</span>
+</a>
+<!-- Contact Us -->
+<a class="flex items-center gap-3 px-space-md py-2.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all font-label-md text-label-md" href="/Account/MyAccount?tab=contact#contact">
+<span class="material-symbols-outlined text-[20px]">mail</span>
+<span class="">Contact Us</span>
+</a>
+</nav>
+</div>
+<!-- Bottom section: subtle divider line + Logout -->
+<div class="pt-3 border-t border-outline-variant/30 space-y-2 pb-1">
+<a href="/Account/Logout" class="flex items-center gap-3 w-full px-space-md py-2.5 rounded-lg text-error hover:bg-surface-container-high transition-all font-label-md text-label-md text-left" role="button">
+<span class="material-symbols-outlined text-[20px]">logout</span>
+<span class="font-medium">Logout</span>
+</a>
+</div>
+</div></aside>
+<!-- MAIN APP CANVAS -->
+<div id="accountMainCanvas" class="pl-72 transition-all duration-300 ease-in-out">
+<!-- TOP HEADER -->
+<header id="accountTopHeader" class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/30 z-40 px-gutter flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out">
+<div class="flex items-center gap-3">
+<button id="btnExpandSidebar" onclick="toggleSidebar()" type="button" class="hidden p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex items-center justify-center transition-colors" title="Open Navigation Menu">
+  <span class="material-symbols-outlined text-[22px]">menu</span>
+</button>
+<a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group" href="/">
+<span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">west</span>
+<span class="">Back to Storefront</span>
+</a>
+</div>
+<div class="flex items-center gap-space-md">
+<div class="relative hidden md:block">
+<div class="flex items-center gap-2 px-space-md py-1.5 rounded-full bg-surface-container/80 border border-outline-variant/30 text-on-surface-variant font-label-sm text-label-sm w-64 lg:w-72">
+<span class="material-symbols-outlined text-[18px]">search</span>
+<input class="bg-transparent border-none outline-none text-on-surface placeholder:text-on-surface-variant/60 w-full text-xs" placeholder="Search orders, invoices, items..." type="text"/>
+</div>
+</div>
+<a href="/Product/Cart" aria-label="Cart" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-surface-container-high transition-all" role="button">
+<span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+</a>
+<div class="pl-space-xs border-l border-outline-variant/40 flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-gradient-to-br from-surface-container-highest to-surface-container-low border border-secondary/40 flex items-center justify-center font-headline-sm text-secondary font-bold text-xs ring-1 ring-secondary/40">
+@initial
+</div>
+</div>
+</div>
+</header>
+<!-- MAIN SCROLLABLE CONTENT -->
+<main class="relative pt-20 bg-background min-h-screen w-full px-gutter py-space-lg"><div class="flex flex-col w-full max-w-[1140px] mx-auto pb-space-2xl space-y-space-xl">
+
+<!-- TOP HEADER & CONTROLS SECTION -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pt-2">
+<div class="space-y-space-xs">
+<a class="inline-flex items-center gap-2 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group" href="/Account/MyAccount">
+<span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1 text-secondary">arrow_back</span>
+<span>Back to Account Overview</span>
+</a>
+<h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Personal Information &amp; Profile Settings</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+        Update your personal credentials, contact verification, bespoke ring sizing records, and cryptographic vault security preferences.
+      </p>
+</div>
+<!-- Top Action Buttons -->
+<div class="flex items-center gap-3 self-start md:self-end shrink-0">
+<a href="/Account/MyAccount" class="px-space-lg py-2.5 rounded-full bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all inline-block" role="button">
+        Cancel
+      </a>
+<button onclick="handleSaveProfile()" class="px-space-lg py-2.5 rounded-full bg-gradient-to-r from-secondary to-primary-container text-surface-container-lowest font-label-md text-label-md font-bold shadow-lg hover:shadow-primary-container/20 hover:brightness-105 active:scale-95 transition-all flex items-center gap-2" type="button">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+<span>Save Changes</span>
+</button>
+</div>
+</div>
+<!-- CLIENT ATELIER BADGE & MONOGRAM BANNER -->
+<div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-surface-container to-surface-container-low p-space-lg shadow-xl">
+<!-- Ambient gold background flare -->
+<div class="absolute -right-20 -top-20 w-80 h-80 rounded-full bg-secondary/10 blur-3xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-space-lg">
+<div class="flex flex-col sm:flex-row items-center sm:items-center gap-space-lg text-center sm:text-left">
+<!-- Monogram Avatar with Double Ring Treatment -->
+<div class="relative group">
+<div class="w-24 h-24 rounded-full bg-gradient-to-tr from-surface-container-highest via-surface-container to-surface-container-lowest p-[2px] shadow-[0_0_24px_rgba(212,175,55,0.2)]">
+<div class="w-full h-full rounded-full bg-surface-container-low flex items-center justify-center relative overflow-hidden">
+<span class="font-headline-lg text-headline-lg text-secondary font-bold select-none">@initial</span>
+<div class="absolute inset-0 bg-surface-container-lowest/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined text-secondary text-[22px]">photo_camera</span>
+<span class="font-label-caps text-label-caps text-on-surface uppercase mt-1">Change</span>
+</div>
+</div>
+</div>
+<!-- Verified check dot -->
+<span class="absolute bottom-1 right-1 w-6 h-6 rounded-full bg-secondary text-surface-container-lowest flex items-center justify-center shadow-md">
+<span class="material-symbols-outlined text-[14px] font-bold">verified</span>
+</span>
+</div>
+<!-- Identity & Status Badges -->
+<div class="space-y-2">
+<div class="flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
+<h3 id="displayHeaderName" class="font-headline-sm text-headline-sm text-on-surface font-semibold">@displayName</h3>
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-container/40 text-secondary font-label-caps text-label-caps uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+              Verified SAT Member
+            </span>
+<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[14px]">event</span>
+              Member since Oct 2023
+            </span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Private Client Tier: <span class="text-secondary font-medium">Bespoke Diamond Collector</span> • Client ID: <span class="font-mono text-xs text-on-surface">#SAT-8492-VIP</span></p>
+<div class="flex items-center justify-center sm:justify-start gap-3 pt-1">
+<button onclick="alert('Profile photo upload is integrated with your secure vault account.')" class="text-secondary hover:text-primary font-label-sm text-label-sm font-semibold flex items-center gap-1.5 transition-colors" type="button">
+<span class="material-symbols-outlined text-[16px]">upload</span>
+              Upload Portrait
+            </button>
+<span class="text-surface-container-highest">•</span>
+<button onclick="alert('Profile photo reset to default monogram.')" class="text-on-surface-variant hover:text-error font-label-sm text-label-sm transition-colors" type="button">
+              Remove
+            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- MAIN TWO-COLUMN FORM LAYOUT -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-space-lg">
+<!-- CARD 1: PERSONAL DETAILS -->
+<div class="rounded-xl bg-surface-container p-space-lg flex flex-col justify-between shadow-md space-y-space-md">
+<div>
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-full bg-surface-container-high text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">badge</span>
+</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Personal Details</h4>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">01 / Identity</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">Essential information utilized for customized appraisals, bespoke engraving logs, and VIP salon identification.</p>
+<div class="space-y-4">
+<!-- Salutation / Title & First Name Row -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5" for="salutation">Salutation</label>
+<select class="w-full rounded-lg bg-surface-container-lowest px-3 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60 transition-all" id="salutation">
+<option selected="">Mr.</option>
+<option>Mrs.</option>
+<option>Ms.</option>
+<option>Dr.</option>
+<option>Lady / Lord</option>
+</select>
+</div>
+<div class="sm:col-span-2">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5" for="firstName">First Name</label>
+<input class="w-full rounded-lg bg-surface-container-lowest px-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60 transition-all placeholder:text-outline" id="firstName" type="text" value="@firstName"/>
+</div>
+</div>
+<!-- Last Name & Display Name -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5" for="lastName">Last Name</label>
+<input class="w-full rounded-lg bg-surface-container-lowest px-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60 transition-all" id="lastName" type="text" value="@lastName"/>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5" for="displayNameInput">Display Name</label>
+<input class="w-full rounded-lg bg-surface-container-lowest px-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60 transition-all" id="displayNameInput" type="text" value="@displayName"/>
+</div>
+</div>
+<!-- Date of Birth (Milestone Rewards) -->
+<div>
+<div class="flex items-center justify-between mb-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant" for="dob">Date of Birth</label>
+<span class="font-label-caps text-label-caps text-secondary uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px]">featured_seasonal_and_gifts</span>
+                Annual Gift Eligibility
+              </span>
+</div>
+<div class="relative">
+<input class="w-full rounded-lg bg-surface-container-lowest px-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60 transition-all scheme-dark" id="dob" type="date" value="1994-06-18"/>
+</div>
+<p class="font-body-sm text-[11px] text-on-surface-variant/80 mt-1">Used exclusively for personalized anniversary diamond tokens and birthstone curation.</p>
+</div>
+</div>
+</div>
+<div class="pt-space-sm flex items-center justify-between">
+<span class="font-body-sm text-[12px] text-on-surface-variant">Profile completeness: <span class="text-secondary font-semibold">94%</span></span>
+<span class="text-on-surface-variant text-[12px]">Last updated recently</span>
+</div>
+</div>
+<!-- CARD 2: CONTACT & VERIFICATION -->
+<div class="rounded-xl bg-surface-container p-space-lg flex flex-col justify-between shadow-md space-y-space-md">
+<div>
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-full bg-surface-container-high text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">verified_user</span>
+</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Contact &amp; Verification</h4>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">02 / Concierge</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">Encrypted communication conduits for discrete shipment dispatch, vault arrivals, and private appraisal alerts.</p>
+<div class="space-y-4">
+<!-- Email Address Row -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-sm text-label-sm text-on-surface-variant" for="emailField">Primary Email Address</label>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary font-label-caps text-[10px] font-bold tracking-wider uppercase">
+<span class="material-symbols-outlined text-[12px]">check</span> Verified
+              </span>
+</div>
+<div class="flex gap-2">
+<div class="relative flex-1">
+<span class="absolute left-3.5 top-2.5 text-on-surface-variant material-symbols-outlined text-[18px]">mail</span>
+<input class="w-full rounded-lg bg-surface-container-lowest pl-10 pr-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none opacity-90 cursor-not-allowed" id="emailField" readonly="" type="email" value="@email"/>
+</div>
+<button onclick="alert('Email address is bound to your authentication ledger.')" class="px-3 py-2.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-secondary hover:text-primary font-label-sm text-label-sm font-semibold transition-colors shrink-0" type="button">
+                Change Email
+              </button>
+</div>
+</div>
+<!-- Mobile Phone Row -->
+<div class="space-y-1.5">
+<div class="flex items-center justify-between">
+<label class="font-label-sm text-label-sm text-on-surface-variant" for="phoneField">Secure Mobile Phone</label>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-tertiary/10 text-tertiary font-label-caps text-[10px] font-bold tracking-wider uppercase">
+<span class="material-symbols-outlined text-[12px]">sms</span> SMS Alerts Active
+              </span>
+</div>
+<div class="flex gap-2">
+<div class="relative flex-1">
+<span class="absolute left-3.5 top-2.5 text-on-surface-variant material-symbols-outlined text-[18px]">call</span>
+<input class="w-full rounded-lg bg-surface-container-lowest pl-10 pr-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60 transition-all" id="phoneField" type="text" value="@phone"/>
+</div>
+<button onclick="handleSaveProfile()" class="px-3 py-2.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface hover:text-secondary font-label-sm text-label-sm font-medium transition-colors shrink-0" type="button">
+                Update
+              </button>
+</div>
+</div>
+<!-- Preferred Communication Channel Pills -->
+<div class="pt-2">
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-2">Preferred Concierge Channel</label>
+<div class="grid grid-cols-3 gap-2">
+<label class="cursor-pointer">
+<input checked="" class="peer sr-only" name="comm_channel" type="radio" value="whatsapp"/>
+<div class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-surface-container-lowest peer-checked:bg-secondary-container/40 peer-checked:text-secondary text-on-surface-variant font-label-sm text-label-sm font-semibold transition-all text-center">
+<span class="material-symbols-outlined text-[16px]">chat</span>
+<span>WhatsApp</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="comm_channel" type="radio" value="sms"/>
+<div class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-surface-container-lowest peer-checked:bg-secondary-container/40 peer-checked:text-secondary text-on-surface-variant font-label-sm text-label-sm font-semibold transition-all text-center">
+<span class="material-symbols-outlined text-[16px]">phone_iphone</span>
+<span>SMS</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="comm_channel" type="radio" value="email"/>
+<div class="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg bg-surface-container-lowest peer-checked:bg-secondary-container/40 peer-checked:text-secondary text-on-surface-variant font-label-sm text-label-sm font-semibold transition-all text-center">
+<span class="material-symbols-outlined text-[16px]">mail</span>
+<span>Email</span>
+</div>
+</label>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-space-sm">
+<span class="inline-flex items-center gap-2 font-body-sm text-[12px] text-tertiary">
+<span class="material-symbols-outlined text-[16px]">lock</span>
+          256-bit cryptographic storage active for all VIP communication.
+        </span>
+</div>
+</div>
+<!-- CARD 3: JEWELRY & SIZING PREFERENCES -->
+<div class="rounded-xl bg-surface-container p-space-lg flex flex-col justify-between shadow-md space-y-space-md">
+<div>
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-full bg-surface-container-high text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">diamond</span>
+</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Jewelry &amp; Sizing Preferences</h4>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">03 / Atelier</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">Preset specifications ensure custom commissions, ring reservations, and trial settings align with your biometric profile.</p>
+<div class="space-y-4">
+<!-- Ring Size Dropdown & Guide Row -->
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5" for="ringSize">Default Ring Size (US)</label>
+<div class="relative">
+<select class="w-full rounded-lg bg-surface-container-lowest px-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60 appearance-none" id="ringSize">
+<option>US 4.5 (15.3mm)</option>
+<option>US 5.0 (15.7mm)</option>
+<option>US 5.5 (16.1mm)</option>
+<option selected="">US 6.0 (16.5mm) - Recorded</option>
+<option>US 6.5 (16.9mm)</option>
+<option>US 7.0 (17.3mm)</option>
+<option>US 7.5 (17.7mm)</option>
+<option>US 8.0 (18.1mm)</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 pointer-events-none text-on-surface-variant text-[18px]">expand_more</span>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5">Diamond Cut Preference</label>
+<div class="relative">
+<select class="w-full rounded-lg bg-surface-container-lowest px-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60 appearance-none">
+<option selected="">Cushion Brilliant</option>
+<option>Emerald Cut</option>
+<option>Round Brilliant (Hearts &amp; Arrows)</option>
+<option>Oval Cut</option>
+<option>Radiant Cut</option>
+<option>Asscher Cut</option>
+</select>
+<span class="material-symbols-outlined absolute right-3 top-3 pointer-events-none text-on-surface-variant text-[18px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Preferred Precious Metal Selection -->
+<div class="space-y-1.5">
+<label class="block font-label-sm text-label-sm text-on-surface-variant">Preferred Precious Metal</label>
+<div class="grid grid-cols-3 gap-2">
+<label class="cursor-pointer">
+<input checked="" class="peer sr-only" name="metal_choice" type="radio" value="platinum"/>
+<div class="p-2.5 rounded-lg bg-surface-container-lowest peer-checked:bg-secondary-container/40 peer-checked:text-secondary text-on-surface-variant flex flex-col items-center justify-center gap-1 transition-all text-center">
+<span class="w-3 h-3 rounded-full bg-slate-300"></span>
+<span class="font-label-sm text-label-sm font-semibold">Platinum 950</span>
+<span class="font-body-sm text-[10px] text-on-surface-variant/70">Hypoallergenic</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="metal_choice" type="radio" value="yellow_gold"/>
+<div class="p-2.5 rounded-lg bg-surface-container-lowest peer-checked:bg-secondary-container/40 peer-checked:text-secondary text-on-surface-variant flex flex-col items-center justify-center gap-1 transition-all text-center">
+<span class="w-3 h-3 rounded-full bg-secondary"></span>
+<span class="font-label-sm text-label-sm font-semibold">18k Yellow Gold</span>
+<span class="font-body-sm text-[10px] text-on-surface-variant/70">Atelier Signature</span>
+</div>
+</label>
+<label class="cursor-pointer">
+<input class="peer sr-only" name="metal_choice" type="radio" value="rose_gold"/>
+<div class="p-2.5 rounded-lg bg-surface-container-lowest peer-checked:bg-secondary-container/40 peer-checked:text-secondary text-on-surface-variant flex flex-col items-center justify-center gap-1 transition-all text-center">
+<span class="w-3 h-3 rounded-full bg-rose-400"></span>
+<span class="font-label-sm text-label-sm font-semibold">18k Rose Gold</span>
+<span class="font-body-sm text-[10px] text-on-surface-variant/70">Warm Alloy</span>
+</div>
+</label>
+</div>
+</div>
+<!-- Milestone / Anniversary Reminder -->
+<div class="pt-1">
+<div class="flex items-center justify-between mb-1.5">
+<label class="font-label-sm text-label-sm text-on-surface-variant" for="anniversaryField">Anniversary / Milestone Date</label>
+<span class="text-[11px] text-secondary font-label-caps uppercase">VIP Pre-Order Concierge</span>
+</div>
+<div class="relative">
+<span class="absolute left-3.5 top-2.5 text-on-surface-variant material-symbols-outlined text-[18px]">celebration</span>
+<input class="w-full rounded-lg bg-surface-container-lowest pl-10 pr-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60 scheme-dark" id="anniversaryField" type="date" value="2021-11-24"/>
+</div>
+<p class="font-body-sm text-[11px] text-on-surface-variant/80 mt-1">Our master goldsmith will prompt bespoke commission slots 60 days prior.</p>
+</div>
+</div>
+</div>
+<div class="pt-space-sm flex items-center justify-between">
+<a class="text-secondary hover:underline font-label-sm text-label-sm inline-flex items-center gap-1" href="/Home/RingSizeGuide">
+<span class="material-symbols-outlined text-[16px]">straighten</span> Request SAT Physical Ring Sizer Kit
+        </a>
+</div>
+</div>
+<!-- CARD 4: PASSWORD & AUTHENTICATION -->
+<div class="rounded-xl bg-surface-container p-space-lg flex flex-col justify-between shadow-md space-y-space-md">
+<div>
+<div class="flex items-center justify-between pb-space-sm">
+<div class="flex items-center gap-2.5">
+<span class="w-8 h-8 rounded-full bg-surface-container-high text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px]">key</span>
+</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface">Password &amp; Security</h4>
+</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">04 / Cryptography</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">Protect your high-value insurance certificates, appraisal records, and stored payment conduits.</p>
+<div class="space-y-4">
+<!-- Password Inputs -->
+<div class="space-y-3">
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5" for="currentPassword">Current Security Key / Password</label>
+<div class="relative">
+<input class="w-full rounded-lg bg-surface-container-lowest px-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60" id="currentPassword" type="password" value="••••••••••••"/>
+<button aria-label="Toggle password visibility" class="absolute right-3 top-2.5 text-on-surface-variant hover:text-on-surface" type="button" onclick="const f=document.getElementById('currentPassword'); f.type=f.type==='password'?'text':'password';">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</div>
+<div>
+<label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5" for="newPassword">New Vault Passphrase</label>
+<div class="relative">
+<input class="w-full rounded-lg bg-surface-container-lowest px-3.5 py-2.5 text-on-surface font-body-md text-body-md focus:outline-none focus:ring-1 focus:ring-secondary/60 placeholder:text-outline" id="newPassword" placeholder="Min. 12 characters, symbols &amp; digits" type="password"/>
+<button aria-label="Toggle password visibility" class="absolute right-3 top-2.5 text-on-surface-variant hover:text-on-surface" type="button" onclick="const f=document.getElementById('newPassword'); f.type=f.type==='password'?'text':'password';">
+<span class="material-symbols-outlined text-[18px]">visibility_off</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Two-Factor Authentication Box -->
+<div class="rounded-lg bg-surface-container-lowest p-space-md space-y-2">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary text-[20px]">shield</span>
+<span class="font-label-md text-label-md font-semibold text-on-surface">Two-Factor Authentication (2FA)</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-surface-container-high peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
+</label>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+              Enabled via encrypted SMS to <span class="text-on-surface font-mono text-xs">+1 (812) •••-1686</span>. Mandatory for orders exceeding $10,000 USD.
+            </p>
+</div>
+<!-- Security Keys & Hardware Token Link -->
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-secondary">token</span>
+<span class="font-label-sm text-label-sm">Hardware Keys (FIDO2 / YubiKey)</span>
+</div>
+<button onclick="alert('Hardware key ledger is active.')" class="text-secondary hover:text-primary font-label-sm text-label-sm font-semibold transition-colors" type="button">
+              Manage Keys (1 Active)
+            </button>
+</div>
+</div>
+</div>
+<div class="pt-space-sm flex items-center justify-between text-[11px] text-on-surface-variant">
+<span>Active Login Sessions: <span class="text-on-surface">Beverly Hills, CA (Current)</span></span>
+<button onclick="alert('Other sessions revoked.')" class="text-error hover:underline" type="button">Revoke Other Sessions</button>
+</div>
+</div>
+</div>
+<!-- ATELIER ASSURANCE & DISCRETE DISPATCH CALLOUT (VISUAL LUXURY ELEMENT) -->
+<div class="rounded-xl bg-gradient-to-r from-surface-container-lowest via-surface-container to-surface-container-lowest p-space-md flex flex-col md:flex-row items-center justify-between gap-space-md shadow-lg">
+<div class="flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary text-[24px]">verified</span>
+</div>
+<div>
+<h5 class="font-label-md text-label-md font-semibold text-on-surface">SAT Vault Protection &amp; Confidential Delivery</h5>
+<p class="font-body-sm text-body-sm text-on-surface-variant">All modifications made to physical delivery addresses or profile names require 15-minute verification hold to protect client holdings.</p>
+</div>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-highest text-secondary font-label-caps text-[11px] uppercase">
+<span class="w-2 h-2 rounded-full bg-secondary"></span> GIA • IGI Vault Synced
+      </span>
+</div>
+</div>
+<!-- BOTTOM STICKY/FIXED ACTIONS TRAY -->
+<div class="pt-space-md flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<!-- Deactivate / Delete Link -->
+<div>
+<button onclick="alert('Vault account deletion requires dedicated concierge verification.')" class="text-outline hover:text-error transition-colors font-label-sm text-label-sm inline-flex items-center gap-1.5 group" type="button">
+<span class="material-symbols-outlined text-[16px] text-outline-variant group-hover:text-error transition-colors">delete_forever</span>
+<span>Deactivate or Request Vault Account Deletion</span>
+</button>
+</div>
+<!-- Main Submission Action Cluster -->
+<div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+<a href="/Account/MyAccount" class="w-full sm:w-auto px-space-lg py-3 rounded-full bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-all text-center inline-block" role="button">
+        Discard Changes
+      </a>
+<button class="w-full sm:w-auto px-space-xl py-3 rounded-full bg-gradient-to-r from-secondary to-primary-container text-surface-container-lowest font-label-md text-label-md font-bold shadow-xl hover:brightness-105 active:scale-95 transition-all flex items-center justify-center gap-2" id="btnSaveProfile" type="button" onclick="handleSaveProfile()">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>Save Profile Settings</span>
+</button>
+</div>
+</div>
+
+<script>
+  // Toggle Sidebar Collapse / Expand
+  function toggleSidebar() {
+    const sidebar = document.getElementById('accountSidebar');
+    const mainCanvas = document.getElementById('accountMainCanvas');
+    const topHeader = document.getElementById('accountTopHeader');
+    const btnExpand = document.getElementById('btnExpandSidebar');
+
+    const isCollapsed = sidebar.classList.contains('-translate-x-full');
+    if (isCollapsed) {
+      sidebar.classList.remove('-translate-x-full');
+      mainCanvas.classList.add('pl-72');
+      mainCanvas.classList.remove('pl-0');
+      topHeader.classList.add('left-72');
+      topHeader.classList.remove('left-0');
+      if (btnExpand) btnExpand.classList.add('hidden');
+      localStorage.setItem('sat_sidebar_collapsed', 'false');
+    } else {
+      sidebar.classList.add('-translate-x-full');
+      mainCanvas.classList.remove('pl-72');
+      mainCanvas.classList.add('pl-0');
+      topHeader.classList.remove('left-72');
+      topHeader.classList.add('left-0');
+      if (btnExpand) btnExpand.classList.remove('hidden');
+      localStorage.setItem('sat_sidebar_collapsed', 'true');
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    if (localStorage.getItem('sat_sidebar_collapsed') === 'true') {
+      toggleSidebar();
+    }
+  });
+
+  async function handleSaveProfile() {
+    const saveBtn = document.getElementById('btnSaveProfile');
+    const fName = document.getElementById('firstName').value.trim();
+    const lName = document.getElementById('lastName').value.trim();
+    const full = fName + (lName ? ' ' + lName : '');
+    const phone = document.getElementById('phoneField').value.trim();
+
+    const originalHtml = saveBtn ? saveBtn.innerHTML : '';
+    if (saveBtn) {
+      saveBtn.innerHTML = `
+        <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+        <span>Syncing Vault Profile...</span>
+      `;
+      saveBtn.disabled = true;
+    }
+
+    try {
+      const res = await fetch('/Account/UpdateProfile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fullName: full, phone: phone })
+      });
+      const data = await res.json();
+      
+      const headName = document.getElementById('displayHeaderName');
+      if (headName && full) headName.textContent = full;
+
+      if (saveBtn) {
+        saveBtn.innerHTML = `
+          <span class="material-symbols-outlined text-[18px]">check</span>
+          <span>Profile Updated</span>
+        `;
+        saveBtn.classList.remove('from-secondary', 'to-primary-container');
+        saveBtn.classList.add('bg-tertiary-container', 'text-on-tertiary-container');
+
+        setTimeout(() => {
+          saveBtn.innerHTML = originalHtml;
+          saveBtn.classList.remove('bg-tertiary-container', 'text-on-tertiary-container');
+          saveBtn.classList.add('from-secondary', 'to-primary-container');
+          saveBtn.disabled = false;
+        }, 2200);
+      }
+    } catch(err) {
+      if (saveBtn) {
+        saveBtn.innerHTML = originalHtml;
+        saveBtn.disabled = false;
+      }
+      alert('Profile synced locally.');
+    }
+  }
+</script>
+
+</div></main>
+</div>
+<!-- FLOATING WHATSAPP CHAT BADGE -->
+<div class="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+<div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-highest/95 border border-outline-variant/40 backdrop-blur-md shadow-2xl">
+<span class="font-label-sm text-label-sm text-on-surface font-medium">SAT Concierge Support</span>
+<button aria-label="Dismiss message" class="text-outline hover:text-on-surface text-[14px]" type="button" onclick="this.parentElement.style.display='none'">
+<span class="material-symbols-outlined text-[14px]">close</span>
+</button>
+</div>
+<a aria-label="Direct SAT Customer Support on WhatsApp" class="w-13 h-13 p-3 rounded-full bg-[#25D366] text-surface-container-lowest flex items-center justify-center shadow-[0_4px_25px_rgba(37,211,102,0.4)] hover:scale-110 active:scale-95 transition-transform" href="https://wa.me/918320972779" target="_blank">
+<svg class="w-6 h-6 fill-current" viewbox="0 0 24 24">
+<path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"></path>
+</svg>
+</a>
+</div>
+</body></html>

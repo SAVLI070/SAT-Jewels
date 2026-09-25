@@ -21,21 +21,14 @@ namespace SAT1.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Wishlist()
+        public IActionResult Wishlist()
         {
             if (User.Identity?.IsAuthenticated != true)
             {
-                return Redirect("/Account/SignIn?returnUrl=/Account/Wishlist");
+                return Redirect("/Account/SignIn?returnUrl=/Account/MyAccount?tab=wishlist");
             }
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue(ClaimTypes.Email) ?? User.Identity.Name ?? "";
-            var items = await _context.WishlistItems
-                .AsNoTracking()
-                .Where(w => w.UserId == userId)
-                .OrderByDescending(w => w.AddedAt)
-                .ToListAsync();
-
-            return View(items);
+            return Redirect("/Account/MyAccount?tab=wishlist#wishlist");
         }
 
         [HttpGet]
@@ -289,22 +282,77 @@ namespace SAT1.Controllers
                 Role = User.FindFirstValue(ClaimTypes.Role) ?? "Client"
             };
 
+            var orders = await _authBal.GetUserOrdersAsync(userId, email);
+            var addresses = await _authBal.GetUserAddressesAsync(userId ?? "");
+            var wishlist = await _context.WishlistItems
+                .AsNoTracking()
+                .Where(w => w.UserId == userId || (!string.IsNullOrEmpty(email) && w.UserId == email))
+                .OrderByDescending(w => w.AddedAt)
+                .ToListAsync();
+
+            ViewBag.Orders = orders;
+            ViewBag.Addresses = addresses;
+            ViewBag.Wishlist = wishlist;
+
             return View(user);
         }
 
         [HttpGet]
-        public async Task<IActionResult> Orders()
+        public IActionResult Orders()
+        {
+            return Redirect("/Account/MyAccount?tab=orders#orders");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditProfile()
         {
             if (User.Identity?.IsAuthenticated != true)
             {
-                return Redirect("/Account/SignIn?returnUrl=/Account/Orders");
+                return Redirect("/Account/SignIn?returnUrl=/Account/EditProfile");
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var email = User.FindFirstValue(ClaimTypes.Email) ?? "";
 
-            var orders = await _authBal.GetUserOrdersAsync(userId, email);
-            return View(orders);
+            var user = await _authBal.GetUserByIdAsync(userId) ?? new User
+            {
+                FullName = User.Identity?.Name ?? "VIP Member",
+                Email = email,
+                Role = User.FindFirstValue(ClaimTypes.Role) ?? "Client"
+            };
+
+            return View(user);
+        }
+
+        public class UpdateProfileRequest
+        {
+            public string? FullName { get; set; }
+            public string? Phone { get; set; }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest req)
+        {
+            if (User.Identity?.IsAuthenticated != true)
+            {
+                return Unauthorized(new { success = false, message = "Not authenticated" });
+            }
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest(new { success = false, message = "User not found" });
+            }
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user != null)
+            {
+                if (!string.IsNullOrWhiteSpace(req?.FullName)) user.FullName = req.FullName.Trim();
+                if (!string.IsNullOrWhiteSpace(req?.Phone)) user.Phone = req.Phone.Trim();
+                await _context.SaveChangesAsync();
+            }
+
+            return Ok(new { success = true, message = "Profile updated successfully." });
         }
 
         // =========================================================================
@@ -312,16 +360,9 @@ namespace SAT1.Controllers
         // =========================================================================
 
         [HttpGet]
-        public async Task<IActionResult> Addresses()
+        public IActionResult Addresses()
         {
-            if (User.Identity?.IsAuthenticated != true)
-            {
-                return Redirect("/Account/SignIn?returnUrl=/Account/Addresses");
-            }
-
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
-            var addresses = await _authBal.GetUserAddressesAsync(userId);
-            return View(addresses);
+            return Redirect("/Account/MyAccount?tab=addresses#addresses");
         }
 
         [HttpPost]

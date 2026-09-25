@@ -769,30 +769,23 @@ namespace SAT1.BAL
                     })
                     .ToListAsync();
 
-                if (totalCount > 0)
+                return new PagedCatalogResult
                 {
-                    return new PagedCatalogResult
-                    {
-                        Items = pagedProducts,
-                        TotalCount = totalCount,
-                        Page = page,
-                        PageSize = pageSize
-                    };
-                }
+                    Items = pagedProducts,
+                    TotalCount = totalCount,
+                    Page = page,
+                    PageSize = pageSize
+                };
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"[GetCategoryProductsPagedAsync Error]: {ex.Message}");
             }
 
-            // Fallback
-            var allItems = await GetProductsByCategoryAndShapeAsync(categoryId, shape, webRootPath);
-            int fbCount = allItems.Count;
-            var fbPaged = allItems.Skip((page - 1) * pageSize).Take(pageSize).ToList();
             return new PagedCatalogResult
             {
-                Items = fbPaged,
-                TotalCount = fbCount,
+                Items = new List<CatalogItem>(),
+                TotalCount = 0,
                 Page = page,
                 PageSize = pageSize
             };

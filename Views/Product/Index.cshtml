@@ -1,18 +1,73 @@
 @model List<SAT1.Models.CatalogItem>
 @{
-    ViewData["Title"] = "Jewelry Catalog & Shop";
+    ViewData["Title"] = "Jewelry Catalog & Shop — SAT Jewel";
     var products = Model ?? new List<SAT1.Models.CatalogItem>();
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var userName = User.Identity?.Name ?? "Sahil";
+    var userInitial = (!string.IsNullOrWhiteSpace(userName) ? userName.Substring(0, 1) : "S").ToUpper();
 }
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bespoke Jewelry Catalog — SAT Jewel Sanctuary</title>
+  <link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="shortcut icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="apple-touch-icon" href="/assets/sat_emblem_clean.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="~/css/style.css" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      corePlugins: {
+        preflight: false
+      },
+      theme: {
+        extend: {
+          colors: {
+            "secondary": "#e4c277",
+            "on-secondary-container": "#d5b46b",
+            "surface-container-high": "#2a2a2b",
+            "on-surface-variant": "#d0c5af",
+            "tertiary": "#36eaa1",
+            "primary": "#f2ca50",
+            "primary-fixed": "#ffe088",
+            "surface-container-low": "#1c1b1c",
+            "surface-variant": "#353436",
+            "surface-container": "#201f20",
+            "surface-container-highest": "#353436",
+            "surface-container-lowest": "#0e0e0f",
+            "outline": "#99907c",
+            "outline-variant": "#4d4635",
+            "surface": "#131314",
+            "on-surface": "#e5e2e3",
+            "on-primary": "#3c2f00"
+          },
+          fontFamily: {
+            "headline-sm": ["Playfair Display", "serif"],
+            "label-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "sans-serif"],
+            "label-caps": ["Plus Jakarta Sans", "sans-serif"]
+          },
+          fontSize: {
+            "headline-sm": ["16px", { lineHeight: "24px", fontWeight: "600" }],
+            "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-sm": ["13px", { lineHeight: "20px", fontWeight: "400" }],
+            "label-md": ["13px", { lineHeight: "18px", fontWeight: "600" }],
+            "label-caps": ["10px", { lineHeight: "14px", letterSpacing: "0.1em", fontWeight: "700" }]
+          }
+        }
+      }
+    };
+  </script>
+
   <style>
     body {
       background: #07070a;
@@ -20,6 +75,7 @@
       font-family: var(--font-sans);
       min-height: 100vh;
       margin: 0;
+      padding-top: 64px;
     }
     .shop-container {
       max-width: 1200px;
@@ -128,11 +184,62 @@
   </style>
 </head>
 <body>
-  <div class="shop-container">
-    <div style="margin-bottom: 20px;">
-      <a href="/" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back to Storefront</a>
-    </div>
 
+  <!-- SAT Jewel Navigation Bar (Unified Luxury Header - As Designed) -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
+    <div class="max-w-[1180px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4 shrink-0">
+        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" data-path="home" href="/" style="text-decoration:none;">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+          <span class="hidden sm:inline">Storefront</span>
+        </a>
+        <div class="h-4 w-[1px] bg-outline-variant/40 hidden sm:block"></div>
+        <div class="flex items-center gap-2">
+          <a href="/" class="flex items-center gap-2.5 group" style="text-decoration:none;">
+            <img src="/assets/sat_emblem_clean.png" alt="SAT Jewels Logo" class="w-8 h-8 rounded-full object-contain border border-primary/30" />
+            <span style="font-family: var(--font-serif, 'Playfair Display', serif); font-size: 19px; font-weight: 700; color: #ffffff; letter-spacing: 0.03em; line-height: 1; white-space: nowrap; display: flex; align-items: center;">SAT <span style="margin-left: 4px; color: #d4b878;">Jewel</span></span>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex-1 max-w-md mx-2 hidden md:block">
+        <div class="relative w-full">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant/60">search</span>
+          <input class="w-full h-9 pl-9 pr-4 rounded-full bg-surface-container border border-outline-variant/40 text-on-surface placeholder:text-on-surface-variant/50 text-body-sm font-body-sm focus:outline-none focus:border-primary transition-colors" placeholder="Search certified diamonds, pieces, items..." type="text" onkeydown="if(event.key==='Enter'){window.location.href='/Product?search='+encodeURIComponent(this.value);}" />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <button class="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors md:hidden" type="button" onclick="const q = prompt('Search pieces:'); if(q) window.location.href='/Product?search='+encodeURIComponent(q);">
+          <span class="material-symbols-outlined text-[18px]">search</span>
+        </button>
+        <a class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors" data-path="cart" href="/Product/Cart" title="Shopping Cart" style="text-decoration:none;">
+          <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+          <span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
+        </a>
+        @if (isAuthenticated)
+        {
+          <a class="flex items-center gap-2 pl-2 pr-2.5 py-1 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-colors" data-path="account" href="/Account/MyAccount" style="text-decoration:none;">
+            <div class="w-7 h-7 rounded-full bg-primary text-on-primary font-headline-sm text-[13px] font-bold flex items-center justify-center">@userInitial</div>
+            <div class="flex flex-col text-left hidden sm:flex">
+              <span class="font-label-sm text-label-sm text-on-surface font-medium leading-none">@userName</span>
+              <span class="text-[9px] text-secondary font-label-caps tracking-wider leading-none mt-0.5">VIP Member</span>
+            </div>
+            <span class="material-symbols-outlined text-[16px] text-on-surface-variant hidden sm:inline">expand_more</span>
+          </a>
+        }
+        else
+        {
+          <a class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-bold hover:bg-primary-fixed transition-colors" href="/Account/SignIn?returnUrl=@Context.Request.Path@Context.Request.QueryString" style="text-decoration:none;">
+            <span class="material-symbols-outlined text-[16px]">person</span>
+            <span>Sign In</span>
+          </a>
+        }
+      </div>
+    </div>
+  </header>
+
+  <div class="shop-container">
     <div class="shop-header">
       <h1 class="shop-title">Shop SAT Bespoke Jewelry</h1>
       <p class="shop-sub">Conflict-free GIA certified engagement rings, necklaces, bracelets, and fine gemstones.</p>
@@ -155,5 +262,20 @@
       }
     </div>
   </div>
+
+  <script>
+    function syncCartBadge() {
+      try {
+        const isAuth = @(isAuthenticated ? "true" : "false");
+        const email = '@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower()?.Trim() ?? "")';
+        const key = (isAuth && email) ? ('sat_cart_' + encodeURIComponent(email)) : 'sat_cart_guest';
+        const saved = localStorage.getItem(key);
+        const items = saved ? JSON.parse(saved) : [];
+        const badge = document.getElementById('navCartBadge');
+        if (badge) badge.textContent = items.length;
+      } catch (e) {}
+    }
+    document.addEventListener('DOMContentLoaded', syncCartBadge);
+  </script>
 </body>
 </html>

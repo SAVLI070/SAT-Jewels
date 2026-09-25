@@ -104,10 +104,92 @@
   }
   </script>
 
+  <link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="shortcut icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="apple-touch-icon" href="/assets/sat_emblem_clean.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="~/css/style.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      corePlugins: {
+        preflight: false
+      },
+      theme: {
+        extend: {
+          colors: {
+            "secondary": "#e4c277",
+            "on-secondary-container": "#d5b46b",
+            "on-primary-fixed-variant": "#574500",
+            "surface-container-high": "#2a2a2b",
+            "on-surface-variant": "#d0c5af",
+            "tertiary-fixed-dim": "#26e19a",
+            "secondary-fixed-dim": "#e4c277",
+            "tertiary": "#36eaa1",
+            "primary-container": "#d4af37",
+            "surface-dim": "#131314",
+            "on-error": "#690005",
+            "primary-fixed": "#ffe088",
+            "surface-container-low": "#1c1b1c",
+            "surface-variant": "#353436",
+            "inverse-on-surface": "#313031",
+            "on-tertiary-fixed-variant": "#005234",
+            "inverse-surface": "#e5e2e3",
+            "primary": "#f2ca50",
+            "surface-tint": "#e9c349",
+            "background": "#131314",
+            "error": "#ffb4ab",
+            "on-surface": "#e5e2e3",
+            "surface": "#131314",
+            "on-secondary-fixed": "#251a00",
+            "surface-container-lowest": "#0e0e0f",
+            "tertiary-fixed": "#53feb4",
+            "outline": "#99907c",
+            "surface-container": "#201f20",
+            "on-tertiary": "#003823",
+            "secondary-fixed": "#ffdf9b",
+            "on-primary-container": "#554300",
+            "on-secondary-fixed-variant": "#5a4302",
+            "on-primary-fixed": "#241a00",
+            "surface-bright": "#3a393a",
+            "on-primary": "#3c2f00",
+            "on-tertiary-fixed": "#002112",
+            "secondary-container": "#5d4604",
+            "error-container": "#93000a",
+            "on-secondary": "#3f2e00",
+            "surface-container-highest": "#353436",
+            "on-tertiary-container": "#005033",
+            "primary-fixed-dim": "#e9c349",
+            "on-error-container": "#ffdad6",
+            "on-background": "#e5e2e3",
+            "inverse-primary": "#735c00",
+            "tertiary-container": "#00cc89",
+            "outline-variant": "#4d4635"
+          },
+          fontFamily: {
+            "headline-sm": ["Playfair Display", "serif"],
+            "label-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "sans-serif"],
+            "label-caps": ["Plus Jakarta Sans", "sans-serif"]
+          },
+          fontSize: {
+            "headline-sm": ["16px", { lineHeight: "24px", fontWeight: "600" }],
+            "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-sm": ["13px", { lineHeight: "20px", fontWeight: "400" }],
+            "label-md": ["13px", { lineHeight: "18px", fontWeight: "600" }],
+            "label-caps": ["10px", { lineHeight: "14px", letterSpacing: "0.1em", fontWeight: "700" }]
+          }
+        }
+      }
+    };
+  </script>
   <style>
     body {
       background: #07070a;
@@ -115,6 +197,7 @@
       font-family: var(--font-sans);
       min-height: 100vh;
       margin: 0;
+      padding-top: 64px;
     }
     /* Redirection Header & 6 Category Buttons Section with AI Banners */
     .cat-redir-section {
@@ -788,29 +871,61 @@
   </style>
 </head>
 <body>
-  <!-- SAT Jewel Navigation Bar (Dark Metallic Luxury Header) -->
-  <!-- Clean Glitch-Free Header Section for Category Pages (Task 2) -->
-  <nav class="navbar" style="position:relative; background:#08111e; border-bottom:1px solid rgba(212,178,112,0.3);">
-    <div class="container" style="display:flex; align-items:center; justify-content:space-between; padding:14px 20px; width:100%;">
-      <a href="/" class="sat-nav-brand-wrap" style="text-decoration:none;">
-        <img src="~/assets/sat_emblem_clean.png" asp-append-version="true" class="official-sat-logo-nav" alt="SAT Jewels Logo" />
-        <div class="nav-logo-slot">
-          <span style="font-family:var(--font-serif); font-size:21px; font-weight:700; color:#ffffff; letter-spacing:0.03em; line-height:1; white-space:nowrap; display:flex; align-items:center;">SAT <span class="sat-brand-script" style="margin-left:4px; color:var(--champagne-gold);">Jewel</span></span>
-          <span style="font-size:8.5px; font-weight:600; color:rgba(212,178,112,0.85); letter-spacing:0.22em; text-transform:uppercase; margin-top:3px;">Fine Jewelry</span>
-        </div>
-      </a>
-
-      <div style="display:flex; align-items:center; gap:16px;">
-        <a href="/" class="mobile-hidden" style="color:var(--champagne-gold); font-size:13.5px; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:6px;">
-          <i class="fa-solid fa-arrow-left" style="font-size:12px;"></i> Back to Home
+  <!-- SAT Jewel Navigation Bar (Unified Luxury Header - As Designed) -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
+    <div class="max-w-[1180px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4 shrink-0">
+        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" data-path="home" href="/" style="text-decoration:none;">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+          <span class="hidden sm:inline">Storefront</span>
         </a>
-        <partial name="_AuthNav" />
-        <button class="hamburger desktop-hidden" onclick="openSatMobileDrawer()" aria-label="Menu" style="background:transparent; border:none; color:#ffffff; font-size:22px; cursor:pointer;">
-          <i class="fa-solid fa-bars"></i>
+        <div class="h-4 w-[1px] bg-outline-variant/40 hidden sm:block"></div>
+        <div class="flex items-center gap-2">
+          <a href="/" class="flex items-center gap-2.5 group" style="text-decoration:none;">
+            <img src="/assets/sat_emblem_clean.png" alt="SAT Jewels Logo" class="w-8 h-8 rounded-full object-contain border border-primary/30" />
+            <span style="font-family: var(--font-serif, 'Playfair Display', serif); font-size: 19px; font-weight: 700; color: #ffffff; letter-spacing: 0.03em; line-height: 1; white-space: nowrap; display: flex; align-items: center;">SAT <span style="margin-left: 4px; color: #d4b878;">Jewel</span></span>
+          </a>
+        </div>
+      </div>
+
+      <div class="flex-1 max-w-md mx-2 hidden md:block">
+        <div class="relative w-full">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant/60">search</span>
+          <input class="w-full h-9 pl-9 pr-4 rounded-full bg-surface-container border border-outline-variant/40 text-on-surface placeholder:text-on-surface-variant/50 text-body-sm font-body-sm focus:outline-none focus:border-primary transition-colors" placeholder="Search certified diamonds, pieces, items..." type="text" onkeydown="if(event.key==='Enter'){window.location.href='/Product/Category?id=@categoryId&search='+encodeURIComponent(this.value);}" />
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <button class="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors md:hidden" type="button" onclick="const q = prompt('Search pieces:'); if(q) window.location.href='/Product/Category?id=@categoryId&search='+encodeURIComponent(q);">
+          <span class="material-symbols-outlined text-[18px]">search</span>
         </button>
+        <a class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors" data-path="cart" href="/Product/Cart" title="Shopping Cart" style="text-decoration:none;">
+          <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+          <span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
+        </a>
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+          var authName = User.Identity?.Name ?? "Sahil";
+          var authInitial = (!string.IsNullOrWhiteSpace(authName) ? authName.Substring(0, 1) : "S").ToUpper();
+          <a class="flex items-center gap-2 pl-2 pr-2.5 py-1 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 transition-colors" data-path="account" href="/Account/MyAccount" style="text-decoration:none;">
+            <div class="w-7 h-7 rounded-full bg-primary text-on-primary font-headline-sm text-[13px] font-bold flex items-center justify-center">@authInitial</div>
+            <div class="flex flex-col text-left hidden sm:flex">
+              <span class="font-label-sm text-label-sm text-on-surface font-medium leading-none">@authName</span>
+              <span class="text-[9px] text-secondary font-label-caps tracking-wider leading-none mt-0.5">VIP Member</span>
+            </div>
+            <span class="material-symbols-outlined text-[16px] text-on-surface-variant hidden sm:inline">expand_more</span>
+          </a>
+        }
+        else
+        {
+          <a class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-bold hover:bg-primary-fixed transition-colors" href="/Account/SignIn?returnUrl=@Context.Request.Path@Context.Request.QueryString" style="text-decoration:none;">
+            <span class="material-symbols-outlined text-[16px]">person</span>
+            <span>Sign In</span>
+          </a>
+        }
       </div>
     </div>
-  </nav>
+  </header>
 
   <!-- 6 Category Redirection Banner Section with AI Generated Background Banners -->
   <section class="cat-redir-section" style="background-image: linear-gradient(180deg, rgba(5, 11, 20, 0.35) 0%, rgba(5, 11, 20, 0.68) 100%), url('/assets/categories/banners/cat_banner_@(categoryId).jpg');">
@@ -1351,6 +1466,22 @@
       return 'sat_cart_guest';
     }
 
+    window.syncCartBadge = function() {
+      try {
+        const key = getCartStorageKey();
+        const saved = localStorage.getItem(key);
+        const items = saved ? JSON.parse(saved) : [];
+        const count = items.length;
+        document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count').forEach(el => {
+          el.textContent = count;
+        });
+      } catch (e) {}
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      window.syncCartBadge();
+    });
+
     let cartToastTimer = null;
 
     function showCartToast(name, priceUSD, img) {
@@ -1414,7 +1545,7 @@
         }
 
         // 2. Animate cart badge with bounce
-        document.querySelectorAll('#navCartCount, .auth-nav-cart-count').forEach(el => {
+        document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count').forEach(el => {
           el.classList.remove('cart-badge-bounce');
           void el.offsetWidth;
           el.classList.add('cart-badge-bounce');

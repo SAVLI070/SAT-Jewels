@@ -33,32 +33,76 @@ namespace SAT1.BAL
             public string Country { get; set; } = "United States";
         }
 
-        // 1. Create PayPal Order Flow (Server-Authoritative Pricing)
+        public class CartItemDto
+        {
+            public string ProductId { get; set; } = string.Empty;
+            public string? Name { get; set; }
+            public int Quantity { get; set; } = 1;
+            public string? StoneType { get; set; }
+            public string? Metal { get; set; }
+            public string? Size { get; set; }
+            public decimal PriceUSD { get; set; }
+        }
+
+        // 1. Create PayPal Order Flow (Server-Authoritative Pricing + Stone Type & Multi-Item Support)
         public async Task<(string payPalOrderId, string internalOrderId, decimal serverCalculatedPriceUSD, string approveUrl)> CreatePayPalOrderFlowAsync(
             string productId, 
             int quantity, 
             string userId, 
             string userEmail, 
             ShippingAddressDto shipping,
-            bool includePhysicalCertificate = false)
+            bool includePhysicalCertificate = false,
+            string? stoneType = null,
+            List<CartItemDto>? cartItems = null)
         {
-            if (quantity <= 0) quantity = 1;
+            decimal totalAmountUSD = 0m;
+            var itemDescriptions = new List<string>();
 
-            // Security Rule: Lookup real price from DB
-            var product = await _orderRepo.GetProductByIdAsync(productId);
-            if (product == null)
+            if (cartItems != null && cartItems.Count > 0)
             {
-                throw new Exception($"SECURITY ALERT: Product '{productId}' not found in database.");
+                foreach (var item in cartItems)
+                {
+                    if (string.IsNullOrWhiteSpace(item.ProductId)) continue;
+                    var prod = await _orderRepo.GetProductByIdAsync(item.ProductId);
+                    int qty = Math.Clamp(item.Quantity, 1, 10);
+                    bool isMoiss = string.Equals(item.StoneType, "Moissanite", StringComparison.OrdinalIgnoreCase);
+                    decimal unitPrice = prod != null 
+                        ? (isMoiss ? prod.MoissanitePrice : prod.PriceUSD) 
+                        : (item.PriceUSD > 0 ? item.PriceUSD : 1200m);
+
+                    totalAmountUSD += (unitPrice * qty);
+                    var stoneLabel = isMoiss ? "Moissanite" : "Lab Grown Diamond";
+                    itemDescriptions.Add($"{item.Name ?? prod?.Name ?? "Fine Jewelry"} ({stoneLabel}, Qty: {qty})");
+                }
             }
 
-            decimal unitPrice = product.PriceUSD;
+            if (totalAmountUSD == 0m)
+            {
+                int safeQty = Math.Clamp(quantity, 1, 10);
+                var product = await _orderRepo.GetProductByIdAsync(productId);
+                if (product == null)
+                {
+                    throw new Exception($"SECURITY ALERT: Product '{productId}' not found in database.");
+                }
+
+                bool isMoiss = string.Equals(stoneType, "Moissanite", StringComparison.OrdinalIgnoreCase);
+                decimal unitPrice = isMoiss ? product.MoissanitePrice : product.PriceUSD;
+                totalAmountUSD = unitPrice * safeQty;
+                var stoneLabel = isMoiss ? "Moissanite" : "Lab Grown Diamond";
+                itemDescriptions.Add($"{product.Name} ({stoneLabel}, Qty: {safeQty})");
+            }
+
             decimal giaCertFee = includePhysicalCertificate ? 50.00m : 0.00m;
-            decimal totalAmountUSD = Math.Max(0.01m, (unitPrice * quantity) + giaCertFee);
+            totalAmountUSD = Math.Max(0.01m, totalAmountUSD + giaCertFee);
 
             var internalOrderId = "SAT-ORD-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
 
             // Create PayPal Order on PayPal Servers
             var (payPalOrderId, approveUrl) = await _payPalService.CreateOrderAsync(totalAmountUSD, "USD", internalOrderId);
+
+            string itemsSummary = string.Join(" + ", itemDescriptions);
+            if (includePhysicalCertificate) itemsSummary += " [Includes Physical GIA Hardcopy Certificate]";
+            if (itemsSummary.Length > 250) itemsSummary = itemsSummary.Substring(0, 247) + "...";
 
             // Save Pending Order Record in DB
             var pendingOrder = new Order
@@ -67,9 +111,7 @@ namespace SAT1.BAL
                 OrderNumber = $"SAT-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}",
                 UserId = userId,
                 CustomerEmail = userEmail,
-                ItemName = includePhysicalCertificate 
-                    ? $"{product.Name} (Qty: {quantity}) [Includes Physical GIA Hardcopy Certificate]" 
-                    : $"{product.Name} (Qty: {quantity})",
+                ItemName = itemsSummary,
                 ExpectedAmount = totalAmountUSD,
                 TotalAmountUSD = totalAmountUSD,
                 IncludesPhysicalGiaCert = includePhysicalCertificate,
@@ -133,32 +175,65 @@ namespace SAT1.BAL
             return (true, wasAlreadyPaid ? "Order already verified and completed." : "PayPal payment verified and order marked as Paid!", updatedOrder);
         }
 
-        // 3. Create Razorpay Order Flow (Server-Authoritative Pricing)
+        // 3. Create Razorpay Order Flow (Server-Authoritative Pricing + Stone Type & Multi-Item Support)
         public async Task<(string razorpayOrderId, string internalOrderId, decimal serverCalculatedPriceUSD, string razorpayKeyId)> CreateRazorpayOrderFlowAsync(
             string productId, 
             int quantity, 
             string userId, 
             string userEmail, 
             ShippingAddressDto shipping,
-            bool includePhysicalCertificate = false)
+            bool includePhysicalCertificate = false,
+            string? stoneType = null,
+            List<CartItemDto>? cartItems = null)
         {
-            if (quantity <= 0) quantity = 1;
+            decimal totalAmountUSD = 0m;
+            var itemDescriptions = new List<string>();
 
-            // Security Rule: Lookup real price from DB
-            var product = await _orderRepo.GetProductByIdAsync(productId);
-            if (product == null)
+            if (cartItems != null && cartItems.Count > 0)
             {
-                throw new Exception($"SECURITY ALERT: Product '{productId}' not found in database.");
+                foreach (var item in cartItems)
+                {
+                    if (string.IsNullOrWhiteSpace(item.ProductId)) continue;
+                    var prod = await _orderRepo.GetProductByIdAsync(item.ProductId);
+                    int qty = Math.Clamp(item.Quantity, 1, 10);
+                    bool isMoiss = string.Equals(item.StoneType, "Moissanite", StringComparison.OrdinalIgnoreCase);
+                    decimal unitPrice = prod != null 
+                        ? (isMoiss ? prod.MoissanitePrice : prod.PriceUSD) 
+                        : (item.PriceUSD > 0 ? item.PriceUSD : 1200m);
+
+                    totalAmountUSD += (unitPrice * qty);
+                    var stoneLabel = isMoiss ? "Moissanite" : "Lab Grown Diamond";
+                    itemDescriptions.Add($"{item.Name ?? prod?.Name ?? "Fine Jewelry"} ({stoneLabel}, Qty: {qty})");
+                }
             }
 
-            decimal unitPrice = product.PriceUSD;
+            if (totalAmountUSD == 0m)
+            {
+                int safeQty = Math.Clamp(quantity, 1, 10);
+                var product = await _orderRepo.GetProductByIdAsync(productId);
+                if (product == null)
+                {
+                    throw new Exception($"SECURITY ALERT: Product '{productId}' not found in database.");
+                }
+
+                bool isMoiss = string.Equals(stoneType, "Moissanite", StringComparison.OrdinalIgnoreCase);
+                decimal unitPrice = isMoiss ? product.MoissanitePrice : product.PriceUSD;
+                totalAmountUSD = unitPrice * safeQty;
+                var stoneLabel = isMoiss ? "Moissanite" : "Lab Grown Diamond";
+                itemDescriptions.Add($"{product.Name} ({stoneLabel}, Qty: {safeQty})");
+            }
+
             decimal giaCertFee = includePhysicalCertificate ? 50.00m : 0.00m;
-            decimal totalAmountUSD = Math.Max(0.01m, (unitPrice * quantity) + giaCertFee);
+            totalAmountUSD = Math.Max(0.01m, totalAmountUSD + giaCertFee);
 
             var internalOrderId = "SAT-ORD-" + Guid.NewGuid().ToString("N").Substring(0, 8).ToUpper();
 
             // Create Razorpay Order via API (Amount calculated on Server)
             var (razorpayOrderId, amountUSD, currency) = await _razorpayService.CreateOrderAsync(totalAmountUSD, "USD", internalOrderId);
+
+            string itemsSummary = string.Join(" + ", itemDescriptions);
+            if (includePhysicalCertificate) itemsSummary += " [Includes Physical GIA Hardcopy Certificate]";
+            if (itemsSummary.Length > 250) itemsSummary = itemsSummary.Substring(0, 247) + "...";
 
             // Save Pending Order Record in DB
             var pendingOrder = new Order
@@ -167,9 +242,7 @@ namespace SAT1.BAL
                 OrderNumber = $"SAT-{DateTime.Now:yyyyMMdd}-{Random.Shared.Next(1000, 9999)}",
                 UserId = userId,
                 CustomerEmail = userEmail,
-                ItemName = includePhysicalCertificate 
-                    ? $"{product.Name} (Qty: {quantity}) [Includes Physical GIA Hardcopy Certificate]" 
-                    : $"{product.Name} (Qty: {quantity})",
+                ItemName = itemsSummary,
                 ExpectedAmount = totalAmountUSD,
                 TotalAmountUSD = totalAmountUSD,
                 IncludesPhysicalGiaCert = includePhysicalCertificate,

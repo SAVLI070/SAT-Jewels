@@ -123,19 +123,16 @@ namespace SAT1.Controllers
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 12;
 
-            var allReviews = await reviewBal.GetAllReviewsAsync(status);
-            int totalCount = allReviews.Count;
+            var (pagedReviews, totalCount) = await reviewBal.GetReviewsPagedAsync(status, page, pageSize);
             int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
-
-            var pagedReviews = allReviews.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             ViewBag.StatusFilter = status ?? "All";
             ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
             ViewBag.TotalCount = totalCount;
             ViewBag.TotalPages = totalPages;
-            ViewBag.AllReviewsCount = (await reviewBal.GetAllReviewsAsync("All")).Count;
+            ViewBag.AllReviewsCount = totalCount;
 
             return View(pagedReviews);
         }

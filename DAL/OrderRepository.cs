@@ -41,8 +41,8 @@ namespace SAT1.DAL
                 }
             }
 
-            // Fallback to first active item in catalog
-            return await _context.CatalogItems.FirstOrDefaultAsync(p => p.IsActive);
+            // Product not found
+            return null;
         }
 
         // 2. Create Pending Order Record

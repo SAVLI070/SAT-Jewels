@@ -1,370 +1,1056 @@
 @inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     Layout = null;
-    ViewData["Title"] = "Shopping Cart & Home Delivery Checkout";
+    ViewData["Title"] = "Bespoke Shopping Cart & Secure Checkout";
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
     var userName = User.Identity?.Name ?? "";
     var userEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "";
     var payPalClientId = Configuration["PayPal:ClientId"] ?? "sb";
+    var savedAddresses = ViewBag.SavedAddresses as List<SAT1.Models.UserAddress> ?? new List<SAT1.Models.UserAddress>();
 }
 <!DOCTYPE html>
-<html lang="en">
+<html class="dark" lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Shopping Cart & Home Delivery Checkout — SAT Jewel Sanctuary</title>
-  <link rel="icon" type="image/png" href="/assets/sat_logo_transparent.png" />
-  <link rel="shortcut icon" type="image/png" href="/assets/sat_logo_transparent.png" />
-  <link rel="apple-touch-icon" href="/assets/sat_logo_transparent.png" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <meta content="web_standard" name="shell-type" />
+  <title>Bespoke Shopping Cart &amp; Secure Checkout — SAT Jewel Sanctuary</title>
+  <link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="shortcut icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="apple-touch-icon" href="/assets/sat_emblem_clean.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <link rel="stylesheet" href="~/css/style.css" />
-  <!-- Official Dual Payment Gateways (PayPal SDK + Razorpay Checkout.js) -->
-  <script src="https://www.paypal.com/sdk/js?client-id=@(payPalClientId)&currency=USD&enable-funding=venmo,paylater"></script>
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <style>
-    body {
-      background: radial-gradient(circle at 50% 20%, #16141a 0%, #06070a 100%);
-      color: #ffffff;
-      font-family: var(--font-sans);
-      min-height: 100vh;
-      margin: 0;
-    }
-    .cart-container {
-      max-width: 960px;
-      margin: 40px auto 80px;
-      padding: 0 20px;
-    }
-    .cart-card {
-      background: rgba(14, 13, 16, 0.88);
-      backdrop-filter: blur(24px);
-      border: 1px solid rgba(212, 184, 120, 0.35);
-      border-radius: 24px;
-      padding: 32px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);
-    }
-    .cart-title {
-      font-family: var(--font-serif);
-      font-size: 28px;
-      margin: 0 0 6px;
-    }
-    .cart-item-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 20px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      gap: 16px;
-    }
-    .cart-item-img {
-      width: 70px;
-      height: 70px;
-      border-radius: 12px;
-      object-fit: cover;
-      border: 1px solid rgba(212, 178, 112, 0.3);
-    }
-    .paypal-checkout-panel {
-      margin-top: 28px;
-      padding-top: 24px;
-      border-top: 1px solid rgba(212, 178, 112, 0.3);
-    }
-    .paypal-box-wrap {
-      max-width: 520px;
-      margin: 20px auto 0;
-    }
-    .paypal-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 14px;
-      background: rgba(0, 112, 186, 0.15);
-      border: 1px solid #0070ba;
-      border-radius: 20px;
-      color: #38bdf8;
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-    .auth-required-banner {
-      background: rgba(212, 178, 112, 0.08);
-      border: 1px solid rgba(212, 178, 112, 0.4);
-      border-radius: 16px;
-      padding: 28px 24px;
-      text-align: center;
-      margin-top: 24px;
-    }
-    .btn-auth-signin {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 28px;
-      background: var(--champagne-gold);
-      color: #060c14;
-      font-weight: 800;
-      border-radius: 30px;
-      text-decoration: none;
-      transition: all 0.25s ease;
-    }
-    .btn-auth-signin:hover {
-      background: #ffffff;
-      color: #000000;
-      box-shadow: 0 4px 20px rgba(212, 178, 112, 0.5);
-    }
-    .btn-auth-signup {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 28px;
-      background: transparent;
-      border: 1px solid var(--champagne-gold);
-      color: var(--champagne-gold);
-      font-weight: 700;
-      border-radius: 30px;
-      text-decoration: none;
-      transition: all 0.25s ease;
-    }
 
-    /* Home Delivery Address Form Section */
-    .delivery-form-box {
-      background: #0e0d10;
-      border: 1px solid rgba(212, 178, 112, 0.35);
-      border-radius: 18px;
-      padding: 24px;
-      margin-top: 28px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  <style>
+    @@layer base {
+      html, body { margin: 0; padding: 0; }
+      body { overscroll-behavior: none; }
+      main > :first-child { margin-top: 0 !important; }
+      main > :last-child { margin-bottom: 0 !important; }
     }
-    .delivery-form-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: var(--champagne-gold);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .form-grid-2col {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
-    }
-    @@media (max-width: 650px) {
-      .form-grid-2col { grid-template-columns: 1fr; }
-    }
-    .form-group-item {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .form-group-item label {
-      font-size: 12.5px;
-      font-weight: 700;
-      color: rgba(255, 255, 255, 0.85);
-    }
-    .form-input-field {
-      padding: 12px 14px;
-      background: #0d1b2a;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 8px;
-      color: #ffffff;
-      font-size: 13.5px;
-      outline: none;
-      box-sizing: border-box;
-      transition: border-color 0.25s ease;
-    }
-    .form-input-field:focus {
-      border-color: var(--champagne-gold);
-      box-shadow: 0 0 10px rgba(212, 178, 112, 0.3);
+    ::-webkit-scrollbar { display: none; }
+
+    @@keyframes spinDiamond {
+      0% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(180deg) scale(1.1); }
+      100% { transform: rotate(360deg) scale(1); }
     }
   </style>
-</head>
-<body>
-  <div class="cart-container">
-    <div style="margin-bottom: 20px;">
-      <a href="/" style="color: var(--champagne-gold); text-decoration: none; font-size: 14px;"><i class="fa-solid fa-arrow-left"></i> Back to Storefront</a>
-    </div>
 
-    <div class="cart-card">
-      <h1 class="cart-title">Bespoke Shopping Cart</h1>
-      <p style="color:var(--taupe-beige); font-size:14px; margin-bottom:28px;">Review your GIA certified fine jewelry pieces before secure PayPal USD checkout.</p>
-
-      <div id="cartItemsContainer">
-        <!-- Rendered dynamically by JavaScript -->
-      </div>
-
-      @if (isAuthenticated)
-      {
-        var savedAddresses = ViewBag.SavedAddresses as List<SAT1.Models.UserAddress> ?? new List<SAT1.Models.UserAddress>();
-
-        <!-- High Priority Home Delivery Address Form -->
-        <div class="delivery-form-box">
-          <div class="delivery-form-title">
-            <i class="fa-solid fa-truck-ramp-box"></i> Home Delivery Shipping Address <span style="font-size:11px; color:#fbbf24; font-weight:600; margin-left:auto;">[ REQUIRED FOR PAYMENT ]</span>
-          </div>
-
-          @if (savedAddresses.Count > 0)
-          {
-            <div style="margin-bottom: 18px; padding: 12px 16px; background: rgba(212,178,112,0.12); border: 1px solid rgba(212,178,112,0.35); border-radius: 12px;">
-              <label style="font-size: 12px; font-weight: 700; color: #fbbf24; display: block; margin-bottom: 6px;">
-                <i class="fa-solid fa-bookmark"></i> Quick Select From Saved Address Vault:
-              </label>
-              <select id="savedAddressSelector" class="form-input-field" onchange="loadSavedAddress(this.value)" style="border-color:#d4b270;">
-                <option value="">-- Choose a Saved Shipping Address --</option>
-                @foreach (var addr in savedAddresses)
-                {
-                  <option value="@Html.Raw(System.Text.Json.JsonSerializer.Serialize(addr))" selected="@(addr.IsDefault ? "selected" : null)">
-                    @(addr.IsDefault ? "⭐ [DEFAULT] " : "")@addr.FullName - @addr.StreetAddress, @addr.City, @addr.State
-                  </option>
-                }
-              </select>
-            </div>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "secondary": "#e4c277",
+            "on-secondary-container": "#d5b46b",
+            "on-primary-fixed-variant": "#574500",
+            "surface-container-high": "#2a2a2b",
+            "on-surface-variant": "#d0c5af",
+            "tertiary-fixed-dim": "#26e19a",
+            "secondary-fixed-dim": "#e4c277",
+            "tertiary": "#36eaa1",
+            "primary-container": "#d4af37",
+            "surface-dim": "#131314",
+            "on-error": "#690005",
+            "primary-fixed": "#ffe088",
+            "surface-container-low": "#1c1b1c",
+            "surface-variant": "#353436",
+            "inverse-on-surface": "#313031",
+            "on-tertiary-fixed-variant": "#005234",
+            "inverse-surface": "#e5e2e3",
+            "primary": "#f2ca50",
+            "surface-tint": "#e9c349",
+            "background": "#131314",
+            "error": "#ffb4ab",
+            "on-surface": "#e5e2e3",
+            "surface": "#131314",
+            "on-secondary-fixed": "#251a00",
+            "surface-container-lowest": "#0e0e0f",
+            "tertiary-fixed": "#53feb4",
+            "outline": "#99907c",
+            "surface-container": "#201f20",
+            "on-tertiary": "#003823",
+            "secondary-fixed": "#ffdf9b",
+            "on-primary-container": "#554300",
+            "on-secondary-fixed-variant": "#5a4302",
+            "on-primary-fixed": "#241a00",
+            "surface-bright": "#3a393a",
+            "on-primary": "#3c2f00",
+            "on-tertiary-fixed": "#002112",
+            "secondary-container": "#5d4604",
+            "error-container": "#93000a",
+            "on-secondary": "#3f2e00",
+            "surface-container-highest": "#353436",
+            "on-tertiary-container": "#005033",
+            "primary-fixed-dim": "#e9c349",
+            "on-error-container": "#ffdad6",
+            "on-background": "#e5e2e3",
+            "inverse-primary": "#735c00",
+            "tertiary-container": "#00cc89",
+            "outline-variant": "#4d4635"
+          },
+          borderRadius: {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          spacing: {
+            "gutter": "1.5rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "margin": "3rem",
+            "space-2xl": "4rem",
+            "space-lg": "1.5rem",
+            "gutter-mobile": "1rem",
+            "margin-mobile": "1.25rem",
+            "space-xs": "0.25rem",
+            "space-xl": "2.5rem"
+          },
+          fontFamily: {
+            "headline-sm": ["Playfair Display", "serif"],
+            "headline-lg": ["Playfair Display", "serif"],
+            "display-hero": ["Playfair Display", "serif"],
+            "headline-md": ["Playfair Display", "serif"],
+            "label-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "body-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "body-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "body-md": ["Plus Jakarta Sans", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "sans-serif"],
+            "label-caps": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-lg-mobile": ["Playfair Display", "serif"],
+            "display-hero-mobile": ["Playfair Display", "serif"]
+          },
+          fontSize: {
+            "headline-sm": ["20px", { lineHeight: "28px", fontWeight: "500" }],
+            "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "500" }],
+            "display-hero": ["52px", { lineHeight: "64px", letterSpacing: "-0.02em", fontWeight: "600" }],
+            "headline-md": ["24px", { lineHeight: "32px", fontWeight: "500" }],
+            "label-sm": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+            "body-lg": ["16px", { lineHeight: "26px", fontWeight: "400" }],
+            "body-sm": ["13px", { lineHeight: "20px", fontWeight: "400" }],
+            "body-md": ["14px", { lineHeight: "22px", fontWeight: "400" }],
+            "label-md": ["13px", { lineHeight: "18px", fontWeight: "600" }],
+            "label-caps": ["11px", { lineHeight: "16px", letterSpacing: "0.12em", fontWeight: "700" }],
+            "headline-lg-mobile": ["26px", { lineHeight: "34px", letterSpacing: "0em", fontWeight: "500" }],
+            "display-hero-mobile": ["34px", { lineHeight: "42px", letterSpacing: "-0.01em", fontWeight: "600" }]
           }
-
-          <form id="shippingAddressForm" oninput="checkAddressValidation()">
-            <div class="form-grid-2col">
-              <div class="form-group-item">
-                <label>Recipient Full Name *</label>
-                <input type="text" id="shipFullName" class="form-input-field" value="@userName" placeholder="e.g. Sahil Kumar" required />
-              </div>
-              <div class="form-group-item">
-                <label>Contact Phone (For Courier Tracking SMS) *</label>
-                <input type="tel" id="shipPhone" class="form-input-field" placeholder="e.g. +91 98765 43210" required />
-              </div>
-            </div>
-
-            <div class="form-group-item" style="margin-top:14px;">
-              <label>Home Delivery Street Address *</label>
-              <input type="text" id="shipStreet" class="form-input-field" placeholder="Flat No., House No., Building Name, Street" required />
-            </div>
-
-            <div class="form-grid-2col" style="margin-top:14px;">
-              <div class="form-group-item">
-                <label>City / Town *</label>
-                <input type="text" id="shipCity" class="form-input-field" placeholder="e.g. Mumbai / New York" required />
-              </div>
-              <div class="form-group-item">
-                <label>State / Province / Region *</label>
-                <input type="text" id="shipState" class="form-input-field" placeholder="e.g. Maharashtra / California" required />
-              </div>
-            </div>
-
-            <div class="form-grid-2col" style="margin-top:14px;">
-              <div class="form-group-item">
-                <label>Postal / ZIP Code *</label>
-                <input type="text" id="shipPostalCode" class="form-input-field" placeholder="e.g. 400001 / 396445 (6 digits)" oninput="checkAddressValidation()" required />
-                <div id="postalCodeFeedback" style="display:none; font-size:11.5px; margin-top:4px; font-weight:600; line-height:1.4;"></div>
-              </div>
-              <div class="form-group-item">
-                <label>Country *</label>
-                <select id="shipCountry" class="form-input-field" onchange="onCountryChanged()" required>
-                  <option value="India" selected>India</option>
-                  <option value="United States">United States</option>
-                  <option value="United Kingdom">United Kingdom</option>
-                  <option value="Canada">Canada</option>
-                  <option value="Australia">Australia</option>
-                  <option value="United Arab Emirates">United Arab Emirates</option>
-                  <option value="Germany">Germany</option>
-                  <option value="France">France</option>
-                </select>
-              </div>
-            </div>
-          </form>
-        </div>
+        }
       }
+    };
+  </script>
 
-      <!-- Physical GIA Hardcopy Certificate Add-on Option -->
-      <div id="cartPhysicalCertCard" style="background: rgba(212, 178, 112, 0.08); border: 1px solid rgba(212, 178, 112, 0.35); border-radius: 12px; padding: 16px 20px; margin: 20px 0;">
-        <label style="display: flex; align-items: flex-start; gap: 14px; cursor: pointer; user-select: none;">
-          <input type="checkbox" id="chkCartPhysicalGiaCert" onchange="handleCartCertToggle()" style="width: 20px; height: 20px; margin-top: 2px; accent-color: #d4b270; cursor: pointer;" />
-          <div style="flex: 1;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
-              <span style="font-weight: 700; color: #ffffff; font-size: 14px;">
-                <i class="fa-solid fa-stamp" style="color: #fbbf24; margin-right: 6px;"></i> Include Official Hardcopy Physical GIA Certificate
-              </span>
-              <span style="background: #fbbf24; color: #0f172a; font-size: 11px; font-weight: 800; padding: 2px 10px; border-radius: 999px;">+$50.00 USD</span>
-            </div>
-            <div style="font-size: 12px; color: var(--taupe-beige); margin-top: 4px; line-height: 1.5;">
-              A sealed, laminated physical GIA Gemological dossier with tamper-evident holographic seal will be enclosed in your parcel when delivering from India. Digital GIA certificate is complimentary.
-            </div>
-          </div>
-        </label>
+  <!-- Dual Official Payment Gateways: PayPal SDK + Razorpay Checkout.js -->
+  <script src="https://www.paypal.com/sdk/js?client-id=@(payPalClientId)&currency=USD&enable-funding=venmo,paylater"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+
+<body class="bg-surface font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container">
+
+  <!-- Fixed Top Header -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
+    <div class="h-16 max-w-[1240px] mx-auto px-6 flex items-center justify-between gap-6">
+      <div class="flex items-center gap-4">
+        <a class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-label-sm font-label-md font-medium" href="/">
+          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+          <span>Storefront</span>
+        </a>
+        <div class="h-4 w-[1px] bg-outline-variant/40"></div>
+        <a class="flex items-center gap-2.5 group" href="/">
+          <img src="/assets/sat_emblem_clean.png" alt="SAT Jewels Logo" class="w-8 h-8 rounded-full object-contain border border-primary/30" />
+          <span style="font-family: var(--font-serif, 'Playfair Display', serif); font-size: 19px; font-weight: 700; color: #ffffff; letter-spacing: 0.03em; line-height: 1; white-space: nowrap; display: flex; align-items: center;">SAT <span style="margin-left: 4px; color: #d4b878;">Jewel</span></span>
+        </a>
       </div>
 
-      <div class="paypal-checkout-panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
-          <div>
-            <div class="paypal-badge"><i class="fa-brands fa-paypal"></i> PayPal USD Express Checkout</div>
-            <div style="color:var(--taupe-beige); font-size:14px;">Total Order Subtotal:</div>
-            <div id="cartTotalDisplay" style="font-family:var(--font-serif); font-size:30px; font-weight:700; color:#fbbf24; margin-top:2px;">$0 USD</div>
-          </div>
-        </div>
-
+      <div class="flex items-center gap-3">
+        <a class="relative p-2 text-on-surface-variant hover:text-primary transition-colors" href="/Product/Cart" title="Cart">
+          <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
+          <span id="navCartBadge" class="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
+        </a>
         @if (isAuthenticated)
         {
-          <!-- Dynamic Address Status Warning -->
-          <div id="addressWarningNotice" style="margin-top:16px; padding:14px 18px; background:rgba(239,68,68,0.12); border:1px solid #ef4444; border-radius:12px; color:#fca5a5; font-size:13.5px; display:flex; align-items:center; gap:10px;">
-            <i class="fa-solid fa-triangle-exclamation" style="font-size:18px; color:#ef4444;"></i>
-            <div>
-              <strong>Payment Permission Locked:</strong> Please fill in all required shipping address fields above before payment can be authorized.
-            </div>
-          </div>
-
-          <div id="paypalContainerBox" class="paypal-box-wrap" style="opacity: 0.5; pointer-events: none;">
-            <!-- Option 1: Official PayPal Express Checkout -->
-            <div style="margin-bottom: 20px;">
-              <div style="font-size:12px; color:var(--taupe-beige); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Option 1: Pay with PayPal</div>
-              <div id="paypal-button-container" style="min-height: 48px;"></div>
-            </div>
-
-            <!-- Option 2: Razorpay Independent Card Gateway (Embedded Modal Overlay) -->
-            <div style="margin-top: 20px; padding-top: 18px; border-top: 1px dashed rgba(212, 178, 112, 0.3);">
-              <div style="font-size:12px; color:var(--taupe-beige); font-weight:700; margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Option 2: Pay with Credit / Debit Card (Razorpay)</div>
-              <button type="button" id="btnRazorpayCard" class="btn-razorpay-card" onclick="payWithRazorpay()" style="width:100%; padding:14px 20px; background:linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color:#ffffff; border:1px solid rgba(212, 178, 112, 0.5); border-radius:10px; font-weight:800; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:10px; box-shadow:0 4px 15px rgba(0,0,0,0.3); transition:all 0.3s ease;">
-                <i class="fa-solid fa-credit-card" style="color:var(--champagne-gold); font-size:18px;"></i> Pay with Card (No PayPal Account Required)
-              </button>
-            </div>
-          </div>
+          var displayInitial = string.IsNullOrEmpty(userName) ? "U" : userName.Substring(0, 1).ToUpper();
+          <a class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full bg-surface-container hover:bg-surface-container-high transition-colors" href="/Account/MyAccount">
+            <span class="font-label-sm text-label-sm text-on-surface font-medium hidden sm:inline">@(string.IsNullOrEmpty(userName) ? "My Account" : userName)</span>
+            <div class="w-7 h-7 rounded-full bg-primary flex items-center justify-center font-bold text-on-primary text-[12px]">@displayInitial</div>
+          </a>
         }
         else
         {
-          <!-- GATE 1: Sign In Required Banner -->
-          <div class="auth-required-banner">
-            <i class="fa-solid fa-user-lock" style="font-size:42px; color:#f59e0b; margin-bottom:12px;"></i>
-            <h3 style="margin:0 0 8px; font-family:var(--font-serif); font-size:24px; color:#ffffff;">🚫 Permission Denied: Sign In Required</h3>
-            <p style="color:rgba(255,255,255,0.8); font-size:14px; margin-bottom:24px; max-width:560px; margin-left:auto; margin-right:auto; line-height:1.6;">
-              You must sign in to your SAT Jewel account before any payment or shipping transaction can be authorized.
-            </p>
-            <div style="display:flex; justify-content:center; gap:14px; flex-wrap:wrap;">
-              <a href="/Account/SignIn?returnUrl=/Product/Cart" class="btn-auth-signin">
-                <i class="fa-solid fa-right-to-bracket"></i> Sign In to Proceed
-              </a>
-              <a href="/Account/SignUp?returnUrl=/Product/Cart" class="btn-auth-signup">
-                <i class="fa-solid fa-user-plus"></i> Create Account
-              </a>
+          <a class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-bold hover:bg-primary-fixed transition-colors" href="/Account/SignIn?returnUrl=/Product/Cart">
+            <span class="material-symbols-outlined text-[16px]">person</span>
+            <span>Sign In</span>
+          </a>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View -->
+  <main class="w-full bg-surface pt-20">
+    <div class="flex flex-col w-full">
+
+      <!-- Navigation / Reservation Timer Bar -->
+      <div class="w-full bg-surface-container-lowest py-3">
+        <div class="max-w-[1180px] mx-auto px-6 flex items-center justify-end">
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-surface-container font-label-caps text-label-caps text-tertiary">
+              <span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+              <span id="reservationTimer">Cart Vault Reserved (14:32 remaining)</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Checkout Container Canvas -->
+      <section class="max-w-[1180px] mx-auto w-full px-6 py-8">
+
+        <!-- Title and Executive Stepper Header -->
+        <div class="space-y-6 mb-10">
+          <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2 mb-2">
+                <span class="font-label-caps text-label-caps uppercase tracking-widest text-primary">Private Client Reservation</span>
+                <span class="text-outline-variant">•</span>
+                <span class="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant">Order Ref #SJ-2026-9481</span>
+              </div>
+              <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Bespoke Shopping Cart &amp; Secure Checkout</h1>
+              <p class="font-body-md text-body-md text-on-surface-variant mt-1">Review your certified diamond solitaire creation prior to insured armored transit and cryptographic checkout.</p>
+            </div>
+            <!-- Discreet Security Seal Pill -->
+            <div class="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-surface-container-low shadow-sm">
+              <span class="material-symbols-outlined text-primary text-[20px]">lock_clock</span>
+              <div class="text-left leading-tight">
+                <p class="font-label-caps text-[10px] uppercase tracking-wider text-on-surface">End-to-End Encrypted</p>
+                <p class="font-label-sm text-label-sm text-tertiary font-semibold">256-Bit TLS Bank Level</p>
+              </div>
             </div>
           </div>
-        }
+
+          <!-- 3-Step Checkout Milestone Ribbon -->
+          <div class="p-4 rounded-xl bg-surface-container-low shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <!-- Step 1 -->
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-sm text-label-sm font-bold shadow-[0_0_12px_rgba(212,175,55,0.35)]">
+                  <span class="material-symbols-outlined text-[18px]">done</span>
+                </div>
+                <div>
+                  <p class="font-label-caps text-[10px] text-primary uppercase tracking-wider">Step 01</p>
+                  <p class="font-label-md text-label-md text-on-surface font-medium">Bespoke Spec &amp; Item</p>
+                </div>
+              </div>
+              <!-- Step 2 -->
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-surface-container-high text-primary flex items-center justify-center font-label-sm text-label-sm font-bold shadow-[0_0_10px_rgba(212,175,55,0.2)]">
+                  2
+                </div>
+                <div>
+                  <p class="font-label-caps text-[10px] text-primary uppercase tracking-wider">Step 02 [ACTIVE]</p>
+                  <p class="font-label-md text-label-md text-on-surface font-semibold">Insured Delivery Vault</p>
+                </div>
+              </div>
+              <!-- Step 3 -->
+              <div class="flex items-center gap-3 opacity-70">
+                <div class="w-8 h-8 rounded-full bg-surface-container text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm font-semibold">
+                  3
+                </div>
+                <div>
+                  <p class="font-label-caps text-[10px] text-on-surface-variant uppercase tracking-wider">Step 03</p>
+                  <p class="font-label-md text-label-md text-on-surface-variant">Instant Payment Gate</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-Column Luxury Architecture: Left (Review & Address & Gateway), Right (Summary Vault) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+          <!-- ==================== LEFT COLUMN (7-8 COLS) ==================== -->
+          <div class="lg:col-span-7 xl:col-span-8 space-y-6">
+
+            <!-- 1. CART ITEMS VAULT CONTAINER -->
+            <div id="cartItemsContainer" class="space-y-4">
+              <!-- Dynamically populated by renderCart() -->
+            </div>
+
+            <!-- 2. HOME DELIVERY SHIPPING ADDRESS VAULT -->
+            @if (isAuthenticated)
+            {
+              <div class="rounded-xl bg-surface-container p-6 shadow-md space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2">
+                  <div class="flex items-center gap-2.5">
+                    <span class="material-symbols-outlined text-primary text-[22px]">local_shipping</span>
+                    <h3 class="font-headline-sm text-headline-sm text-on-surface">Home Delivery Shipping Address</h3>
+                  </div>
+                  <span class="inline-flex items-center px-2.5 py-1 rounded bg-secondary-container/40 text-on-secondary-container font-label-caps text-[10px] font-bold tracking-wider uppercase">
+                    [ Required for Insured Dispatch ]
+                  </span>
+                </div>
+
+                <!-- Quick Select from Saved Address Vault -->
+                @if (savedAddresses.Count > 0)
+                {
+                  <div class="p-4 rounded-lg bg-surface-container-low space-y-2">
+                    <div class="flex items-center justify-between">
+                      <label class="font-label-caps text-label-caps text-primary uppercase tracking-wider flex items-center gap-1.5" for="address-vault-select">
+                        <span class="material-symbols-outlined text-[15px]">bookmark</span>
+                        <span>Quick Select From Saved Address Vault:</span>
+                      </label>
+                      <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors underline-offset-2 hover:underline" href="/Account/MyAccount?tab=addresses">Manage Vault (@savedAddresses.Count Saved)</a>
+                    </div>
+                    <div class="relative">
+                      <select class="w-full bg-surface-container-highest text-on-surface font-body-md text-body-md rounded-lg px-4 py-3 appearance-none focus:outline-none focus:bg-surface-bright cursor-pointer pr-10" id="address-vault-select" onchange="loadSavedAddress(this.value)">
+                        <option value="">-- Choose a Saved Shipping Address --</option>
+                        @foreach (var addr in savedAddresses)
+                        {
+                          <option value="@Html.Raw(System.Text.Json.JsonSerializer.Serialize(addr))" selected="@(addr.IsDefault ? "selected" : null)">
+                            @(addr.IsDefault ? "⭐ [DEFAULT] " : "")@addr.FullName - @addr.StreetAddress, @addr.City, @addr.State (@addr.Country - @addr.PostalCode)
+                          </option>
+                        }
+                      </select>
+                      <span class="material-symbols-outlined text-on-surface-variant text-[20px] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">unfold_more</span>
+                    </div>
+                  </div>
+                }
+
+                <!-- Address Input Form Grid -->
+                <form id="shippingAddressForm" oninput="checkAddressValidation()" onsubmit="return false;">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Full Name -->
+                    <div class="space-y-1.5">
+                      <label class="block font-label-sm text-label-sm text-on-surface-variant">Recipient Full Name <span class="text-primary">*</span></label>
+                      <div class="relative">
+                        <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipFullName" type="text" value="@userName" placeholder="e.g. Sahil Khurana" required />
+                        <span class="material-symbols-outlined text-on-surface-variant text-[18px] absolute right-3 top-1/2 -translate-y-1/2">person</span>
+                      </div>
+                    </div>
+
+                    <!-- Phone Number -->
+                    <div class="space-y-1.5">
+                      <label class="block font-label-sm text-label-sm text-on-surface-variant">Contact Phone (For Courier Tracking SMS) <span class="text-primary">*</span></label>
+                      <div class="relative">
+                        <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipPhone" type="tel" placeholder="+91 81282 91686" required />
+                        <span class="material-symbols-outlined text-on-surface-variant text-[18px] absolute right-3 top-1/2 -translate-y-1/2">call</span>
+                      </div>
+                    </div>
+
+                    <!-- Street Address (Spans 2 columns) -->
+                    <div class="md:col-span-2 space-y-1.5">
+                      <label class="block font-label-sm text-label-sm text-on-surface-variant">Home Delivery Street Address <span class="text-primary">*</span></label>
+                      <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipStreet" type="text" placeholder="Jalalpore road, Flat 402, Royal Residency" required />
+                    </div>
+
+                    <!-- City / Town -->
+                    <div class="space-y-1.5">
+                      <label class="block font-label-sm text-label-sm text-on-surface-variant">City / Town <span class="text-primary">*</span></label>
+                      <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipCity" type="text" placeholder="Navasari" required />
+                    </div>
+
+                    <!-- State / Province / Region -->
+                    <div class="space-y-1.5">
+                      <label class="block font-label-sm text-label-sm text-on-surface-variant">State / Province / Region <span class="text-primary">*</span></label>
+                      <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipState" type="text" placeholder="Gujarat" required />
+                    </div>
+
+                    <!-- Postal / ZIP Code -->
+                    <div class="space-y-1.5">
+                      <label class="block font-label-sm text-label-sm text-on-surface-variant">Postal / ZIP Code <span class="text-primary">*</span></label>
+                      <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipPostalCode" type="text" placeholder="396445" required />
+                      <div id="postalCodeFeedback" class="hidden items-center gap-1.5 text-tertiary pt-0.5">
+                        <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                        <span class="font-label-sm text-label-sm">Valid international postal format &amp; armored service area.</span>
+                      </div>
+                    </div>
+
+                    <!-- Country Selection Dropdown -->
+                    <div class="space-y-1.5">
+                      <label class="block font-label-sm text-label-sm text-on-surface-variant">Country <span class="text-primary">*</span></label>
+                      <div class="relative">
+                        <select class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 appearance-none focus:outline-none focus:bg-surface-container-high transition-colors pr-10" id="shipCountry" onchange="onCountryChanged()" required>
+                          <option value="India" selected>India (Domestic Insured Speed Delivery)</option>
+                          <option value="United States">United States (Armored Air Dispatch)</option>
+                          <option value="United Kingdom">United Kingdom (Direct Atelier Import)</option>
+                          <option value="United Arab Emirates">United Arab Emirates (Dubai VIP Vault)</option>
+                          <option value="Singapore">Singapore (Direct Insured Courier)</option>
+                          <option value="Canada">Canada (Express Insured Air)</option>
+                          <option value="Australia">Australia (Direct Courier)</option>
+                          <option value="Germany">Germany (EU Insured Dispatch)</option>
+                          <option value="France">France (EU Insured Dispatch)</option>
+                        </select>
+                        <span class="material-symbols-outlined text-on-surface-variant text-[20px] absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">expand_more</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Transit Tier Radio Badges -->
+                  <div class="pt-4">
+                    <label class="block font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant mb-2.5">Select Armored Transit Tier</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <label class="p-3.5 rounded-lg bg-surface-container-high cursor-pointer flex items-start gap-3 transition-colors">
+                        <input checked="" class="mt-1 accent-primary w-4 h-4 cursor-pointer" name="shipping-tier" type="radio" />
+                        <div class="space-y-0.5">
+                          <div class="flex items-center justify-between">
+                            <span class="font-label-md text-label-md text-on-surface font-semibold">Priority Armored Courier</span>
+                            <span class="font-label-caps text-[10px] text-tertiary font-bold uppercase">FREE</span>
+                          </div>
+                          <p class="font-body-sm text-body-sm text-on-surface-variant">3-5 business days. Discretely packaged, GPS tracked, signature verification required.</p>
+                        </div>
+                      </label>
+                      <label class="p-3.5 rounded-lg bg-surface-container-low hover:bg-surface-container-high cursor-pointer flex items-start gap-3 transition-colors">
+                        <input class="mt-1 accent-primary w-4 h-4 cursor-pointer" name="shipping-tier" type="radio" />
+                        <div class="space-y-0.5">
+                          <div class="flex items-center justify-between">
+                            <span class="font-label-md text-label-md text-on-surface font-semibold">White-Glove Salon Handover</span>
+                            <span class="font-label-caps text-[10px] text-primary font-bold uppercase">+$120.00</span>
+                          </div>
+                          <p class="font-body-sm text-body-sm text-on-surface-variant">Personal SAT Jewel ambassador delivery to residence or private bank vault.</p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            }
+            else
+            {
+              <!-- Gated Sign-In Prompt for Non-Authenticated Users -->
+              <div class="rounded-xl bg-surface-container p-8 shadow-md text-center space-y-4 border border-primary/20">
+                <div class="w-14 h-14 rounded-full bg-primary/10 text-primary mx-auto flex items-center justify-center">
+                  <span class="material-symbols-outlined text-[32px]">lock</span>
+                </div>
+                <h3 class="font-headline-sm text-headline-sm text-on-surface">Client Authentication Required</h3>
+                <p class="font-body-md text-body-md text-on-surface-variant max-w-lg mx-auto">
+                  To ensure insured armored dispatch and cryptographic transaction recordkeeping, please sign in or register your SAT Jewel account before completing order dispatch.
+                </p>
+                <div class="flex items-center justify-center gap-4 pt-2">
+                  <a class="px-6 py-3 rounded-full bg-primary hover:bg-primary-fixed text-on-primary font-label-md text-label-md font-bold transition-all shadow-[0_0_16px_rgba(212,175,55,0.3)]" href="/Account/SignIn?returnUrl=/Product/Cart">
+                    Sign In to Account
+                  </a>
+                  <a class="px-6 py-3 rounded-full bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-medium border border-outline-variant/40 transition-all" href="/Account/SignUp?returnUrl=/Product/Cart">
+                    Create Private Account
+                  </a>
+                </div>
+              </div>
+            }
+
+            <!-- 3. OFFICIAL HARDCOPY PHYSICAL GIA CERTIFICATE ADD-ON -->
+            <div id="giaCardContainer" class="gia-card-container rounded-xl bg-surface-container-high p-5 shadow-sm transition-all border border-outline-variant/30">
+              <label class="flex items-start gap-4 cursor-pointer select-none">
+                <div class="pt-0.5">
+                  <input class="w-5 h-5 rounded accent-primary cursor-pointer mt-0.5" id="gia-checkbox" onchange="toggleGiaHardcopy(this)" type="checkbox" />
+                </div>
+                <div class="flex-1 space-y-1.5">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <span class="material-symbols-outlined text-primary text-[20px]">workspace_premium</span>
+                      <span class="font-headline-sm text-[17px] text-on-surface font-medium">Include Official Hardcopy Physical GIA Certificate</span>
+                    </div>
+                    <span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-label-caps text-label-caps font-bold tracking-wider">
+                      +$50.00 USD
+                    </span>
+                  </div>
+                  <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                    A sealed, laminated physical GIA Gemological dossier with tamper-evident holographic seal will be enclosed in your parcel when delivering from India. Digital GIA certificate is complimentary.
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            <!-- 4. FINAL PAYMENT DISPATCH (Express & Gateway Options) -->
+            <div class="rounded-xl bg-surface-container p-6 shadow-md space-y-6">
+
+              <!-- Authorization Warning / Status Banner -->
+              <div id="addressWarningNotice" class="p-3.5 rounded-lg bg-surface-container-low flex items-center gap-3 transition-colors">
+                <span id="addressStatusIcon" class="material-symbols-outlined text-tertiary text-[22px]">verified_user</span>
+                <p id="addressStatusText" class="font-body-sm text-body-sm text-on-surface">
+                  <strong class="text-tertiary font-semibold">Payment Status:</strong> Enter your verified home delivery shipping address above to authorize payment dispatch.
+                </p>
+              </div>
+
+              <!-- Payment Header with Subtotal Reminder -->
+              <div class="flex items-baseline justify-between pt-1 border-b border-outline-variant/30 pb-4">
+                <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Total Order Subtotal:</span>
+                <span class="font-headline-lg text-headline-lg text-primary font-bold tracking-tight" id="banner-subtotal-display">$0.00 USD</span>
+              </div>
+
+              @if (isAuthenticated)
+              {
+                <div id="paypalContainerBox" class="space-y-6 opacity-50 pointer-events-none transition-opacity">
+
+                  <!-- OPTION 1: INSTANT ONE-CLICK / PAYPAL EXPRESS CHECKOUT -->
+                  <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant">Option 1: Pay with PayPal Express</span>
+                      <span class="text-tertiary font-label-caps text-[10px] uppercase font-semibold">Instant USD Clearance</span>
+                    </div>
+
+                    <!-- PayPal Official Smart Buttons Target Container -->
+                    <div id="paypal-button-container" class="min-h-[48px]"></div>
+
+                    <div class="flex items-center justify-center gap-2 font-label-caps text-[10px] text-on-surface-variant">
+                      <span>Powered by</span>
+                      <span class="text-on-surface font-semibold">PayPal Enterprise Live Commerce</span>
+                    </div>
+                  </div>
+
+                  <!-- OPTION 2: EXPANDABLE DEBIT OR CREDIT CARD (RAZORPAY) -->
+                  <div class="space-y-3 pt-2 border-t border-outline-variant/20">
+                    <span class="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant">Option 2: Pay with Credit / Debit Card</span>
+                    <button class="w-full py-3.5 px-6 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-medium transition-colors flex items-center justify-between group" id="btn-method-card" onclick="payWithRazorpay()" type="button">
+                      <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-primary text-[20px]">credit_card</span>
+                        <span class="font-body-md text-body-md font-semibold text-left">Debit or Credit Card (Razorpay Gateway)</span>
+                      </div>
+                      <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[20px]">arrow_forward</span>
+                    </button>
+                    <div class="flex items-center justify-center gap-2 font-label-caps text-[10px] text-on-surface-variant">
+                      <span>Accepted:</span>
+                      <span class="text-on-surface font-semibold">Visa • MasterCard • American Express • RuPay</span>
+                    </div>
+                  </div>
+
+                  <!-- OPTION 3: CONCIERGE WIRE PRIVILEGE -->
+                  <div class="pt-1 border-t border-outline-variant/20">
+                    <button class="w-full py-2.5 px-4 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm flex items-center justify-between transition-colors" onclick="toggleWireDetails()" type="button">
+                      <span class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px] text-primary">account_balance</span>
+                        <span>Direct Bank Wire Transfer (2% Savings Privilege for High Jewelry Orders)</span>
+                      </span>
+                      <span class="text-primary font-semibold text-[11px] uppercase tracking-wider">Inquire Desk</span>
+                    </button>
+                    <div class="hidden mt-2 p-3.5 rounded bg-surface-container-lowest font-body-sm text-body-sm text-on-surface-variant" id="wire-payment-details">
+                      Upon placing your order via Private Bank Wire, wire instructions for JPMorgan Chase / HDFC Private Banking will be dispatched to your email. Your stone is reserved immediately for 72 hours.
+                    </div>
+                  </div>
+
+                </div>
+              }
+              else
+              {
+                <div class="p-6 rounded-lg bg-surface-container-low text-center space-y-3">
+                  <p class="font-body-md text-body-md text-on-surface-variant">
+                    Please sign in above to unlock instant PayPal Express and Credit Card payment options.
+                  </p>
+                </div>
+              }
+
+            </div>
+
+          </div>
+
+          <!-- ==================== RIGHT COLUMN (4-5 COLS): STICKY ORDER SUMMARY ==================== -->
+          <div class="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-24">
+
+            <!-- Summary Vault Card -->
+            <div class="rounded-xl bg-surface-container p-6 shadow-xl space-y-6 border border-outline-variant/20">
+              <div class="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+                <h3 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+                  <span class="material-symbols-outlined text-primary text-[20px]">shopping_bag</span>
+                  <span>Order Summary</span>
+                </h3>
+                <span id="summaryItemCountBadge" class="px-2.5 py-0.5 rounded-full bg-surface-container-high font-label-caps text-[10px] text-on-surface tracking-wider font-semibold">1 Custom Piece</span>
+              </div>
+
+              <!-- Breakdown Ledger -->
+              <div class="space-y-3 font-body-md text-body-md">
+                <div class="flex items-center justify-between text-on-surface-variant">
+                  <span>Bespoke Jewelry Subtotal</span>
+                  <span id="summary-items-price" class="text-on-surface font-medium">$0.00 USD</span>
+                </div>
+
+                <!-- GIA Hardcopy Dynamic Line -->
+                <div class="hidden items-center justify-between text-on-surface-variant" id="summary-gia-row">
+                  <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-primary">description</span>
+                    <span>Official Hardcopy GIA Certificate</span>
+                  </span>
+                  <span class="text-primary font-medium">+$50.00 USD</span>
+                </div>
+
+                <div class="flex items-center justify-between text-on-surface-variant">
+                  <span class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px] text-tertiary">shield</span>
+                    <span>Armored Transit Insurance</span>
+                  </span>
+                  <span class="text-tertiary font-medium uppercase font-label-caps text-[10px]">Complimentary</span>
+                </div>
+
+                <div class="flex items-center justify-between text-on-surface-variant">
+                  <span>Estimated VAT / Import Duty</span>
+                  <span class="text-on-surface-variant">Calculated at Delivery</span>
+                </div>
+              </div>
+
+              <!-- Total Calculation Ledger -->
+              <div class="pt-4 bg-surface-container-low -mx-6 px-6 py-4 space-y-1 rounded-lg">
+                <div class="flex items-baseline justify-between">
+                  <div>
+                    <p class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">Final Order Total</p>
+                    <p class="font-label-sm text-[11px] text-on-surface-variant">Currency locked in United States Dollars</p>
+                  </div>
+                  <div class="text-right">
+                    <p class="font-headline-lg text-headline-lg text-primary font-bold tracking-tight" id="order-summary-total">$0.00 USD</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Primary Gold Action Trigger -->
+              <div class="space-y-3 pt-2">
+                <button id="btnAuthorizeOrder" class="w-full py-4 px-6 rounded-full bg-primary hover:bg-primary-fixed text-on-primary font-label-md text-label-md font-bold tracking-wide uppercase shadow-[0_0_20px_rgba(212,175,55,0.35)] transition-all transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2" onclick="scrollToPaymentOrAction()" type="button">
+                  <span>Authorize &amp; Complete Order</span>
+                  <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+                </button>
+                <p class="text-center font-label-caps text-[10px] text-on-surface-variant tracking-wider uppercase">
+                  By authorizing, you accept SAT Jewels bespoke fabrication terms.
+                </p>
+              </div>
+
+              <!-- Guarantee & Quality Certifications Bento -->
+              <div class="pt-4 space-y-3.5 border-t border-outline-variant/20">
+                <div class="flex items-start gap-3">
+                  <div class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 text-primary">
+                    <span class="material-symbols-outlined text-[16px]">diamond</span>
+                  </div>
+                  <div>
+                    <p class="font-label-sm text-label-sm text-on-surface font-semibold">Laser-Inscribed GIA Diamond</p>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Microscopic registry matches physical &amp; digital report.</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                  <div class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 text-primary">
+                    <span class="material-symbols-outlined text-[16px]">verified</span>
+                  </div>
+                  <div>
+                    <p class="font-label-sm text-label-sm text-on-surface font-semibold">Lifetime Goldsmith Warranty</p>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Free prong tightening, annual steam clean, and inspection.</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                  <div class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 text-primary">
+                    <span class="material-symbols-outlined text-[16px]">cached</span>
+                  </div>
+                  <div>
+                    <p class="font-label-sm text-label-sm text-on-surface font-semibold">30-Day Complimentary Resizing</p>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Complimentary round-trip armored courier if fit requires adjustment.</p>
+                  </div>
+                </div>
+
+                <div class="flex items-start gap-3">
+                  <div class="w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center shrink-0 text-primary">
+                    <span class="material-symbols-outlined text-[16px]">package_2</span>
+                  </div>
+                  <div>
+                    <p class="font-label-sm text-label-sm text-on-surface font-semibold">Discreet Luxury Packaging</p>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">Unmarked security outer parcel protects your surprise engagement.</p>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Master Jeweler Concierge Help Card -->
+            <div class="rounded-xl bg-surface-container-low p-5 shadow-sm flex items-center gap-4 border border-outline-variant/20">
+              <div class="w-12 h-12 rounded-full bg-surface-container-high shrink-0 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined text-[24px]">support_agent</span>
+              </div>
+              <div class="space-y-0.5">
+                <p class="font-label-caps text-[10px] text-primary uppercase tracking-wider">Atelier Concierge Hotline</p>
+                <p class="font-label-md text-label-md text-on-surface font-semibold">Need Instant Assistance?</p>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Call or chat with Master Jeweler Sahil Khurana directly via <a href="https://wa.me/918128291686" target="_blank" class="text-primary hover:underline font-semibold">WhatsApp VIP Desk</a>.
+                </p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Luxury Footer -->
+  <footer class="w-full bg-surface-container-lowest border-t border-outline-variant/30 mt-20">
+    <div class="max-w-[1180px] mx-auto px-6 py-16">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 lg:gap-10">
+        <div class="space-y-4">
+          <h4 class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Company</h4>
+          <ul class="space-y-2.5">
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/About">About Us</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/FAQ">FAQ's</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Contact">Contact Us</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Reviews">Customer Reviews</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/DeveloperInfo">Developer Info</a></li>
+          </ul>
+        </div>
+        <div class="space-y-4">
+          <h4 class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Policies</h4>
+          <ul class="space-y-2.5">
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Privacy">Privacy Policy</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/PaymentPolicy">Payment Policy</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/RefundPolicy">Refund Policy</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/ShippingPolicy">Shipping Policy</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Terms">Terms of Service</a></li>
+          </ul>
+        </div>
+        <div class="space-y-4">
+          <h4 class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Lab Grown Diamonds</h4>
+          <ul class="space-y-2.5">
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?cat=lab-diamonds">All Hip Hop Lab Grown Diamonds</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?cat=pendants">Lab Grown Diamond Pendants</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?cat=cuban-chains">Custom Lab Grown Cuban Chains</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?cat=fine-jewelry">All Lab Grown Fine Jewelry</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?cat=rings">All Lab Grown Diamond Ring</a></li>
+          </ul>
+        </div>
+        <div class="space-y-4">
+          <h4 class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Shop by Shape</h4>
+          <ul class="space-y-2.5">
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?shape=dutch-marquise">Dutch Marquise Cut Jewelry</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?shape=round">Round Cut Jewelry</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?shape=marquise">Marquise Cut Jewelry</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?shape=cushion">Cushion Cut Jewelry</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?shape=emerald">Emerald Cut Jewelry</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Product?shape=antiques">Antiques Cut Jewelry</a></li>
+          </ul>
+        </div>
+        <div class="space-y-4">
+          <h4 class="font-label-caps text-label-caps text-primary tracking-widest uppercase">Resources / Education</h4>
+          <ul class="space-y-2.5">
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/Blog">The Blog</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/RingSizeGuide">Find Your Ring Size</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/JewelryCare">Jewelry Care</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/OrderProcess">Order Process</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/DiamondSizeChart">Diamond Size Chart</a></li>
+            <li class="leading-none"><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-primary transition-colors block py-0.5" href="/MoissaniteVsDiamond">Moissanite vs Diamond</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-14 pt-8 border-t border-outline-variant/30 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="flex items-center gap-3">
+          <span class="font-label-caps text-label-caps text-on-surface-variant uppercase mr-2">Follow Us:</span>
+          <a aria-label="Instagram" class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#f09433] via-[#dc2743] to-[#bc1888] flex items-center justify-center text-white shadow-sm hover:scale-110 transition-transform" href="https://instagram.com" target="_blank">
+            <i class="fa-brands fa-instagram text-[14px]"></i>
+          </a>
+          <a aria-label="WhatsApp" class="w-8 h-8 rounded-full bg-[#25D366] flex items-center justify-center text-white shadow-sm hover:scale-110 transition-transform" href="https://wa.me/918128291686" target="_blank">
+            <i class="fa-brands fa-whatsapp text-[14px]"></i>
+          </a>
+          <a aria-label="YouTube" class="w-8 h-8 rounded-full bg-[#FF0000] flex items-center justify-center text-white shadow-sm hover:scale-110 transition-transform" href="https://youtube.com" target="_blank">
+            <i class="fa-brands fa-youtube text-[14px]"></i>
+          </a>
+          <a aria-label="Facebook" class="w-8 h-8 rounded-full bg-[#1877F2] flex items-center justify-center text-white shadow-sm hover:scale-110 transition-transform" href="https://facebook.com" target="_blank">
+            <i class="fa-brands fa-facebook-f text-[14px]"></i>
+          </a>
+          <a aria-label="Pinterest" class="w-8 h-8 rounded-full bg-[#E60023] flex items-center justify-center text-white shadow-sm hover:scale-110 transition-transform" href="https://pinterest.com" target="_blank">
+            <i class="fa-brands fa-pinterest-p text-[14px]"></i>
+          </a>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 font-label-caps text-[10px] text-on-surface tracking-wider font-bold">PAYPAL</span>
+          <span class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 font-label-caps text-[10px] text-on-surface tracking-wider font-bold">VISA</span>
+          <span class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 font-label-caps text-[10px] text-on-surface tracking-wider font-bold">MASTERCARD</span>
+          <span class="px-2.5 py-1 rounded bg-surface-container border border-outline-variant/30 font-label-caps text-[10px] text-on-surface tracking-wider font-bold">AMEX</span>
+        </div>
+      </div>
+
+      <div class="mt-8 text-center">
+        <p class="font-body-sm text-body-sm text-on-surface-variant">© 2026 SAT JEWEL LLC. All Rights Reserved. Master Goldsmiths &amp; Certified Diamond Repository.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Concierge WhatsApp Widget -->
+  <a href="https://wa.me/918128291686" target="_blank" class="fixed bottom-6 right-6 z-50 flex items-center gap-2 group cursor-pointer text-decoration-none" style="bottom: max(24px, env(safe-area-inset-bottom, 24px));">
+    <div class="px-3 py-1.5 rounded-full bg-surface-container-high border border-outline-variant/40 shadow-xl flex items-center gap-1.5 transition-all group-hover:border-primary/50">
+      <span class="font-label-sm text-label-sm text-on-surface font-semibold">We Are Here!</span>
+      <span class="text-[14px]">👋</span>
+    </div>
+    <div class="w-12 h-12 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-[0_8px_24px_rgba(37,211,102,0.4)] group-hover:scale-105 transition-transform">
+      <i class="fa-brands fa-whatsapp text-[22px]"></i>
+    </div>
+  </a>
+
+  <!-- In-Page Payment Processing & Verification Modal Overlay -->
+  <div id="paymentProcessingOverlay" style="position:fixed; inset:0; background:rgba(5, 11, 20, 0.88); backdrop-filter:blur(12px); z-index:999999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px;">
+    <div style="background:rgba(19, 19, 20, 0.95); border:1px solid rgba(212, 175, 55, 0.4); border-radius:24px; padding:40px 32px; max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.85);">
+      <div style="font-size:48px; color:#f2ca50; margin-bottom:16px; animation:spinDiamond 3s infinite linear;">
+        <span class="material-symbols-outlined text-[48px]">diamond</span>
+      </div>
+      <h3 style="font-family:'Playfair Display', serif; font-size:22px; color:#e5e2e3; margin:0 0 10px;">Verifying Payment Security...</h3>
+      <p id="processingOverlayMessage" style="color:#d0c5af; font-size:14px; margin:0 0 20px; line-height:1.6;">
+        Confirming payment with server-authoritative pricing. Please do not close or refresh this window.
+      </p>
+      <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; background:rgba(212, 175, 55, 0.15); border:1px solid rgba(212, 175, 55, 0.3); border-radius:20px; color:#f2ca50; font-size:12px; font-weight:700;">
+        <span class="material-symbols-outlined text-[16px]">verified_user</span> 256-Bit TLS Encrypted Verification
       </div>
     </div>
   </div>
 
+  <!-- Client-Side Interactive Business Logic & Payment Integrations -->
   <script>
     const isUserAuthenticated = @(isAuthenticated ? "true" : "false");
     let currentCartTotal = 0;
+    let currentRawItemsTotal = 0;
     let currentCartSummary = 'Bespoke Jewelry Order';
 
     document.addEventListener('DOMContentLoaded', () => {
+      // 1. Initialize cart state from storage
       renderCart();
+
+      // 2. Initialize saved address if available
       if (isUserAuthenticated) {
-        // Auto-select default saved address if dropdown exists
-        const savedSelect = document.getElementById('savedAddressSelector');
+        const savedSelect = document.getElementById('address-vault-select');
         if (savedSelect && savedSelect.value) {
           loadSavedAddress(savedSelect.value);
         }
         checkAddressValidation();
         initPayPalButtons();
       }
+
+      // 3. Countdown timer simulation for vault reservation
+      startReservationTimer(14 * 60 + 32);
     });
+
+    function startReservationTimer(duration) {
+      let timer = duration;
+      const el = document.getElementById('reservationTimer');
+      if (!el) return;
+      setInterval(() => {
+        const minutes = parseInt(timer / 60, 10);
+        const seconds = parseInt(timer % 60, 10);
+        const formatted = (minutes < 10 ? '0' + minutes : minutes) + ':' + (seconds < 10 ? '0' + seconds : seconds);
+        el.textContent = `Cart Vault Reserved (${formatted} remaining)`;
+        if (--timer < 0) {
+          timer = duration;
+        }
+      }, 1000);
+    }
+
+    function getCartStorageKey() {
+      const isAuth = @(isAuthenticated ? "true" : "false");
+      const email = '@(userEmail.ToLower().Trim())';
+      if (isAuth && email) {
+        return 'sat_cart_' + encodeURIComponent(email);
+      }
+      return 'sat_cart_guest';
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cartItemsContainer');
+      const badgeEl = document.getElementById('navCartBadge');
+      const countBadge = document.getElementById('summaryItemCountBadge');
+      const itemsPriceEl = document.getElementById('summary-items-price');
+      const totalDisplay = document.getElementById('order-summary-total');
+      const bannerSubtotal = document.getElementById('banner-subtotal-display');
+      const giaRow = document.getElementById('summary-gia-row');
+      const giaCheckbox = document.getElementById('gia-checkbox');
+
+      if (!container) return;
+
+      try {
+        const key = getCartStorageKey();
+        const saved = localStorage.getItem(key);
+        const items = saved ? JSON.parse(saved) : [];
+
+        if (badgeEl) badgeEl.textContent = items.length;
+
+        if (items.length === 0) {
+          container.innerHTML = `
+            <div class="rounded-xl bg-surface-container p-12 text-center shadow-md space-y-4">
+              <div class="w-16 h-16 rounded-full bg-surface-container-high text-primary mx-auto flex items-center justify-center">
+                <span class="material-symbols-outlined text-[36px]">shopping_bag</span>
+              </div>
+              <h2 class="font-headline-sm text-headline-sm text-on-surface">Your Shopping Cart is Empty</h2>
+              <p class="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto">
+                Discover handcrafted solitaire rings, pendants, and certified diamonds in our collection.
+              </p>
+              <div class="pt-2">
+                <a href="/Product" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-primary hover:bg-primary-fixed text-on-primary font-label-md text-label-md font-bold transition-all shadow-[0_0_16px_rgba(212,175,55,0.3)]">
+                  <span class="material-symbols-outlined text-[18px]">diamond</span>
+                  <span>Browse Fine Jewelry Catalog</span>
+                </a>
+              </div>
+            </div>
+          `;
+          if (countBadge) countBadge.textContent = '0 Pieces';
+          if (itemsPriceEl) itemsPriceEl.textContent = '$0.00 USD';
+          if (totalDisplay) totalDisplay.textContent = '$0.00 USD';
+          if (bannerSubtotal) bannerSubtotal.textContent = '$0.00 USD';
+          currentCartTotal = 0;
+          currentRawItemsTotal = 0;
+          return;
+        }
+
+        let rawTotal = 0;
+        let html = '';
+        let names = [];
+
+        items.forEach((item, index) => {
+          const itemPrice = Number(item.priceUSD) || 2925;
+          const qty = Number(item.quantity) || 1;
+          const subtotal = itemPrice * qty;
+          rawTotal += subtotal;
+          names.push(item.name || 'Bespoke Solitaire Ring');
+
+          const formattedPrice = '$' + subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+          const imgSrc = item.img || 'https://lh3.googleusercontent.com/aida-public/AB6AXuA_DTo2CiKldBn9YJhBYGy9qeOAtspxUut1HIUuuQDuOeCnrSmH-tHAR8ymqB7sOQUsYmSZ7Z2-pBSmANCzyedoNSCfcmeSwvtNJeMsRYpYbPsnZJIrcGzr5bnnezNnrrktJXpG3CyyNa1iulAYCbRXWsm5LgpiyjQZNwy4b8xisGQ0R9imJ1pBz_NDEAYpy2MeO79rVhlxF00fin61MfDlBPyi3c00CBaaeFRqapyfkeZgCWKBqdgm0Q';
+          const certUrl = `/Product/GiaCertificate/${encodeURIComponent(item.id || 'sat-prod-8')}`;
+
+          html += `
+            <div class="rounded-xl bg-surface-container p-6 shadow-md relative overflow-hidden">
+              <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                <!-- Product Ring Visual with Jewel Box Framing -->
+                <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-lg bg-surface-container-lowest shrink-0 overflow-hidden shadow-inner flex items-center justify-center">
+                  <img class="w-full h-full object-cover object-center" src="${imgSrc}" alt="${item.name || 'Fine Jewelry'}">
+                  <span class="absolute bottom-1 left-1 bg-surface-container-lowest/90 px-1.5 py-0.5 rounded font-label-caps text-[9px] text-secondary tracking-widest uppercase">GIA 3EX</span>
+                </div>
+                <!-- Diamond Ring Details & Spec Hierarchy -->
+                <div class="flex-1 min-w-0 space-y-2">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <div class="flex items-center gap-2 mb-1">
+                        <span class="px-2 py-0.5 rounded bg-surface-container-highest font-label-caps text-[10px] text-primary uppercase tracking-wider">Solitaire Atelier</span>
+                        <span class="px-2 py-0.5 rounded bg-surface-container-highest font-label-caps text-[10px] text-tertiary uppercase tracking-wider">In Stock &amp; Ready to Set</span>
+                      </div>
+                      <h2 class="font-headline-sm text-headline-sm text-on-surface font-medium leading-snug">
+                        ${item.name || '1.50CT Princess Diamond Hidden Halo Pavé Setting Engagement Ring'}
+                      </h2>
+                    </div>
+                    <button class="text-on-surface-variant hover:text-error transition-colors p-1.5 rounded-full hover:bg-surface-container-high shrink-0" title="Remove piece" type="button" onclick="removeItem(${index})">
+                      <span class="material-symbols-outlined text-[20px]">delete</span>
+                    </button>
+                  </div>
+                  <!-- Ring Specification Chips -->
+                  <div class="flex flex-wrap items-center gap-y-1 gap-x-3 text-on-surface-variant font-body-sm text-body-sm">
+                    <span>Metal: <strong class="text-on-surface font-medium">${item.metal || '18K Solid Yellow Gold'}</strong></span>
+                    <span class="text-outline-variant">•</span>
+                    <span>Finger Size: <strong class="text-on-surface font-medium">${item.size || 'US 6.0 (Resizing Included)'}</strong></span>
+                    <span class="text-outline-variant">•</span>
+                    <span>Clarity: <strong class="text-on-surface font-medium">${item.clarity || 'VVS1 / Color F'}</strong></span>
+                  </div>
+                  <!-- GIA Certificate Link & Price Line -->
+                  <div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <a class="inline-flex items-center gap-1.5 font-label-sm text-label-sm text-primary hover:text-primary-fixed transition-colors underline-offset-4 hover:underline" href="${certUrl}" target="_blank">
+                      <span class="material-symbols-outlined text-[16px]">verified</span>
+                      <span>Digital GIA Certificate (Download PDF)</span>
+                      <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                    </a>
+                    <div class="text-left sm:text-right">
+                      <p class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight">${formattedPrice} <span class="font-label-caps text-label-caps text-on-surface-variant font-normal">USD</span></p>
+                      <p class="font-label-caps text-[10px] text-on-surface-variant">Complimentary Armored Freight Included</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        });
+
+        container.innerHTML = html;
+        currentRawItemsTotal = rawTotal;
+
+        // Restore GIA hardcopy option from storage
+        const storedGia = localStorage.getItem('sat_cart_physical_cert');
+        if (giaCheckbox) {
+          if (storedGia !== null) {
+            giaCheckbox.checked = (storedGia === 'true');
+          } else {
+            giaCheckbox.checked = true; // default enabled
+          }
+        }
+
+        const isGia = giaCheckbox ? giaCheckbox.checked : true;
+        const giaFee = isGia ? 50 : 0;
+        const total = rawTotal + giaFee;
+        currentCartTotal = total;
+        currentCartSummary = names.join(', ') + (isGia ? ' (+ Hardcopy GIA Certificate)' : '');
+
+        if (countBadge) countBadge.textContent = `${items.length} Custom ${items.length === 1 ? 'Piece' : 'Pieces'}`;
+        if (itemsPriceEl) itemsPriceEl.textContent = '$' + rawTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+        
+        if (giaRow) {
+          if (isGia) {
+            giaRow.classList.remove('hidden');
+            giaRow.classList.add('flex');
+          } else {
+            giaRow.classList.add('hidden');
+            giaRow.classList.remove('flex');
+          }
+        }
+
+        const totalFormatted = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+        if (totalDisplay) totalDisplay.textContent = totalFormatted;
+        if (bannerSubtotal) bannerSubtotal.textContent = totalFormatted;
+
+      } catch (e) {
+        console.error('Error rendering cart:', e);
+      }
+    }
+
+    function toggleGiaHardcopy(el) {
+      const checkbox = document.getElementById('gia-checkbox');
+      const isChecked = checkbox ? checkbox.checked : false;
+      localStorage.setItem('sat_cart_physical_cert', isChecked ? 'true' : 'false');
+      
+      const giaRow = document.getElementById('summary-gia-row');
+      const totalDisplay = document.getElementById('order-summary-total');
+      const totalBannerDisplay = document.getElementById('banner-subtotal-display');
+      const cardContainer = document.getElementById('giaCardContainer');
+
+      const giaPrice = isChecked ? 50 : 0;
+      const newTotalNum = currentRawItemsTotal + giaPrice;
+      currentCartTotal = newTotalNum;
+      const formattedTotal = '$' + newTotalNum.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
+
+      if (isChecked) {
+        if (giaRow) {
+          giaRow.classList.remove('hidden');
+          giaRow.classList.add('flex');
+        }
+        if (cardContainer) {
+          cardContainer.classList.add('bg-surface-container-high');
+          cardContainer.classList.remove('bg-surface-container-low');
+        }
+      } else {
+        if (giaRow) {
+          giaRow.classList.add('hidden');
+          giaRow.classList.remove('flex');
+        }
+        if (cardContainer) {
+          cardContainer.classList.remove('bg-surface-container-high');
+          cardContainer.classList.add('bg-surface-container-low');
+        }
+      }
+
+      if (totalDisplay) totalDisplay.textContent = formattedTotal;
+      if (totalBannerDisplay) totalBannerDisplay.textContent = formattedTotal;
+    }
+
+    function removeItem(index) {
+      try {
+        const key = getCartStorageKey();
+        const saved = localStorage.getItem(key);
+        let items = saved ? JSON.parse(saved) : [];
+        items.splice(index, 1);
+        localStorage.setItem(key, JSON.stringify(items));
+        renderCart();
+      } catch (e) {
+        console.error(e);
+      }
+    }
 
     function loadSavedAddress(jsonStr) {
       if (!jsonStr) return;
@@ -376,7 +1062,10 @@
         if (item.City) document.getElementById('shipCity').value = item.City;
         if (item.State) document.getElementById('shipState').value = item.State;
         if (item.PostalCode) document.getElementById('shipPostalCode').value = item.PostalCode;
-        if (item.Country) document.getElementById('shipCountry').value = item.Country;
+        if (item.Country) {
+          const countryEl = document.getElementById('shipCountry');
+          if (countryEl) countryEl.value = item.Country;
+        }
         checkAddressValidation();
       } catch (e) {
         console.error(e);
@@ -391,23 +1080,19 @@
       const country = countryEl.value;
       switch (country) {
         case 'India':
-          postalEl.placeholder = 'e.g. 400001 / 396445 (6-digit PIN)';
+          postalEl.placeholder = '396445 (6-digit PIN)';
           break;
         case 'United States':
-          postalEl.placeholder = 'e.g. 10001 / 90210 (5-digit ZIP)';
+          postalEl.placeholder = '10021 / 90210 (5-digit ZIP)';
           break;
         case 'United Kingdom':
-          postalEl.placeholder = 'e.g. SW1A 1AA / EC1A 1BB';
+          postalEl.placeholder = 'SW1A 1AA / EC1A 1BB';
           break;
         case 'Canada':
-          postalEl.placeholder = 'e.g. M5V 2T6 / K1A 0B1';
+          postalEl.placeholder = 'M5V 2T6';
           break;
         case 'Australia':
-          postalEl.placeholder = 'e.g. 2000 / 3000 (4-digit Postcode)';
-          break;
-        case 'Germany':
-        case 'France':
-          postalEl.placeholder = 'e.g. 75001 / 10115 (5-digit Code)';
+          postalEl.placeholder = '2000 / 3000';
           break;
         default:
           postalEl.placeholder = 'Postal / ZIP Code';
@@ -425,12 +1110,11 @@
         if (digitsOnly.length === 6) {
           return {
             valid: false,
-            message: `"${postal}" is a 6-digit Indian PIN code. For United States, please enter a 5-digit US ZIP code (e.g. 10001, 90210) or switch country to India.`
+            message: `"${postal}" is a 6-digit Indian PIN. For US, enter 5-digit ZIP (e.g. 10021).`
           };
         }
-        const usRegex = /^\d{5}(-\d{4})?$/;
-        if (!usRegex.test(clean)) {
-          return { valid: false, message: 'For United States, please enter a valid 5-digit ZIP code (e.g. 10001, 90210).' };
+        if (!/^\d{5}(-\d{4})?$/.test(clean)) {
+          return { valid: false, message: 'Please enter a valid 5-digit US ZIP code (e.g. 10021).' };
         }
         return { valid: true };
       }
@@ -439,42 +1123,18 @@
         if (digitsOnly.length === 5) {
           return {
             valid: false,
-            message: `"${postal}" is a 5-digit US ZIP code. For India, please enter a 6-digit Indian PIN code (e.g. 400001, 396445) or switch country to United States.`
+            message: `"${postal}" is a 5-digit US ZIP. For India, enter 6-digit PIN (e.g. 396445).`
           };
         }
-        const inRegex = /^\d{6}$/;
-        if (!inRegex.test(clean)) {
-          return { valid: false, message: 'For India, please enter a valid 6-digit postal PIN code (e.g. 396445, 400001).' };
+        if (!/^\d{6}$/.test(clean)) {
+          return { valid: false, message: 'Please enter a valid 6-digit Indian PIN code (e.g. 396445).' };
         }
         return { valid: true };
       }
 
       if (country === 'United Kingdom') {
-        const ukRegex = /^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/;
-        if (!ukRegex.test(clean)) {
-          return { valid: false, message: 'For United Kingdom, please enter a valid UK postcode (e.g. SW1A 1AA, EC1A 1BB).' };
-        }
-        return { valid: true };
-      }
-
-      if (country === 'Canada') {
-        const caRegex = /^[A-Z]\d[A-Z]\s*\d[A-Z]\d$/;
-        if (!caRegex.test(clean)) {
-          return { valid: false, message: 'For Canada, please enter a valid Canadian postal code (e.g. M5V 2T6).' };
-        }
-        return { valid: true };
-      }
-
-      if (country === 'Australia') {
-        if (!/^\d{4}$/.test(clean)) {
-          return { valid: false, message: 'For Australia, please enter a valid 4-digit postcode (e.g. 2000).' };
-        }
-        return { valid: true };
-      }
-
-      if (country === 'Germany' || country === 'France') {
-        if (!/^\d{5}$/.test(clean)) {
-          return { valid: false, message: `For ${country}, please enter a valid 5-digit postal code (e.g. 75001).` };
+        if (!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/.test(clean)) {
+          return { valid: false, message: 'Please enter a valid UK postcode (e.g. SW1A 1AA).' };
         }
         return { valid: true };
       }
@@ -484,169 +1144,6 @@
       }
 
       return { valid: true };
-    }
-
-    function checkAddressValidation() {
-      const addr = getShippingAddressData();
-      const notice = document.getElementById('addressWarningNotice');
-      const paypalBox = document.getElementById('paypalContainerBox');
-      const postalFeedback = document.getElementById('postalCodeFeedback');
-      const postalEl = document.getElementById('shipPostalCode');
-      const countryEl = document.getElementById('shipCountry');
-
-      const postalVal = postalEl ? postalEl.value.trim() : '';
-      const countryVal = countryEl ? countryEl.value : 'India';
-
-      if (postalVal && postalFeedback && postalEl) {
-        const postalCheck = validatePostalCodeFormat(postalVal, countryVal);
-        if (!postalCheck.valid) {
-          postalFeedback.style.display = 'block';
-          postalFeedback.style.color = '#f87171';
-          postalFeedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${postalCheck.message}`;
-          postalEl.style.borderColor = '#ef4444';
-          postalEl.style.boxShadow = '0 0 10px rgba(239, 68, 68, 0.4)';
-        } else {
-          postalFeedback.style.display = 'block';
-          postalFeedback.style.color = '#4ade80';
-          postalFeedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> Valid ${countryVal} postal format.`;
-          postalEl.style.borderColor = '#22c55e';
-          postalEl.style.boxShadow = '0 0 10px rgba(34, 197, 94, 0.3)';
-        }
-      } else if (postalFeedback) {
-        postalFeedback.style.display = 'none';
-        if (postalEl) {
-          postalEl.style.borderColor = '';
-          postalEl.style.boxShadow = '';
-        }
-      }
-
-      if (addr) {
-        if (notice) {
-          notice.style.background = 'rgba(34, 197, 94, 0.12)';
-          notice.style.borderColor = '#22c55e';
-          notice.style.color = '#4ade80';
-          notice.innerHTML = `<i class="fa-solid fa-circle-check" style="font-size:18px; color:#22c55e;"></i> <div><strong>Payment Authorized:</strong> Shipping address verified for ${addr.country}. You may now complete your payment below.</div>`;
-        }
-        if (paypalBox) {
-          paypalBox.style.opacity = '1';
-          paypalBox.style.pointerEvents = 'auto';
-        }
-        return true;
-      } else {
-        if (notice) {
-          notice.style.background = 'rgba(239,68,68,0.12)';
-          notice.style.borderColor = '#ef4444';
-          notice.style.color = '#fca5a5';
-          notice.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="font-size:18px; color:#ef4444;"></i> <div><strong>Payment Permission Locked:</strong> Complete home delivery shipping address with valid country-matched PIN/ZIP code required before payment button unlocks.</div>';
-        }
-        if (paypalBox) {
-          paypalBox.style.opacity = '0.5';
-          paypalBox.style.pointerEvents = 'none';
-        }
-        return false;
-      }
-    }
-
-    function getCartStorageKey() {
-      const isAuth = @(isAuthenticated ? "true" : "false");
-      const email = '@(userEmail.ToLower().Trim())';
-      if (isAuth && email) {
-        return 'sat_cart_' + encodeURIComponent(email);
-      }
-      return 'sat_cart_guest';
-    }
-
-    function renderCart() {
-      const container = document.getElementById('cartItemsContainer');
-      const totalEl = document.getElementById('cartTotalDisplay');
-      const paypalBox = document.getElementById('paypalContainerBox');
-      if (!container) return;
-
-      try {
-        const key = getCartStorageKey();
-        const saved = localStorage.getItem(key);
-        const items = saved ? JSON.parse(saved) : [];
-
-        if (items.length === 0) {
-          container.innerHTML = `
-            <div style="text-align:center; padding: 40px 20px;">
-              <i class="fa-solid fa-bag-shopping" style="font-size:42px; color:var(--champagne-gold); margin-bottom:14px;"></i>
-              <h3 style="margin:0 0 8px; font-family:var(--font-serif);">Your Shopping Cart is Empty</h3>
-              <p style="color:var(--taupe-beige); font-size:14px; margin-bottom:20px;">Discover handcrafted engagement rings, necklaces, and GIA diamonds in our shop.</p>
-              <a href="/Product" class="btn-primary" style="display:inline-flex; padding:10px 24px; border-radius:30px; text-decoration:none;"><i class="fa-solid fa-gem"></i> Browse Shop Catalog</a>
-            </div>
-          `;
-          totalEl.textContent = '$0 USD';
-          if (paypalBox) paypalBox.style.display = 'none';
-          currentCartTotal = 0;
-          return;
-        }
-
-        if (paypalBox && isUserAuthenticated) paypalBox.style.display = 'block';
-
-        let total = 0;
-        let html = '';
-        let names = [];
-
-        items.forEach((item, index) => {
-          const itemPrice = Number(item.priceUSD) || 0;
-          const qty = Number(item.quantity) || 1;
-          const subtotal = itemPrice * qty;
-          total += subtotal;
-          names.push(item.name || 'Jewelry Piece');
-
-          html += `
-            <div class="cart-item-row">
-              <div style="display:flex; align-items:center; gap:16px;">
-                <img src="${item.img || '/assets/ring_1.jpg'}" class="cart-item-img" alt="${item.name}" />
-                <div>
-                  <div style="font-weight:700; font-family:var(--font-serif); font-size:16px;">${item.name}</div>
-                  <div style="font-size:12px; color:var(--taupe-beige); margin-top:2px;">$${itemPrice.toLocaleString()} USD each</div>
-                  <div style="margin-top:4px;">
-                    <a href="/Product/GiaCertificate/${item.id || 'sat-prod-8f3a9b2c1d4e'}" target="_blank" style="display:inline-flex; align-items:center; gap:4px; font-size:11.5px; color:#fbbf24; text-decoration:none; font-weight:600;">
-                      <i class="fa-solid fa-file-shield"></i> Digital GIA Certificate (Download) <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:9px;"></i>
-                    </a>
-                  </div>
-                </div>
-              </div>
-              <div style="display:flex; align-items:center; gap:16px;">
-                <div style="font-weight:700; color:#fbbf24; font-size:18px;">$${subtotal.toLocaleString()} USD</div>
-                <button type="button" onclick="removeItem(${index})" style="background:none; border:none; color:#fca5a5; cursor:pointer; font-size:16px;" title="Remove Item"><i class="fa-solid fa-trash-can"></i></button>
-              </div>
-            </div>
-          `;
-        });
-
-        // Check if physical hardcopy GIA certificate is selected
-        const chkCert = document.getElementById('chkCartPhysicalGiaCert');
-        const storedCert = localStorage.getItem('sat_cart_physical_cert');
-        if (chkCert && storedCert !== null) {
-          chkCert.checked = (storedCert === 'true');
-        }
-        const isPhysicalCert = chkCert ? chkCert.checked : (storedCert === 'true');
-        const certFee = isPhysicalCert ? 50 : 0;
-        total += certFee;
-
-        currentCartTotal = total;
-        currentCartSummary = names.join(', ') + (isPhysicalCert ? ' (+ Physical GIA Hardcopy Certificate)' : '');
-        container.innerHTML = html;
-        totalEl.innerHTML = '$' + total.toLocaleString() + ' USD' + (isPhysicalCert ? '<span style="display:block; font-size:12px; color:#fbbf24; font-weight:600; font-family:sans-serif; margin-top:4px;"><i class="fa-solid fa-stamp"></i> Includes +$50 Physical GIA Hardcopy Certificate</span>' : '');
-        const btnDisplay = document.getElementById('paypalBtnAmountDisplay');
-        if (btnDisplay) btnDisplay.textContent = '$' + total.toLocaleString() + ' USD';
-      } catch (e) {
-        console.error(e);
-      }
-    }
-
-    function isPhysicalCertSelected() {
-      const chk = document.getElementById('chkCartPhysicalGiaCert');
-      return chk ? chk.checked : (localStorage.getItem('sat_cart_physical_cert') === 'true');
-    }
-
-    function handleCartCertToggle() {
-      const chk = document.getElementById('chkCartPhysicalGiaCert');
-      localStorage.setItem('sat_cart_physical_cert', (chk && chk.checked) ? 'true' : 'false');
-      renderCart();
     }
 
     function getShippingAddressData() {
@@ -668,28 +1165,89 @@
       const postal = postalEl.value.trim();
       const country = countryEl.value.trim();
 
-      if (!name || !phone || !street || !city || !state || !postal) {
-        return null;
-      }
+      if (!name || !phone || !street || !city || !state || !postal) return null;
 
-      if (typeof validatePostalCodeFormat === 'function') {
-        const check = validatePostalCodeFormat(postal, country);
-        if (!check.valid) return null;
-      }
+      const check = validatePostalCodeFormat(postal, country);
+      if (!check.valid) return null;
 
       return { name, phone, street, city, state, postal, country };
     }
 
-    function removeItem(index) {
-      try {
-        const key = getCartStorageKey();
-        const saved = localStorage.getItem(key);
-        let items = saved ? JSON.parse(saved) : [];
-        items.splice(index, 1);
-        localStorage.setItem(key, JSON.stringify(items));
-        renderCart();
-        if (typeof syncCartBadge === 'function') syncCartBadge();
-      } catch (e) {}
+    function checkAddressValidation() {
+      const addr = getShippingAddressData();
+      const notice = document.getElementById('addressWarningNotice');
+      const icon = document.getElementById('addressStatusIcon');
+      const text = document.getElementById('addressStatusText');
+      const paypalBox = document.getElementById('paypalContainerBox');
+      const feedback = document.getElementById('postalCodeFeedback');
+      const postalEl = document.getElementById('shipPostalCode');
+      const countryEl = document.getElementById('shipCountry');
+
+      const postalVal = postalEl ? postalEl.value.trim() : '';
+      const countryVal = countryEl ? countryEl.value : 'India';
+
+      if (postalVal && feedback) {
+        const check = validatePostalCodeFormat(postalVal, countryVal);
+        feedback.classList.remove('hidden');
+        feedback.classList.add('flex');
+        if (!check.valid) {
+          feedback.className = 'flex items-center gap-1.5 text-error pt-0.5';
+          feedback.innerHTML = `<span class="material-symbols-outlined text-[16px]">warning</span> <span class="font-label-sm text-label-sm">${check.message}</span>`;
+        } else {
+          feedback.className = 'flex items-center gap-1.5 text-tertiary pt-0.5';
+          feedback.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> <span class="font-label-sm text-label-sm">Valid ${countryVal} postal format &amp; armored service area.</span>`;
+        }
+      } else if (feedback) {
+        feedback.classList.add('hidden');
+        feedback.classList.remove('flex');
+      }
+
+      if (addr) {
+        if (notice && icon && text) {
+          notice.className = 'p-3.5 rounded-lg bg-surface-container-high border border-tertiary/40 flex items-center gap-3 transition-colors';
+          icon.className = 'material-symbols-outlined text-tertiary text-[22px]';
+          icon.textContent = 'verified_user';
+          text.innerHTML = `<strong class="text-tertiary font-semibold">Payment Authorized:</strong> Shipping address verified for ${addr.country}. Select your payment gateway below.`;
+        }
+        if (paypalBox) {
+          paypalBox.classList.remove('opacity-50', 'pointer-events-none');
+        }
+        return true;
+      } else {
+        if (notice && icon && text) {
+          notice.className = 'p-3.5 rounded-lg bg-surface-container-low border border-outline-variant/30 flex items-center gap-3 transition-colors';
+          icon.className = 'material-symbols-outlined text-primary text-[22px]';
+          icon.textContent = 'lock';
+          text.innerHTML = `<strong class="text-primary font-semibold">Address Required:</strong> Complete your full name, street, city, and valid postal code above to unlock payment.`;
+        }
+        if (paypalBox) {
+          paypalBox.classList.add('opacity-50', 'pointer-events-none');
+        }
+        return false;
+      }
+    }
+
+    function toggleWireDetails() {
+      const wire = document.getElementById('wire-payment-details');
+      if (wire) wire.classList.toggle('hidden');
+    }
+
+    function scrollToPaymentOrAction() {
+      if (!isUserAuthenticated) {
+        window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+        return;
+      }
+      const addr = getShippingAddressData();
+      if (!addr) {
+        const formEl = document.getElementById('shippingAddressForm');
+        if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        checkAddressValidation();
+        return;
+      }
+      const paypalBox = document.getElementById('paypalContainerBox');
+      if (paypalBox) {
+        paypalBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
 
     function showPaymentProcessing(msg) {
@@ -704,8 +1262,18 @@
       if (el) el.style.display = 'none';
     }
 
+    function isPhysicalCertSelected() {
+      const chk = document.getElementById('gia-checkbox');
+      return chk ? chk.checked : (localStorage.getItem('sat_cart_physical_cert') === 'true');
+    }
+
+    // PayPal Official Smart Buttons Integration
     function initPayPalButtons() {
       if (typeof paypal === 'undefined') return;
+
+      const container = document.getElementById('paypal-button-container');
+      if (!container) return;
+      container.innerHTML = '';
 
       paypal.Buttons({
         style: {
@@ -726,6 +1294,7 @@
           if (!addr) {
             alert('⚠️ PERMISSION DENIED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, ZIP) is required before payment can be initialized.');
             checkAddressValidation();
+            scrollToPaymentOrAction();
             return actions.reject();
           }
           return actions.resolve();
@@ -738,12 +1307,20 @@
             throw new Error('Shipping address incomplete.');
           }
 
-          // Security Rule: Never send price/amount! Pass only productId & quantity to server
           const key = getCartStorageKey();
           const savedCart = localStorage.getItem(key);
           const cartItems = savedCart ? JSON.parse(savedCart) : [];
           const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-8') : 'sat-prod-8';
           const qty = cartItems.length > 0 ? (Number(cartItems[0].quantity) || 1) : 1;
+          const mappedCartItems = cartItems.map(item => ({
+            productId: item.id || item.catalogItemId || 'sat-prod-8',
+            name: item.name || 'Bespoke Fine Jewelry',
+            quantity: Number(item.quantity) || 1,
+            stoneType: item.stone || item.stoneType || 'Lab Grown Diamond',
+            metal: item.metal || '',
+            size: item.size || '',
+            priceUSD: Number(item.priceUSD) || 0
+          }));
 
           try {
             const res = await fetch('/api/payment/create-order', {
@@ -752,6 +1329,10 @@
               body: JSON.stringify({
                 productId: firstItemId,
                 quantity: qty,
+                stoneType: cartItems[0]?.stone || cartItems[0]?.stoneType || 'Lab Grown Diamond',
+                metal: cartItems[0]?.metal || '',
+                ringSize: cartItems[0]?.size || '',
+                cartItems: mappedCartItems,
                 includePhysicalCertificate: isPhysicalCertSelected(),
                 shippingFullName: addr.name,
                 shippingPhone: addr.phone,
@@ -787,9 +1368,22 @@
           .then(result => {
             hidePaymentProcessing();
             if (result.success) {
-              localStorage.removeItem(getCartStorageKey());
-              alert('🎉 Order Verified & Placed Successfully! Order ID: ' + (result.orderId || data.orderID));
-              window.location.href = '/Account/Orders';
+              const key = getCartStorageKey();
+              const savedCart = localStorage.getItem(key);
+              const cartItems = savedCart ? JSON.parse(savedCart) : [];
+              const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-8') : 'sat-prod-8';
+              localStorage.removeItem(key);
+
+              try {
+                sessionStorage.setItem('sat_pending_review_item', JSON.stringify({
+                  productId: firstItemId,
+                  productName: cartItems[0]?.name || 'Bespoke Fine Jewelry',
+                  orderId: result.orderId || data.orderID
+                }));
+              } catch(e) {}
+
+              const confirmedOrderId = result.orderId || data.orderID;
+              window.location.href = '/Order/Confirmation?orderId=' + encodeURIComponent(confirmedOrderId);
             } else {
               alert('⚠️ PayPal Verification Warning: ' + result.message);
             }
@@ -803,7 +1397,7 @@
 
         onCancel: function(data) {
           hidePaymentProcessing();
-          alert('PayPal checkout was cancelled. Your items remain in your cart.');
+          alert('PayPal checkout was cancelled. Your items remain safely in your cart.');
         },
 
         onError: function(err) {
@@ -814,7 +1408,7 @@
       }).render('#paypal-button-container');
     }
 
-    // Razorpay Embedded Card Payment Modal (Independent path - No PayPal prompt)
+    // Razorpay Embedded Card Payment
     async function payWithRazorpay() {
       if (!isUserAuthenticated) {
         alert('🚫 PERMISSION DENIED: You must sign in to your account before proceeding to payment.');
@@ -826,6 +1420,7 @@
       if (!addr) {
         alert('⚠️ PERMISSION DENIED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, ZIP) is required before payment can be initialized.');
         checkAddressValidation();
+        scrollToPaymentOrAction();
         return;
       }
 
@@ -834,15 +1429,27 @@
       const cartItems = savedCart ? JSON.parse(savedCart) : [];
       const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-8') : 'sat-prod-8';
       const qty = cartItems.length > 0 ? (Number(cartItems[0].quantity) || 1) : 1;
+      const mappedCartItems = cartItems.map(item => ({
+        productId: item.id || item.catalogItemId || 'sat-prod-8',
+        name: item.name || 'Bespoke Fine Jewelry',
+        quantity: Number(item.quantity) || 1,
+        stoneType: item.stone || item.stoneType || 'Lab Grown Diamond',
+        metal: item.metal || '',
+        size: item.size || '',
+        priceUSD: Number(item.priceUSD) || 0
+      }));
 
       try {
-        // Step 1: Server calculates price & creates Razorpay Order
         const res = await fetch('/api/payment/razorpay/create-order', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             productId: firstItemId,
             quantity: qty,
+            stoneType: cartItems[0]?.stone || cartItems[0]?.stoneType || 'Lab Grown Diamond',
+            metal: cartItems[0]?.metal || '',
+            ringSize: cartItems[0]?.size || '',
+            cartItems: mappedCartItems,
             includePhysicalCertificate: isPhysicalCertSelected(),
             shippingFullName: addr.name,
             shippingPhone: addr.phone,
@@ -860,19 +1467,17 @@
           return;
         }
 
-        // Step 2: Open Embedded Razorpay Checkout.js Modal
         const options = {
           key: data.keyId,
           amount: Math.round(data.amountUSD * 100),
           currency: 'USD',
           name: 'SAT Luxury Jewellery',
           description: 'Bespoke Fine Jewelry Order',
-          image: '/assets/ring_1.jpg',
+          image: '/assets/sat_logo_transparent.png',
           order_id: data.razorpayOrderId,
           handler: async function (response) {
-            showPaymentProcessing("Verifying Razorpay card HMAC signature server-side. Please do not close this window...");
+            showPaymentProcessing("Verifying Razorpay card signature server-side. Please do not close this window...");
             try {
-              // Step 3: Server-side HMAC Signature Verification
               const verifyRes = await fetch('/api/payment/razorpay/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -888,8 +1493,15 @@
 
               if (verifyResult.success) {
                 localStorage.removeItem(getCartStorageKey());
-                alert('🎉 Razorpay Card Order Verified and Confirmed! Order ID: ' + (verifyResult.orderId || response.razorpay_order_id));
-                window.location.href = '/Account/Orders';
+                try {
+                  sessionStorage.setItem('sat_pending_review_item', JSON.stringify({
+                    productId: firstItemId,
+                    productName: cartItems[0]?.name || 'Bespoke Fine Jewelry',
+                    orderId: verifyResult.orderId || response.razorpay_order_id
+                  }));
+                } catch(e) {}
+                const confirmedOrderId = verifyResult.orderId || response.razorpay_order_id;
+                window.location.href = '/Order/Confirmation?orderId=' + encodeURIComponent(confirmedOrderId);
               } else {
                 alert('⚠️ Razorpay Signature Verification Alert: ' + verifyResult.message);
               }
@@ -903,7 +1515,7 @@
             contact: addr.phone
           },
           theme: {
-            color: '#d4b270'
+            color: '#d4af37'
           }
         };
 
@@ -916,32 +1528,5 @@
       }
     }
   </script>
-
-  <!-- In-Page Payment Processing & Verification Modal Overlay -->
-  <div id="paymentProcessingOverlay" style="position:fixed; inset:0; background:rgba(5, 11, 20, 0.88); backdrop-filter:blur(12px); z-index:999999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px;">
-    <div style="background:rgba(13, 27, 42, 0.95); border:1px solid rgba(212, 178, 112, 0.4); border-radius:24px; padding:40px 32px; max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.7);">
-      <div style="font-size:48px; color:var(--champagne-gold); margin-bottom:16px; animation:spinDiamond 3s infinite linear;">
-        <i class="fa-solid fa-gem"></i>
-      </div>
-      <h3 style="font-family:var(--font-serif); font-size:22px; color:#ffffff; margin:0 0 10px;">Verifying Payment Security...</h3>
-      <p id="processingOverlayMessage" style="color:var(--taupe-beige); font-size:14px; margin:0 0 20px; line-height:1.6;">
-        Confirming payment with server-authoritative pricing. Please do not close or refresh this window.
-      </p>
-      <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; background:rgba(212, 178, 112, 0.15); border:1px solid rgba(212, 178, 112, 0.3); border-radius:20px; color:#fbbf24; font-size:12px; font-weight:700;">
-        <i class="fa-solid fa-shield-halved"></i> 256-Bit TLS Encrypted Verification
-      </div>
-    </div>
-  </div>
-
-  <style>
-    @@keyframes spinDiamond {
-      0% { transform: rotate(0deg) scale(1); }
-      50% { transform: rotate(180deg) scale(1.1); }
-      100% { transform: rotate(360deg) scale(1); }
-    }
-  </style>
-
-  <!-- SAT Jewel Footer -->
-  <partial name="_Footer" />
 </body>
 </html>
