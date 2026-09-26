@@ -9,10 +9,19 @@ namespace SAT1.Controllers
     public class SeoController : Controller
     {
         private readonly SatJewelDbContext _context;
+        private readonly IConfiguration _config;
 
-        public SeoController(SatJewelDbContext context)
+        public SeoController(SatJewelDbContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
+        }
+
+        private string GetBaseUrl()
+        {
+            var configured = _config["AppUrl"]?.TrimEnd('/');
+            if (!string.IsNullOrWhiteSpace(configured)) return configured;
+            return $"{Request.Scheme}://{Request.Host}";
         }
 
         [HttpGet]
@@ -20,7 +29,7 @@ namespace SAT1.Controllers
         [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> SitemapXml()
         {
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var baseUrl = GetBaseUrl();
             XNamespace ns = "http://www.sitemaps.org/schemas/sitemap/0.9";
             XNamespace imgNs = "http://www.google.com/schemas/sitemap-image/1.1";
 
@@ -148,7 +157,7 @@ namespace SAT1.Controllers
         [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Any)]
         public IActionResult RobotsTxt()
         {
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var baseUrl = GetBaseUrl();
             var sb = new StringBuilder();
             sb.AppendLine("User-agent: *");
             sb.AppendLine("Allow: /");
@@ -172,7 +181,7 @@ namespace SAT1.Controllers
         [ResponseCache(Duration = 3600, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GoogleMerchantFeed()
         {
-            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            var baseUrl = GetBaseUrl();
             XNamespace g = "http://base.google.com/ns/1.0";
 
             var channelElements = new List<XElement>
