@@ -151,7 +151,7 @@
 <body class="bg-background font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen">
 
 <!-- LEFT NAVIGATION SIDEBAR -->
-<aside id="accountSidebar" class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between p-space-md transition-transform duration-300 ease-in-out">
+<aside id="accountSidebar" class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between p-space-md transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none">
   <div class="flex flex-col h-full justify-between">
     <div class="space-y-space-md">
       <!-- Brand Logo + Collapse Button -->
@@ -163,7 +163,7 @@
             <span class="font-label-caps text-[9px] uppercase tracking-[0.2em] text-secondary/80 mt-1">Fine Jewelry &amp; Atelier</span>
           </div>
         </a>
-        <button id="btnCollapseSidebar" onclick="toggleSidebar()" type="button" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex items-center justify-center transition-colors" title="Collapse sidebar menu">
+        <button id="btnCollapseSidebar" onclick="toggleSidebar(false)" type="button" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex items-center justify-center transition-colors cursor-pointer" title="Close sidebar menu">
           <span class="material-symbols-outlined text-[20px]">chevron_left</span>
         </button>
       </div>
@@ -244,29 +244,26 @@
   </div>
 </aside>
 
+<!-- Mobile Sidebar Backdrop Overlay -->
+<div id="sidebarBackdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
+
 <!-- MAIN APP CANVAS -->
-<div id="accountMainCanvas" class="pl-72 transition-all duration-300 ease-in-out">
+<div id="accountMainCanvas" class="pl-0 md:pl-72 transition-all duration-300 ease-in-out">
   <!-- TOP HEADER -->
-  <header id="accountTopHeader" class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/30 z-40 px-gutter flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out">
+  <header id="accountTopHeader" class="fixed top-0 left-0 md:left-72 right-0 h-16 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/30 z-40 px-gutter flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out">
     <div class="flex items-center gap-3">
-      <!-- Toggle button when sidebar collapsed -->
-      <button id="btnExpandSidebar" onclick="toggleSidebar()" type="button" class="hidden p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex items-center justify-center transition-colors" title="Open Navigation Menu">
+      <!-- Toggle button when sidebar collapsed or on mobile -->
+      <button id="btnExpandSidebar" onclick="toggleSidebar(true)" type="button" class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex md:hidden items-center justify-center transition-colors cursor-pointer" title="Open Navigation Menu">
         <span class="material-symbols-outlined text-[22px]">menu</span>
       </button>
 
-      <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group cursor-pointer" href="javascript:void(0)" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }">
+      <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group cursor-pointer" href="javascript:void(0)" onclick="if(window.showDiamondLoader) window.showDiamondLoader('Returning to previous view...'); if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }">
         <span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">west</span>
         <span>Back</span>
       </a>
     </div>
 
     <div class="flex items-center gap-space-md">
-      <div class="relative hidden md:block">
-        <div class="flex items-center gap-2 px-space-md py-1.5 rounded-full bg-surface-container/80 border border-outline-variant/30 text-on-surface-variant font-label-sm text-label-sm w-64 lg:w-72">
-          <span class="material-symbols-outlined text-[18px]">search</span>
-          <input class="bg-transparent border-none outline-none text-on-surface placeholder:text-on-surface-variant/60 w-full text-xs" placeholder="Search orders, items..." type="text">
-        </div>
-      </div>
       <a href="/Product/Cart" aria-label="Cart" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-surface-container-high transition-all relative" role="button" title="Shopping Cart">
         <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
         <span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
@@ -537,33 +534,50 @@
 
         @if (wishlist.Count > 0)
         {
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="wishlistGrid">
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4" id="wishlistGrid">
             @foreach (var item in wishlist)
             {
-              <div class="rounded-2xl bg-surface-container-lowest/90 border border-outline-variant/25 p-4 flex flex-col justify-between hover:border-secondary/40 transition-all group" id="wishCard-@item.CatalogItemId">
-                <div class="space-y-3">
-                  <div class="relative w-full aspect-square rounded-xl bg-surface-container overflow-hidden border border-outline-variant/20">
+              <div class="rounded-xl sm:rounded-2xl bg-surface-container-lowest/90 border border-outline-variant/25 p-2.5 sm:p-4 flex flex-col justify-between hover:border-secondary/40 transition-all group" id="wishCard-@item.CatalogItemId">
+                <div class="space-y-2 sm:space-y-3">
+                  <div class="relative w-full aspect-square rounded-lg sm:rounded-xl bg-surface-container overflow-hidden border border-outline-variant/20">
                     <img src="@(string.IsNullOrWhiteSpace(item.ImageUrl) ? "/assets/ring_1.jpg" : item.ImageUrl)" alt="@item.ProductName" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                    <button onclick="removeWishlistItem('@item.CatalogItemId')" class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-error hover:scale-110 transition-transform flex items-center justify-center" title="Remove from Wishlist">
-                      <span class="material-symbols-outlined text-[18px]">close</span>
+                    <button type="button" onclick="removeWishlistItem('@item.CatalogItemId')" class="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-black/60 backdrop-blur-md text-error hover:scale-110 transition-transform flex items-center justify-center cursor-pointer" title="Remove from Wishlist">
+                      <span class="material-symbols-outlined text-[14px] sm:text-[18px]">close</span>
                     </button>
                   </div>
                   <div>
-                    <h4 class="font-headline-sm text-body-md text-on-surface font-medium line-clamp-1">@item.ProductName</h4>
-                    <p class="font-headline-sm text-secondary font-bold text-body-lg mt-1">$@item.PriceUSD.ToString("N2") USD</p>
+                    <h4 class="font-headline-sm text-xs sm:text-body-md text-on-surface font-medium line-clamp-1">@item.ProductName</h4>
+                    <p class="font-headline-sm text-secondary font-bold text-xs sm:text-body-lg mt-0.5 sm:mt-1">$@item.PriceUSD.ToString("N2") USD</p>
                   </div>
                 </div>
-                <div class="pt-3 border-t border-outline-variant/20 mt-3 flex items-center gap-2">
-                  <button onclick="addWishlistItemToCart('@item.CatalogItemId', '@item.ProductName', @item.PriceUSD, '@item.ImageUrl', this)" class="flex-1 py-2 px-3 rounded-full bg-gradient-to-r from-secondary to-primary-container text-on-primary font-label-sm font-semibold text-center hover:brightness-105 transition-all text-xs flex items-center justify-center gap-1 shadow-[0_0_10px_rgba(212,175,55,0.2)]">
-                    <span class="material-symbols-outlined text-[15px]">shopping_cart</span>
+                <div class="pt-2 sm:pt-3 border-t border-outline-variant/20 mt-2 sm:mt-3 flex items-center gap-1.5 sm:gap-2">
+                  <button type="button" 
+                          data-id="@item.CatalogItemId" 
+                          data-name="@item.ProductName" 
+                          data-price="@item.PriceUSD" 
+                          data-img="@(string.IsNullOrWhiteSpace(item.ImageUrl) ? "/assets/ring_1.jpg" : item.ImageUrl)" 
+                          onclick="addWishlistItemToCart(this)" 
+                          class="flex-1 py-1.5 sm:py-2 px-2 sm:px-3 rounded-full bg-gradient-to-r from-secondary to-primary-container text-on-primary font-label-sm font-semibold text-center hover:brightness-105 transition-all text-[11px] sm:text-xs flex items-center justify-center gap-1 shadow-[0_0_10px_rgba(212,175,55,0.2)] cursor-pointer">
+                    <span class="material-symbols-outlined text-[13px] sm:text-[15px]">shopping_cart</span>
                     <span>Add to Bag</span>
                   </button>
-                  <a href="/Product" class="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:text-secondary transition-colors" title="View details">
-                    <span class="material-symbols-outlined text-[16px]">visibility</span>
+                  <a href="/Product/Details/@item.CatalogItemId" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 flex items-center justify-center text-on-surface-variant hover:text-secondary transition-colors shrink-0" title="View details">
+                    <span class="material-symbols-outlined text-[14px] sm:text-[16px]">visibility</span>
                   </a>
                 </div>
               </div>
             }
+          </div>
+
+          <!-- Wishlist Pagination Controls -->
+          <div id="wishlistPaginationWrap" class="flex items-center justify-center gap-2 pt-4 hidden">
+            <button type="button" id="btnWishlistPrev" onclick="changeWishlistPage(-1)" class="px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-xs font-semibold text-on-surface hover:text-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+              &larr; Prev
+            </button>
+            <span id="wishlistPageIndicator" class="text-xs text-on-surface-variant font-medium px-2">Page 1 of 1</span>
+            <button type="button" id="btnWishlistNext" onclick="changeWishlistPage(1)" class="px-3 py-1.5 rounded-lg bg-surface-container border border-outline-variant/30 text-xs font-semibold text-on-surface hover:text-secondary disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+              Next &rarr;
+            </button>
           </div>
         }
         else
@@ -625,6 +639,7 @@
                         <span class="material-symbols-outlined text-[18px]">edit</span>
                       </button>
                       <form method="post" action="/Account/DeleteAddress" onsubmit="return confirm('Remove this shipping address?');" class="inline">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="addressId" value="@addr.AddressId" />
                         <button type="submit" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-outline hover:text-error flex items-center justify-center transition-all" title="Delete address">
                           <span class="material-symbols-outlined text-[18px]">delete</span>
@@ -637,6 +652,7 @@
                   {
                     <div class="mt-2 pt-2 border-t border-outline-variant/20 flex items-center justify-end">
                       <form method="post" action="/Account/SetDefaultAddress">
+                        @Html.AntiForgeryToken()
                         <input type="hidden" name="addressId" value="@addr.AddressId" />
                         <button type="submit" class="text-secondary hover:underline font-label-sm text-label-sm">Set as Default</button>
                       </form>
@@ -765,6 +781,23 @@
       <textarea id="revTextInput" rows="3" placeholder="Share your experience regarding the stone cut, metal setting, and delivery presentation..." class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none"></textarea>
     </div>
 
+    <!-- Customer Photo Upload (Optional) -->
+    <div>
+      <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">Add Photo (Optional)</label>
+      <div class="flex items-center gap-3">
+        <label class="flex items-center gap-2 px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 hover:border-secondary/60 text-on-surface font-body-sm text-xs cursor-pointer transition-colors">
+          <span class="material-symbols-outlined text-[18px] text-secondary">add_a_photo</span>
+          <span id="revPhotoUploadLabel">Upload Photo</span>
+          <input type="file" id="revPhotoFileInput" accept="image/png, image/jpeg, image/webp" class="hidden" onchange="handleReviewPhotoSelect(this)" />
+        </label>
+        <div id="revPhotoPreviewWrap" class="relative hidden">
+          <img id="revPhotoPreviewImg" src="" class="w-12 h-12 rounded-lg object-cover border border-secondary/40" alt="Preview" />
+          <button type="button" onclick="clearReviewPhoto()" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-xs hover:bg-rose-700" title="Remove Photo">×</button>
+        </div>
+      </div>
+      <input type="hidden" id="revPhotoUrlInput" value="" />
+    </div>
+
     <input type="hidden" id="revProductIdInput" value="sat-prod-8" />
 
     <!-- Action Buttons -->
@@ -793,6 +826,7 @@
     </div>
 
     <form method="post" action="/Account/SaveAddress" class="space-y-3">
+      @Html.AntiForgeryToken()
       <input type="hidden" id="addrInputId" name="AddressId" value="" />
       <div>
         <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">Full Name</label>
@@ -853,11 +887,11 @@
 </div>
 
 <!-- DYNAMIC ORDER DETAILS & INVOICE MODAL -->
-<div id="orderDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-3 sm:p-6" style="display: none;">
-  <div class="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-2xl bg-surface-container-lowest border border-secondary/40 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+<div id="orderDetailsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-2.5 sm:p-6" style="display: none;">
+  <div class="relative w-full max-w-2xl max-h-[88vh] sm:max-h-[90vh] flex flex-col rounded-2xl bg-surface-container-lowest border border-secondary/40 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
     
     <!-- Modal Header -->
-    <div class="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30 bg-surface-container-low/80 flex-shrink-0">
+    <div class="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4 border-b border-outline-variant/30 bg-surface-container-low/80 flex-shrink-0">
       <div class="flex items-center gap-2.5">
         <span class="material-symbols-outlined text-secondary text-[24px]">verified</span>
         <div>
@@ -868,59 +902,59 @@
           <p id="modalOrderDate" class="text-xs text-on-surface-variant font-body-sm mt-0.5">Placed on Sep 25, 2026</p>
         </div>
       </div>
-      <button onclick="closeOrderModal()" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-outline hover:text-on-surface flex items-center justify-center transition-colors" title="Close">
+      <button onclick="closeOrderModal()" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-outline hover:text-on-surface flex items-center justify-center transition-colors cursor-pointer" title="Close">
         <span class="material-symbols-outlined text-[20px]">close</span>
       </button>
     </div>
 
     <!-- Modal Scrollable Content (Printable Area) -->
-    <div id="modalOrderPrintableArea" class="p-6 overflow-y-auto space-y-6 flex-1 text-on-surface">
+    <div id="modalOrderPrintableArea" class="p-3.5 sm:p-6 overflow-y-auto space-y-3.5 sm:space-y-6 flex-1 text-on-surface">
       <!-- 1. Product Item Details Card -->
-      <div class="p-4 rounded-xl bg-surface-container-low border border-outline-variant/20 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-        <img id="modalItemImg" src="/assets/ring_1.jpg" alt="Item Thumbnail" class="w-20 h-20 rounded-xl object-cover border border-outline-variant/30 flex-shrink-0" />
+      <div class="p-3.5 sm:p-4 rounded-xl bg-surface-container-low border border-outline-variant/20 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
+        <img id="modalItemImg" src="/assets/ring_1.jpg" alt="Item Thumbnail" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-outline-variant/30 flex-shrink-0" />
         <div class="flex-1 min-w-0 space-y-1">
-          <h4 id="modalItemName" class="font-headline-md text-base sm:text-lg text-on-surface font-semibold leading-snug">Product Name</h4>
+          <h4 id="modalItemName" class="font-headline-md text-sm sm:text-lg text-on-surface font-semibold leading-snug">Product Name</h4>
           <p id="modalItemSpecs" class="text-xs text-secondary font-medium">Bespoke Jewelry Commission • Includes GIA/IGI Certification</p>
-          <div class="flex items-center gap-2 pt-1 flex-wrap">
-            <span id="modalGiaPill" class="px-2.5 py-0.5 rounded bg-surface-container text-on-surface font-label-caps text-[11px] border border-outline-variant/30">GIA #SAT-CERT</span>
-            <span class="px-2.5 py-0.5 rounded bg-surface-container text-tertiary font-label-caps text-[11px] border border-outline-variant/30 flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">shield</span> Insured Courier</span>
-            <span class="px-2.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-caps text-[11px] border border-outline-variant/30">Signature Required</span>
+          <div class="flex items-center gap-1.5 sm:gap-2 pt-1 flex-wrap">
+            <span id="modalGiaPill" class="px-2 py-0.5 rounded bg-surface-container text-on-surface font-label-caps text-[10px] sm:text-[11px] border border-outline-variant/30">GIA #SAT-CERT</span>
+            <span class="px-2 py-0.5 rounded bg-surface-container text-tertiary font-label-caps text-[10px] sm:text-[11px] border border-outline-variant/30 flex items-center gap-1"><span class="material-symbols-outlined text-[13px]">shield</span> Insured Courier</span>
+            <span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-caps text-[10px] sm:text-[11px] border border-outline-variant/30">Signature Required</span>
           </div>
         </div>
         <div class="text-right sm:border-l sm:border-outline-variant/20 sm:pl-4 self-stretch sm:self-center flex sm:flex-col justify-between sm:justify-center items-end">
           <span class="text-xs text-outline uppercase block">Order Total</span>
-          <span id="modalItemPrice" class="font-headline-sm text-headline-sm text-secondary font-bold">$0.00 USD</span>
+          <span id="modalItemPrice" class="font-headline-sm text-base sm:text-headline-sm text-secondary font-bold">$0.00 USD</span>
         </div>
       </div>
 
       <!-- 2. Tracking & Journey Status -->
-      <div class="p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 space-y-3">
+      <div class="p-3.5 sm:p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 space-y-2.5 sm:space-y-3">
         <div class="flex items-center justify-between flex-wrap gap-2">
           <div class="flex items-center gap-2">
             <span class="material-symbols-outlined text-secondary text-[20px]">local_shipping</span>
-            <span class="font-label-md text-sm font-semibold text-on-surface">Fulfillment &amp; Courier Tracking</span>
+            <span class="font-label-md text-xs sm:text-sm font-semibold text-on-surface">Fulfillment &amp; Courier Tracking</span>
           </div>
           <span id="modalTrackingStatusText" class="text-xs text-emerald-400 font-semibold">Delivered &amp; Hand-Signed</span>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
-          <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-xs pt-1">
+          <div class="p-2 sm:p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20">
             <span class="text-outline block uppercase text-[10px] tracking-wider">Courier Carrier</span>
-            <span id="modalCarrier" class="font-semibold text-on-surface text-sm mt-0.5 block">DHL Express</span>
+            <span id="modalCarrier" class="font-semibold text-on-surface text-xs sm:text-sm mt-0.5 block">DHL Express</span>
           </div>
-          <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20">
+          <div class="p-2 sm:p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20">
             <span class="text-outline block uppercase text-[10px] tracking-wider">Tracking Number</span>
-            <span id="modalTrackingNumber" class="font-mono font-semibold text-secondary text-sm mt-0.5 block">DHL-98421094</span>
+            <span id="modalTrackingNumber" class="font-mono font-semibold text-secondary text-xs sm:text-sm mt-0.5 block">DHL-98421094</span>
           </div>
-          <div class="p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20">
+          <div class="p-2 sm:p-2.5 rounded-lg bg-surface-container/60 border border-outline-variant/20">
             <span class="text-outline block uppercase text-[10px] tracking-wider">Delivery Date</span>
-            <span id="modalDeliveryDate" class="font-semibold text-on-surface text-sm mt-0.5 block">Delivered</span>
+            <span id="modalDeliveryDate" class="font-semibold text-on-surface text-xs sm:text-sm mt-0.5 block">Delivered</span>
           </div>
         </div>
 
         <!-- 4-step Timeline -->
         <div class="pt-2">
-          <div class="flex items-center justify-between text-[11px] font-medium text-on-surface-variant mb-2">
+          <div class="flex items-center justify-between text-[10px] sm:text-[11px] font-medium text-on-surface-variant mb-2">
             <span class="text-secondary font-semibold">1. Confirmed</span>
             <span class="text-secondary font-semibold">2. Handcrafted</span>
             <span class="text-secondary font-semibold">3. GIA Inspected</span>
@@ -933,14 +967,14 @@
       </div>
 
       <!-- 3. Shipping & Payment Details Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         <!-- Shipping Address -->
-        <div class="p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 space-y-1 text-xs">
+        <div class="p-3.5 sm:p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 space-y-1 text-xs">
           <div class="flex items-center gap-1.5 text-secondary font-semibold mb-2">
             <span class="material-symbols-outlined text-[16px]">location_on</span>
             <span class="font-label-md text-xs uppercase tracking-wider">Shipping Destination</span>
           </div>
-          <p id="modalShipName" class="font-semibold text-on-surface text-sm">Recipient Name</p>
+          <p id="modalShipName" class="font-semibold text-on-surface text-xs sm:text-sm">Recipient Name</p>
           <p id="modalShipStreet" class="text-on-surface-variant">Street Address</p>
           <p id="modalShipCityState" class="text-on-surface-variant">City, State Zip</p>
           <p id="modalShipCountry" class="text-on-surface-variant">United States</p>
@@ -948,7 +982,7 @@
         </div>
 
         <!-- Payment & Invoice Breakdown -->
-        <div class="p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 space-y-2 text-xs">
+        <div class="p-3.5 sm:p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 space-y-2 text-xs">
           <div class="flex items-center gap-1.5 text-secondary font-semibold mb-2">
             <span class="material-symbols-outlined text-[16px]">receipt</span>
             <span class="font-label-md text-xs uppercase tracking-wider">Payment Breakdown</span>
@@ -969,32 +1003,32 @@
             <span>Presentation Box &amp; Cloth:</span>
             <span class="text-emerald-400 font-medium">COMPLIMENTARY</span>
           </div>
-          <div class="border-t border-outline-variant/20 pt-2 flex justify-between text-sm font-semibold">
+          <div class="border-t border-outline-variant/20 pt-2 flex justify-between text-xs sm:text-sm font-semibold">
             <span class="text-on-surface">Total Paid:</span>
             <span id="modalTotalPaid" class="text-secondary">$0.00 USD</span>
           </div>
-          <p id="modalPayMethod" class="text-[11px] text-outline pt-1">Payment Method: PayPal Express</p>
+          <p id="modalPayMethod" class="text-[10px] sm:text-[11px] text-outline pt-1">Payment Method: PayPal Express</p>
         </div>
       </div>
     </div>
 
     <!-- Modal Footer Actions -->
-    <div class="px-6 py-4 border-t border-outline-variant/30 bg-surface-container-low/90 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
-      <div class="flex items-center gap-2 flex-wrap">
-        <button type="button" onclick="printOrderInvoice()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface text-xs font-semibold transition-all cursor-pointer">
-          <span class="material-symbols-outlined text-[15px]">print</span>
+    <div class="px-3.5 py-2.5 sm:px-6 sm:py-3.5 border-t border-outline-variant/30 bg-surface-container-low/95 flex flex-wrap items-center justify-between gap-2 flex-shrink-0">
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+        <button type="button" onclick="printOrderInvoice()" class="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface text-[11px] sm:text-xs font-semibold transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[14px] sm:text-[15px]">print</span>
           <span>Print Invoice</span>
         </button>
-        <button type="button" id="modalReviewBtn" onclick="reviewModalOrder()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-secondary text-xs font-semibold transition-all cursor-pointer">
-          <span class="material-symbols-outlined text-[15px]">rate_review</span>
+        <button type="button" id="modalReviewBtn" onclick="reviewModalOrder()" class="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-secondary text-[11px] sm:text-xs font-semibold transition-all cursor-pointer">
+          <span class="material-symbols-outlined text-[14px] sm:text-[15px]">rate_review</span>
           <span>Write a Review</span>
         </button>
-        <a id="modalGiaCertLink" href="/Product/Certificate" target="_blank" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface text-xs font-semibold transition-all">
-          <span class="material-symbols-outlined text-[15px]">verified</span>
+        <a id="modalGiaCertLink" href="/Product/Certificate" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface text-[11px] sm:text-xs font-semibold transition-all">
+          <span class="material-symbols-outlined text-[14px] sm:text-[15px]">verified</span>
           <span>View GIA Certificate</span>
         </a>
       </div>
-      <button type="button" onclick="closeOrderModal()" class="px-5 py-1.5 rounded-full bg-gradient-to-r from-secondary to-primary-container text-on-primary text-xs font-semibold hover:brightness-105 transition-all shadow-md cursor-pointer">
+      <button type="button" onclick="closeOrderModal()" class="px-4 py-1 sm:px-5 sm:py-1.5 rounded-full bg-gradient-to-r from-secondary to-primary-container text-on-primary text-[11px] sm:text-xs font-semibold hover:brightness-105 transition-all shadow-md cursor-pointer ml-auto sm:ml-0">
         Close
       </button>
     </div>
@@ -1069,32 +1103,55 @@
 <script>
   let activeTab = 'account';
 
+  function isMobileView() {
+    return window.innerWidth < 768;
+  }
+
   // Toggle Sidebar Collapse / Expand
-  function toggleSidebar() {
+  function toggleSidebar(forceState) {
     const sidebar = document.getElementById('accountSidebar');
     const mainCanvas = document.getElementById('accountMainCanvas');
     const topHeader = document.getElementById('accountTopHeader');
     const btnExpand = document.getElementById('btnExpandSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
 
-    const isCollapsed = sidebar.classList.contains('-translate-x-full');
-    if (isCollapsed) {
+    const isMobile = isMobileView();
+    const isCurrentlyCollapsed = sidebar.classList.contains('-translate-x-full');
+    const shouldOpen = typeof forceState === 'boolean' ? forceState : isCurrentlyCollapsed;
+
+    if (shouldOpen) {
       // Expand sidebar
       sidebar.classList.remove('-translate-x-full');
-      mainCanvas.classList.add('pl-72');
-      mainCanvas.classList.remove('pl-0');
-      topHeader.classList.add('left-72');
-      topHeader.classList.remove('left-0');
-      if (btnExpand) btnExpand.classList.add('hidden');
-      localStorage.setItem('sat_sidebar_collapsed', 'false');
+      if (isMobile) {
+        if (backdrop) backdrop.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      } else {
+        mainCanvas.classList.add('md:pl-72');
+        mainCanvas.classList.remove('md:pl-0');
+        topHeader.classList.add('md:left-72');
+        topHeader.classList.remove('md:left-0');
+        if (btnExpand) btnExpand.classList.add('md:hidden');
+        localStorage.setItem('sat_sidebar_collapsed', 'false');
+      }
     } else {
       // Collapse sidebar
       sidebar.classList.add('-translate-x-full');
-      mainCanvas.classList.remove('pl-72');
-      mainCanvas.classList.add('pl-0');
-      topHeader.classList.remove('left-72');
-      topHeader.classList.add('left-0');
-      if (btnExpand) btnExpand.classList.remove('hidden');
-      localStorage.setItem('sat_sidebar_collapsed', 'true');
+      if (backdrop) backdrop.classList.add('hidden');
+      document.body.style.overflow = '';
+      if (!isMobile) {
+        mainCanvas.classList.remove('md:pl-72');
+        mainCanvas.classList.add('md:pl-0');
+        topHeader.classList.remove('md:left-72');
+        topHeader.classList.add('md:left-0');
+        if (btnExpand) btnExpand.classList.remove('md:hidden');
+        localStorage.setItem('sat_sidebar_collapsed', 'true');
+      }
+    }
+  }
+
+  function closeMobileSidebar() {
+    if (isMobileView()) {
+      toggleSidebar(false);
     }
   }
 
@@ -1156,6 +1213,8 @@
       targetEl = document.getElementById('sectionAccount');
     }
 
+    closeMobileSidebar();
+
     if (e && targetEl) {
       targetEl.scrollIntoView({ behavior: 'smooth' });
     }
@@ -1164,8 +1223,13 @@
   // Handle URL hash or tab query on load & restore sidebar state
   window.addEventListener('DOMContentLoaded', () => {
     // Restore sidebar state
-    if (localStorage.getItem('sat_sidebar_collapsed') === 'true') {
-      toggleSidebar();
+    if (isMobileView()) {
+      const sidebar = document.getElementById('accountSidebar');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (sidebar) sidebar.classList.add('-translate-x-full');
+      if (backdrop) backdrop.classList.add('hidden');
+    } else if (localStorage.getItem('sat_sidebar_collapsed') === 'true') {
+      toggleSidebar(false);
     }
 
     const params = new URLSearchParams(window.location.search);
@@ -1250,11 +1314,69 @@
           const cur = parseInt(badge.textContent || '0', 10);
           if (cur > 0) badge.textContent = cur - 1;
         }
+        initWishlistPagination();
       }
     } catch (e) {
       console.error(e);
       window.location.reload();
     }
+  }
+
+  // Wishlist Client-Side Pagination (4 per page: 2x2 on mobile, 1x4 on desktop)
+  let currentWishlistPage = 1;
+  const WISHLIST_PAGE_SIZE = 4;
+
+  function initWishlistPagination() {
+    const grid = document.getElementById('wishlistGrid');
+    if (!grid) return;
+    const cards = Array.from(grid.querySelectorAll('[id^="wishCard-"]'));
+    const total = cards.length;
+    const totalPages = Math.ceil(total / WISHLIST_PAGE_SIZE) || 1;
+    const paginationWrap = document.getElementById('wishlistPaginationWrap');
+    if (!paginationWrap) return;
+
+    if (total <= WISHLIST_PAGE_SIZE) {
+      paginationWrap.classList.add('hidden');
+      cards.forEach(c => c.style.display = '');
+      return;
+    }
+
+    paginationWrap.classList.remove('hidden');
+    renderWishlistPage(cards, currentWishlistPage, totalPages);
+  }
+
+  function renderWishlistPage(cards, page, totalPages) {
+    const start = (page - 1) * WISHLIST_PAGE_SIZE;
+    const end = start + WISHLIST_PAGE_SIZE;
+
+    cards.forEach((card, idx) => {
+      if (idx >= start && idx < end) {
+        card.style.display = '';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+
+    const indicator = document.getElementById('wishlistPageIndicator');
+    if (indicator) indicator.textContent = `Page ${page} of ${totalPages}`;
+
+    const prevBtn = document.getElementById('btnWishlistPrev');
+    const nextBtn = document.getElementById('btnWishlistNext');
+    if (prevBtn) prevBtn.disabled = (page <= 1);
+    if (nextBtn) nextBtn.disabled = (page >= totalPages);
+  }
+
+  function changeWishlistPage(delta) {
+    const grid = document.getElementById('wishlistGrid');
+    if (!grid) return;
+    const cards = Array.from(grid.querySelectorAll('[id^="wishCard-"]'));
+    const totalPages = Math.ceil(cards.length / WISHLIST_PAGE_SIZE) || 1;
+
+    currentWishlistPage += delta;
+    if (currentWishlistPage < 1) currentWishlistPage = 1;
+    if (currentWishlistPage > totalPages) currentWishlistPage = totalPages;
+
+    renderWishlistPage(cards, currentWishlistPage, totalPages);
   }
 
   function getCartStorageKey() {
@@ -1276,11 +1398,30 @@
       });
     } catch (_) {}
   }
-  document.addEventListener('DOMContentLoaded', syncCartBadge);
+  document.addEventListener('DOMContentLoaded', () => {
+    syncCartBadge();
+    initWishlistPagination();
+  });
   syncCartBadge();
+  initWishlistPagination();
 
-  function addWishlistItemToCart(id, name, price, img, btn) {
+  function addWishlistItemToCart(btnOrId, name, price, img, btnEl) {
     try {
+      let id, actualName, actualPrice, actualImg, btn;
+      if (btnOrId && typeof btnOrId === 'object' && btnOrId.dataset) {
+        btn = btnOrId;
+        id = btn.dataset.id;
+        actualName = btn.dataset.name;
+        actualPrice = Number(btn.dataset.price) || 0;
+        actualImg = btn.dataset.img;
+      } else {
+        id = btnOrId;
+        actualName = name;
+        actualPrice = Number(price) || 0;
+        actualImg = img;
+        btn = btnEl;
+      }
+
       const key = getCartStorageKey();
       let cart = JSON.parse(localStorage.getItem(key) || '[]');
       const existing = cart.find(x => x.id === id);
@@ -1289,10 +1430,10 @@
       } else {
         cart.push({
           id: id,
-          name: name,
-          title: name,
-          priceUSD: Number(price) || 0,
-          img: img || '/assets/ring_1.jpg',
+          name: actualName,
+          title: actualName,
+          priceUSD: actualPrice,
+          img: actualImg || '/assets/ring_1.jpg',
           metal: '14K Yellow Gold',
           carat: '1.50 CT',
           shape: 'Round',
@@ -1315,16 +1456,50 @@
     }
   }
 
-  // Review Modal Interactions
+  // Review Modal Interactions & Photo Upload
+  let selectedReviewFile = null;
+
   function promptProductReview(productId, productName, imgUrl) {
+    clearReviewPhoto();
     document.getElementById('revProductIdInput').value = productId || 'sat-prod-8';
-    document.getElementById('revModalProdName').textContent = productName || 'Bespoke Fine Jewelry Piece';
+    
+    let cleanName = productName || 'Bespoke Fine Jewelry Piece';
+    if (cleanName.includes('[')) cleanName = cleanName.substring(0, cleanName.indexOf('[')).trim();
+    if (cleanName.includes('(')) cleanName = cleanName.substring(0, cleanName.indexOf('(')).trim();
+    
+    document.getElementById('revModalProdName').textContent = cleanName;
     if (imgUrl) document.getElementById('revModalImg').src = imgUrl;
     document.getElementById('reviewPromptModal').style.display = 'flex';
   }
 
   function closeReviewModal() {
+    clearReviewPhoto();
     document.getElementById('reviewPromptModal').style.display = 'none';
+  }
+
+  function handleReviewPhotoSelect(input) {
+    if (input.files && input.files[0]) {
+      selectedReviewFile = input.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('revPhotoPreviewImg').src = e.target.result;
+        document.getElementById('revPhotoPreviewWrap').classList.remove('hidden');
+        document.getElementById('revPhotoUploadLabel').textContent = selectedReviewFile.name.length > 18 ? selectedReviewFile.name.substring(0, 15) + '...' : selectedReviewFile.name;
+      };
+      reader.readAsDataURL(selectedReviewFile);
+    }
+  }
+
+  function clearReviewPhoto() {
+    selectedReviewFile = null;
+    const fileInp = document.getElementById('revPhotoFileInput');
+    if (fileInp) fileInp.value = '';
+    const urlInp = document.getElementById('revPhotoUrlInput');
+    if (urlInp) urlInp.value = '';
+    const previewWrap = document.getElementById('revPhotoPreviewWrap');
+    if (previewWrap) previewWrap.classList.add('hidden');
+    const label = document.getElementById('revPhotoUploadLabel');
+    if (label) label.textContent = 'Upload Photo';
   }
 
   function selectReviewRating(stars) {
@@ -1350,8 +1525,26 @@
     btn.disabled = true;
     btn.textContent = 'Submitting...';
 
+    let uploadedPhotoUrl = document.getElementById('revPhotoUrlInput').value || '';
+    if (selectedReviewFile) {
+      try {
+        const formData = new FormData();
+        formData.append('file', selectedReviewFile);
+        const uploadRes = await fetch('/api/products/upload-review-photo', {
+          method: 'POST',
+          body: formData
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success && uploadData.photoUrl) {
+          uploadedPhotoUrl = uploadData.photoUrl;
+        }
+      } catch (err) {
+        console.warn('Review photo upload notice:', err);
+      }
+    }
+
     try {
-      const res = await fetch(`/api/product/${prodId}/reviews`, {
+      const res = await fetch(`/api/products/${prodId}/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1360,16 +1553,17 @@
           reviewText: text,
           productName: document.getElementById('revModalProdName').textContent,
           customerName: '@displayName',
-          customerEmail: '@email'
+          customerEmail: '@email',
+          photoUrl: uploadedPhotoUrl
         })
       });
 
       const data = await res.json();
       if (data.success) {
-        alert('🎉 Thank you! Your review has been submitted and verified.');
+        alert('🎉 Thank you! Your review has been submitted.');
         closeReviewModal();
       } else {
-        alert('Review error: ' + (data.message || 'Unable to submit review'));
+        alert('Review note: ' + (data.message || 'Unable to submit review'));
       }
     } catch (e) {
       alert('Review successfully recorded. Thank you for your feedback!');
@@ -1385,6 +1579,7 @@
     var ordersJsonList = orders.Select(o => new {
         orderId = o.OrderId,
         orderNumber = o.OrderNumber ?? o.OrderId,
+        productId = (o.OrderItems != null && o.OrderItems.FirstOrDefault() != null && o.OrderItems.FirstOrDefault()!.ProductId > 0) ? o.OrderItems.FirstOrDefault()!.ProductId.ToString() : (o.ItemName.Contains("Regal", StringComparison.OrdinalIgnoreCase) ? "2" : "1"),
         itemName = o.ItemName,
         totalAmountUSD = o.TotalAmountUSD,
         orderStatus = o.OrderStatus,
@@ -1444,10 +1639,26 @@
       document.getElementById('timelineBar').className = 'h-full bg-gradient-to-r from-secondary to-amber-400 w-2/3 transition-all duration-500';
     }
 
-    document.getElementById('modalItemName').textContent = order.itemName;
-    document.getElementById('modalItemSpecs').textContent = order.includesPhysicalGiaCert 
-      ? 'Bespoke Jewelry Commission • Includes Physical GIA Hardcopy Certificate' 
-      : 'Bespoke Jewelry Commission • Includes GIA/IGI Digital Certification & Presentation Box';
+    let rawTitle = order.itemName || 'Fine Jewelry Piece';
+    let cleanTitle = rawTitle;
+    let specsText = 'Bespoke Jewelry Commission • Includes GIA/IGI Certification';
+    if (rawTitle.includes('(') && rawTitle.includes(')')) {
+      const sIdx = rawTitle.indexOf('(');
+      const eIdx = rawTitle.indexOf(')');
+      if (eIdx > sIdx) {
+        specsText = rawTitle.substring(sIdx + 1, eIdx);
+      }
+      cleanTitle = rawTitle.substring(0, sIdx).trim();
+    }
+    if (cleanTitle.includes('[')) {
+      cleanTitle = cleanTitle.substring(0, cleanTitle.indexOf('[')).trim();
+    }
+    if (order.includesPhysicalGiaCert) {
+      specsText += ' • Physical GIA Hardcopy';
+    }
+
+    document.getElementById('modalItemName').textContent = cleanTitle || rawTitle;
+    document.getElementById('modalItemSpecs').textContent = specsText;
     document.getElementById('modalGiaPill').textContent = 'GIA #' + (order.orderId.length > 10 ? order.orderId.substring(0, 10).toUpperCase() : order.orderId);
     document.getElementById('modalItemPrice').textContent = '$' + Number(order.totalAmountUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
     
@@ -1472,7 +1683,14 @@
       giaCertLink.href = '/Product/Certificate?orderId=' + encodeURIComponent(order.orderId);
     }
 
-    document.getElementById('orderDetailsModal').style.display = 'flex';
+    const modal = document.getElementById('orderDetailsModal');
+    modal.style.display = 'flex';
+
+    // Ensure printable content starts cleanly at the top without clipping
+    const scrollArea = document.getElementById('modalOrderPrintableArea');
+    if (scrollArea) {
+      scrollArea.scrollTop = 0;
+    }
   }
 
   function closeOrderModal() {
@@ -1484,7 +1702,7 @@
     const order = window.SAT_USER_ORDERS.find(o => o.orderId === currentModalOrderId);
     if (order) {
       closeOrderModal();
-      promptProductReview(order.orderId, order.itemName, '/assets/ring_1.jpg');
+      promptProductReview(order.productId || order.orderId, order.itemName, '/assets/ring_1.jpg');
     }
   }
 
@@ -1496,51 +1714,169 @@
     document.getElementById('ringCareModal').style.display = 'none';
   }
 
+  // Elegant Single-Page Official SAT Jewels Invoice Generator
   function printOrderInvoice() {
-    const printable = document.getElementById('modalOrderPrintableArea');
-    if (!printable) return;
-    const printWindow = window.open('', '', 'width=850,height=900');
+    if (!currentModalOrderId || !window.SAT_USER_ORDERS) return;
+    const order = window.SAT_USER_ORDERS.find(o => o.orderId === currentModalOrderId);
+    if (!order) return;
+
+    let rawTitle = order.itemName || 'Fine Jewelry Creation';
+    let cleanTitle = rawTitle;
+    let specs = 'Bespoke Jewelry • GIA/IGI Certified';
+    if (rawTitle.includes('(') && rawTitle.includes(')')) {
+      const sIdx = rawTitle.indexOf('(');
+      const eIdx = rawTitle.indexOf(')');
+      if (eIdx > sIdx) specs = rawTitle.substring(sIdx + 1, eIdx);
+      cleanTitle = rawTitle.substring(0, sIdx).trim();
+    }
+    if (cleanTitle.includes('[')) cleanTitle = cleanTitle.substring(0, cleanTitle.indexOf('[')).trim();
+
+    const subtotal = order.totalAmountUSD - (order.giaCertFeeUSD || 0);
+    const subtotalStr = Number(subtotal > 0 ? subtotal : order.totalAmountUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const totalStr = Number(order.totalAmountUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const giaCertStr = order.giaCertFeeUSD > 0 ? ('$' + Number(order.giaCertFeeUSD).toFixed(2)) : (order.includesPhysicalGiaCert ? 'Included ($0.00)' : 'Included');
+    const issueDate = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+    const printWindow = window.open('', '', 'width=850,height=920');
     printWindow.document.write(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>SAT Jewels - Customer Order Invoice</title>
+          <meta charset="utf-8">
+          <title>SAT Jewels - Invoice #${order.orderNumber}</title>
           <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 40px; color: #111; line-height: 1.6; background: #fff; }
-            .header { border-bottom: 2px solid #d4af37; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-start; }
-            .brand { font-size: 26px; font-weight: bold; color: #111; letter-spacing: 1px; }
-            .sub { font-size: 12px; color: #666; margin-top: 4px; }
-            .inv-badge { font-size: 14px; font-weight: bold; color: #d4af37; text-transform: uppercase; letter-spacing: 1px; }
-            .content-block { border: 1px solid #e5e5e5; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-            .footer { margin-top: 40px; border-top: 1px solid #eee; padding-top: 15px; font-size: 11px; color: #888; text-align: center; }
+            @@page { size: A4 portrait; margin: 8mm 12mm; }
+            * { box-sizing: border-box; }
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #1e293b; background: #fff; margin: 0; padding: 0; font-size: 10.5px; line-height: 1.35; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .inv-wrap { max-width: 760px; margin: 0 auto; page-break-inside: avoid; }
+            .header-table { width: 100%; border-bottom: 2px solid #b48328; padding-bottom: 8px; margin-bottom: 10px; page-break-inside: avoid; }
+            .brand-title { font-size: 22px; font-weight: 800; letter-spacing: 2px; color: #0f172a; margin: 0; font-family: Georgia, serif; }
+            .brand-subtitle { font-size: 10px; color: #64748b; margin-top: 2px; letter-spacing: 0.4px; }
+            .inv-meta-title { font-size: 15px; font-weight: 800; color: #b48328; text-transform: uppercase; letter-spacing: 1.5px; margin: 0; }
+            .inv-meta-sub { font-size: 10.5px; color: #475569; margin-top: 2px; }
+            .info-grid { width: 100%; margin-bottom: 10px; border: 1px solid #e2e8f0; border-radius: 6px; background: #fafafa; page-break-inside: avoid; }
+            .info-col { width: 50%; padding: 8px 12px; vertical-align: top; }
+            .info-title { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #b48328; margin-bottom: 4px; }
+            .info-line { font-size: 10.5px; color: #334155; margin-bottom: 2px; }
+            .items-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; page-break-inside: avoid; }
+            .items-table th { background: #f1f5f9; color: #0f172a; font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 6px 8px; border-bottom: 1px solid #cbd5e1; text-align: left; }
+            .items-table td { padding: 6px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: middle; }
+            .item-thumb { width: 42px; height: 42px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; margin-right: 10px; vertical-align: middle; }
+            .badge-gia { display: inline-block; background: #fef3c7; color: #92400e; font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 3px; margin-top: 2px; }
+            .totals-table { width: 280px; margin-left: auto; border-collapse: collapse; margin-top: 4px; page-break-inside: avoid; }
+            .totals-table td { padding: 3px 6px; font-size: 10.5px; }
+            .total-row { border-top: 1.5px solid #b48328; font-size: 12.5px !important; font-weight: 800; color: #0f172a; }
+            .total-gold { color: #b48328; font-size: 13px !important; font-weight: 800; }
+            .footer-note { margin-top: 12px; padding-top: 8px; border-top: 1px dashed #cbd5e1; text-align: center; font-size: 9.5px; color: #64748b; page-break-inside: avoid; }
           </style>
         </head>
         <body>
-          <div class="header">
-            <div>
-              <div class="brand">SAT JEWELS</div>
-              <div class="sub">Fine Jewelry &amp; Atelier • Varachha Diamond District, Surat</div>
+          <div class="inv-wrap">
+            <table class="header-table">
+              <tr>
+                <td>
+                  <h1 class="brand-title">SAT JEWELS</h1>
+                  <div class="brand-subtitle">Fine Jewelry &amp; Atelier • Varachha Diamond District, Surat, India</div>
+                  <div class="brand-subtitle">care@satjewel.com • Insured Air Express Worldwide</div>
+                </td>
+                <td style="text-align: right; vertical-align: top;">
+                  <div class="inv-meta-title">Official Invoice</div>
+                  <div class="inv-meta-sub"><strong>Order:</strong> #${order.orderNumber}</div>
+                  <div class="inv-meta-sub"><strong>Date:</strong> ${order.createdAt}</div>
+                  <div class="inv-meta-sub"><strong>Status:</strong> ${order.orderStatus.toUpperCase()}</div>
+                </td>
+              </tr>
+            </table>
+
+            <table class="info-grid">
+              <tr>
+                <td class="info-col" style="border-right: 1px solid #e2e8f0;">
+                  <div class="info-title">Shipped &amp; Billed To</div>
+                  <div class="info-line"><strong>${order.shippingFullName}</strong></div>
+                  <div class="info-line">${order.shippingStreet}</div>
+                  <div class="info-line">${order.shippingCity}, ${order.shippingState} ${order.shippingPostalCode}</div>
+                  <div class="info-line">${order.shippingCountry}</div>
+                  <div class="info-line" style="color: #64748b; margin-top: 4px;">Phone: ${order.shippingPhone}</div>
+                  <div class="info-line" style="color: #64748b;">Email: ${order.customerEmail}</div>
+                </td>
+                <td class="info-col">
+                  <div class="info-title">Fulfillment &amp; Courier</div>
+                  <div class="info-line"><strong>Carrier:</strong> ${order.carrierName}</div>
+                  <div class="info-line"><strong>Tracking:</strong> <span style="font-family: monospace; color:#b48328;">${order.trackingNumber}</span></div>
+                  <div class="info-line"><strong>Dispatch Status:</strong> ${order.orderStatus === 'Delivered' ? 'Delivered & Hand-Signed' : 'Handcrafted & Quality Inspected'}</div>
+                  <div class="info-line"><strong>Delivery:</strong> ${order.orderStatus === 'Delivered' ? order.createdAt : 'Est. ' + order.estimatedDeliveryDate}</div>
+                  <div class="info-line" style="color: #64748b; margin-top: 4px;">Payment: ${order.paymentMethod}</div>
+                </td>
+              </tr>
+            </table>
+
+            <table class="items-table">
+              <thead>
+                <tr>
+                  <th style="width: 55%;">Item &amp; Description</th>
+                  <th style="width: 15%; text-align: center;">Qty</th>
+                  <th style="width: 15%; text-align: right;">Unit Price</th>
+                  <th style="width: 15%; text-align: right;">Total Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <table style="width: 100%; border-collapse: collapse;">
+                      <tr>
+                        <td style="width: 60px; padding: 0; border: none;">
+                          <img src="/assets/ring_1.jpg" class="item-thumb" alt="Product" />
+                        </td>
+                        <td style="padding: 0 0 0 10px; border: none; vertical-align: middle;">
+                          <div style="font-size: 12px; font-weight: 700; color: #0f172a;">${cleanTitle}</div>
+                          <div style="font-size: 10.5px; color: #64748b; margin-top: 2px;">${specs}</div>
+                          <span class="badge-gia">GIA Certified #${order.orderId.length > 8 ? order.orderId.substring(0, 8).toUpperCase() : order.orderId}</span>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                  <td style="text-align: center; font-weight: 600;">1</td>
+                  <td style="text-align: right; color: #475569;">$${subtotalStr}</td>
+                  <td style="text-align: right; font-weight: 700; color: #0f172a;">$${subtotalStr} USD</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <table class="totals-table">
+              <tr>
+                <td style="color: #64748b;">Item Subtotal:</td>
+                <td style="text-align: right; font-weight: 600;">$${subtotalStr}</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b;">Physical GIA Certificate:</td>
+                <td style="text-align: right; font-weight: 600;">${giaCertStr}</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b;">Insured Courier Delivery:</td>
+                <td style="text-align: right; color: #059669; font-weight: 600;">COMPLIMENTARY ($0.00)</td>
+              </tr>
+              <tr>
+                <td style="color: #64748b;">Atelier Presentation Box:</td>
+                <td style="text-align: right; color: #059669; font-weight: 600;">COMPLIMENTARY</td>
+              </tr>
+              <tr class="total-row">
+                <td style="padding-top: 8px;">Total Paid:</td>
+                <td style="text-align: right; padding-top: 8px;" class="total-gold">$${totalStr} USD</td>
+              </tr>
+            </table>
+
+            <div class="footer-note">
+              <strong>SAT Jewels Guarantee:</strong> All diamonds are conflict-free, independently certified by GIA/IGI, and protected with lifetime atelier complimentary cleaning &amp; prong inspection.
             </div>
-            <div style="text-align: right;">
-              <div class="inv-badge">Customer Invoice</div>
-              <div style="font-size: 12px; color: #888; margin-top: 4px;">Issued: ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
-            </div>
           </div>
-          <div class="content-block">
-            ${printable.innerHTML}
-          </div>
-          <div class="footer">
-            SAT Jewels Official Client Folio • 100% Insured Delivery • GIA/IGI Certified Lab &amp; Natural Diamonds
-          </div>
-        </body>
-      </html>
-    `);
+        ` + '<' + `/body><` + `/html>`
+    );
     printWindow.document.close();
     printWindow.focus();
     setTimeout(() => {
       printWindow.print();
       printWindow.close();
-    }, 450);
+    }, 400);
   }
 
   // Backdrop click listener to close modals
@@ -1565,5 +1901,7 @@
     }
   });
 </script>
+  <!-- SAT Jewel Signature Diamond Loader -->
+  <partial name="_DiamondLoader" />
 </body>
 </html>

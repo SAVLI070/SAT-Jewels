@@ -652,9 +652,7 @@ async function deleteAdminItem(category, id) {
 }
 
 function logout() {
-  isAdminLoggedIn = false;
-  closeFbAdminPortal();
-  alert('You have been logged out of SAT Jewel Admin Portal.');
+  window.location.href = '/Account/Logout';
 }
 
 // 11. Mobile Menu Drawer Toggle

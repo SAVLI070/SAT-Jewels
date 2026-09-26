@@ -18,7 +18,6 @@ namespace SAT1.Models
         [Column("name")]
         public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Slug is required.")]
         [MaxLength(150)]
         [Column("slug")]
         public string Slug { get; set; } = string.Empty;

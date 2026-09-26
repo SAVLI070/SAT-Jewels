@@ -6,15 +6,24 @@
 <style>
   .add-prod-layout {
     display: grid;
-    grid-template-columns: 1fr 340px;
+    grid-template-columns: minmax(0, 1fr) 340px;
     gap: 28px;
     max-width: 1240px;
     margin: 0 auto;
     color: #0f172a;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   @@media (max-width: 992px) {
-    .add-prod-layout { grid-template-columns: 1fr; }
+    .add-prod-layout {
+      grid-template-columns: minmax(0, 1fr) !important;
+      gap: 20px !important;
+      width: 100% !important;
+      min-width: 0 !important;
+      box-sizing: border-box !important;
+    }
   }
 
   .add-prod-panel {
@@ -23,36 +32,59 @@
     border-radius: 20px;
     padding: 32px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   /* Wizard Steps Indicator Bar */
   .wizard-steps-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-    padding-bottom: 18px;
+    gap: 10px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
     border-bottom: 1px solid #e2e8f0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .wizard-steps-bar::-webkit-scrollbar {
+    display: none;
   }
 
   .wizard-step-item {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
     color: #64748b;
     cursor: pointer;
     transition: all 0.25s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+  }
+
+  .wizard-step-item:hover {
+    background: #f8fafc;
+    color: #0f172a;
   }
 
   .wizard-step-item.active {
     color: #b45309;
+    background: rgba(180, 83, 9, 0.08);
+    border-color: rgba(180, 83, 9, 0.25);
   }
 
   .wizard-step-num {
-    width: 26px;
-    height: 26px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     background: #f1f5f9;
     color: #475569;
@@ -70,13 +102,18 @@
   /* Collection Cards Grid */
   .cat-cards-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
     margin-top: 8px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   @@media (max-width: 600px) {
-    .cat-cards-grid { grid-template-columns: repeat(2, 1fr); }
+    .cat-cards-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 8px !important;
+    }
   }
 
   .cat-select-card {
@@ -88,6 +125,40 @@
     cursor: pointer;
     transition: all 0.25s ease;
     color: #0f172a;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  @@media (max-width: 600px) {
+    .cat-select-card {
+      padding: 10px 6px !important;
+    }
+    .cat-select-card span {
+      font-size: 11px !important;
+      display: block !important;
+      word-break: break-word !important;
+      line-height: 1.25 !important;
+    }
+    .cat-select-card i, .cat-select-card svg {
+      font-size: 17px !important;
+      margin-bottom: 4px !important;
+    }
+  }
+
+  /* Dual Stone Pricing Responsive Grid */
+  .dual-stone-pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  @@media (max-width: 540px) {
+    .dual-stone-pricing-grid {
+      grid-template-columns: 1fr !important;
+      gap: 12px !important;
+    }
   }
 
   .cat-select-card:hover, .cat-select-card.active {
@@ -96,11 +167,13 @@
     box-shadow: 0 4px 14px rgba(180, 83, 9, 0.15);
   }
 
-  .cat-select-card i {
+  .cat-select-card i, .cat-select-card svg {
     font-size: 20px;
     color: #b45309;
     margin-bottom: 6px;
     display: block;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .cat-select-card span {
@@ -205,6 +278,9 @@
   .carat-pill-btn.active {
     border-color: #b45309 !important;
     background: #b45309 !important;
+    color: #ffffff !important;
+  }
+
   /* Matrix Table Styling - Compact Fit Without Horizontal Scroll */
   .matrix-table-wrap {
     overflow-x: auto;
@@ -318,6 +394,41 @@
     height: 100%;
     object-fit: cover;
   }
+
+  @@media (max-width: 992px) {
+    .add-prod-layout {
+      grid-template-columns: minmax(0, 1fr) !important;
+      width: 100% !important;
+      min-width: 0 !important;
+    }
+    .add-prod-panel {
+      padding: 16px 12px !important;
+      border-radius: 14px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .live-preview-card {
+      position: static;
+      max-width: 320px;
+      margin: 0 auto;
+      padding: 14px;
+      border-radius: 16px;
+      box-shadow: 0 2px 14px rgba(0,0,0,0.06);
+    }
+    .preview-stage {
+      max-height: 240px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+    }
+    #prevTitle {
+      font-size: 14px !important;
+      margin-bottom: 6px !important;
+    }
+    #prevPrice {
+      font-size: 16px !important;
+    }
+  }
 </style>
 
 <div class="add-prod-layout">
@@ -350,7 +461,7 @@
       <div id="wStep1" class="wizard-content-step">
         <div style="margin-bottom:20px;">
           <label style="font-size:13px; font-weight:700; color:var(--champagne-gold); display:block; margin-bottom:6px;">Select Main Collection Category *</label>
-          <div class="cat-cards-grid">
+          <div class="cat-cards-grid" id="adminCatCardsGrid">
             <div class="cat-select-card active" data-category-id="1" data-category-slug="engagement-rings" data-category-name="Engagement Rings" data-category-name-lower="engagement rings" onclick="setCategory(1, 'Engagement Rings', this)">
               <i class="fa-solid fa-gem"></i> <span>1. Engagement Rings</span>
             </div>
@@ -361,7 +472,8 @@
               <i class="fa-solid fa-heart"></i> <span>3. Bridal Sets</span>
             </div>
             <div class="cat-select-card" data-category-id="4" data-category-slug="earrings" data-category-name="Earrings" data-category-name-lower="earrings" onclick="setCategory(4, 'Earrings', this)">
-              <i class="fa-solid fa-sparkles"></i> <span>4. Earrings</span>
+              <svg class="cat-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>
+              <span>4. Earrings</span>
             </div>
             <div class="cat-select-card" data-category-id="5" data-category-slug="bracelets" data-category-name="Bracelets" data-category-name-lower="bracelets" onclick="setCategory(5, 'Bracelets', this)">
               <i class="fa-solid fa-link"></i> <span>5. Bracelets</span>
@@ -388,13 +500,13 @@
             <span style="font-size:11px; color:#64748b;">Customers toggle stone types dynamically on the details page</span>
           </div>
 
-          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:14px;">
+          <div class="dual-stone-pricing-grid">
             <div>
               <label style="font-size:12.5px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">
                 💎 Lab Grown Price ($ USD) *
               </label>
               <div style="position:relative;">
-                <input type="number" id="adminPrice" class="form-input" placeholder="2713" min="1" required oninput="handleLabPriceChange()" style="width:100%; box-sizing:border-box; padding:11px 12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; color:#0f172a; font-size:14px; font-weight:700;" />
+                <input type="number" id="adminPrice" class="form-input" placeholder="2713" min="0" step="any" required oninput="handleLabPriceChange()" style="width:100%; box-sizing:border-box; padding:11px 12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; color:#0f172a; font-size:14px; font-weight:700;" />
               </div>
             </div>
 
@@ -408,7 +520,7 @@
                 </button>
               </div>
               <div style="position:relative;">
-                <input type="number" id="adminMoissanitePrice" class="form-input" placeholder="1492" min="1" oninput="updateLivePreview()" style="width:100%; box-sizing:border-box; padding:11px 12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; color:#0f172a; font-size:14px; font-weight:700;" />
+                <input type="number" id="adminMoissanitePrice" class="form-input" placeholder="1492" min="0" step="any" oninput="updateLivePreview()" style="width:100%; box-sizing:border-box; padding:11px 12px; background:#ffffff; border:1px solid #cbd5e1; border-radius:8px; color:#0f172a; font-size:14px; font-weight:700;" />
               </div>
             </div>
           </div>
@@ -447,17 +559,19 @@
             <input type="file" id="adminUploadFiles" multiple accept="image/*" style="display:none;" onchange="handleFileSelect(this)" />
           </div>
           <div id="uploadStatusText" style="font-size:12px; font-weight:700; color:var(--champagne-gold); margin-top:8px;"></div>
-          <div id="uploadPreviewGrid" style="display:grid; grid-template-columns:repeat(5, 1fr); gap:10px; margin-top:14px;"></div>
+          <div id="uploadPreviewGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(64px, 1fr)); gap:10px; margin-top:14px; width:100%; box-sizing:border-box;"></div>
         </div>
 
         <div style="margin-bottom:20px;">
           <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Or Choose Preset Studio Photo (Optional)</label>
           <select id="presetImageSelect" class="form-select" onchange="usePresetImage(this.value)" style="width:100%; padding:10px; background:#f8fafc; border:1px solid #cbd5e1; border-radius:10px; color:#0f172a;">
-            <option value="/assets/ring_1.jpg">Default Solitaire (/assets/ring_1.jpg)</option>
-            <option value="/assets/ring_main.png">Royal Solitaire Ring (/assets/ring_main.png)</option>
-            <option value="/assets/hero_1.jpg">Studio Ring Showcase 1 (/assets/hero_1.jpg)</option>
-            <option value="/assets/hero_2.jpg">Studio Ring Showcase 2 (/assets/hero_2.jpg)</option>
-            <option value="/assets/hero_3.jpg">Studio Ring Showcase 3 (/assets/hero_3.jpg)</option>
+            <option value="">-- Select Preset Cloudinary Photo --</option>
+            <option value="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png">Engagement Ring Studio Showcase</option>
+            <option value="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_2_wedding_rings.png">Wedding Ring Studio Showcase</option>
+            <option value="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_3_bridal_sets.png">Bridal Set Studio Showcase</option>
+            <option value="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_4_earrings.png">Earrings Studio Showcase</option>
+            <option value="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_5_bracelets.png">Bracelets Studio Showcase</option>
+            <option value="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_6_necklaces.png">Necklaces Studio Showcase</option>
           </select>
         </div>
 
@@ -552,9 +666,13 @@
         <i class="fa-solid fa-eye"></i> Real-Time Storefront Preview
       </div>
 
-      <div class="preview-stage">
-        <span id="prevBadge" style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.8); color:#fff; font-size:9.5px; font-weight:700; padding:3px 6px; border-radius:4px; z-index:2;">💎 Lab Grown</span>
-        <img id="prevImg" src="/assets/ring_1.jpg" alt="Preview" />
+      <div class="preview-stage" style="position:relative;">
+        <span id="prevBadge" style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.8); color:#fff; font-size:9.5px; font-weight:700; padding:3px 6px; border-radius:4px; z-index:4;">💎 Lab Grown</span>
+        <div id="prevImgLoadingOverlay" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.88); backdrop-filter:blur(3px); z-index:3; align-items:center; justify-content:center; gap:8px; color:#b45309; font-size:13px; font-weight:700;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:18px; color:#b45309;"></i>
+          <span>Image is loading...</span>
+        </div>
+        <img id="prevImg" src="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png" alt="Storefront Real-Time Preview" style="width:100%; height:100%; object-fit:cover; display:block;" onerror="this.onerror=null; this.src='https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png';" />
       </div>
 
       <!-- Preview Stone Selector Toggle -->
@@ -589,8 +707,8 @@
         <span style="font-size:9.5px; background:rgba(180,83,9,0.1); color:#b45309; padding:2px 6px; border-radius:4px; font-weight:700;">2.00 CT</span>
       </div>
 
-      <button type="button" style="width:100%; padding:10px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); border:none; border-radius:8px; color:#fff; font-weight:700; font-size:12.5px; cursor:default;">
-        <i class="fa-solid fa-bag-shopping"></i> Add to Cart (Mockup)
+      <button type="button" style="width:100%; padding:10px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); border:none; border-radius:8px; color:#fff; font-weight:700; font-size:12.5px; cursor:default; display:flex; align-items:center; justify-content:center; gap:6px;">
+        <span class="material-symbols-outlined text-[17px]">shopping_bag</span> Buy Now (Mockup)
       </button>
     </div>
   </div>
@@ -657,11 +775,24 @@
     });
   }
 
+  const categoryDefaultImageMap = {
+    1: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png',
+    2: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_2_wedding_rings.png',
+    3: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_3_bridal_sets.png',
+    4: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_4_earrings.png',
+    5: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_5_bracelets.png',
+    6: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_6_necklaces.png'
+  };
+
   function setCategory(id, name, element) {
     document.getElementById('adminCategoryId').value = id;
     document.querySelectorAll('.cat-select-card').forEach(c => c.classList.remove('active'));
     element.classList.add('active');
     document.getElementById('prevCategory').textContent = `${id}. ${name}`;
+    if (currentUploadedUrls.length === 0) {
+      const defaultCatImg = categoryDefaultImageMap[id] || DEFAULT_PRODUCT_IMAGE;
+      setPreviewImgSrc(defaultCatImg);
+    }
   }
 
   function setShape(id, name, element) {
@@ -757,10 +888,30 @@
     document.getElementById('prevCaratList').innerHTML = activeCarats.map(c => `<span style="font-size:9.5px; background:rgba(212,178,112,0.2); color:var(--champagne-gold); padding:2px 6px; border-radius:4px;">${c}</span>`).join('');
   }
 
+  const DEFAULT_PRODUCT_IMAGE = 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png';
+
+  function setPreviewImgSrc(src) {
+    const prev = document.getElementById('prevImg');
+    const overlay = document.getElementById('prevImgLoadingOverlay');
+    if (!prev) return;
+    const targetSrc = (src && src.trim()) ? src.trim() : DEFAULT_PRODUCT_IMAGE;
+    if (overlay) overlay.style.display = 'flex';
+    prev.onload = () => { if (overlay) overlay.style.display = 'none'; };
+    prev.onerror = () => {
+      if (overlay) overlay.style.display = 'none';
+      prev.onerror = null;
+      prev.src = DEFAULT_PRODUCT_IMAGE;
+    };
+    prev.src = targetSrc;
+    if (prev.complete && prev.naturalWidth > 0) {
+      if (overlay) overlay.style.display = 'none';
+    }
+  }
+
   function usePresetImage(url) {
     if (url) {
       currentUploadedUrls = [url];
-      document.getElementById('prevImg').src = url;
+      setPreviewImgSrc(url);
       renderUploadPreviewGrid();
     }
   }
@@ -774,10 +925,16 @@
     }
     previewGrid.innerHTML = currentUploadedUrls.map((u, i) => `
       <div style="position:relative; height:85px; border-radius:8px; overflow:hidden; border:${i === 0 ? '2px solid #b45309' : '1px solid #cbd5e1'}; background:#f8fafc; cursor:pointer;" onclick="setCoverImage(${i})">
-        <img src="${u}" style="width:100%; height:100%; object-fit:cover;" alt="Photo ${i+1}" />
-        ${i === 0 ? '<span style="position:absolute; bottom:2px; left:2px; background:rgba(180,83,9,0.9); color:#fff; font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px;">Cover</span>' : ''}
+        <div class="thumb-loading-overlay" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8fafc; color:#b45309; font-size:10px; font-weight:700; z-index:2; gap:4px; text-align:center; padding:4px;">
+          <i class="fa-solid fa-spinner fa-spin" style="font-size:14px;"></i>
+          <span>Image is loading...</span>
+        </div>
+        <img src="${u}" style="width:100%; height:100%; object-fit:cover; position:relative; z-index:1;" alt="Photo ${i+1}"
+             onload="const ov=this.previousElementSibling; if(ov) ov.style.display='none';"
+             onerror="const ov=this.previousElementSibling; if(ov) ov.style.display='none';" />
+        ${i === 0 ? '<span style="position:absolute; bottom:2px; left:2px; background:rgba(180,83,9,0.9); color:#fff; font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px; z-index:3;">Cover</span>' : ''}
         <button type="button" onclick="event.stopPropagation(); removeUploadedImage(${i})" title="Remove photo"
-          style="position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%; background:rgba(220,38,38,0.9); color:#ffffff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px; transition:transform 0.2s;">
+          style="position:absolute; top:4px; right:4px; width:22px; height:22px; border-radius:50%; background:rgba(220,38,38,0.9); color:#ffffff; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:11px; z-index:3; transition:transform 0.2s;">
           <i class="fa-solid fa-times"></i>
         </button>
       </div>
@@ -788,7 +945,7 @@
     if (index >= 0 && index < currentUploadedUrls.length) {
       const selected = currentUploadedUrls.splice(index, 1)[0];
       currentUploadedUrls.unshift(selected);
-      document.getElementById('prevImg').src = currentUploadedUrls[0];
+      setPreviewImgSrc(currentUploadedUrls[0]);
       renderUploadPreviewGrid();
     }
   }
@@ -800,15 +957,14 @@
     renderUploadPreviewGrid();
 
     if (currentUploadedUrls.length > 0) {
-      document.getElementById('prevImg').src = currentUploadedUrls[0];
+      setPreviewImgSrc(currentUploadedUrls[0]);
     } else {
-      document.getElementById('prevImg').src = '/assets/ring_1.jpg';
+      setPreviewImgSrc('');
     }
 
-    // If this image is on Cloudinary and was explicitly deleted by the admin, remove it from Cloudinary storage
     if (urlToRemove && urlToRemove.includes('res.cloudinary.com')) {
       try {
-        await fetch(`/api/catalogapi/delete-image?url=${encodeURIComponent(urlToRemove)}`, { method: 'POST' });
+        await fetch(`/api/catalogapi/delete-image?url=${encodeURIComponent(urlToRemove)}`, { method: 'POST', credentials: 'include' });
       } catch (e) {
         console.warn('Cloudinary image deletion error:', e);
       }
@@ -819,8 +975,21 @@
     const files = Array.from(input.files);
     if (files.length === 0) return;
 
+    // Instantly display local file previews so admin sees photos right away
+    const localPreviews = files.map(f => URL.createObjectURL(f));
+    
+    // Put new photos at the front so the newly uploaded photo is immediately the preview & cover
+    currentUploadedUrls = [...localPreviews, ...currentUploadedUrls];
+    setPreviewImgSrc(currentUploadedUrls[0]);
+    renderUploadPreviewGrid();
+
     const statusText = document.getElementById('uploadStatusText');
-    statusText.textContent = `Uploading ${files.length} file(s) to Cloudinary...`;
+    if (statusText) {
+      statusText.innerHTML = `<div style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:#fffbeb; border:1.5px solid #f59e0b; border-radius:10px; color:#b45309; font-weight:700; font-size:13px; margin: 10px 0;"><i class="fa-solid fa-spinner fa-spin" style="font-size:18px; color:#b45309;"></i> <span>Image is uploading... Please wait</span></div>`;
+    }
+    if (typeof showToast === 'function') {
+      showToast('Image is uploading... Please wait', 'info', 'Uploading Photos');
+    }
 
     const formData = new FormData();
     files.forEach(f => formData.append('files', f));
@@ -828,19 +997,39 @@
     try {
       const res = await fetch('/api/catalogapi/upload-images', {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'include'
       });
       const data = await res.json();
-      if (data.success && data.urls) {
-        currentUploadedUrls = [...currentUploadedUrls, ...data.urls];
-        statusText.textContent = `Successfully uploaded ${data.urls.length} photo(s) to Cloudinary!`;
-        document.getElementById('prevImg').src = currentUploadedUrls[0];
+      if (res.ok && data.success && data.urls && data.urls.length > 0) {
+        // Replace temporary object URLs with permanent Cloudinary URLs
+        for (let i = 0; i < localPreviews.length; i++) {
+          const idx = currentUploadedUrls.indexOf(localPreviews[i]);
+          if (idx !== -1 && data.urls[i]) {
+            currentUploadedUrls[idx] = data.urls[i];
+          }
+        }
+        if (statusText) {
+          statusText.innerHTML = `<div style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:#f0fdf4; border:1.5px solid #86efac; border-radius:10px; color:#15803d; font-weight:700; font-size:13px; margin: 10px 0;"><i class="fa-solid fa-circle-check" style="font-size:18px; color:#16a34a;"></i> <span>Successfully uploaded to Cloudinary: ${data.urls.length} photo(s)</span></div>`;
+          setTimeout(() => { if (statusText) statusText.innerHTML = ''; }, 4000);
+        }
+        setPreviewImgSrc(currentUploadedUrls[0]);
         renderUploadPreviewGrid();
+        if (typeof showToast === 'function') {
+          showToast(`Uploaded ${data.urls.length} photo(s) to Cloudinary!`, 'success');
+        }
       } else {
-        alert(data.message || 'Upload failed');
+        const msg = data.message || 'Upload failed';
+        if (statusText) statusText.innerHTML = `<div style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:#fef2f2; border:1.5px solid #fca5a5; border-radius:10px; color:#b91c1c; font-weight:700; font-size:13px; margin: 10px 0;"><i class="fa-solid fa-triangle-exclamation" style="font-size:18px; color:#dc2626;"></i> <span>Upload failed: ${msg}</span></div>`;
+        if (typeof showToast === 'function') {
+          showToast(msg, 'warning');
+        }
       }
     } catch (err) {
-      statusText.textContent = 'Upload error: ' + err.message;
+      if (statusText) statusText.innerHTML = `<div style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:#fef2f2; border:1.5px solid #fca5a5; border-radius:10px; color:#b91c1c; font-weight:700; font-size:13px; margin: 10px 0;"><i class="fa-solid fa-triangle-exclamation" style="font-size:18px; color:#dc2626;"></i> <span>Upload error: ${err.message}</span></div>`;
+      if (typeof showToast === 'function') {
+        showToast('Upload error: ' + err.message, 'error');
+      }
     }
   }
 
@@ -940,7 +1129,7 @@
                       </label>
                       <div style="display:flex; align-items:center; gap:2px;">
                         <span style="font-size:11px; font-weight:700; color:#64748b;">$</span>
-                        <input type="number" step="1" min="1" class="matrix-price-input" 
+                        <input type="number" step="any" min="0" class="matrix-price-input" 
                                data-metal-id="${m.id}" data-carat-id="${c.id}" data-carat-label="${c.label}" 
                                value="${cellPrice}" 
                                style="width:84px; padding:4px 6px; font-size:12px; font-weight:700; border:1px solid #cbd5e1; border-radius:6px; color:#b45309; text-align:center; background:#ffffff;" />
@@ -962,9 +1151,66 @@
     document.querySelectorAll('.matrix-chk').forEach(chk => chk.checked = checked);
   }
 
-  let editingProductId = null;
+  async function loadAdminCategories() {
+    try {
+      const res = await fetch('/api/catalogapi/admin-categories');
+      if (!res.ok) return;
+      const categories = await res.json();
+      if (!categories || !Array.isArray(categories) || categories.length === 0) return;
 
-  document.addEventListener('DOMContentLoaded', () => {
+      // Filter: only show categories that are visible on storefront (isActive !== false)
+      const visibleCategories = categories.filter(c => c.isActive !== false);
+      if (visibleCategories.length === 0) return;
+
+      const grid = document.getElementById('adminCatCardsGrid') || document.querySelector('.cat-cards-grid');
+      if (!grid) return;
+
+      const currentSelectedId = document.getElementById('adminCategoryId').value;
+
+      grid.innerHTML = visibleCategories.map((c, idx) => {
+        const idVal = c.id;
+        const nameVal = c.name;
+        const slugVal = c.slug || nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const isActiveSelection = String(currentSelectedId) === String(idVal) || (!currentSelectedId && idx === 0);
+
+        let iconMarkup = `<i class="fa-solid fa-gem"></i>`;
+        const lower = nameVal.toLowerCase();
+        if (lower.includes('wedding')) {
+          iconMarkup = `<i class="fa-solid fa-ring"></i>`;
+        } else if (lower.includes('bridal')) {
+          iconMarkup = `<i class="fa-solid fa-heart"></i>`;
+        } else if (lower.includes('earring')) {
+          iconMarkup = `<svg class="cat-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>`;
+        } else if (lower.includes('bracelet')) {
+          iconMarkup = `<i class="fa-solid fa-link"></i>`;
+        } else if (lower.includes('necklace')) {
+          iconMarkup = `<i class="fa-solid fa-crown"></i>`;
+        }
+
+        return `
+          <div class="cat-select-card ${isActiveSelection ? 'active' : ''}" 
+               data-category-id="${idVal}" 
+               data-category-slug="${slugVal}" 
+               data-category-name="${nameVal}" 
+               data-category-name-lower="${lower}" 
+               onclick="setCategory('${idVal}', '${nameVal.replace(/'/g, "\\'")}', this)">
+            ${iconMarkup} <span>${nameVal}</span>
+          </div>
+        `;
+      }).join('');
+
+      const activeCard = grid.querySelector('.cat-select-card.active') || grid.querySelector('.cat-select-card');
+      if (activeCard) {
+        setCategory(activeCard.dataset.categoryId, activeCard.dataset.categoryName, activeCard);
+      }
+    } catch (e) {
+      console.warn('Error loading dynamic categories in AddProduct:', e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    setPreviewImgSrc(DEFAULT_PRODUCT_IMAGE);
+    await loadAdminCategories();
     const urlParams = new URLSearchParams(window.location.search);
     const editId = urlParams.get('editId') || urlParams.get('productId');
     if (editId) {
@@ -1027,7 +1273,9 @@
 
       currentUploadedUrls = existingImgs;
       if (currentUploadedUrls.length > 0) {
-        document.getElementById('prevImg').src = currentUploadedUrls[0];
+        setPreviewImgSrc(currentUploadedUrls[0]);
+      } else {
+        setPreviewImgSrc(DEFAULT_PRODUCT_IMAGE);
       }
       renderUploadPreviewGrid();
 
@@ -1115,7 +1363,17 @@
       return;
     }
 
-    const imageUrls = currentUploadedUrls.length > 0 ? currentUploadedUrls : ['/assets/ring_1.jpg'];
+    // Ensure all uploaded photos have finished uploading to Cloudinary
+    if (currentUploadedUrls.some(u => u && u.startsWith('blob:'))) {
+      showToast('Photos are still uploading to Cloudinary, please wait a moment...', 'warning');
+      return;
+    }
+
+    const imageUrls = currentUploadedUrls.filter(u => u && !u.startsWith('blob:'));
+    if (imageUrls.length === 0) {
+      showToast('Please upload at least 1 product photo to Cloudinary before saving.', 'warning');
+      return;
+    }
 
     const payload = {
       editId: editingProductId || '',

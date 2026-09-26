@@ -3,9 +3,60 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
     var statusFilter = ViewBag.StatusFilter as string ?? "All";
     var searchQuery = ViewBag.SearchQuery as string ?? "";
+    var filterUserId = ViewBag.UserId as string ?? "";
+    var filterUserEmail = ViewBag.UserEmail as string ?? "";
+    var filterUserName = ViewBag.UserName as string ?? "";
+
+    string BuildOrderUrl(string? st = null, string? q = null, int? pageNum = null)
+    {
+        var parts = new List<string>();
+        var s = st ?? statusFilter;
+        if (!string.IsNullOrEmpty(s) && !s.Equals("All", StringComparison.OrdinalIgnoreCase))
+            parts.Add("status=" + Uri.EscapeDataString(s));
+        
+        var queryStr = q ?? searchQuery;
+        if (!string.IsNullOrWhiteSpace(queryStr))
+            parts.Add("q=" + Uri.EscapeDataString(queryStr));
+
+        if (!string.IsNullOrWhiteSpace(filterUserId))
+            parts.Add("userId=" + Uri.EscapeDataString(filterUserId));
+
+        if (!string.IsNullOrWhiteSpace(filterUserEmail))
+            parts.Add("email=" + Uri.EscapeDataString(filterUserEmail));
+
+        if (!string.IsNullOrWhiteSpace(filterUserName))
+            parts.Add("userName=" + Uri.EscapeDataString(filterUserName));
+
+        if (pageNum.HasValue && pageNum.Value > 1)
+            parts.Add("page=" + pageNum.Value);
+
+        return "/Admin/Orders" + (parts.Count > 0 ? "?" + string.Join("&", parts) : "");
+    }
 }
 
 <div style="padding: 24px; max-width: 1400px; margin: 0 auto;">
+
+  @if (!string.IsNullOrWhiteSpace(filterUserId) || !string.IsNullOrWhiteSpace(filterUserEmail))
+  {
+    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 14px; padding: 14px 20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; box-shadow: 0 2px 8px rgba(180, 83, 9, 0.06);">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: #b45309; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px;">
+          <i class="fa-solid fa-user-check"></i>
+        </div>
+        <div>
+          <div style="font-size: 14.5px; font-weight: 800; color: #92400e;">
+            Filtered Orders for Client: @(!string.IsNullOrWhiteSpace(filterUserName) ? filterUserName : (!string.IsNullOrWhiteSpace(filterUserEmail) ? filterUserEmail : "Selected Customer"))
+          </div>
+          <div style="font-size: 12.5px; color: #b45309; margin-top: 1px;">
+            Displaying all completed, paid, in-transit &amp; pending orders placed by <strong>@(filterUserEmail.Length > 0 ? filterUserEmail : "this client")</strong>
+          </div>
+        </div>
+      </div>
+      <a href="/Admin/Orders" style="padding: 7px 16px; background: #ffffff; border: 1px solid #d97706; border-radius: 8px; color: #b45309; font-size: 12.5px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+        <i class="fa-solid fa-xmark"></i> Clear Client Filter &amp; Show All Orders
+      </a>
+    </div>
+  }
 
   <!-- Header & Action Bar -->
   <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px;">
@@ -16,16 +67,33 @@
     
     <!-- Filter Tabs -->
     <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap;">
-      <a href="/Admin/Orders?status=All" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Orders (@(ViewBag.TotalCount ?? Model.Count))</a>
-      <a href="/Admin/Orders?status=Paid" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Paid" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Paid (@(ViewBag.PaidCount ?? 0))</a>
-      <a href="/Admin/Orders?status=Shipped" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Shipped" || statusFilter == "ShipmentBooked" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Shipped (@(ViewBag.DispatchedCount ?? 0))</a>
-      <a href="/Admin/Orders?status=InTransit" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "InTransit" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">In Transit (@(ViewBag.InTransitCount ?? 0))</a>
-      <a href="/Admin/Orders?status=Delivered" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Delivered" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Delivered (@(ViewBag.DeliveredCount ?? 0))</a>
+      <a href="@BuildOrderUrl("All", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Orders (@(ViewBag.TotalCount ?? Model.Count))</a>
+      <a href="@BuildOrderUrl("Pending", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Pending" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Pending (@(ViewBag.PendingCount ?? 0))</a>
+      <a href="@BuildOrderUrl("Paid", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Paid" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Paid (@(ViewBag.PaidCount ?? 0))</a>
+      <a href="@BuildOrderUrl("Shipped", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Shipped" || statusFilter == "ShipmentBooked" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Shipped (@(ViewBag.DispatchedCount ?? 0))</a>
+      <a href="@BuildOrderUrl("InTransit", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "InTransit" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">In Transit (@(ViewBag.InTransitCount ?? 0))</a>
+      <a href="@BuildOrderUrl("Delivered", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Delivered" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Delivered (@(ViewBag.DeliveredCount ?? 0))</a>
     </div>
   </div>
 
   <!-- Search Box -->
   <form method="get" action="/Admin/Orders" style="margin-bottom: 20px;">
+    @if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "All")
+    {
+      <input type="hidden" name="status" value="@statusFilter" />
+    }
+    @if (!string.IsNullOrEmpty(filterUserId))
+    {
+      <input type="hidden" name="userId" value="@filterUserId" />
+    }
+    @if (!string.IsNullOrEmpty(filterUserEmail))
+    {
+      <input type="hidden" name="email" value="@filterUserEmail" />
+    }
+    @if (!string.IsNullOrEmpty(filterUserName))
+    {
+      <input type="hidden" name="userName" value="@filterUserName" />
+    }
     <div style="display: flex; gap: 10px; max-width: 500px;">
       <input type="text" name="q" value="@searchQuery" placeholder="Search by customer name, email, order # or tracking #..." 
              style="flex: 1; padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; background: #ffffff;" />
@@ -34,7 +102,7 @@
       </button>
       @if (!string.IsNullOrWhiteSpace(searchQuery))
       {
-        <a href="/Admin/Orders" style="display: flex; align-items: center; color: #64748b; text-decoration: none; font-size: 13px;">Clear</a>
+        <a href="@BuildOrderUrl(q: "")" style="display: flex; align-items: center; color: #64748b; text-decoration: none; font-size: 13px;">Clear</a>
       }
     </div>
   </form>
@@ -245,7 +313,7 @@
       <div style="display: flex; align-items: center; gap: 6px;">
         @if (curPage > 1)
         {
-          <a href="/Admin/Orders?status=@(statusFilter)&q=@System.Net.WebUtility.UrlEncode(searchQuery)&page=@(curPage - 1)" style="padding: 7px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; font-size: 13px; font-weight: 600; text-decoration: none;">
+          <a href="@BuildOrderUrl(pageNum: curPage - 1)" style="padding: 7px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; font-size: 13px; font-weight: 600; text-decoration: none;">
             &larr; Prev
           </a>
         }
@@ -254,7 +322,7 @@
         {
           if (p == 1 || p == totPages || (p >= curPage - 2 && p <= curPage + 2))
           {
-            <a href="/Admin/Orders?status=@(statusFilter)&q=@System.Net.WebUtility.UrlEncode(searchQuery)&page=@p" style="min-width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; @(p == curPage ? "background:#b45309; color:#ffffff; border:1px solid #b45309;" : "background:#ffffff; color:#334155; border:1px solid #cbd5e1;")">
+            <a href="@BuildOrderUrl(pageNum: p)" style="min-width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0 10px; border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none; @(p == curPage ? "background:#b45309; color:#ffffff; border:1px solid #b45309;" : "background:#ffffff; color:#334155; border:1px solid #cbd5e1;")">
               @p
             </a>
           }
@@ -266,7 +334,7 @@
 
         @if (curPage < totPages)
         {
-          <a href="/Admin/Orders?status=@(statusFilter)&q=@System.Net.WebUtility.UrlEncode(searchQuery)&page=@(curPage + 1)" style="padding: 7px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; font-size: 13px; font-weight: 600; text-decoration: none;">
+          <a href="@BuildOrderUrl(pageNum: curPage + 1)" style="padding: 7px 14px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; color: #334155; font-size: 13px; font-weight: 600; text-decoration: none;">
             Next &rarr;
           </a>
         }

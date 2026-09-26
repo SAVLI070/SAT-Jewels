@@ -20,9 +20,9 @@
     <!-- Status Tabs -->
     <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
       <a href="/Admin/Reviews?status=All" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Reviews (@(ViewBag.AllReviewsCount ?? Model.Count))</a>
-      <a href="/Admin/Reviews?status=Approved" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Approved" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Approved</a>
-      <a href="/Admin/Reviews?status=Pending" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Pending" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Pending</a>
-      <a href="/Admin/Reviews?status=Rejected" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Rejected" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Rejected</a>
+      <a href="/Admin/Reviews?status=Approved" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Approved" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Approved (@(ViewBag.ApprovedCount ?? 0))</a>
+      <a href="/Admin/Reviews?status=Pending" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Pending" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Pending (@(ViewBag.PendingCount ?? 0))</a>
+      <a href="/Admin/Reviews?status=Rejected" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Rejected" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Rejected (@(ViewBag.RejectedCount ?? 0))</a>
     </div>
   </div>
 

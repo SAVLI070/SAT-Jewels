@@ -23,6 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&amp;family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://unpkg.com/@@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
   <style>
     @@layer base {
@@ -157,7 +158,7 @@
   <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
     <div class="h-16 max-w-[1240px] mx-auto px-6 flex items-center justify-between gap-6">
       <div class="flex items-center gap-4">
-        <a class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-label-sm font-label-md font-medium" href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }">
+        <a class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors text-label-sm font-label-md font-medium" href="javascript:void(0);" onclick="if(window.showDiamondLoader) window.showDiamondLoader('Returning to previous view...'); if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }">
           <span class="material-symbols-outlined text-[18px]">arrow_back</span>
           <span>Back</span>
         </a>
@@ -169,9 +170,6 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <button type="button" class="relative p-2 text-on-surface-variant hover:text-primary transition-colors" onclick="openSatGlobalSearch(event)" title="Search Fine Jewelry">
-          <span class="material-symbols-outlined text-[20px]">search</span>
-        </button>
         <a class="relative p-2 text-on-surface-variant hover:text-primary transition-colors" href="/Product/Cart" title="Cart">
           <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
           <span id="navCartBadge" class="absolute top-1 right-1 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
@@ -196,7 +194,7 @@
   </header>
 
   <!-- Main View -->
-  <main class="w-full bg-surface pt-20">
+  <main class="w-full bg-surface pt-20 pb-24 lg:pb-0">
     <div class="flex flex-col w-full">
 
       <!-- Navigation / Reservation Timer Bar -->
@@ -276,8 +274,8 @@
         <!-- 2-Column Luxury Architecture: Left (Review & Address & Gateway), Right (Summary Vault) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-          <!-- ==================== LEFT COLUMN (7-8 COLS) ==================== -->
-          <div class="lg:col-span-7 xl:col-span-8 space-y-6">
+          <!-- ==================== CONTAINER 1: CART ITEMS & SHIPPING ADDRESS (7-8 COLS) ==================== -->
+          <div class="lg:col-span-7 xl:col-span-8 lg:row-start-1 space-y-6">
 
             <!-- 1. CART ITEMS VAULT CONTAINER -->
             <div id="cartItemsContainer" class="space-y-4">
@@ -325,7 +323,7 @@
                 }
 
                 <!-- Address Input Form Grid -->
-                <form id="shippingAddressForm" oninput="checkAddressValidation()" onsubmit="return false;">
+                <form id="shippingAddressForm" oninput="checkAddressValidation(); if(event.target.style) { event.target.style.borderColor=''; event.target.style.boxShadow=''; }" onsubmit="return false;">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Full Name -->
                     <div class="space-y-1.5">
@@ -467,90 +465,10 @@
               </label>
             </div>
 
-            <!-- 4. FINAL PAYMENT DISPATCH (Express & Gateway Options) -->
-            <div class="rounded-xl bg-surface-container p-6 shadow-md space-y-6">
-
-              <!-- Authorization Warning / Status Banner -->
-              <div id="addressWarningNotice" class="p-3.5 rounded-lg bg-surface-container-low flex items-center gap-3 transition-colors">
-                <span id="addressStatusIcon" class="material-symbols-outlined text-tertiary text-[22px]">verified_user</span>
-                <p id="addressStatusText" class="font-body-sm text-body-sm text-on-surface">
-                  <strong class="text-tertiary font-semibold">Payment Status:</strong> Enter your verified home delivery shipping address above to authorize payment dispatch.
-                </p>
-              </div>
-
-              <!-- Payment Header with Subtotal Reminder -->
-              <div class="flex items-baseline justify-between pt-1 border-b border-outline-variant/30 pb-4">
-                <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Total Order Subtotal:</span>
-                <span class="font-headline-lg text-headline-lg text-primary font-bold tracking-tight" id="banner-subtotal-display">$0.00 USD</span>
-              </div>
-
-              @if (isAuthenticated)
-              {
-                <div id="paypalContainerBox" class="space-y-6 opacity-50 pointer-events-none transition-opacity">
-
-                  <!-- OPTION 1: INSTANT ONE-CLICK / PAYPAL EXPRESS CHECKOUT -->
-                  <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                      <span class="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant">Option 1: Pay with PayPal Express</span>
-                      <span class="text-tertiary font-label-caps text-[10px] uppercase font-semibold">Instant USD Clearance</span>
-                    </div>
-
-                    <!-- PayPal Official Smart Buttons Target Container -->
-                    <div id="paypal-button-container" class="min-h-[48px]"></div>
-
-                    <div class="flex items-center justify-center gap-2 font-label-caps text-[10px] text-on-surface-variant">
-                      <span>Powered by</span>
-                      <span class="text-on-surface font-semibold">PayPal Enterprise Live Commerce</span>
-                    </div>
-                  </div>
-
-                  <!-- OPTION 2: EXPANDABLE DEBIT OR CREDIT CARD (RAZORPAY) -->
-                  <div class="space-y-3 pt-2 border-t border-outline-variant/20">
-                    <span class="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant">Option 2: Pay with Credit / Debit Card</span>
-                    <button class="w-full py-3.5 px-6 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-medium transition-colors flex items-center justify-between group" id="btn-method-card" onclick="payWithRazorpay()" type="button">
-                      <div class="flex items-center gap-2.5">
-                        <span class="material-symbols-outlined text-primary text-[20px]">credit_card</span>
-                        <span class="font-body-md text-body-md font-semibold text-left">Debit or Credit Card (Razorpay Gateway)</span>
-                      </div>
-                      <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[20px]">arrow_forward</span>
-                    </button>
-                    <div class="flex items-center justify-center gap-2 font-label-caps text-[10px] text-on-surface-variant">
-                      <span>Accepted:</span>
-                      <span class="text-on-surface font-semibold">Visa • MasterCard • American Express • RuPay</span>
-                    </div>
-                  </div>
-
-                  <!-- OPTION 3: CONCIERGE WIRE PRIVILEGE -->
-                  <div class="pt-1 border-t border-outline-variant/20">
-                    <button class="w-full py-2.5 px-4 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm flex items-center justify-between transition-colors" onclick="toggleWireDetails()" type="button">
-                      <span class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[16px] text-primary">account_balance</span>
-                        <span>Direct Bank Wire Transfer (2% Savings Privilege for High Jewelry Orders)</span>
-                      </span>
-                      <span class="text-primary font-semibold text-[11px] uppercase tracking-wider">Inquire Desk</span>
-                    </button>
-                    <div class="hidden mt-2 p-3.5 rounded bg-surface-container-lowest font-body-sm text-body-sm text-on-surface-variant" id="wire-payment-details">
-                      Upon placing your order via Private Bank Wire, wire instructions for JPMorgan Chase / HDFC Private Banking will be dispatched to your email. Your stone is reserved immediately for 72 hours.
-                    </div>
-                  </div>
-
-                </div>
-              }
-              else
-              {
-                <div class="p-6 rounded-lg bg-surface-container-low text-center space-y-3">
-                  <p class="font-body-md text-body-md text-on-surface-variant">
-                    Please sign in above to unlock instant PayPal Express and Credit Card payment options.
-                  </p>
-                </div>
-              }
-
-            </div>
-
           </div>
 
-          <!-- ==================== RIGHT COLUMN (4-5 COLS): STICKY ORDER SUMMARY ==================== -->
-          <div class="lg:col-span-5 xl:col-span-4 space-y-6 lg:sticky lg:top-24">
+          <!-- ==================== CONTAINER 2: ORDER SUMMARY (BEFORE PAYMENT ON MOBILE, RIGHT COLUMN ON DESKTOP) ==================== -->
+          <div class="lg:col-span-5 xl:col-span-4 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-24 space-y-6">
 
             <!-- Summary Vault Card -->
             <div class="rounded-xl bg-surface-container p-6 shadow-xl space-y-6 border border-outline-variant/20">
@@ -677,12 +595,130 @@
 
           </div>
 
+          <!-- ==================== CONTAINER 3: FINAL PAYMENT DISPATCH (LEFT BOTTOM ON DESKTOP, AFTER SUMMARY ON MOBILE) ==================== -->
+          <div id="paymentSectionBox" class="lg:col-span-7 xl:col-span-8 lg:row-start-2 space-y-6">
+
+            <div class="rounded-xl bg-surface-container p-6 shadow-md space-y-6">
+
+              <!-- Authorization Warning / Status Banner -->
+              <div id="addressWarningNotice" class="p-3.5 rounded-lg bg-surface-container-low flex items-center gap-3 transition-colors">
+                <span id="addressStatusIcon" class="material-symbols-outlined text-tertiary text-[22px]">verified_user</span>
+                <p id="addressStatusText" class="font-body-sm text-body-sm text-on-surface">
+                  <strong class="text-tertiary font-semibold">Payment Status:</strong> Enter your verified home delivery shipping address above to authorize payment dispatch.
+                </p>
+              </div>
+
+              <!-- Payment Header with Subtotal Reminder -->
+              <div class="flex items-baseline justify-between pt-1 border-b border-outline-variant/30 pb-4">
+                <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Total Order Subtotal:</span>
+                <span class="font-headline-lg text-headline-lg text-primary font-bold tracking-tight" id="banner-subtotal-display">$0.00 USD</span>
+              </div>
+
+              @if (isAuthenticated)
+              {
+                <div id="paypalContainerBox" class="space-y-6 opacity-50 pointer-events-none transition-opacity">
+
+                  <!-- OPTION 1: INSTANT ONE-CLICK / PAYPAL EXPRESS CHECKOUT -->
+                  <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant">Option 1: Pay with PayPal Express</span>
+                      <span class="text-tertiary font-label-caps text-[10px] uppercase font-semibold">Instant USD Clearance</span>
+                    </div>
+
+                    <!-- PayPal Official Smart Buttons Target Container -->
+                    <div id="paypal-button-container" class="min-h-[48px]"></div>
+
+                    <div class="flex items-center justify-center gap-2 font-label-caps text-[10px] text-on-surface-variant">
+                      <span>Powered by</span>
+                      <span class="text-on-surface font-semibold">PayPal Enterprise Live Commerce</span>
+                    </div>
+                  </div>
+
+                  <!-- OPTION 2: EXPANDABLE DEBIT OR CREDIT CARD (RAZORPAY) -->
+                  <div class="space-y-3 pt-2 border-t border-outline-variant/20">
+                    <span class="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant">Option 2: Pay with Credit / Debit Card</span>
+                    <button class="w-full py-3.5 px-6 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-medium transition-colors flex items-center justify-between group" id="btn-method-card" onclick="payWithRazorpay()" type="button">
+                      <div class="flex items-center gap-2.5">
+                        <span class="material-symbols-outlined text-primary text-[20px]">credit_card</span>
+                        <span class="font-body-md text-body-md font-semibold text-left">Debit or Credit Card (Razorpay Gateway)</span>
+                      </div>
+                      <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[20px]">arrow_forward</span>
+                    </button>
+                    <div class="flex items-center justify-center gap-2 font-label-caps text-[10px] text-on-surface-variant">
+                      <span>Accepted:</span>
+                      <span class="text-on-surface font-semibold">Visa • MasterCard • American Express • RuPay</span>
+                    </div>
+                  </div>
+
+                  <!-- OPTION 3: CONCIERGE WIRE PRIVILEGE -->
+                  <div class="pt-1 border-t border-outline-variant/20">
+                    <button class="w-full py-2.5 px-4 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm flex items-center justify-between transition-colors" onclick="toggleWireDetails()" type="button">
+                      <span class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[16px] text-primary">account_balance</span>
+                        <span>Direct Bank Wire Transfer (2% Savings Privilege for High Jewelry Orders)</span>
+                      </span>
+                      <span class="text-primary font-semibold text-[11px] uppercase tracking-wider">Inquire Desk</span>
+                    </button>
+                    <div class="hidden mt-2 p-3.5 rounded bg-surface-container-lowest font-body-sm text-body-sm text-on-surface-variant" id="wire-payment-details">
+                      Upon placing your order via Private Bank Wire, wire instructions for JPMorgan Chase / HDFC Private Banking will be dispatched to your email. Your stone is reserved immediately for 72 hours.
+                    </div>
+                  </div>
+
+                </div>
+              }
+              else
+              {
+                <div class="p-6 rounded-lg bg-surface-container-low text-center space-y-3">
+                  <p class="font-body-md text-body-md text-on-surface-variant">
+                    Please sign in above to unlock instant PayPal Express and Credit Card payment options.
+                  </p>
+                </div>
+              }
+
+            </div>
+
+          </div>
+
         </div>
 
       </section>
 
     </div>
   </main>
+
+  <!-- Sticky Bottom PayPal Action Bar (Stuck at bottom with amount to pay) -->
+  <div id="mobileStickyPaymentBar" class="fixed bottom-0 left-0 right-0 z-50 bg-[#0e0e0f]/95 backdrop-blur-xl border-t border-outline-variant/40 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,0.8)]">
+    <div class="flex items-center justify-between gap-4 max-w-[1240px] mx-auto">
+      <div class="flex flex-col min-w-0">
+        <span class="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant font-semibold">Total to Pay</span>
+        <span id="mobileStickyTotalDisplay" class="font-headline-sm text-[18px] sm:text-[22px] text-primary font-bold tracking-tight truncate">$0.00 USD</span>
+      </div>
+      <div id="sticky-paypal-button-container" class="flex-1 max-w-[280px] sm:max-w-[340px] min-h-[46px] flex items-center justify-end">
+        <button type="button" id="btnStickyPaypalTrigger" onclick="handleMobilePaymentClick()" class="w-full h-[46px] px-6 rounded-lg bg-[#ffc439] hover:bg-[#ffb619] flex items-center justify-center shadow-[0_4px_16px_rgba(255,196,57,0.35)] transition-all active:scale-[0.98] cursor-pointer" title="Pay with PayPal">
+          <svg class="h-6 w-auto" viewBox="0 0 100 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11.667 3.5H4.833a1.5 1.5 0 00-1.48 1.258L.48 20.306a.75.75 0 00.74.86h3.407a1 1 0 00.986-.838l.942-5.96a1 1 0 01.987-.84h1.792c3.96 0 6.666-1.922 7.266-5.72.333-2.106-.187-3.766-1.48-4.815-1.28-.973-3.213-1.493-5.453-1.493z" fill="#003087"/>
+            <path d="M37.133 9.426a5.733 5.733 0 00-2.32-.426h-4.38a1 1 0 00-.987.838l-1.92 12.167a.75.75 0 00.74.861h2.98a.8.8 0 00.79-.672l.546-3.461a.8.8 0 01.79-.673h1.84c3.487 0 6.22-1.413 7.02-5.507.367-1.887-.1-3.26-1.127-4.127h-.006zM50.48 9h-2.92a.8.8 0 00-.79.673l-.113.72-.18-.26c-.733-1.04-2.313-1.467-3.92-1.467-3.667 0-6.793 2.78-7.393 6.6-.334 2.054.126 3.967 1.26 5.254 1.046 1.18 2.606 1.746 4.386 1.746 3.1 0 4.827-1.993 4.827-1.993l-.114.72a.75.75 0 00.74.86h2.747a.8.8 0 00.79-.673L51.27 9.86A.75.75 0 0050.48 9zm-5.38 6.467c-.313 1.986-1.867 3.32-3.86 3.32-1.007 0-1.847-.327-2.36-.92-.514-.593-.687-1.44-.487-2.387.307-1.96 1.887-3.32 3.86-3.32 1.007 0 1.84.334 2.354.927.52.6.693 1.44.493 2.38z" fill="#003087"/>
+            <path d="M69.047 9h-2.92a.8.8 0 00-.79.673l-3.933 11.967-1.827-11.78a.8.8 0 00-.793-.673h-2.96a.75.75 0 00-.74.866l3.373 15.694a.8.8 0 00.79.673h2.893a.8.8 0 00.79-.673L69.837 9.86A.75.75 0 0069.047 9z" fill="#0079C1"/>
+            <path d="M78.687 3.5h-6.834a1.5 1.5 0 00-1.48 1.258L67.5 20.306a.75.75 0 00.74.86h3.407a1 1 0 00.987-.838l.94-5.96a1 1 0 01.986-.84h1.794c3.96 0 6.666-1.922 7.266-5.72.334-2.106-.186-3.766-1.48-4.815-1.28-.973-3.213-1.493-5.453-1.493z" fill="#0079C1"/>
+            <path d="M100.153 9.426a5.733 5.733 0 00-2.32-.426h-4.38a1 1 0 00-.986.838l-1.92 12.167a.75.75 0 00.74.861h2.98a.8.8 0 00.79-.672l.547-3.461a.8.8 0 01.79-.673h1.84c3.486 0 6.22-1.413 7.02-5.507.366-1.887-.1-3.26-1.127-4.127h-.007zM113.5 9h-2.92a.8.8 0 00-.79.673l-.113.72-.18-.26c-.734-1.04-2.314-1.467-3.92-1.467-3.667 0-6.794 2.78-7.394 6.6-.333 2.054.127 3.967 1.26 5.254 1.047 1.18 2.607 1.746 4.387 1.746 3.1 0 4.827-1.993 4.827-1.993l-.113.72a.75.75 0 00.74.86h2.746a.8.8 0 00.79-.673L114.29 9.86A.75.75 0 00113.5 9zm-5.38 6.467c-.313 1.986-1.867 3.32-3.86 3.32-1.007 0-1.847-.327-2.36-.92-.514-.593-.687-1.44-.487-2.387.307-1.96 1.887-3.32 3.86-3.32 1.007 0 1.84.334 2.353.927.52.6.694 1.44.494 2.38z" fill="#0079C1"/>
+            <path d="M117.84 21.033a.75.75 0 01-.74-.86l2.36-14.966a.8.8 0 01.79-.674h2.98a.75.75 0 01.74.86l-2.36 14.967a.8.8 0 01-.79.673h-2.98z" fill="#0079C1"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Luxury Notification Toast -->
+  <div id="satNoticeToast" class="fixed top-5 right-5 z-[999999] max-w-md w-[calc(100%-40px)] p-4 rounded-2xl bg-surface-container-high/95 backdrop-blur-xl border border-primary/40 shadow-[0_20px_50px_rgba(0,0,0,0.85)] flex items-start gap-3.5 transition-all duration-300 -translate-y-10 opacity-0 pointer-events-none">
+    <div id="satNoticeToastIconWrap" class="w-9 h-9 rounded-full bg-primary/15 text-primary flex items-center justify-center shrink-0">
+      <span id="satNoticeToastIcon" class="material-symbols-outlined text-[20px]">info</span>
+    </div>
+    <div class="flex-1 min-w-0">
+      <h4 id="satNoticeToastTitle" class="font-headline-sm text-sm font-bold text-on-surface leading-tight">Notification</h4>
+      <p id="satNoticeToastMsg" class="font-body-sm text-xs text-on-surface-variant mt-0.5 leading-snug">Message</p>
+    </div>
+    <button type="button" onclick="closeNoticeToast()" class="text-on-surface-variant hover:text-on-surface text-lg leading-none p-1 -mr-1 -mt-1" aria-label="Close">&times;</button>
+  </div>
 
   <!-- Luxury Footer -->
   <footer class="w-full bg-surface-container-lowest border-t border-outline-variant/30 mt-20">
@@ -788,16 +824,29 @@
 
   <!-- In-Page Payment Processing & Verification Modal Overlay -->
   <div id="paymentProcessingOverlay" style="position:fixed; inset:0; background:rgba(5, 11, 20, 0.88); backdrop-filter:blur(12px); z-index:999999; display:none; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:24px;">
-    <div style="background:rgba(19, 19, 20, 0.95); border:1px solid rgba(212, 175, 55, 0.4); border-radius:24px; padding:40px 32px; max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.85);">
-      <div style="font-size:48px; color:#f2ca50; margin-bottom:16px; animation:spinDiamond 3s infinite linear;">
-        <span class="material-symbols-outlined text-[48px]">diamond</span>
+    <div style="background:rgba(19, 19, 20, 0.95); border:1px solid rgba(212, 175, 55, 0.4); border-radius:24px; padding:36px 32px; max-width:440px; width:100%; box-shadow:0 20px 60px rgba(0,0,0,0.85);">
+      <div style="width: 170px; height: 170px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;">
+        <lottie-player
+          id="paymentCreditCardLottie"
+          src="/assets/animations/credit_card.json"
+          background="transparent"
+          speed="1"
+          style="width: 170px; height: 170px;"
+          loop
+          autoplay>
+        </lottie-player>
       </div>
-      <h3 style="font-family:'Playfair Display', serif; font-size:22px; color:#e5e2e3; margin:0 0 10px;">Verifying Payment Security...</h3>
+      <h3 style="font-family:'Playfair Display', serif; font-size:22px; color:#e5e2e3; margin:0 0 10px;">Payment in Progress</h3>
       <p id="processingOverlayMessage" style="color:#d0c5af; font-size:14px; margin:0 0 20px; line-height:1.6;">
-        Confirming payment with server-authoritative pricing. Please do not close or refresh this window.
+        Processing your secure transaction. Please do not close or refresh this window.
       </p>
       <div style="display:inline-flex; align-items:center; gap:8px; padding:6px 16px; background:rgba(212, 175, 55, 0.15); border:1px solid rgba(212, 175, 55, 0.3); border-radius:20px; color:#f2ca50; font-size:12px; font-weight:700;">
         <span class="material-symbols-outlined text-[16px]">verified_user</span> 256-Bit TLS Encrypted Verification
+      </div>
+      <div style="margin-top: 16px;">
+        <button type="button" onclick="hidePaymentProcessing()" style="background: none; border: none; color: #a1a1aa; font-size: 12px; text-decoration: underline; cursor: pointer; padding: 4px 8px;" onmouseover="this.style.color='#f3dfa2'" onmouseout="this.style.color='#a1a1aa'">
+          Cancel &amp; Return to Cart
+        </button>
       </div>
     </div>
   </div>
@@ -895,6 +944,8 @@
           if (itemsPriceEl) itemsPriceEl.textContent = '$0.00 USD';
           if (totalDisplay) totalDisplay.textContent = '$0.00 USD';
           if (bannerSubtotal) bannerSubtotal.textContent = '$0.00 USD';
+          const stickyBarEmpty = document.getElementById('mobileStickyPaymentBar');
+          if (stickyBarEmpty) stickyBarEmpty.style.display = 'none';
           currentCartTotal = 0;
           currentRawItemsTotal = 0;
           return;
@@ -1000,6 +1051,10 @@
         const totalFormatted = '$' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USD';
         if (totalDisplay) totalDisplay.textContent = totalFormatted;
         if (bannerSubtotal) bannerSubtotal.textContent = totalFormatted;
+        const stickyMobileTotal = document.getElementById('mobileStickyTotalDisplay');
+        if (stickyMobileTotal) stickyMobileTotal.textContent = totalFormatted;
+        const stickyBarActive = document.getElementById('mobileStickyPaymentBar');
+        if (stickyBarActive) stickyBarActive.style.display = 'block';
 
       } catch (e) {
         console.error('Error rendering cart:', e);
@@ -1043,6 +1098,8 @@
 
       if (totalDisplay) totalDisplay.textContent = formattedTotal;
       if (totalBannerDisplay) totalBannerDisplay.textContent = formattedTotal;
+      const stickyMobileTotal = document.getElementById('mobileStickyTotalDisplay');
+      if (stickyMobileTotal) stickyMobileTotal.textContent = formattedTotal;
     }
 
     function removeItem(index) {
@@ -1238,34 +1295,187 @@
       if (wire) wire.classList.toggle('hidden');
     }
 
+    let noticeToastTimer = null;
+    function showCartNoticeToast(title, message, type = 'info') {
+      const toast = document.getElementById('satNoticeToast');
+      if (!toast) return;
+
+      const titleEl = document.getElementById('satNoticeToastTitle');
+      const msgEl = document.getElementById('satNoticeToastMsg');
+      const iconWrap = document.getElementById('satNoticeToastIconWrap');
+      const iconEl = document.getElementById('satNoticeToastIcon');
+
+      if (titleEl) titleEl.textContent = title;
+      if (msgEl) msgEl.textContent = message;
+
+      if (iconWrap && iconEl) {
+        if (type === 'error' || type === 'danger') {
+          iconWrap.className = 'w-9 h-9 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center shrink-0';
+          iconEl.textContent = 'error';
+        } else if (type === 'warning') {
+          iconWrap.className = 'w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0';
+          iconEl.textContent = 'warning';
+        } else if (type === 'success') {
+          iconWrap.className = 'w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0';
+          iconEl.textContent = 'check_circle';
+        } else {
+          iconWrap.className = 'w-9 h-9 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0';
+          iconEl.textContent = 'info';
+        }
+      }
+
+      toast.classList.remove('-translate-y-10', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
+
+      clearTimeout(noticeToastTimer);
+      noticeToastTimer = setTimeout(() => {
+        closeNoticeToast();
+      }, 4500);
+    }
+
+    function closeNoticeToast() {
+      const toast = document.getElementById('satNoticeToast');
+      if (toast) {
+        toast.classList.add('-translate-y-10', 'opacity-0', 'pointer-events-none');
+        toast.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
+      }
+    }
+
+    function validateAddressFieldsInteractive() {
+      const fields = [
+        { id: 'shipFullName', label: 'Full Name' },
+        { id: 'shipPhone', label: 'Contact Phone' },
+        { id: 'shipStreet', label: 'Street Address' },
+        { id: 'shipCity', label: 'City / Town' },
+        { id: 'shipState', label: 'State / Province' },
+        { id: 'shipPostalCode', label: 'Postal / ZIP Code' }
+      ];
+
+      let missingLabels = [];
+      let firstMissingEl = null;
+
+      fields.forEach(f => {
+        const el = document.getElementById(f.id);
+        if (el) {
+          if (!el.value.trim()) {
+            missingLabels.push(f.label);
+            el.style.borderColor = '#f43f5e';
+            el.style.boxShadow = '0 0 0 2px rgba(244, 63, 94, 0.4)';
+            if (!firstMissingEl) firstMissingEl = el;
+          } else {
+            el.style.borderColor = '';
+            el.style.boxShadow = '';
+          }
+        }
+      });
+
+      if (missingLabels.length > 0) {
+        const summaryText = missingLabels.length <= 2 
+          ? missingLabels.join(' and ') 
+          : `${missingLabels[0]}, ${missingLabels[1]} +${missingLabels.length - 2} more`;
+        showCartNoticeToast(
+          "Shipping Details Incomplete",
+          `Please provide your ${summaryText} before proceeding to payment.`,
+          "error"
+        );
+        if (firstMissingEl) {
+          firstMissingEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          firstMissingEl.focus();
+        }
+        return false;
+      }
+
+      const postalEl = document.getElementById('shipPostalCode');
+      const countryEl = document.getElementById('shipCountry');
+      const postalVal = postalEl ? postalEl.value.trim() : '';
+      const countryVal = countryEl ? countryEl.value : 'India';
+      const postalCheck = validatePostalCodeFormat(postalVal, countryVal);
+
+      if (!postalCheck.valid) {
+        showCartNoticeToast("Invalid Postal Code", postalCheck.message, "warning");
+        if (postalEl) {
+          postalEl.style.borderColor = '#f43f5e';
+          postalEl.style.boxShadow = '0 0 0 2px rgba(244, 63, 94, 0.4)';
+          postalEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          postalEl.focus();
+        }
+        return false;
+      }
+
+      fields.forEach(f => {
+        const el = document.getElementById(f.id);
+        if (el) {
+          el.style.borderColor = '';
+          el.style.boxShadow = '';
+        }
+      });
+
+      checkAddressValidation();
+      return true;
+    }
+
     function scrollToPaymentOrAction() {
       if (!isUserAuthenticated) {
-        window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+        showCartNoticeToast("Authentication Required", "Please sign in to your SAT Jewel account before completing order dispatch.", "warning");
+        setTimeout(() => {
+          window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+        }, 1200);
         return;
       }
-      const addr = getShippingAddressData();
-      if (!addr) {
-        const formEl = document.getElementById('shippingAddressForm');
-        if (formEl) formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        checkAddressValidation();
-        return;
-      }
+
+      if (!validateAddressFieldsInteractive()) return;
+
       const paypalBox = document.getElementById('paypalContainerBox');
       if (paypalBox) {
         paypalBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showCartNoticeToast("Address Confirmed", "Shipping address verified. Select your payment gateway below.", "success");
+      }
+    }
+
+    function handleMobilePaymentClick() {
+      if (!isUserAuthenticated) {
+        showCartNoticeToast("Authentication Required", "Please sign in to your SAT Jewel account to proceed with payment.", "warning");
+        setTimeout(() => {
+          window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+        }, 1200);
+        return;
+      }
+
+      const key = getCartStorageKey();
+      const saved = localStorage.getItem(key);
+      const items = saved ? JSON.parse(saved) : [];
+      if (!items || items.length === 0) {
+        showCartNoticeToast("Bag Empty", "Your shopping bag is empty. Please select a fine jewelry creation first.", "warning");
+        return;
+      }
+
+      if (!validateAddressFieldsInteractive()) return;
+
+      const paypalBox = document.getElementById('paypalContainerBox');
+      if (paypalBox) {
+        paypalBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        showCartNoticeToast("Address Confirmed", "Proceed with instant PayPal checkout below.", "success");
       }
     }
 
     function showPaymentProcessing(msg) {
       const el = document.getElementById('paymentProcessingOverlay');
       const msgEl = document.getElementById('processingOverlayMessage');
+      const player = document.getElementById('paymentCreditCardLottie');
       if (msgEl && msg) msgEl.textContent = msg;
+      if (player && typeof player.play === 'function') {
+        try { player.play(); } catch(e) {}
+      }
       if (el) el.style.display = 'flex';
     }
 
     function hidePaymentProcessing() {
       const el = document.getElementById('paymentProcessingOverlay');
       if (el) el.style.display = 'none';
+      const player = document.getElementById('paymentCreditCardLottie');
+      if (player && typeof player.stop === 'function') {
+        try { player.stop(); } catch(e) {}
+      }
     }
 
     function isPhysicalCertSelected() {
@@ -1278,10 +1488,12 @@
       if (typeof paypal === 'undefined') return;
 
       const container = document.getElementById('paypal-button-container');
-      if (!container) return;
-      container.innerHTML = '';
+      const stickyContainer = document.getElementById('sticky-paypal-button-container');
+      if (!container && !stickyContainer) return;
+      if (container) container.innerHTML = '';
+      if (stickyContainer) stickyContainer.innerHTML = '';
 
-      paypal.Buttons({
+      const paypalConfig = {
         style: {
           layout: 'vertical',
           color:  'gold',
@@ -1303,12 +1515,15 @@
             scrollToPaymentOrAction();
             return actions.reject();
           }
+          showPaymentProcessing("PayPal checkout window is active. Please complete payment in the PayPal window...");
           return actions.resolve();
         },
 
         createOrder: async function(data, actions) {
+          showPaymentProcessing("Connecting with PayPal & securing transaction session...");
           const addr = getShippingAddressData();
           if (!addr) {
+            hidePaymentProcessing();
             alert('⚠️ Shipping Address Required before completing checkout.');
             throw new Error('Shipping address incomplete.');
           }
@@ -1411,7 +1626,18 @@
           console.error('PayPal Checkout Error:', err);
           alert('An error occurred during PayPal checkout. Please ensure your shipping details are entered and try again.');
         }
-      }).render('#paypal-button-container');
+      };
+
+      if (container) {
+        paypal.Buttons(paypalConfig).render('#paypal-button-container');
+      }
+
+      if (stickyContainer) {
+        paypal.Buttons({
+          ...paypalConfig,
+          style: { layout: 'horizontal', color: 'gold', shape: 'rect', label: 'paypal', tagline: false, height: 46 }
+        }).render('#sticky-paypal-button-container');
+      }
     }
 
     // Razorpay Embedded Card Payment
@@ -1507,6 +1733,7 @@
                   }));
                 } catch(e) {}
                 const confirmedOrderId = verifyResult.orderId || response.razorpay_order_id;
+                if (window.showDiamondLoader) window.showDiamondLoader('Securing Order Confirmation...');
                 window.location.href = '/Order/Confirmation?orderId=' + encodeURIComponent(confirmedOrderId);
               } else {
                 alert('⚠️ Razorpay Signature Verification Alert: ' + verifyResult.message);
@@ -1522,9 +1749,15 @@
           },
           theme: {
             color: '#d4af37'
+          },
+          modal: {
+            ondismiss: function() {
+              hidePaymentProcessing();
+            }
           }
         };
 
+        showPaymentProcessing("Processing card payment. Please enter your card credentials in the checkout window...");
         const rzp = new Razorpay(options);
         rzp.open();
       } catch (err) {
@@ -1537,5 +1770,8 @@
 
   <!-- Global Search Modal -->
   <partial name="_SearchModal" />
+
+  <!-- SAT Jewel Signature Diamond Loader -->
+  <partial name="_DiamondLoader" />
 </body>
 </html>

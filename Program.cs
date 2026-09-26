@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using SAT1.Models;
 
@@ -84,6 +86,22 @@ builder.Services.AddHttpClient();
 
 // Add In-Memory Caching (for catalog performance, rate limiting, and temporary token vaults)
 builder.Services.AddMemoryCache();
+
+// Add Rate Limiter (Protects against brute-force attacks and abuse)
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 150,
+                QueueLimit = 0,
+                Window = TimeSpan.FromMinutes(1)
+            }));
+});
 
 // Register BAL & DAL Payment Services
 builder.Services.AddScoped<SAT1.DAL.OrderRepository>();
@@ -292,8 +310,11 @@ using (var scope = app.Services.CreateScope())
             CREATE INDEX IF NOT EXISTS ""IX_dynamic_pricing_rules_rule_type"" ON ""dynamic_pricing_rules"" (""rule_type"");
             CREATE INDEX IF NOT EXISTS ""IX_product_reviews_product_id"" ON ""product_reviews"" (""product_id"");
             CREATE INDEX IF NOT EXISTS ""IX_product_reviews_status"" ON ""product_reviews"" (""status"");
+            CREATE INDEX IF NOT EXISTS ""IX_product_reviews_pid_status_created"" ON ""product_reviews"" (""product_id"", ""status"", ""created_at"" DESC);
             CREATE INDEX IF NOT EXISTS ""IX_Orders_CustomerEmail"" ON ""Orders"" (""CustomerEmail"");
             CREATE INDEX IF NOT EXISTS ""IX_Orders_OrderStatus"" ON ""Orders"" (""OrderStatus"");
+            CREATE INDEX IF NOT EXISTS ""IX_Orders_UserId_CreatedAt"" ON ""Orders"" (""UserId"", ""CreatedAt"" DESC);
+            CREATE UNIQUE INDEX IF NOT EXISTS ""UX_Orders_ProviderOrderId"" ON ""Orders"" (""ProviderOrderId"") WHERE ""ProviderOrderId"" <> '';
             CREATE INDEX IF NOT EXISTS ""IX_order_tracking_history_order_id"" ON ""order_tracking_history"" (""order_id"");
             CREATE INDEX IF NOT EXISTS ""IX_UserAddresses_UserId"" ON ""UserAddresses"" (""UserId"");
             CREATE INDEX IF NOT EXISTS ""IX_Users_Email"" ON ""Users"" (""Email"");
@@ -381,6 +402,8 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseRateLimiter();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
@@ -392,6 +415,12 @@ app.Use(async (context, next) =>
     var userRole = context.User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "";
 
     // 1. Admin Route Guard: Only /admin direct URL navigation is routed to Admin Portal (requires Admin role)
+    if (path.Equals("/admin/logout"))
+    {
+        context.Response.Redirect("/Account/Logout");
+        return;
+    }
+
     if (path.StartsWith("/admin"))
     {
         if (!isAuthenticated)

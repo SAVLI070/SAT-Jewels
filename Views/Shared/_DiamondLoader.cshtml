@@ -1,0 +1,319 @@
+<!-- Global SAT Bespoke Loading Animation (Ornaments & Payment Lottie) -->
+<script src="https://unpkg.com/@@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
+<div id="satLottieLoader" class="sat-lottie-overlay sat-diamond-overlay" aria-hidden="true">
+  <div class="sat-pure-diamond-loader">
+    <div class="sat-diamond-svg-wrap sat-lottie-wrap">
+      <lottie-player
+        id="satGlobalLottiePlayer"
+        src="/assets/animations/ornaments_loading.json"
+        background="transparent"
+        speed="1.2"
+        style="width: min(420px, 90vw); height: min(300px, 45vh); max-height: 48vh; margin: 0 auto; overflow: visible;"
+        loop
+        autoplay>
+      </lottie-player>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function() {
+    try {
+      const curPath = (window.location.pathname || '').toLowerCase();
+      if (curPath === '/' || curPath === '' || curPath === '/home' || curPath === '/home/index' || curPath === '/home/landingnew' ||
+          curPath.startsWith('/admin') || curPath.includes('/admin/') ||
+          curPath.includes('/account/signin') || curPath.includes('/account/login') || curPath.includes('/account/auth') || curPath.includes('/account/register') || curPath.includes('/account/handlesignin') || curPath.includes('/account/handlesignup')) {
+        return; // Exclude main landing page, admin portal, and sign in/register pages
+      }
+      const perfNav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || performance.navigation;
+      const isReload = perfNav && (perfNav.type === 'reload' || perfNav.type === 1);
+      if (isReload) {
+        const ldr = document.getElementById('satLottieLoader');
+        if (ldr) ldr.classList.add('active');
+        setTimeout(function() {
+          if (ldr) ldr.classList.remove('active');
+        }, 1200);
+      }
+    } catch(e) {}
+  })();
+</script>
+
+<style>
+  .sat-lottie-overlay,
+  .sat-diamond-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    height: 100dvh !important;
+    background: rgba(5, 11, 20, 0.72) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    z-index: 99999999 !important;
+    display: none !important;
+    align-items: center !important;
+    justify-content: center !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+    transition: opacity 0.22s ease, visibility 0.22s ease !important;
+  }
+
+  .sat-lottie-overlay.active,
+  .sat-diamond-overlay.active {
+    display: flex !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+  }
+
+  .sat-pure-diamond-loader {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    text-align: center !important;
+    overflow: visible !important;
+  }
+
+  .sat-diamond-svg-wrap,
+  .sat-lottie-wrap {
+    width: min(420px, 90vw) !important;
+    height: min(300px, 45vh) !important;
+    max-width: 95vw !important;
+    max-height: 48vh !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    animation: floatDiamondSubtle 3s ease-in-out infinite !important;
+    filter: drop-shadow(0 0 24px rgba(251, 191, 36, 0.8)) drop-shadow(0 0 50px rgba(212, 178, 112, 0.45)) !important;
+    overflow: visible !important;
+  }
+
+  .sat-diamond-svg-wrap lottie-player,
+  .sat-lottie-wrap lottie-player {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 95vw !important;
+    max-height: 48vh !important;
+    overflow: visible !important;
+  }
+
+  @@media (max-width: 640px) {
+    .sat-diamond-svg-wrap,
+    .sat-lottie-wrap {
+      width: min(320px, 85vw) !important;
+      height: min(230px, 35vh) !important;
+      max-height: 40vh !important;
+    }
+    .sat-diamond-svg-wrap lottie-player,
+    .sat-lottie-wrap lottie-player {
+      width: 100% !important;
+      height: 100% !important;
+      max-height: 40vh !important;
+    }
+  }
+
+  @@keyframes floatDiamondSubtle {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-7px) scale(1.02); }
+  }
+</style>
+
+<script>
+(function() {
+  if (window._satDiamondLoaderEngineBound) return;
+  window._satDiamondLoaderEngineBound = true;
+
+  const curPath = (window.location.pathname || '').toLowerCase();
+  if (curPath.startsWith('/admin') || curPath.includes('/admin/')) {
+    window.showDiamondLoader = function() {};
+    window.hideDiamondLoader = function() {};
+    window.showPaymentLoader = function() {};
+    window.showLottieLoader = function() {};
+    window.hideLottieLoader = function() {};
+    return;
+  }
+
+  let loaderDismissTimer = null;
+
+  window.showDiamondLoader = function(text, animType) {
+    const curP = (window.location.pathname || '').toLowerCase();
+    if (curP.startsWith('/admin') || curP.includes('/admin/')) return;
+
+    const loader = document.getElementById('satLottieLoader') || document.getElementById('satDiamondLoader');
+    const player = document.getElementById('satGlobalLottiePlayer');
+
+    if (player) {
+      const isCard = (animType === 'payment' || animType === 'card' || animType === 'credit_card');
+      const targetSrc = isCard ? '/assets/animations/credit_card.json' : '/assets/animations/ornaments_loading.json';
+      if (player.getAttribute('src') !== targetSrc) {
+        player.load(targetSrc);
+      }
+      if (isCard) {
+        player.style.width = 'min(180px, 45vw)';
+        player.style.height = 'min(180px, 45vw)';
+      } else {
+        player.style.width = 'min(420px, 90vw)';
+        player.style.height = 'min(300px, 45vh)';
+      }
+      try {
+        if (typeof player.play === 'function') player.play();
+      } catch(e) {}
+    }
+
+    if (loader) {
+      loader.classList.add('active');
+      clearTimeout(loaderDismissTimer);
+      // Fast auto-hide timeout: never block UI for more than 1.2 seconds
+      loaderDismissTimer = setTimeout(() => {
+        window.hideDiamondLoader();
+      }, 1200);
+    }
+  };
+
+  window.showPaymentLoader = function(text) {
+    window.showDiamondLoader(text || 'Processing Payment...', 'payment');
+  };
+
+  window.hideDiamondLoader = function() {
+    clearTimeout(loaderDismissTimer);
+    const loader = document.getElementById('satLottieLoader') || document.getElementById('satDiamondLoader');
+    if (loader) {
+      loader.classList.remove('active');
+    }
+    const player = document.getElementById('satGlobalLottiePlayer');
+    if (player) {
+      const defaultSrc = '/assets/animations/ornaments_loading.json';
+      if (player.getAttribute('src') !== defaultSrc) {
+        player.load(defaultSrc);
+      }
+      player.style.width = 'min(420px, 90vw)';
+      player.style.height = 'min(300px, 45vh)';
+    }
+  };
+
+  window.showLottieLoader = window.showDiamondLoader;
+  window.hideLottieLoader = window.hideDiamondLoader;
+
+  // Dismiss if user touches overlay to prevent background lock
+  const ldrEl = document.getElementById('satLottieLoader');
+  if (ldrEl) {
+    ldrEl.addEventListener('touchstart', window.hideDiamondLoader, { passive: true });
+    ldrEl.addEventListener('click', window.hideDiamondLoader);
+  }
+
+  // Show loader on page reload / navigation unload (except on main landing page, admin, and sign-in/register)
+  window.addEventListener('beforeunload', function() {
+    try {
+      const curP = (window.location.pathname || '').toLowerCase();
+      if (curP === '/' || curP === '' || curP === '/home' || curP === '/home/index' || curP === '/home/landingnew' ||
+          curP.startsWith('/admin') || curP.includes('/admin/') ||
+          curP.includes('/account/signin') || curP.includes('/account/login') || curP.includes('/account/auth') || curP.includes('/account/register')) {
+        return;
+      }
+      window.showDiamondLoader();
+    } catch(e) {}
+  });
+
+  // Keep loader fast: dismiss on DOMContentLoaded or immediately if ready
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
+    window.hideDiamondLoader();
+  } else {
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(window.hideDiamondLoader, 100);
+    });
+    window.addEventListener('load', function() {
+      window.hideDiamondLoader();
+    });
+  }
+  setTimeout(window.hideDiamondLoader, 800);
+
+  // Auto-hide when restored from back/forward cache
+  window.addEventListener('pageshow', function() {
+    window.hideDiamondLoader();
+  });
+  window.addEventListener('popstate', function() {
+    window.hideDiamondLoader();
+  });
+
+  // Universal Link Interceptor for Instant Feedback
+  document.addEventListener('click', function(e) {
+    const link = e.target.closest('a');
+    if (!link) return;
+
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('tel:') || href.startsWith('mailto:') || link.target === '_blank' || link.hasAttribute('download')) {
+      return;
+    }
+
+    try {
+      const url = new URL(link.href, window.location.origin);
+      if (url.origin !== window.location.origin) return;
+
+      // Skip if staying on exact same URL
+      if (url.pathname === window.location.pathname && url.search === window.location.search) {
+        return;
+      }
+
+      const path = url.pathname.toLowerCase();
+      if (path === '/' || path === '' || path === '/home' || path === '/home/index' || path === '/home/landingnew' ||
+          path.startsWith('/admin') || path.includes('/admin/') ||
+          path.includes('/account/signin') || path.includes('/account/login') || path.includes('/account/auth') || path.includes('/account/register')) {
+        return; // Exclude main landing page, admin portal, and sign-in / register pages
+      }
+
+      // Do NOT trigger full-screen blocking loader for pagination or shape/sort filters
+      if (url.searchParams.has('page') || url.searchParams.has('sort') || url.searchParams.has('shape')) {
+        return;
+      }
+
+      let msg = 'Loading Atelier...';
+
+      if (path.includes('/account/myaccount') || path.includes('/account/profile') || path.includes('/account/orders')) {
+        msg = 'Opening Private Account...';
+      } else if (path.includes('/product/details')) {
+        msg = 'Loading Creation Details...';
+      } else if (path.includes('/product/category') || path === '/product') {
+        msg = 'Curating Collection...';
+      } else if (path.includes('/cart')) {
+        msg = 'Opening Shopping Bag...';
+      } else if (path.includes('/order') || path.includes('/checkout')) {
+        msg = 'Securing Your Order...';
+      }
+
+      window.showDiamondLoader(msg);
+    } catch (err) {}
+  });
+
+  // Form submission interceptor
+  document.addEventListener('submit', function(e) {
+    const form = e.target;
+    if (form && !form.target && !form.getAttribute('action')?.startsWith('javascript:')) {
+      const action = (form.getAttribute('action') || window.location.pathname).toLowerCase();
+      if (action.startsWith('/admin') || action.includes('/admin/') || window.location.pathname.toLowerCase().startsWith('/admin')) {
+        return; // NEVER show on admin side!
+      }
+      if (action.includes('/account/signin') || action.includes('/account/login') || action.includes('/account/handlesignin') || action.includes('/account/handlesignup') || action.includes('/account/register') || action.includes('/account/auth')) {
+        return; // Do NOT show ornaments loading animation on sign in / registration submit
+      }
+      let msg = 'Processing Request...';
+      if (action.includes('/cart') || action.includes('/checkout') || action.includes('/order')) {
+        msg = 'Securing Your Order...';
+      } else if (action.includes('/category')) {
+        msg = 'Filtering Creations...';
+      }
+      window.showDiamondLoader(msg);
+    }
+  });
+})();
+</script>

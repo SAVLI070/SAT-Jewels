@@ -254,6 +254,7 @@
                 </button>
 
                 <form method="post" action="/Account/DeleteAddress" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this address?');">
+                  @Html.AntiForgeryToken()
                   <input type="hidden" name="addressId" value="@item.AddressId" />
                   <button type="submit" class="btn-action btn-del">
                     <i class="fa-solid fa-trash-can"></i> Delete
@@ -263,6 +264,7 @@
                 @if (!item.IsDefault)
                 {
                   <form method="post" action="/Account/SetDefaultAddress" style="display:inline; margin-left:auto;">
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="addressId" value="@item.AddressId" />
                     <button type="submit" class="btn-action" style="color:var(--taupe-beige);">
                       Set Default
@@ -297,6 +299,7 @@
       </div>
 
       <form method="post" action="/Account/SaveAddress" onsubmit="return validateAddressForm(event)">
+        @Html.AntiForgeryToken()
         <input type="hidden" id="modalAddressId" name="AddressId" value="" />
 
         <div class="form-group">
@@ -479,5 +482,7 @@
       document.getElementById('addressModal').style.display = 'none';
     }
   </script>
+  <!-- SAT Jewel Signature Diamond Loader -->
+  <partial name="_DiamondLoader" />
 </body>
 </html>

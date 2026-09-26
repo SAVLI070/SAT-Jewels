@@ -28,22 +28,8 @@
 </head>
 
 <body>
-  <!-- Global SAT Bespoke Diamond Line Loading Animation (Pure Floating Diamond Lines) -->
-  <div id="satLottieLoader" class="sat-lottie-overlay">
-    <div class="sat-pure-diamond-loader">
-      <svg viewBox="0 0 100 100" class="sat-diamond-svg" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <!-- Outer Diamond Geometry -->
-        <polygon points="50,12 88,38 50,88 12,38" class="diamond-line-outer" />
-        <!-- Table & Crown Facets -->
-        <polygon points="50,12 68,38 50,48 32,38" class="diamond-line-table" />
-        <line x1="50" y1="12" x2="50" y2="48" class="diamond-line-inner" />
-        <line x1="12" y1="38" x2="88" y2="38" class="diamond-line-inner" />
-        <line x1="32" y1="38" x2="50" y2="88" class="diamond-line-inner" />
-        <line x1="68" y1="38" x2="50" y2="88" class="diamond-line-inner" />
-        <line x1="50" y1="48" x2="50" y2="88" class="diamond-line-inner" />
-      </svg>
-    </div>
-  </div>
+  <!-- Global SAT Bespoke Diamond Line Loading Animation -->
+  <partial name="_DiamondLoader" />
 
   <!-- Global SAT Bespoke Payment Success Lottie Modal -->
   <div id="satPaymentSuccessModal" class="sat-lottie-overlay">
@@ -159,6 +145,9 @@
 
   <!-- Global SAT Jewel Live Search Modal / Overlay -->
   <partial name="_SearchModal" />
+
+  <!-- Global Authentication Required Modal -->
+  <partial name="_AuthPromptModal" />
 
   <script>
     // Anti-bfcache & Back Button Security Buster: Prevent cached account views after logout/tab close

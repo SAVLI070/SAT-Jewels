@@ -35,15 +35,47 @@ namespace SAT1.Controllers
             ));
 
             // 2. Main Collection & Category Pages (Priority 0.8)
-            var categoryIds = new[] { 1, 2, 4, 5, 6 };
-            foreach (var catId in categoryIds)
+            try
             {
-                urlElements.Add(new XElement(ns + "url",
-                    new XElement(ns + "loc", $"{baseUrl}/Product/Category?id={catId}"),
-                    new XElement(ns + "lastmod", DateTime.Now.ToString("yyyy-MM-dd")),
-                    new XElement(ns + "changefreq", "weekly"),
-                    new XElement(ns + "priority", "0.8")
-                ));
+                var categories = await _context.Categories.AsNoTracking().ToListAsync();
+                if (categories.Count > 0)
+                {
+                    foreach (var cat in categories)
+                    {
+                        urlElements.Add(new XElement(ns + "url",
+                            new XElement(ns + "loc", $"{baseUrl}/Product/Category?id={cat.CategoryId}"),
+                            new XElement(ns + "lastmod", DateTime.Now.ToString("yyyy-MM-dd")),
+                            new XElement(ns + "changefreq", "weekly"),
+                            new XElement(ns + "priority", "0.8")
+                        ));
+                    }
+                }
+                else
+                {
+                    var fallbackCatIds = new[] { 1, 2, 4, 5, 6 };
+                    foreach (var catId in fallbackCatIds)
+                    {
+                        urlElements.Add(new XElement(ns + "url",
+                            new XElement(ns + "loc", $"{baseUrl}/Product/Category?id={catId}"),
+                            new XElement(ns + "lastmod", DateTime.Now.ToString("yyyy-MM-dd")),
+                            new XElement(ns + "changefreq", "weekly"),
+                            new XElement(ns + "priority", "0.8")
+                        ));
+                    }
+                }
+            }
+            catch
+            {
+                var fallbackCatIds = new[] { 1, 2, 4, 5, 6 };
+                foreach (var catId in fallbackCatIds)
+                {
+                    urlElements.Add(new XElement(ns + "url",
+                        new XElement(ns + "loc", $"{baseUrl}/Product/Category?id={catId}"),
+                        new XElement(ns + "lastmod", DateTime.Now.ToString("yyyy-MM-dd")),
+                        new XElement(ns + "changefreq", "weekly"),
+                        new XElement(ns + "priority", "0.8")
+                    ));
+                }
             }
 
             // 3. Static Pages & Craft Process (Priority 0.6)

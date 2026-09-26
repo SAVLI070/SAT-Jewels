@@ -46,8 +46,8 @@
                                 <a href="/Product/Details/@item.CatalogItemId" class="btn-wishlist-view">
                                     View Details
                                 </a>
-                                <button type="button" class="btn-wishlist-cart" onclick="addWishlistItemToCart('@item.CatalogItemId', '@item.ProductName', @item.PriceUSD, '@item.ImageUrl', this)">
-                                    <i class="fa-solid fa-bag-shopping"></i> Add to Cart
+                                <button type="button" class="btn-wishlist-cart" onclick="addWishlistItemToCart('@item.CatalogItemId', '@item.ProductName', @item.PriceUSD, '@item.ImageUrl', this)" style="display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+                                    <span class="material-symbols-outlined text-[17px]">shopping_bag</span> <span>Buy Now</span>
                                 </button>
                             </div>
                         </div>

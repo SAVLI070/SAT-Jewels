@@ -1,4 +1,5 @@
 @{
+    Layout = null;
     ViewData["Title"] = "Design Your Own Custom Engagement Ring — SAT Jewel Sanctuary";
 }
 <!DOCTYPE html>
@@ -10,6 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
   <link rel="stylesheet" href="~/css/style.css" />
   <style>
     body {
@@ -312,17 +314,50 @@
 </head>
 <body>
 
+  <!-- SAT Jewel Navigation Bar (Unified Luxury Header - As Designed) -->
+  <header style="position:fixed; top:0; left:0; right:0; z-index:9999; background:rgba(7,7,10,0.96); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); border-bottom:1px solid rgba(212,184,120,0.25); height:64px;">
+    <div style="max-width:1280px; margin:0 auto; padding:0 20px; height:100%; display:flex; align-items:center; justify-content:space-between; gap:16px;">
+      <div style="display:flex; align-items:center; gap:14px; flex-shrink:0;">
+        <a href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="display:inline-flex; align-items:center; gap:6px; color:rgba(255,255,255,0.85); font-size:13px; font-weight:600; text-decoration:none; cursor:pointer;" title="Go Back">
+          <span class="material-symbols-outlined" style="font-size:20px;">arrow_back</span>
+          <span class="mobile-hidden">Back</span>
+        </a>
+        <div style="height:16px; width:1px; background:rgba(255,255,255,0.2);"></div>
+        <a href="/" style="display:flex; align-items:center; gap:10px; text-decoration:none;">
+          <img src="/assets/sat_emblem_clean.png" alt="SAT Jewels Emblem" style="width:34px; height:34px; border-radius:50%; object-fit:contain; border:1px solid rgba(212,184,120,0.4);" />
+          <div style="display:flex; flex-direction:column; line-height:1.1;">
+            <span style="font-family:var(--font-serif, 'Playfair Display', serif); font-size:18px; font-weight:700; color:#ffffff; letter-spacing:0.03em; white-space:nowrap;">SAT <span style="margin-left:3px; color:#d4b878;">Jewel</span></span>
+            <span style="font-size:8px; font-weight:600; color:rgba(212,184,120,0.8); letter-spacing:0.18em; text-transform:uppercase;">Fine Jewelry</span>
+          </div>
+        </a>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:12px; flex-shrink:0;">
+        <button type="button" onclick="openSatGlobalSearch(event)" style="background:transparent; border:none; color:rgba(255,255,255,0.85); width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; cursor:pointer;" title="Search">
+          <span class="material-symbols-outlined" style="font-size:20px;">search</span>
+        </button>
+        <a href="/Product/Cart" style="position:relative; color:rgba(255,255,255,0.85); width:36px; height:36px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="Shopping Cart">
+          <span class="material-symbols-outlined" style="font-size:20px;">shopping_bag</span>
+          <span id="navCartBadge" class="sat-cart-count-badge" style="position:absolute; top:2px; right:2px; min-width:16px; height:16px; border-radius:8px; background:#d4b878; color:#060c14; font-size:10px; font-weight:800; display:flex; align-items:center; justify-content:center; padding:0 3px; line-height:1;">0</span>
+        </a>
+        <a href="/Account/MyAccount" style="width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg, #d4b878, #b8944d); color:#060c14; font-size:13px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; text-decoration:none;" title="My Account">
+          <span class="material-symbols-outlined" style="font-size:18px;">person</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
   <!-- PAGE BREADCRUMB NAVIGATION BAR -->
-  <nav class="cat-breadcrumb-nav" style="background:#08111e; border-bottom:1px solid rgba(255,255,255,0.1); padding:16px 0;">
+  <nav class="cat-breadcrumb-nav" style="background:#08111e; border-bottom:1px solid rgba(255,255,255,0.1); padding:14px 0; margin-top:64px;">
     <div class="cat-container" style="max-width:1280px; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between;">
       <div style="font-size:13px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:8px;">
         <a href="/" style="color:#ffffff; text-decoration:none;">Home</a>
         <span>/</span>
-        <span style="color:var(--champagne-gold);">Custom Engagement Rings</span>
+        <span style="color:var(--champagne-gold, #d4b878);">Custom Engagement Rings</span>
       </div>
-      <div class="mobile-hidden">
-        <a href="/" style="color:var(--champagne-gold); font-size:13.5px; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:6px;">
-          <i class="fa-solid fa-arrow-left" style="font-size:12px;"></i> Back to Home
+      <div>
+        <a href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="color:var(--champagne-gold, #d4b878); font-size:13px; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:6px; cursor:pointer;" title="Go Back">
+          <i class="fa-solid fa-arrow-left" style="font-size:11px;"></i> <span>Back</span>
         </a>
       </div>
     </div>
@@ -641,8 +676,24 @@
           document.getElementById('custUploadText').innerText = 'Click to choose an image file (PNG, JPG, WEBP)';
           btn.innerHTML = '<i class="fa-solid fa-gem"></i> Submit Custom Request Online';
         }, 3000);
-      }, 700);
+    function syncCartBadge() {
+      try {
+        const email = '@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower()?.Trim() ?? "")';
+        const key = email ? ('sat_cart_' + encodeURIComponent(email)) : 'sat_cart_guest';
+        const saved = localStorage.getItem(key);
+        const items = saved ? JSON.parse(saved) : [];
+        const count = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
+        document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count, .sat-cart-count-badge').forEach(el => {
+          el.textContent = String(count);
+        });
+      } catch (_) {}
     }
+    document.addEventListener('DOMContentLoaded', syncCartBadge);
+    syncCartBadge();
   </script>
+  <!-- SAT Jewel Search Modal -->
+  <partial name="_SearchModal" />
+  <!-- SAT Jewel Signature Diamond Loader -->
+  <partial name="_DiamondLoader" />
 </body>
 </html>

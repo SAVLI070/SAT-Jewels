@@ -10,15 +10,18 @@ namespace SAT1.BAL
         private readonly OrderRepository _orderRepo;
         private readonly PayPalService _payPalService;
         private readonly RazorpayService _razorpayService;
+        private readonly CatalogBal _catalogBal;
 
         public OrderBusinessService(
             OrderRepository orderRepo, 
             PayPalService payPalService, 
-            RazorpayService razorpayService)
+            RazorpayService razorpayService,
+            CatalogBal catalogBal)
         {
             _orderRepo = orderRepo;
             _payPalService = payPalService;
             _razorpayService = razorpayService;
+            _catalogBal = catalogBal;
         }
 
         // DTO for Shipping Details
@@ -71,6 +74,19 @@ namespace SAT1.BAL
                     }
                     bool itemIsMoiss = string.Equals(item.StoneType, "Moissanite", StringComparison.OrdinalIgnoreCase);
                     decimal unitPrice = itemIsMoiss ? prod.MoissanitePrice : prod.PriceUSD;
+
+                    if (!string.IsNullOrWhiteSpace(item.Metal) || !string.IsNullOrWhiteSpace(item.Size))
+                    {
+                        var (isValid, validatedPrice, _, _) = await _catalogBal.CalculateServerValidatedPriceAsync(item.ProductId, item.Metal, null, item.Size, item.StoneType);
+                        if (isValid && validatedPrice > 0)
+                        {
+                            unitPrice = validatedPrice;
+                        }
+                    }
+                    if (item.PriceUSD > 0 && (Math.Abs(item.PriceUSD - unitPrice) <= 0.01m || (item.PriceUSD >= unitPrice && item.PriceUSD - unitPrice <= 600m)))
+                    {
+                        unitPrice = item.PriceUSD;
+                    }
 
                     totalAmountUSD += (unitPrice * qty);
                     var stoneLabel = itemIsMoiss ? "Moissanite" : "Lab Grown Diamond";
@@ -204,6 +220,19 @@ namespace SAT1.BAL
                     }
                     bool itemIsMoiss = string.Equals(item.StoneType, "Moissanite", StringComparison.OrdinalIgnoreCase);
                     decimal unitPrice = itemIsMoiss ? prod.MoissanitePrice : prod.PriceUSD;
+
+                    if (!string.IsNullOrWhiteSpace(item.Metal) || !string.IsNullOrWhiteSpace(item.Size))
+                    {
+                        var (isValid, validatedPrice, _, _) = await _catalogBal.CalculateServerValidatedPriceAsync(item.ProductId, item.Metal, null, item.Size, item.StoneType);
+                        if (isValid && validatedPrice > 0)
+                        {
+                            unitPrice = validatedPrice;
+                        }
+                    }
+                    if (item.PriceUSD > 0 && (Math.Abs(item.PriceUSD - unitPrice) <= 0.01m || (item.PriceUSD >= unitPrice && item.PriceUSD - unitPrice <= 600m)))
+                    {
+                        unitPrice = item.PriceUSD;
+                    }
 
                     totalAmountUSD += (unitPrice * qty);
                     var stoneLabel = itemIsMoiss ? "Moissanite" : "Lab Grown Diamond";

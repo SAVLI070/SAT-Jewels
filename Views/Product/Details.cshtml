@@ -98,9 +98,10 @@
         }.ToList();
     }
 
-    var prodCanonical = $"{Context.Request.Scheme}://{Context.Request.Host}/Product/Details/{Model.Id}";
-    var absoluteImg = mainImage.StartsWith("http") ? mainImage : $"{Context.Request.Scheme}://{Context.Request.Host}{mainImage}";
-    var galleryAbsolute = galleryList.Select(g => g.StartsWith("http") ? g : $"{Context.Request.Scheme}://{Context.Request.Host}{g}").ToList();
+    var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var prodCanonical = $"{baseUrl}/Product/Details/{Model.Id}";
+    var absoluteImg = mainImage.StartsWith("http") ? mainImage : $"{baseUrl}{mainImage}";
+    var galleryAbsolute = galleryList.Select(g => g.StartsWith("http") ? g : $"{baseUrl}{g}").ToList();
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -159,6 +160,34 @@
       "availability": "https://schema.org/InStock",
       "itemCondition": "https://schema.org/NewCondition"
     }
+  }
+  </script>
+
+  <!-- BreadcrumbList JSON-LD Schema -->
+  <script type="application/ld+json">
+  {
+    "@@context": "https://schema.org",
+    "@@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "@baseUrl/"
+      },
+      {
+        "@@type": "ListItem",
+        "position": 2,
+        "name": "Fine Jewelry",
+        "item": "@baseUrl/Product"
+      },
+      {
+        "@@type": "ListItem",
+        "position": 3,
+        "name": "@Model.Name",
+        "item": "@prodCanonical"
+      }
+    ]
   }
   </script>
 
@@ -1284,17 +1313,110 @@
         width: calc(100% - 32px);
       }
     }
+
+    /* Luxury Toast Notification */
+    .sat-cart-toast {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 999999;
+      background: rgba(14, 13, 18, 0.96);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(212, 178, 112, 0.55);
+      border-radius: 16px;
+      padding: 16px 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 25px rgba(212, 178, 112, 0.25);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      max-width: 420px;
+      width: calc(100% - 48px);
+      transform: translateY(-30px);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .sat-cart-toast.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .sat-cart-toast-img {
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      object-fit: cover;
+      border: 1px solid rgba(212, 178, 112, 0.3);
+      flex-shrink: 0;
+      background: #06070a;
+    }
+    .sat-cart-toast-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .sat-cart-toast-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #10b981;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .sat-cart-toast-title {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: #ffffff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: var(--font-serif, 'Playfair Display', serif);
+    }
+    .sat-cart-toast-price {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #d4b878;
+      margin-top: 2px;
+    }
+    .sat-cart-toast-btn {
+      padding: 8px 14px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #d4b878, #b8944d);
+      color: #06070a;
+      font-size: 12px;
+      font-weight: 800;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      box-shadow: 0 4px 12px rgba(212, 178, 112, 0.3);
+    }
+    .sat-cart-toast-btn:hover {
+      background: #ffffff;
+      color: #000000;
+      transform: translateY(-1px);
+    }
+    .sat-cart-toast-close {
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      transition: color 0.2s ease;
+    }
+    .sat-cart-toast-close:hover {
+      color: #ffffff;
+    }
   </style>
 </head>
 <body>
-
-  <!-- Top Luxury Ticker Bar -->
-  <div class="w-full bg-surface-container-lowest border-b border-outline-variant/30 py-2 text-center">
-    <p class="font-label-caps text-[11px] text-primary tracking-widest font-bold uppercase m-0 flex items-center justify-center gap-2">
-      <span class="text-[13px]">💎</span>
-      <span>100% GIA &amp; IGI CERTIFIED DIAMONDS • FREE WORLDWIDE INSURED SHIPPING</span>
-    </p>
-  </div>
 
   <!-- Header Navigation (Unified Luxury Header - As Designed) -->
   <header class="sticky top-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
@@ -1302,7 +1424,7 @@
       
       <!-- Left: Back link & brand & breadcrumb -->
       <div class="flex items-center gap-4 shrink-0">
-        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="text-decoration:none;">
+        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" href="javascript:void(0);" onclick="if(window.showDiamondLoader) window.showDiamondLoader('Returning to previous view...'); if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="text-decoration:none;">
           <span class="material-symbols-outlined text-[18px]">arrow_back</span>
           <span class="hidden sm:inline font-bold uppercase tracking-wider text-[11px]">Back</span>
         </a>
@@ -1315,11 +1437,8 @@
         </div>
       </div>
 
-      <!-- Right: Search, Cart & profile -->
+      <!-- Right: Cart & profile -->
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <button type="button" class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors" onclick="openSatGlobalSearch(event)" title="Search Fine Jewelry">
-          <span class="material-symbols-outlined text-[18px]">search</span>
-        </button>
         <a class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors" data-path="cart" href="/Product/Cart" title="Shopping Cart" style="text-decoration:none;">
           <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
           <span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
@@ -1347,6 +1466,14 @@
 
     </div>
   </header>
+
+  <!-- Top Luxury Ticker Bar (Positioned After Navigation Bar) -->
+  <div class="w-full bg-surface-container-lowest border-b border-outline-variant/30 py-2 text-center">
+    <p class="font-label-caps text-[11px] text-primary tracking-widest font-bold uppercase m-0 flex items-center justify-center gap-2">
+      <span class="text-[13px]">💎</span>
+      <span>100% GIA &amp; IGI CERTIFIED DIAMONDS • FREE WORLDWIDE INSURED SHIPPING</span>
+    </p>
+  </div>
 
   <div class="pd-container">
     
@@ -1492,9 +1619,15 @@
 
         <!-- CTA Action Buttons -->
         <div class="pd-cta-group">
-          <button type="button" class="btn-begin-order" id="btnBeginOrder" onclick="executeAddToCart()">
-            <i class="fa-solid fa-bag-shopping"></i> Begin My Order • <span id="btnOrderPrice">$@Model.Price.ToString("N0")</span>
-          </button>
+          <div style="display: flex; gap: 10px; width: 100%;">
+            <button type="button" class="btn-begin-order" id="btnBeginOrder" onclick="executeAddToCart()" style="flex: 1;">
+              <i class="fa-solid fa-bag-shopping"></i> Begin My Order • <span id="btnOrderPrice">$@Model.Price.ToString("N0")</span>
+            </button>
+            <button type="button" class="btn-details-wishlist" id="btnDetailsWishlist" onclick="executeToggleWishlist(this)" title="Save to Wishlist Sanctuary" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 14px 22px; border-radius: 9999px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(212, 175, 55, 0.4); color: #d4b878; font-weight: 600; font-size: 14px; cursor: pointer; transition: all 0.2s ease;">
+              <i class="fa-regular fa-heart" id="detailsWishlistIcon"></i>
+              <span id="detailsWishlistText" class="hidden sm:inline">Wishlist</span>
+            </button>
+          </div>
           <a href="https://wa.me/19175550199?text=Hello%20SAT%20Jewel%2C%20I%20am%20interested%20in%20@Uri.EscapeDataString(Model.Name)" target="_blank" class="btn-whatsapp-chat">
             <i class="fa-brands fa-whatsapp" style="font-size:18px;"></i> WhatsApp Us for Bespoke Request
           </a>
@@ -1910,9 +2043,14 @@
         <span class="floating-price" id="floatingPriceVal">$ @Model.Price.ToString("N0")</span>
       </div>
     </div>
-    <button type="button" class="floating-btn-order" onclick="executeAddToCart()">
-      Begin My Order
-    </button>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button type="button" class="btn-details-wishlist-mobile" onclick="executeToggleWishlist(this)" title="Save to Wishlist" style="width: 44px; height: 44px; border-radius: 50%; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(212, 175, 55, 0.4); color: #d4b878; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; flex-shrink: 0; transition: all 0.2s ease;">
+        <i class="fa-regular fa-heart floating-wishlist-icon"></i>
+      </button>
+      <button type="button" class="floating-btn-order" onclick="executeAddToCart()">
+        Begin My Order
+      </button>
+    </div>
   </div>
 
   <partial name="_Footer" />
@@ -2259,9 +2397,9 @@
         const variantTitle = `@Model.Name (${stoneName}, ${selectedMetal}, ${selectedCarat}, Size: ${ringSize}${engraving ? `, Engraved: "${engraving}"` : ''})`;
 
         function getCartStorageKey() {
-          const isAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+          const isUserAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
           const email = '@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower()?.Trim() ?? "")';
-          if (isAuth && email) {
+          if (isUserAuth && email) {
             return 'sat_cart_' + encodeURIComponent(email);
           }
           return 'sat_cart_guest';
@@ -2288,14 +2426,122 @@
           localStorage.setItem('sat_cart_physical_cert', 'true');
         }
 
-        if (!isUserAuthenticated) {
-          alert('🔒 Please sign in to your account first to complete your bespoke order.');
-          window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
-        } else {
-          window.location.href = '/Product/Cart';
-        }
-      } catch (e) {}
+        if (window.showDiamondLoader) window.showDiamondLoader('Preparing Shopping Bag...');
+        window.location.href = '/Product/Cart';
+      } catch (e) {
+        console.error('Error adding to cart:', e);
+      }
     }
+
+    let cartToastTimer = null;
+    function showCartToast(title, priceUSD, img) {
+      const toast = document.getElementById('satCartToast');
+      if (!toast) return;
+
+      const imgEl = document.getElementById('satToastImg');
+      if (imgEl) imgEl.src = img || '@mainImage';
+      const titleEl = document.getElementById('satToastTitle');
+      if (titleEl) titleEl.innerText = title || '@Model.Name';
+      const priceEl = document.getElementById('satToastPrice');
+      if (priceEl) priceEl.innerText = '$' + (Number(priceUSD) || 0).toLocaleString() + ' USD';
+
+      toast.classList.add('show');
+      clearTimeout(cartToastTimer);
+      cartToastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    function closeCartToast() {
+      const toast = document.getElementById('satCartToast');
+      if (toast) toast.classList.remove('show');
+    }
+
+    async function executeToggleWishlist(btn) {
+      const isAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+      if (!isAuth) {
+        showAuthRequiredModal('wishlist');
+        return;
+      }
+
+      const allWishBtns = document.querySelectorAll('#btnDetailsWishlist, .btn-details-wishlist-mobile');
+      allWishBtns.forEach(b => b.disabled = true);
+
+      try {
+        const curPrice = window.activeVariantPriceUSD || basePriceUSD;
+        const res = await fetch('/api/WishlistApi/toggle', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            catalogItemId: '@Model.Id',
+            productName: '@Model.Name',
+            priceUSD: curPrice,
+            imageUrl: '@mainImage'
+          })
+        });
+
+        if (res.status === 401) {
+          showAuthRequiredModal('wishlist');
+          return;
+        }
+
+        const data = await res.json();
+        if (data && data.success) {
+          const deskIcon = document.getElementById('detailsWishlistIcon');
+          const deskText = document.getElementById('detailsWishlistText');
+          const deskBtn = document.getElementById('btnDetailsWishlist');
+          const mobileBtns = document.querySelectorAll('.btn-details-wishlist-mobile');
+          const mobileIcons = document.querySelectorAll('.floating-wishlist-icon');
+
+          if (data.isSaved) {
+            if (deskIcon) { deskIcon.classList.remove('fa-regular'); deskIcon.classList.add('fa-solid'); deskIcon.style.color = '#ef4444'; }
+            if (deskText) deskText.textContent = 'Saved to Wishlist';
+            if (deskBtn) deskBtn.style.borderColor = '#ef4444';
+            mobileIcons.forEach(mi => { mi.classList.remove('fa-regular'); mi.classList.add('fa-solid'); mi.style.color = '#ef4444'; });
+            mobileBtns.forEach(mb => { mb.style.borderColor = '#ef4444'; });
+            showCartToast('@Model.Name (Saved to Wishlist)', curPrice, '@mainImage');
+          } else {
+            if (deskIcon) { deskIcon.classList.remove('fa-solid'); deskIcon.classList.add('fa-regular'); deskIcon.style.color = '#d4b878'; }
+            if (deskText) deskText.textContent = 'Wishlist';
+            if (deskBtn) deskBtn.style.borderColor = 'rgba(212, 175, 55, 0.4)';
+            mobileIcons.forEach(mi => { mi.classList.remove('fa-solid'); mi.classList.add('fa-regular'); mi.style.color = '#d4b878'; });
+            mobileBtns.forEach(mb => { mb.style.borderColor = 'rgba(212, 175, 55, 0.4)'; });
+            showCartToast('@Model.Name (Removed from Wishlist)', curPrice, '@mainImage');
+          }
+        }
+      } catch (err) {
+        console.error('Wishlist error:', err);
+      } finally {
+        allWishBtns.forEach(b => b.disabled = false);
+      }
+    }
+
+    // Check initial wishlist state on Details page
+    (function checkInitialWishlist() {
+      const isAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+      if (!isAuth) return;
+      fetch('/api/WishlistApi/my-wishlist')
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.success && Array.isArray(data.items)) {
+            const isWish = data.items.some(i => String(i.catalogItemId) === String('@Model.Id'));
+            if (isWish) {
+              const deskIcon = document.getElementById('detailsWishlistIcon');
+              const deskText = document.getElementById('detailsWishlistText');
+              const deskBtn = document.getElementById('btnDetailsWishlist');
+              const mobileBtns = document.querySelectorAll('.btn-details-wishlist-mobile');
+              const mobileIcons = document.querySelectorAll('.floating-wishlist-icon');
+
+              if (deskIcon) { deskIcon.classList.remove('fa-regular'); deskIcon.classList.add('fa-solid'); deskIcon.style.color = '#ef4444'; }
+              if (deskText) deskText.textContent = 'Saved to Wishlist';
+              if (deskBtn) deskBtn.style.borderColor = '#ef4444';
+              mobileIcons.forEach(mi => { mi.classList.remove('fa-regular'); mi.classList.add('fa-solid'); mi.style.color = '#ef4444'; });
+              mobileBtns.forEach(mb => { mb.style.borderColor = '#ef4444'; });
+            }
+          }
+        })
+        .catch(() => {});
+    })();
 
     function openReviewModal(name, photoUrl, title, text) {
       document.getElementById('modalReviewName').textContent = name || 'Verified Customer';
@@ -2443,5 +2689,24 @@
 
   <!-- Sign In Required Prompt Modal -->
   <partial name="_AuthPromptModal" />
+
+  <!-- Luxury Added to Cart Toast Notification -->
+  <div id="satCartToast" class="sat-cart-toast">
+    <img id="satToastImg" src="@mainImage" class="sat-cart-toast-img" alt="Jewelry Piece" />
+    <div class="sat-cart-toast-info">
+      <div class="sat-cart-toast-badge"><i class="fa-solid fa-circle-check"></i> Wishlist Updated</div>
+      <div id="satToastTitle" class="sat-cart-toast-title">@Model.Name</div>
+      <div id="satToastPrice" class="sat-cart-toast-price">$@Model.Price.ToString("N0") USD</div>
+    </div>
+    <a href="/Account/MyAccount?tab=wishlist" class="sat-cart-toast-btn">
+      <i class="fa-solid fa-heart"></i> View Wishlist
+    </a>
+    <button type="button" class="sat-cart-toast-close" onclick="closeCartToast()" aria-label="Close notification">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+
+  <!-- SAT Jewel Signature Diamond Loader -->
+  <partial name="_DiamondLoader" />
 </body>
 </html>

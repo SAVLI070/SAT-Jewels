@@ -1,5 +1,6 @@
 @model List<SAT1.Models.CatalogItem>
 @{
+    Layout = null;
     ViewData["Title"] = "Jewelry Catalog & Shop — SAT Jewel";
     var products = Model ?? new List<SAT1.Models.CatalogItem>();
     var isAuthenticated = User.Identity?.IsAuthenticated == true;
@@ -202,17 +203,7 @@
         </div>
       </div>
 
-      <div class="flex-1 max-w-md mx-2 hidden md:block">
-        <div class="relative w-full">
-          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant/60">search</span>
-          <input class="w-full h-9 pl-9 pr-4 rounded-full bg-surface-container border border-outline-variant/40 text-on-surface placeholder:text-on-surface-variant/50 text-body-sm font-body-sm focus:outline-none focus:border-primary transition-colors" placeholder="Search certified diamonds, pieces, items..." type="text" onkeydown="if(event.key==='Enter'){window.location.href='/Product?search='+encodeURIComponent(this.value);}" />
-        </div>
-      </div>
-
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <button class="w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-on-surface flex items-center justify-center transition-colors md:hidden" type="button" onclick="const q = prompt('Search pieces:'); if(q) window.location.href='/Product?search='+encodeURIComponent(q);">
-          <span class="material-symbols-outlined text-[18px]">search</span>
-        </button>
         <a class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors" data-path="cart" href="/Product/Cart" title="Shopping Cart" style="text-decoration:none;">
           <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
           <span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
@@ -279,5 +270,7 @@
     }
     document.addEventListener('DOMContentLoaded', syncCartBadge);
   </script>
+  <!-- SAT Jewel Signature Diamond Loader -->
+  <partial name="_DiamondLoader" />
 </body>
 </html>

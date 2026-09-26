@@ -519,12 +519,45 @@
     }
 
     .product-square-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px !important;
     }
 
     .product-square-card {
-      padding: 12px;
+      padding: 10px !important;
+      border-radius: 12px !important;
+    }
+
+    .product-square-img-wrap {
+      border-radius: 8px !important;
+      margin-bottom: 8px !important;
+    }
+
+    .product-square-title {
+      font-size: 11.5px !important;
+      min-height: 28px !important;
+      margin-bottom: 4px !important;
+      line-height: 1.25 !important;
+    }
+
+    .product-square-spec {
+      font-size: 10px !important;
+      margin-bottom: 6px !important;
+    }
+
+    .product-square-price {
+      font-size: 13px !important;
+    }
+
+    .product-square-card-actions {
+      margin-top: 8px !important;
+      gap: 4px !important;
+    }
+
+    .btn-card-edit, .btn-card-delete {
+      padding: 5px 6px !important;
+      font-size: 11px !important;
+      border-radius: 6px !important;
     }
 
     .cat-pagination-bar {
@@ -538,12 +571,6 @@
       width: 100%;
       justify-content: center;
       flex-wrap: wrap;
-    }
-  }
-
-  @@media (max-width: 480px) {
-    .product-square-grid {
-      grid-template-columns: 1fr;
     }
   }
 </style>
@@ -668,8 +695,12 @@
   const categoryPageMap = {};
   const categoryFilteredItemsMap = {};
 
+  const DEFAULT_CATALOG_IMAGE = 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png';
+
   function fixImgUrl(path) {
-    if (!path) return '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';
+    if (!path || !path.trim()) return DEFAULT_CATALOG_IMAGE;
+    path = path.trim();
+    if (path.startsWith('/assets/') || path.startsWith('~/assets/')) return DEFAULT_CATALOG_IMAGE;
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
     if (path.startsWith('~/')) return '/' + path.substring(2);
     if (!path.startsWith('/')) return '/' + path;
@@ -768,13 +799,17 @@
 
     const iconMap = {
       1: 'fa-gem', 2: 'fa-ring', 3: 'fa-user-tie',
-      4: 'fa-sparkles', 5: 'fa-link', 6: 'fa-crown'
+      4: 'fa-gem', 5: 'fa-link', 6: 'fa-crown'
     };
 
     container.innerHTML = categories.map(cat => {
       const icon = iconMap[cat.id] || 'fa-gem';
       const cKey = cat.id.toString().toLowerCase();
       const cachedCount = loadedCategoryItems[cKey] ? loadedCategoryItems[cKey].length : (cat.itemCount || 0);
+      const isEarring = (cat.id == 4 || (cat.name && cat.name.toLowerCase().includes('earring')));
+      const iconHtml = isEarring 
+        ? '<svg class="cat-icon-accent" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display:inline-block; vertical-align:middle;"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>'
+        : `<i class="fa-solid ${icon} cat-icon-accent"></i>`;
 
       return `
         <div class="cat-section-card" id="cat-card-${cat.id}">
@@ -783,7 +818,7 @@
               <i class="fa-solid fa-chevron-right cat-arrow-icon" id="cat-arrow-${cat.id}"></i>
               <div class="cat-title-block">
                 <div class="cat-title-row">
-                  <i class="fa-solid ${icon} cat-icon-accent"></i>
+                  ${iconHtml}
                   <span class="cat-name-text">${cat.name}</span>
                 </div>
                 <div class="cat-meta-row">
@@ -908,8 +943,15 @@
       <div class="product-square-grid">
         ${currentLineItems.map(item => `
           <div class="product-square-card">
-            <div class="product-square-img-wrap">
-              <img src="${fixImgUrl(item.imageUrl)}" class="product-square-img" onerror="this.src='/assets/ivevar/exclusive_regal_star_diamond_ring.jpg'" alt="${item.name}" loading="lazy" />
+            <div class="product-square-img-wrap" style="position:relative;">
+              <div class="catalog-img-loading" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8fafc; color:#b45309; font-size:11px; font-weight:700; z-index:1; gap:4px;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:15px;"></i>
+                <span>Image is loading...</span>
+              </div>
+              <img src="${fixImgUrl(item.imageUrl)}" class="product-square-img"
+                   onload="const ov=this.previousElementSibling; if(ov) ov.style.display='none';"
+                   onerror="this.onerror=null; this.src=DEFAULT_CATALOG_IMAGE; const ov=this.previousElementSibling; if(ov) ov.style.display='none';"
+                   alt="${item.name}" loading="lazy" style="position:relative; z-index:2;" />
             </div>
             
             <h4 class="product-square-title" title="${item.name}">${item.name}</h4>

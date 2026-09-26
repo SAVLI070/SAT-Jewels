@@ -431,6 +431,7 @@
     width: 88vw;
     max-width: 360px;
     height: 100vh;
+    height: 100dvh;
     background: #08111e;
     color: #ffffff;
     z-index: 999999;
@@ -451,7 +452,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 16px;
     border-bottom: 1px solid rgba(212, 178, 112, 0.2);
     background: #060c15;
   }
@@ -507,7 +508,7 @@
   /* Utility List */
   .sat-mob-utility-list {
     margin-top: auto;
-    padding: 20px;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     background: #050b13;
     display: flex;

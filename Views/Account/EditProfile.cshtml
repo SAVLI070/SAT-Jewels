@@ -20,7 +20,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"error-container":"#93000a","surface-tint":"#e9c349","on-tertiary-container":"#005033","error":"#ffb4ab","on-background":"#e5e2e3","surface-bright":"#3a393a","surface-container":"#201f20","secondary-fixed":"#ffdf9b","surface":"#131314","surface-dim":"#131314","on-surface-variant":"#d0c5af","tertiary-fixed":"#53feb4","surface-container-lowest":"#0e0e0f","secondary-container":"#5d4604","on-error":"#690005","outline":"#99907c","surface-container-highest":"#353436","surface-container-high":"#2a2a2b","outline-variant":"#4d4635","on-tertiary":"#003823","tertiary":"#36eaa1","surface-container-low":"#1c1b1c","on-primary":"#3c2f00","inverse-surface":"#e5e2e3","background":"#131314","secondary":"#e4c277","inverse-primary":"#735c00","primary-container":"#d4af37","on-tertiary-fixed":"#002112","primary":"#f2ca50","on-primary-fixed":"#241a00","tertiary-fixed-dim":"#26e19a","on-secondary-container":"#d5b46b","on-error-container":"#ffdad6","primary-fixed":"#ffe088","on-secondary-fixed":"#251a00","on-tertiary-fixed-variant":"#005234","on-surface":"#e5e2e3","on-primary-container":"#554300","on-primary-fixed-variant":"#574500","surface-variant":"#353436","tertiary-container":"#00cc89","secondary-fixed-dim":"#e4c277","on-secondary":"#3f2e00","on-secondary-fixed-variant":"#5a4302","primary-fixed-dim":"#e9c349","inverse-on-surface":"#313031"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"gutter":"1.5rem","space-lg":"1.5rem","space-sm":"0.5rem","margin":"3rem","space-2xl":"4rem","margin-mobile":"1.25rem","space-xs":"0.25rem","space-md":"1rem","gutter-mobile":"1rem","space-xl":"2.5rem"},"fontFamily":{"body-lg":["Plus Jakarta Sans"],"headline-md":["Playfair Display"],"label-md":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"label-caps":["Plus Jakarta Sans"],"headline-lg":["Playfair Display"],"headline-lg-mobile":["Playfair Display"],"display-hero":["Playfair Display"],"display-hero-mobile":["Playfair Display"],"headline-sm":["Playfair Display"],"body-md":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"]},"fontSize":{"body-lg":["16px",{"lineHeight":"26px","fontWeight":"400"}],"headline-md":["24px",{"lineHeight":"32px","fontWeight":"500"}],"label-md":["13px",{"lineHeight":"18px","fontWeight":"600"}],"label-sm":["12px",{"lineHeight":"16px","fontWeight":"500"}],"label-caps":["11px",{"lineHeight":"16px","letterSpacing":"0.12em","fontWeight":"700"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"500"}],"headline-lg-mobile":["26px",{"lineHeight":"34px","letterSpacing":"0em","fontWeight":"500"}],"display-hero":["52px",{"lineHeight":"64px","letterSpacing":"-0.02em","fontWeight":"600"}],"display-hero-mobile":["34px",{"lineHeight":"42px","letterSpacing":"-0.01em","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","fontWeight":"500"}],"body-md":["14px",{"lineHeight":"22px","fontWeight":"400"}],"body-sm":["13px",{"lineHeight":"20px","fontWeight":"400"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container min-h-screen">
 <!-- LEFT NAVIGATION CHROME -->
-<aside id="accountSidebar" class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between p-space-md transition-transform duration-300 ease-in-out"><div class="flex flex-col h-full justify-between">
+<aside id="accountSidebar" class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between p-space-md transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0 shadow-2xl md:shadow-none"><div class="flex flex-col h-full justify-between">
 <div class="space-y-space-md">
 <!-- Brand Logo + Collapse Button -->
 <div class="flex items-center justify-between px-space-xs pt-space-xs">
@@ -31,7 +31,7 @@
       <span class="font-label-caps text-[9px] uppercase tracking-[0.2em] text-secondary/80 mt-1">Fine Jewelry &amp; Atelier</span>
     </div>
   </a>
-  <button id="btnCollapseSidebar" onclick="toggleSidebar()" type="button" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex items-center justify-center transition-colors" title="Collapse sidebar menu">
+  <button id="btnCollapseSidebar" onclick="toggleSidebar(false)" type="button" class="w-8 h-8 rounded-full hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex items-center justify-center transition-colors cursor-pointer" title="Collapse sidebar menu">
     <span class="material-symbols-outlined text-[20px]">chevron_left</span>
   </button>
 </div>
@@ -101,26 +101,24 @@
 </a>
 </div>
 </div></aside>
+
+<!-- Mobile Sidebar Backdrop Overlay -->
+<div id="sidebarBackdrop" onclick="toggleSidebar(false)" class="fixed inset-0 bg-black/75 backdrop-blur-sm z-40 hidden md:hidden transition-opacity"></div>
+
 <!-- MAIN APP CANVAS -->
-<div id="accountMainCanvas" class="pl-72 transition-all duration-300 ease-in-out">
+<div id="accountMainCanvas" class="pl-0 md:pl-72 transition-all duration-300 ease-in-out">
 <!-- TOP HEADER -->
-<header id="accountTopHeader" class="fixed top-0 left-72 right-0 h-16 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/30 z-40 px-gutter flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out">
+<header id="accountTopHeader" class="fixed top-0 left-0 md:left-72 right-0 h-16 bg-surface-container-lowest/85 backdrop-blur-xl border-b border-outline-variant/30 z-40 px-gutter flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.6)] transition-all duration-300 ease-in-out">
 <div class="flex items-center gap-3">
-<button id="btnExpandSidebar" onclick="toggleSidebar()" type="button" class="hidden p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex items-center justify-center transition-colors" title="Open Navigation Menu">
+<button id="btnExpandSidebar" onclick="toggleSidebar(true)" type="button" class="p-2 rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-secondary flex md:hidden items-center justify-center transition-colors cursor-pointer" title="Open Navigation Menu">
   <span class="material-symbols-outlined text-[22px]">menu</span>
 </button>
-<a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group cursor-pointer" href="javascript:void(0)" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }">
+<a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group cursor-pointer" href="javascript:void(0)" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/Account/MyAccount'; }">
 <span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">west</span>
 <span class="">Back</span>
 </a>
 </div>
 <div class="flex items-center gap-space-md">
-<div class="relative hidden md:block">
-<div class="flex items-center gap-2 px-space-md py-1.5 rounded-full bg-surface-container/80 border border-outline-variant/30 text-on-surface-variant font-label-sm text-label-sm w-64 lg:w-72">
-<span class="material-symbols-outlined text-[18px]">search</span>
-<input class="bg-transparent border-none outline-none text-on-surface placeholder:text-on-surface-variant/60 w-full text-xs" placeholder="Search orders, invoices, items..." type="text"/>
-</div>
-</div>
 <a href="/Product/Cart" aria-label="Cart" class="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:text-secondary hover:bg-surface-container-high transition-all relative" role="button" title="Shopping Cart">
 <span class="material-symbols-outlined text-[20px]">shopping_bag</span>
 <span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
@@ -138,10 +136,6 @@
 <!-- TOP HEADER & CONTROLS SECTION -->
 <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pt-2">
 <div class="space-y-space-xs">
-<a class="inline-flex items-center gap-2 text-on-surface-variant hover:text-secondary transition-colors font-label-md text-label-md group" href="/Account/MyAccount">
-<span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1 text-secondary">arrow_back</span>
-<span>Back to Account Overview</span>
-</a>
 <h2 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Personal Information &amp; Profile Settings</h2>
 <p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
         Update your personal credentials, contact verification, bespoke ring sizing records, and cryptographic vault security preferences.
@@ -564,36 +558,53 @@
 </div>
 
 <script>
+  function isMobileView() {
+    return window.innerWidth < 768;
+  }
+
   // Toggle Sidebar Collapse / Expand
-  function toggleSidebar() {
+  function toggleSidebar(forceState) {
     const sidebar = document.getElementById('accountSidebar');
     const mainCanvas = document.getElementById('accountMainCanvas');
     const topHeader = document.getElementById('accountTopHeader');
     const btnExpand = document.getElementById('btnExpandSidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
 
-    const isCollapsed = sidebar.classList.contains('-translate-x-full');
-    if (isCollapsed) {
+    const isMobile = isMobileView();
+    const isCurrentlyCollapsed = sidebar.classList.contains('-translate-x-full');
+    const shouldOpen = typeof forceState === 'boolean' ? forceState : isCurrentlyCollapsed;
+
+    if (shouldOpen) {
       sidebar.classList.remove('-translate-x-full');
-      mainCanvas.classList.add('pl-72');
-      mainCanvas.classList.remove('pl-0');
-      topHeader.classList.add('left-72');
-      topHeader.classList.remove('left-0');
-      if (btnExpand) btnExpand.classList.add('hidden');
-      localStorage.setItem('sat_sidebar_collapsed', 'false');
+      if (isMobile) {
+        if (backdrop) backdrop.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      } else {
+        mainCanvas.classList.add('md:pl-72');
+        mainCanvas.classList.remove('md:pl-0');
+        topHeader.classList.add('md:left-72');
+        topHeader.classList.remove('md:left-0');
+        if (btnExpand) btnExpand.classList.add('md:hidden');
+        localStorage.setItem('sat_sidebar_collapsed', 'false');
+      }
     } else {
       sidebar.classList.add('-translate-x-full');
-      mainCanvas.classList.remove('pl-72');
-      mainCanvas.classList.add('pl-0');
-      topHeader.classList.remove('left-72');
-      topHeader.classList.add('left-0');
-      if (btnExpand) btnExpand.classList.remove('hidden');
-      localStorage.setItem('sat_sidebar_collapsed', 'true');
+      if (backdrop) backdrop.classList.add('hidden');
+      document.body.style.overflow = '';
+      if (!isMobile) {
+        mainCanvas.classList.remove('md:pl-72');
+        mainCanvas.classList.add('md:pl-0');
+        topHeader.classList.remove('md:left-72');
+        topHeader.classList.add('md:left-0');
+        if (btnExpand) btnExpand.classList.remove('md:hidden');
+        localStorage.setItem('sat_sidebar_collapsed', 'true');
+      }
     }
   }
 
   window.addEventListener('DOMContentLoaded', () => {
-    if (localStorage.getItem('sat_sidebar_collapsed') === 'true') {
-      toggleSidebar();
+    if (!isMobileView() && localStorage.getItem('sat_sidebar_collapsed') === 'true') {
+      toggleSidebar(false);
     }
   });
 
@@ -686,5 +697,6 @@
 <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"></path>
 </svg>
 </a>
-</div>
+  <!-- SAT Jewel Signature Diamond Loader -->
+  <partial name="_DiamondLoader" />
 </body></html>

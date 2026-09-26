@@ -665,20 +665,31 @@ function toggleMenu() {
   if (mobileMenu) mobileMenu.classList.toggle('active');
 }
 
-// 12. Global SAT Bespoke Lottie Diamond Loading Engine
+// 12. Global SAT Bespoke Diamond Loading Engine
 function showLottieLoader(text) {
-  const loader = document.getElementById('satLottieLoader');
-  const textEl = document.querySelector('.sat-lottie-text');
+  if (typeof window.showDiamondLoader === 'function') {
+    window.showDiamondLoader(text);
+    return;
+  }
+  const loader = document.getElementById('satLottieLoader') || document.getElementById('satDiamondLoader');
+  const textEl = document.querySelector('.sat-loader-text-inner') || document.querySelector('.sat-lottie-text');
   if (text && textEl) {
-    textEl.innerHTML = `<span class="sat-gold-sparkle"><i class="fa-solid fa-gem"></i></span> ${text}`;
+    textEl.textContent = text;
   }
   if (loader) loader.classList.add('active');
 }
 
 function hideLottieLoader() {
-  const loader = document.getElementById('satLottieLoader');
+  if (typeof window.hideDiamondLoader === 'function') {
+    window.hideDiamondLoader();
+    return;
+  }
+  const loader = document.getElementById('satLottieLoader') || document.getElementById('satDiamondLoader');
   if (loader) loader.classList.remove('active');
 }
+
+window.showDiamondLoader = window.showDiamondLoader || showLottieLoader;
+window.hideDiamondLoader = window.hideDiamondLoader || hideLottieLoader;
 
 // Global Payment Success Lottie Trigger
 function showPaymentSuccessModal(orderId) {
@@ -699,19 +710,42 @@ function showPaymentSuccessModal(orderId) {
   }
 }
 
-// Global Click Interceptor for Subcategory, Product & Shape Navigation
+// Global Click Interceptor for Internal Navigation
 document.addEventListener('click', (e) => {
   const link = e.target.closest('a');
-  if (link && link.href && !link.target && !link.getAttribute('href').startsWith('#') && !link.getAttribute('href').startsWith('javascript:')) {
-    try {
-      const url = new URL(link.href, window.location.origin);
-      const path = url.pathname.toLowerCase();
-      
-      if (path.includes('/product/category') || path.includes('/product/details') || path === '/product') {
-        showLottieLoader('Loading Bespoke Collection...');
-      }
-    } catch (err) {}
-  }
+  if (!link || link.target === '_blank' || link.hasAttribute('download')) return;
+  const href = link.getAttribute('href');
+  if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('tel:') || href.startsWith('mailto:')) return;
+
+  try {
+    const url = new URL(link.href, window.location.origin);
+    if (url.origin !== window.location.origin) return;
+    if (url.pathname === window.location.pathname && url.search === window.location.search) return;
+
+    const path = url.pathname.toLowerCase();
+    let msg = 'Loading Atelier...';
+    if (path.includes('/account/myaccount') || path.includes('/account/profile') || path.includes('/account/orders')) {
+      msg = 'Opening Private Account...';
+    } else if (path.includes('/account/signin') || path.includes('/account/login') || path.includes('/account/auth')) {
+      msg = 'Opening Sign In...';
+    } else if (path.includes('/product/details')) {
+      msg = 'Loading Creation Details...';
+    } else if (path.includes('/product/category') || path === '/product') {
+      msg = 'Curating Collection...';
+    } else if (path.includes('/cart')) {
+      msg = 'Opening Shopping Bag...';
+    } else if (path.includes('/order') || path.includes('/checkout')) {
+      msg = 'Securing Your Order...';
+    } else if (path === '/' || path === '/home' || path === '/home/index') {
+      msg = 'Entering SAT Jewel...';
+    }
+
+    if (typeof window.showDiamondLoader === 'function') {
+      window.showDiamondLoader(msg);
+    } else {
+      showLottieLoader(msg);
+    }
+  } catch (err) {}
 });
 
 window.addEventListener('pageshow', () => {

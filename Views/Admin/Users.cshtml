@@ -200,7 +200,7 @@
           <span style="font-size: 11px; color: #94a3b8;">
             Joined: @user.CreatedAt.ToString("MMM yyyy")
           </span>
-          <a href="/Admin/Orders?q=@System.Net.WebUtility.UrlEncode(user.Email)" style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: #b45309; text-decoration: none;">
+          <a href="/Admin/Orders?userId=@user.Id&email=@System.Net.WebUtility.UrlEncode(user.Email)&userName=@System.Net.WebUtility.UrlEncode(user.FullName)" style="display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 700; color: #b45309; text-decoration: none;">
             View Orders <i class="fa-solid fa-arrow-right" style="font-size: 10px;"></i>
           </a>
         </div>

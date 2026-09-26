@@ -2,6 +2,10 @@
     Layout = null;
     var initialMode = (ViewData["InitialMode"] ?? "signin").ToString();
     var returnUrl = ViewData["ReturnUrl"]?.ToString();
+    if (string.IsNullOrWhiteSpace(returnUrl))
+    {
+        returnUrl = Context.Request.Query["returnUrl"].ToString();
+    }
     var error = ViewBag.ErrorMessage as string;
 }
 <!DOCTYPE html>
@@ -535,6 +539,8 @@
         <!-- 1. SIGN IN PANE -->
         <div class="sat-pane @(initialMode != "signup" ? "active" : "")" id="paneSignIn">
           <form method="post" action="/Account/HandleSignIn" id="formSignIn" onsubmit="return handleSignInSubmit(event)">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
             <div id="clientSignInAlert" class="sat-auth-alert" style="display:none;">
               <i class="fa-solid fa-triangle-exclamation"></i>
               <span id="clientSignInAlertMsg"></span>
@@ -605,6 +611,8 @@
         <!-- 2. SIGN UP PANE -->
         <div class="sat-pane @(initialMode == "signup" ? "active" : "")" id="paneSignUp">
           <form method="post" action="/Account/HandleSignUp" id="formSignUp" onsubmit="return handleSignUpSubmit(event)">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="returnUrl" value="@returnUrl" />
             <div id="clientSignUpAlert" class="sat-auth-alert" style="display:none;">
               <i class="fa-solid fa-triangle-exclamation"></i>
               <span id="clientSignUpAlertMsg"></span>
@@ -664,7 +672,7 @@
             </div>
 
             <button type="submit" class="btn-sat-vault-action" style="margin-top:10px;">
-              <i class="fa-solid fa-sparkles"></i> Join SAT VIP Vault
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Join SAT VIP Vault
             </button>
           </form>
 
@@ -706,13 +714,13 @@
         paneSignUp.classList.add('active');
         tabSignIn.classList.remove('active');
         tabSignUp.classList.add('active');
-        history.replaceState(null, '', '/Account/SignUp');
+        history.replaceState(null, '', '/Account/SignUp' + window.location.search);
       } else {
         paneSignUp.classList.remove('active');
         paneSignIn.classList.add('active');
         tabSignUp.classList.remove('active');
         tabSignIn.classList.add('active');
-        history.replaceState(null, '', '/Account/SignIn');
+        history.replaceState(null, '', '/Account/SignIn' + window.location.search);
       }
     }
 

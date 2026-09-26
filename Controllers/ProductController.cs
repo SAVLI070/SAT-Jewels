@@ -28,6 +28,7 @@ namespace SAT1.Controllers
                 .AsNoTracking()
                 .Where(p => p.IsActive)
                 .OrderByDescending(p => p.CreatedAt)
+                .Take(24)
                 .ToListAsync();
 
             if (products.Count == 0)
@@ -206,8 +207,12 @@ namespace SAT1.Controllers
             return View(product);
         }
 
-        // GET: /Product/GiaCertificate/{id} or /Product/GiaCertificate?productId=... or ?orderId=...
+        // GET: /Product/GiaCertificate/{id} or /Product/Certificate?orderId=...
         [HttpGet]
+        [Route("Product/Certificate")]
+        [Route("Product/GiaCertificate")]
+        [Route("Product/Certificate/{id?}")]
+        [Route("Product/GiaCertificate/{id?}")]
         [AllowAnonymous]
         public async Task<IActionResult> GiaCertificate(
             string? id, 
@@ -475,6 +480,20 @@ namespace SAT1.Controllers
                 inscription += $" • \"{engraving.Trim()}\"";
             }
 
+            var authUserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            var authEmail = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+            var userRole = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
+
+            bool isOrderOwnerOrAdmin = userRole == "Admin" || (order != null && (
+                (!string.IsNullOrEmpty(authUserId) && order.UserId == authUserId) ||
+                (!string.IsNullOrEmpty(authEmail) && order.CustomerEmail.Equals(authEmail, StringComparison.OrdinalIgnoreCase))));
+
+            var clientName = order?.ShippingFullName;
+            if (order != null && !isOrderOwnerOrAdmin && !string.IsNullOrWhiteSpace(clientName))
+            {
+                clientName = "SAT Private Client";
+            }
+
             var vm = new GiaCertificateViewModel
             {
                 ProductId = product.Id,
@@ -488,7 +507,7 @@ namespace SAT1.Controllers
                 OrderId = order?.OrderId,
                 OrderNumber = order?.OrderNumber,
                 OrderDate = order?.CreatedAt,
-                ClientName = order?.ShippingFullName,
+                ClientName = clientName,
                 IncludesPhysicalCert = order?.IncludesPhysicalGiaCert ?? false,
 
                 ReportNumber = reportNumber,

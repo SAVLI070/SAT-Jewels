@@ -96,12 +96,22 @@ namespace SAT1.Controllers
                 return StatusCode(403, new { success = false, message = "Access Denied: Admin authorization required." });
             }
 
-            if (category == null || string.IsNullOrWhiteSpace(category.Id))
+            if (category == null || string.IsNullOrWhiteSpace(category.Name))
             {
-                return BadRequest(new { message = "Invalid category payload." });
+                return BadRequest(new { success = false, message = "Category Name is required." });
+            }
+
+            if (string.IsNullOrWhiteSpace(category.Slug))
+            {
+                category.Slug = category.Name.Trim().ToLower().Replace(" ", "-");
             }
 
             var success = await _catalogBal.AddCategoryAsync(category);
+            if (!success)
+            {
+                return StatusCode(500, new { success = false, message = "Failed to save category to database." });
+            }
+
             return Ok(new { success = true, message = $"Category '{category.Name}' saved successfully!" });
         }
 
@@ -276,9 +286,8 @@ namespace SAT1.Controllers
                 return BadRequest(new { success = false, message = "Maximum 10 images allowed per upload batch." });
             }
 
-            const long maxFileSizeBytes = 10 * 1024 * 1024; // 10 MB limit
-            var allowedExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" };
-            var allowedMimeTypes = new HashSet<string> { "image/jpeg", "image/png", "image/webp" };
+            const long maxFileSizeBytes = 15 * 1024 * 1024; // 15 MB limit
+            var allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp", ".jfif", ".gif" };
 
             var cloudName = _configuration["Cloudinary:CloudName"] ?? "ihcs8m6o";
             var apiKey = _configuration["Cloudinary:ApiKey"];
@@ -301,49 +310,39 @@ namespace SAT1.Controllers
 
                 if (file.Length > maxFileSizeBytes)
                 {
-                    return BadRequest(new { success = false, message = $"File '{file.FileName}' exceeds the 10 MB limit." });
+                    return BadRequest(new { success = false, message = $"File '{file.FileName}' exceeds the 15 MB limit." });
                 }
 
                 var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
                 if (!allowedExtensions.Contains(ext))
                 {
-                    return BadRequest(new { success = false, message = $"Security Alert: Invalid file type '{ext}'. Only PNG, JPG, and WebP images are permitted." });
+                    return BadRequest(new { success = false, message = $"Security Alert: Invalid file type '{ext}'. Supported formats: JPG, PNG, WebP." });
                 }
 
-                if (!allowedMimeTypes.Contains(file.ContentType.ToLowerInvariant()))
+                var ct = (file.ContentType ?? "").ToLowerInvariant();
+                if (!string.IsNullOrEmpty(ct) && !ct.Contains("image") && !ct.Contains("octet-stream"))
                 {
                     return BadRequest(new { success = false, message = $"Security Alert: Invalid MIME type '{file.ContentType}'." });
                 }
 
-                using (var stream = file.OpenReadStream())
-                {
-                    byte[] header = new byte[8];
-                    await stream.ReadAsync(header, 0, header.Length);
-
-                    bool isPng = header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47;
-                    bool isJpeg = header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF;
-                    bool isWebp = header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46;
-
-                    if (!isPng && !isJpeg && !isWebp)
-                    {
-                        return BadRequest(new { success = false, message = $"Security Alert: File signature check failed for '{file.FileName}'." });
-                    }
-                }
-
                 try
                 {
-                    using var fileStream = file.OpenReadStream();
-                    var uploadParams = new ImageUploadParams()
+                    using var memoryStream = new MemoryStream();
+                    await file.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+
+                    var uploadParams = new ImageUploadParams
                     {
-                        File = new FileDescription(file.FileName, fileStream),
+                        File = new FileDescription(file.FileName, memoryStream),
                         Folder = folderName,
                         Overwrite = true
                     };
 
                     var uploadResult = await cloudinary.UploadAsync(uploadParams);
-                    if (uploadResult != null && uploadResult.SecureUrl != null)
+                    var returnedUrl = uploadResult?.SecureUrl?.ToString() ?? uploadResult?.Url?.ToString();
+                    if (!string.IsNullOrWhiteSpace(returnedUrl))
                     {
-                        savedUrls.Add(uploadResult.SecureUrl.ToString());
+                        savedUrls.Add(returnedUrl);
                     }
                     else
                     {
@@ -373,9 +372,8 @@ namespace SAT1.Controllers
                 return BadRequest(new { success = false, message = "No file provided." });
             }
 
-            const long maxFileSizeBytes = 10 * 1024 * 1024; // 10 MB limit
-            var allowedExtensions = new HashSet<string> { ".jpg", ".jpeg", ".png", ".webp" };
-            var allowedMimeTypes = new HashSet<string> { "image/jpeg", "image/png", "image/webp" };
+            const long maxFileSizeBytes = 15 * 1024 * 1024; // 15 MB limit
+            var allowedExtensions = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { ".jpg", ".jpeg", ".png", ".webp", ".jfif", ".gif", ".avif", ".heic", ".bmp" };
 
             var cloudName = _configuration["Cloudinary:CloudName"] ?? "ihcs8m6o";
             var apiKey = _configuration["Cloudinary:ApiKey"];
@@ -388,13 +386,19 @@ namespace SAT1.Controllers
 
             if (file.Length > maxFileSizeBytes)
             {
-                return BadRequest(new { success = false, message = $"File '{file.FileName}' exceeds 10 MB." });
+                return BadRequest(new { success = false, message = $"File '{file.FileName}' exceeds 15 MB." });
             }
 
             var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (!allowedExtensions.Contains(ext) || !allowedMimeTypes.Contains(file.ContentType.ToLowerInvariant()))
+            if (!allowedExtensions.Contains(ext))
             {
                 return BadRequest(new { success = false, message = "Invalid file type. Only PNG, JPG, and WebP are allowed." });
+            }
+
+            var ct = (file.ContentType ?? "").ToLowerInvariant();
+            if (!string.IsNullOrEmpty(ct) && !ct.Contains("image") && !ct.Contains("octet-stream"))
+            {
+                return BadRequest(new { success = false, message = "Invalid MIME type. Must be an image file." });
             }
 
             try
@@ -402,18 +406,22 @@ namespace SAT1.Controllers
                 var account = new CloudinaryDotNet.Account(cloudName, apiKey, apiSecret);
                 var cloudinary = new CloudinaryDotNet.Cloudinary(account);
 
-                using var fileStream = file.OpenReadStream();
+                using var memoryStream = new MemoryStream();
+                await file.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
                 var uploadParams = new ImageUploadParams
                 {
-                    File = new FileDescription(file.FileName, fileStream),
+                    File = new FileDescription(file.FileName, memoryStream),
                     Folder = string.IsNullOrWhiteSpace(folder) ? "sat_jewels/categories" : folder,
                     Overwrite = true
                 };
 
                 var uploadResult = await cloudinary.UploadAsync(uploadParams);
-                if (uploadResult != null && uploadResult.SecureUrl != null)
+                var returnedUrl = uploadResult?.SecureUrl?.ToString() ?? uploadResult?.Url?.ToString();
+                if (!string.IsNullOrWhiteSpace(returnedUrl))
                 {
-                    return Ok(new { success = true, imageUrl = uploadResult.SecureUrl.ToString() });
+                    return Ok(new { success = true, imageUrl = returnedUrl });
                 }
                 return StatusCode(500, new { success = false, message = uploadResult?.Error?.Message ?? "Cloudinary upload failed." });
             }

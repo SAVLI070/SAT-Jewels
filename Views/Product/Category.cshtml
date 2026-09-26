@@ -1,6 +1,7 @@
 @model List<SAT1.Models.CatalogItem>
 @inject SAT1.BAL.CatalogBal CatalogBal
 @{
+    Layout = null;
     var categoryId = ViewBag.CategoryId ?? 2;
     var categoryName = ViewBag.CategoryName as string ?? "Anniversary Ring";
     var pageTitle = $"Buy {categoryName} Online in USA | Certified Lab Diamonds — SAT Jewel";
@@ -237,6 +238,17 @@
       margin: 0 auto;
       padding: 0 16px;
     }
+    .diamond-shapes-wrapper {
+      max-width: 1240px;
+      margin: 20px auto 28px;
+      padding: 16px 0;
+      background: rgba(8, 17, 30, 0.6);
+      border: 1px solid rgba(212, 178, 112, 0.25);
+      border-radius: 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
     @@media (max-width: 992px) {
       .cat-redir-grid {
         grid-template-columns: repeat(3, 1fr);
@@ -245,15 +257,48 @@
     }
     @@media (max-width: 768px) {
       .cat-redir-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+        padding: 0 12px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .cat-redir-btn {
+        padding: 10px 8px !important;
+        font-size: 11px !important;
+        white-space: normal !important;
+        text-align: center !important;
+        word-break: break-word !important;
+        min-height: 42px !important;
       }
       .cat-redir-title {
-        font-size: 26px;
+        font-size: 24px;
+        padding: 0 10px;
       }
       .cat-redir-desc {
-        font-size: 12.5px;
-        margin-bottom: 22px;
+        font-size: 12px;
+        margin-bottom: 20px;
+        padding: 0 10px;
+      }
+      .diamond-shapes-wrapper {
+        width: calc(100% - 24px) !important;
+        margin: 14px auto 22px !important;
+        border-radius: 14px !important;
+        padding: 12px 6px !important;
+        box-sizing: border-box !important;
+      }
+      .diamond-shapes-track {
+        gap: 16px !important;
+        padding: 0 6px !important;
+      }
+      .shape-icon-box {
+        width: 50px !important;
+        height: 50px !important;
+        padding: 5px !important;
+      }
+      .shape-label-text {
+        font-size: 11px !important;
+        margin-top: 6px !important;
       }
     }
     .cat-redir-btn {
@@ -640,12 +685,47 @@
       .product-title {
         font-size: 13px !important;
       }
+      .price-row {
+        display: flex !important;
+        align-items: baseline !important;
+        flex-wrap: nowrap !important;
+        gap: 5px !important;
+        white-space: nowrap !important;
+      }
       .price-main {
-        font-size: 14.5px !important;
+        font-size: 13.5px !important;
+        white-space: nowrap !important;
+      }
+      .price-orig {
+        font-size: 11px !important;
+        white-space: nowrap !important;
+      }
+      .save-badge {
+        font-size: 9px !important;
+        padding: 1.5px 4px !important;
+        white-space: nowrap !important;
+      }
+      .product-card-actions {
+        gap: 5px !important;
+      }
+      .btn-buy-now {
+        padding: 9px 4px !important;
+        font-size: 11px !important;
+        gap: 3px !important;
+        letter-spacing: 0.02em !important;
       }
       .btn-add-cart {
         padding: 10px 6px !important;
         font-size: 11.5px !important;
+      }
+      .btn-card-cart, .btn-card-wishlist {
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        font-size: 13px !important;
+      }
+      .btn-card-cart .material-symbols-outlined {
+        font-size: 17px !important;
       }
     }
     .ivevar-product-card {
@@ -687,27 +767,32 @@
     }
     .price-row {
       display: flex;
-      align-items: center;
+      align-items: baseline;
       gap: 6px;
       margin-bottom: 4px;
+      white-space: nowrap;
+      flex-wrap: nowrap;
     }
     .price-main {
       font-weight: 800;
-      font-size: 16px;
+      font-size: 15.5px;
       color: var(--champagne-gold, #d4b878);
+      white-space: nowrap;
     }
     .price-orig {
       font-size: 12px;
       text-decoration: line-through;
       color: rgba(241, 238, 232, 0.4);
+      white-space: nowrap;
     }
     .save-badge {
       background: #15803d;
       color: #ffffff;
-      font-size: 10px;
+      font-size: 9.5px;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: 3px;
+      white-space: nowrap;
     }
     .inr-price-row {
       font-size: 12.5px;
@@ -721,6 +806,30 @@
       font-size: 12px;
       color: var(--champagne-gold, #d4b878);
       margin-bottom: 16px;
+    }
+    .btn-buy-now {
+      flex: 1;
+      padding: 12px 10px;
+      background: linear-gradient(135deg, #d4b878 0%, #b8944d 100%);
+      color: #06070a;
+      border: none;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .btn-buy-now:hover {
+      background: linear-gradient(135deg, #f1dfae 0%, #d4b878 100%);
+      box-shadow: 0 4px 18px rgba(212, 184, 120, 0.4);
+      transform: translateY(-1px);
     }
     .btn-add-cart {
       width: 100%;
@@ -769,7 +878,7 @@
       flex: 1;
       margin-top: 0;
     }
-    .btn-card-wishlist {
+    .btn-card-cart, .btn-card-wishlist {
       width: 44px;
       height: 44px;
       min-width: 44px;
@@ -783,6 +892,18 @@
       font-size: 16px;
       cursor: pointer;
       transition: all 0.25s ease;
+      flex-shrink: 0;
+    }
+    .btn-card-cart:hover {
+      background: rgba(212, 184, 120, 0.2);
+      border-color: var(--champagne-gold, #d4b878);
+      color: var(--champagne-gold, #d4b878);
+      transform: translateY(-1px);
+    }
+    .btn-card-cart.btn-added {
+      background: rgba(16, 185, 129, 0.25) !important;
+      border-color: #10b981 !important;
+      color: #10b981 !important;
     }
     .btn-card-wishlist:hover {
       background: rgba(212, 184, 120, 0.15);
@@ -916,7 +1037,7 @@
   <header class="fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30">
     <div class="max-w-[1180px] mx-auto px-6 h-16 flex items-center justify-between gap-4">
       <div class="flex items-center gap-4 shrink-0">
-        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" data-path="back" href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="text-decoration:none;">
+        <a class="inline-flex items-center gap-1.5 text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md" data-path="back" href="javascript:void(0);" onclick="if(window.showDiamondLoader) window.showDiamondLoader('Returning to previous view...'); if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="text-decoration:none;">
           <span class="material-symbols-outlined text-[18px]">arrow_back</span>
           <span class="hidden sm:inline">Back</span>
         </a>
@@ -929,23 +1050,7 @@
         </div>
       </div>
 
-      <!-- Search Input in Category Header -->
-      <div class="flex-1 max-w-[420px] mx-3 hidden md:block">
-        <div class="relative w-full">
-          <input type="text" 
-                 id="catHeaderSearchInput"
-                 placeholder="Search rings, diamonds, moissanite..." 
-                 value="@(ViewBag.SearchQuery ?? "")"
-                 onkeydown="if(event.key === 'Enter') { event.preventDefault(); window.location.href = '/Product/Category?q=' + encodeURIComponent(this.value.trim()); }"
-                 class="w-full h-9 pl-9 pr-4 rounded-full bg-surface-container border border-outline-variant/40 text-on-surface placeholder:text-on-surface-variant/50 text-xs focus:outline-none focus:border-primary transition-all" />
-          <span class="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant/60">search</span>
-        </div>
-      </div>
-
       <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-        <button type="button" class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors md:hidden" onclick="openSatGlobalSearch(event)" title="Search">
-          <span class="material-symbols-outlined text-[18px]">search</span>
-        </button>
         <a class="relative w-9 h-9 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface-variant hover:text-primary flex items-center justify-center transition-colors" data-path="cart" href="/Product/Cart" title="Shopping Cart" style="text-decoration:none;">
           <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
           <span id="navCartBadge" class="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-primary text-on-primary font-label-caps text-[9px] flex items-center justify-center font-bold">0</span>
@@ -982,7 +1087,7 @@
       </p>
 
       <!-- Equal-Width Redirection Buttons (Dynamic Active Categories) -->
-      <div class="cat-redir-grid" style="grid-template-columns: repeat(@(Math.Max(1, Math.Min(6, publicCategories.Count))), 1fr);">
+      <div class="cat-redir-grid">
         @if (publicCategories != null && publicCategories.Count > 0)
         {
           @foreach (var cat in publicCategories)
@@ -997,7 +1102,7 @@
   </section>
 
     <!-- Diamond Shape Line-Art Circle Icon Bar (Matches Landing Page & Bianca Chiara Style) -->
-    <div class="diamond-shapes-wrapper" style="margin: 20px auto 28px; padding: 16px 0; background: rgba(8, 17, 30, 0.6); border: 1px solid rgba(212, 178, 112, 0.25); border-radius: 16px;">
+    <div class="diamond-shapes-wrapper">
       <div class="diamond-shapes-track">
         <!-- 1. Round -->
         <a href="/Product/Category?id=@categoryId&shape=Round" class="shape-line-item @(selectedShape == "Round" ? "active" : "")">
@@ -1146,14 +1251,19 @@
             galList.Insert(0, imgSrc);
           }
 
-          <div class="ivevar-product-card sat-scrub-card" data-count="@galList.Count">
+          <div class="ivevar-product-card sat-scrub-card" data-count="@galList.Count" data-fallback="@imgSrc">
             <div class="product-img-wrap sat-carousel-wrap">
               <a href="/Product/Details/@item.Id" class="sat-carousel-track">
+                @{ var sIdx = 0; }
                 @foreach (var gImg in galList)
                 {
                   <div class="sat-carousel-slide">
-                    <img src="@gImg" alt="@item.Name" loading="lazy" />
+                    <img src="@gImg" 
+                         alt="@(sIdx == 0 ? item.Name : "")" 
+                         loading="@(sIdx == 0 ? "eager" : "lazy")" 
+                         onerror="handleCarouselImgError(this, '@imgSrc')" />
                   </div>
+                  sIdx++;
                 }
               </a>
               @if (galList.Count > 1)
@@ -1171,7 +1281,7 @@
                 <div class="product-title">@item.Name</div>
               </a>
               <div class="price-row">
-                <span class="price-main">$@item.PriceUSD.ToString("N0") USD</span>
+                <span class="price-main">$@item.PriceUSD.ToString("N0")</span>
                 <span class="price-orig">$@originalPriceUSD.ToString("N0")</span>
                 <span class="save-badge">Save 15%</span>
               </div>
@@ -1184,13 +1294,23 @@
                 <span style="color:rgba(255,255,255,0.6); margin-left:4px;">(12 reviews)</span>
               </div>
               <div class="product-card-actions">
-                <button type="button" class="btn-add-cart" 
+                <button type="button" class="btn-buy-now" 
                         data-id="@item.Id" 
                         data-name="@item.Name" 
                         data-price="@item.PriceUSD" 
                         data-img="@imgSrc"
+                        onclick="quickBuyNow(this)">
+                  <span>Buy Now</span>
+                </button>
+                <button type="button" class="btn-card-cart" 
+                        data-id="@item.Id" 
+                        data-name="@item.Name" 
+                        data-price="@item.PriceUSD" 
+                        data-img="@imgSrc"
+                        title="Add to Cart"
+                        aria-label="Add to Cart"
                         onclick="quickAddToCart(this)">
-                  Add to Cart
+                  <span class="material-symbols-outlined text-[19px]">shopping_bag</span>
                 </button>
                 <button type="button" class="btn-card-wishlist" 
                         data-id="@item.Id" 
@@ -1198,6 +1318,7 @@
                         data-price="@item.PriceUSD" 
                         data-img="@imgSrc"
                         title="Add to Wishlist"
+                        aria-label="Add to Wishlist"
                         onclick="quickToggleWishlist(this, event)">
                   <i class="fa-regular fa-heart"></i>
                 </button>
@@ -1338,6 +1459,46 @@
       font-weight: 700;
     }
 
+    @@media (max-width: 768px) {
+      .sat-pagination-wrap {
+        margin: 25px auto 45px;
+        gap: 10px;
+      }
+      .sat-page-counter {
+        font-size: 12px;
+      }
+      .sat-page-controls {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 4px !important;
+        max-width: 100% !important;
+        padding: 4px 2px !important;
+        justify-content: center !important;
+      }
+      .sat-page-controls::-webkit-scrollbar { display: none; }
+      .sat-p-nav-btn {
+        padding: 0 8px !important;
+        height: 32px !important;
+        font-size: 11.5px !important;
+        gap: 4px !important;
+        flex-shrink: 0 !important;
+      }
+      .sat-p-num-btn {
+        min-width: 30px !important;
+        height: 32px !important;
+        font-size: 12px !important;
+        flex-shrink: 0 !important;
+      }
+      .sat-p-dots {
+        padding: 0 2px !important;
+        font-size: 11px !important;
+        flex-shrink: 0 !important;
+      }
+    }
+
     /* Smooth Carousel Slider Styles */
     .sat-carousel-wrap {
       position: relative;
@@ -1408,28 +1569,74 @@
   </style>
 
   <script>
-    // Desktop Slow & Calm Right-Sliding Photo by Photo Animation on Hover (Task 1)
+    // Robust handler for broken/non-loaded carousel images
+    window.handleCarouselImgError = function(img, fallbackSrc) {
+      img.onerror = null;
+      const slide = img.closest('.sat-carousel-slide');
+      const card = img.closest('.sat-scrub-card');
+      if (slide && card) {
+        const allSlides = card.querySelectorAll('.sat-carousel-slide');
+        if (allSlides.length > 1) {
+          slide.remove();
+          const remaining = card.querySelectorAll('.sat-carousel-slide');
+          card.setAttribute('data-count', remaining.length);
+          const dotsWrap = card.querySelector('.sat-scrub-dots');
+          if (dotsWrap) {
+            dotsWrap.innerHTML = '';
+            if (remaining.length > 1) {
+              for (let d = 0; d < Math.min(remaining.length, 5); d++) {
+                const span = document.createElement('span');
+                span.className = 'scrub-dot' + (d === 0 ? ' active' : '');
+                dotsWrap.appendChild(span);
+              }
+            }
+          }
+          return;
+        }
+      }
+      img.src = fallbackSrc || '/assets/ring_1.jpg';
+    };
+
+    // Desktop Slow & Calm Right-Sliding Photo by Photo Animation on Hover
     document.querySelectorAll('.sat-scrub-card').forEach(card => {
       const track = card.querySelector('.sat-carousel-track');
-      const dots = card.querySelectorAll('.scrub-dot');
-      const count = parseInt(card.getAttribute('data-count')) || 1;
-      if (!track || count <= 1) return;
-
       let currentIdx = 0;
       let autoSlideTimer = null;
       let lastMoveTime = 0;
 
       function slideTo(idx) {
-        currentIdx = (idx + count) % count;
+        const slides = track.querySelectorAll('.sat-carousel-slide');
+        const countNow = slides.length;
+        if (countNow <= 1) return;
+        const nextIdx = (idx + countNow) % countNow;
+
+        // Skip non-loaded or broken images
+        const targetImg = slides[nextIdx]?.querySelector('img');
+        if (targetImg) {
+          if (!targetImg.complete) {
+            // Target image is still loading; do not slide to a blank frame
+            return;
+          }
+          if (targetImg.naturalWidth === 0) {
+            handleCarouselImgError(targetImg, card.getAttribute('data-fallback') || '');
+            return;
+          }
+        }
+
+        currentIdx = nextIdx;
         track.style.transform = `translateX(-${currentIdx * 100}%)`;
-        dots.forEach((d, i) => {
+        const dotsNow = card.querySelectorAll('.scrub-dot');
+        dotsNow.forEach((d, i) => {
           if (i === currentIdx) d.classList.add('active');
           else d.classList.remove('active');
         });
       }
 
-      // Calm auto-slide photo by photo to the right when mouse is hovering
+      // Preload next images and calmly auto-slide photo by photo to the right when mouse is hovering
       card.addEventListener('mouseenter', () => {
+        track.querySelectorAll('img').forEach(img => {
+          if (img.loading === 'lazy') img.loading = 'eager';
+        });
         clearInterval(autoSlideTimer);
         autoSlideTimer = setInterval(() => {
           slideTo(currentIdx + 1);
@@ -1506,6 +1713,7 @@
     });
 
     function applySorting(sortVal) {
+      if (window.showDiamondLoader) window.showDiamondLoader('Sorting Creations...');
       const urlParams = new URLSearchParams(window.location.search);
       urlParams.set('sort', sortVal);
       urlParams.set('page', '1');
@@ -1617,7 +1825,11 @@
         if (btn) {
           const originalText = btn.innerHTML;
           btn.classList.add('btn-added');
-          btn.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
+          if (btn.classList.contains('btn-card-cart')) {
+            btn.innerHTML = '<span class="material-symbols-outlined" style="font-size:19px; color:#10b981;">check</span>';
+          } else {
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
+          }
           btn.disabled = true;
 
           setTimeout(() => {
@@ -1635,7 +1847,16 @@
       }
     }
 
-    const isUserAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+    function quickBuyNow(firstArg, nameArg, priceArg, imgArg, btnArg) {
+      if (!isUserAuthenticated) {
+        showAuthRequiredModal('cart');
+        return;
+      }
+      quickAddToCart(firstArg, nameArg, priceArg, imgArg, btnArg);
+      setTimeout(() => {
+        window.location.href = '/Product/Cart';
+      }, 200);
+    }
 
     async function quickToggleWishlist(btn, event) {
       if (event) {
@@ -1747,6 +1968,9 @@
       <i class="fa-solid fa-xmark"></i>
     </button>
   </div>
+
+  <!-- SAT Jewel Signature Diamond Loader -->
+  <partial name="_DiamondLoader" />
 
   <!-- SAT Jewel Footer -->
   <partial name="_Footer" />

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SAT1.BAL;
 using SAT1.Models;
 
@@ -30,6 +31,13 @@ namespace SAT1.Controllers
             }
 
             return Redirect("/Account/SignIn?returnUrl=" + System.Net.WebUtility.UrlEncode(Request.Path));
+        }
+
+        [HttpGet("logout")]
+        [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+        public IActionResult Logout()
+        {
+            return RedirectToAction("Logout", "Account");
         }
 
         [HttpGet("")]
@@ -80,27 +88,31 @@ namespace SAT1.Controllers
         }
 
         [HttpGet("orders")]
-        public async Task<IActionResult> Orders(string? status, string? q, int page = 1, int pageSize = 15)
+        public async Task<IActionResult> Orders(string? status, string? q, string? userId, string? email, string? userName, int page = 1, int pageSize = 15)
         {
             if (!CheckAccess()) return HandleUnauthorized();
             ViewBag.Title = "Customer Orders & Live Tracking";
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 15;
 
-            var counts = await _adminBal.GetOrderStatusCountsAsync();
+            var counts = await _adminBal.GetOrderStatusCountsAsync(userId, email);
             
             ViewBag.TotalCount = counts.TotalCount;
+            ViewBag.PendingCount = counts.PendingCount;
             ViewBag.PaidCount = counts.PaidCount;
             ViewBag.DispatchedCount = counts.DispatchedCount;
             ViewBag.InTransitCount = counts.InTransitCount;
             ViewBag.DeliveredCount = counts.DeliveredCount;
 
-            var (filteredOrders, totalFiltered) = await _adminBal.GetOrdersPagedAsync(status, q, page, pageSize);
+            var (filteredOrders, totalFiltered) = await _adminBal.GetOrdersPagedAsync(status, q, userId, email, page, pageSize);
             int totalPages = (int)Math.Ceiling(totalFiltered / (double)pageSize);
             if (totalPages < 1) totalPages = 1;
 
             ViewBag.StatusFilter = status ?? "All";
             ViewBag.SearchQuery = q ?? "";
+            ViewBag.UserId = userId ?? "";
+            ViewBag.UserEmail = email ?? "";
+            ViewBag.UserName = userName ?? "";
             ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = totalPages;
@@ -139,12 +151,22 @@ namespace SAT1.Controllers
         }
 
         [HttpGet("reviews")]
-        public async Task<IActionResult> Reviews([FromServices] ReviewBal reviewBal, string? status, int page = 1, int pageSize = 12)
+        public async Task<IActionResult> Reviews([FromServices] ReviewBal reviewBal, [FromServices] SatJewelDbContext db, string? status, int page = 1, int pageSize = 12)
         {
             if (!CheckAccess()) return HandleUnauthorized();
             ViewBag.Title = "Product Customer Reviews Moderation";
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 12;
+
+            var allCount = await db.ProductReviews.CountAsync();
+            var approvedCount = await db.ProductReviews.CountAsync(r => r.Status.ToLower() == "approved");
+            var pendingCount = await db.ProductReviews.CountAsync(r => r.Status.ToLower() == "pending");
+            var rejectedCount = await db.ProductReviews.CountAsync(r => r.Status.ToLower() == "rejected");
+
+            ViewBag.AllReviewsCount = allCount;
+            ViewBag.ApprovedCount = approvedCount;
+            ViewBag.PendingCount = pendingCount;
+            ViewBag.RejectedCount = rejectedCount;
 
             var (pagedReviews, totalCount) = await reviewBal.GetReviewsPagedAsync(status, page, pageSize);
             int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
@@ -155,7 +177,6 @@ namespace SAT1.Controllers
             ViewBag.PageSize = pageSize;
             ViewBag.TotalCount = totalCount;
             ViewBag.TotalPages = totalPages;
-            ViewBag.AllReviewsCount = totalCount;
 
             return View(pagedReviews);
         }

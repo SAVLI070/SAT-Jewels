@@ -15,12 +15,20 @@
     height: 640px;
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .cat-card-scroll {
+    overflow-x: auto;
     overflow-y: auto;
     flex: 1;
-    padding-right: 6px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+    padding-right: 2px;
   }
 
   .custom-admin-scroll::-webkit-scrollbar {
@@ -84,6 +92,9 @@
     background: #f8fafc;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
   }
 
   .cat-upload-dropzone:hover {
@@ -243,6 +254,7 @@
   /* Clean Light Theme Admin Table (Task 3 Fix) */
   .admin-table {
     width: 100%;
+    min-width: 600px;
     border-collapse: separate;
     border-spacing: 0;
     font-size: 13px;
@@ -277,20 +289,53 @@
 
   .cat-main-grid {
     display: grid;
-    grid-template-columns: 400px 1fr;
+    grid-template-columns: 400px minmax(0, 1fr);
     gap: 28px;
     align-items: start;
+    min-width: 0;
+    max-width: 100%;
   }
 
   @@media (max-width: 1024px) {
     .cat-main-grid {
-      grid-template-columns: 1fr !important;
+      grid-template-columns: minmax(0, 1fr) !important;
       gap: 20px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+  }
+
+  @@media (max-width: 768px) {
+    .cat-main-grid {
+      grid-template-columns: 100% !important;
+      gap: 16px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    .cat-card-panel {
+      padding: 16px 14px !important;
+      height: auto !important;
+      min-height: auto !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .cat-form-input, .cat-upload-dropzone {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .cat-btn-submit {
+      font-size: 13px !important;
+      padding: 12px 14px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
     }
   }
 </style>
 
-<div style="max-width:1280px;margin:0 auto;">
+<div style="max-width:1280px;margin:0 auto;width:100%;min-width:0;box-sizing:border-box;">
   <!-- Header Title Banner -->
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
     <div>
@@ -359,19 +404,33 @@
             <div class="cat-upload-dropzone" onclick="document.getElementById('adminCatFileInput').click()">
               <i class="fa-solid fa-cloud-arrow-up" style="font-size:24px;color:#b45309;margin-bottom:6px;"></i>
               <div style="font-weight:700;color:#0f172a;font-size:13px;">Click to Upload Cover Image</div>
-              <div style="font-size:11px;color:#64748b;">PNG, JPG, WebP (Max 10MB)</div>
+              <div style="font-size:11px;color:#64748b;">PNG, JPG, WebP (Max 15MB)</div>
               <input type="file" id="adminCatFileInput" accept="image/*" style="display:none;" onchange="previewCatUploadFile(this)" />
             </div>
 
-            <div class="cat-preview-box" id="catPreviewBox">
-              <img id="catPreviewImg" src="" alt="Category Preview" />
+            <!-- Continuous Upload Status Indicator Message -->
+            <div id="catUploadStatusBox" style="display:none; align-items:center; gap:10px; margin-top:10px; padding:12px 16px; background:#fffbeb; border:1.5px solid #f59e0b; border-radius:10px; font-size:13px; font-weight:700; color:#b45309;">
+              <i class="fa-solid fa-spinner fa-spin" style="font-size:18px; color:#b45309;"></i>
+              <span id="catUploadStatusText">Image is uploading... Please wait</span>
+            </div>
+
+            <div class="cat-preview-box" id="catPreviewBox" style="position:relative; display:none;">
+              <div id="catPreviewLoadingOverlay" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.88); backdrop-filter:blur(3px); z-index:4; border-radius:inherit; align-items:center; justify-content:center; gap:8px; color:#b45309; font-size:13px; font-weight:700;">
+                <i class="fa-solid fa-spinner fa-spin" style="font-size:18px; color:#b45309;"></i>
+                <span>Image is loading...</span>
+              </div>
+              <img id="catPreviewImg" src="" alt="Category Preview" onerror="this.onerror=null; this.src='https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png';" />
+              <button type="button" onclick="clearCatPreview()" title="Remove Preview"
+                style="position:absolute; top:6px; right:6px; background:rgba(220,38,38,0.9); color:#fff; border:none; border-radius:50%; width:24px; height:24px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:12px; z-index:5;">
+                <i class="fa-solid fa-times"></i>
+              </button>
             </div>
           </div>
 
           <!-- PRESET / CUSTOM URL FALLBACK -->
           <div class="cat-form-group">
-            <label class="cat-form-label">Or Preset Asset / Custom Image URL</label>
-            <input type="text" id="adminCatImg" class="cat-form-input" placeholder="/assets/ivevar/exclusive_regal_star_diamond_ring.jpg" />
+            <label class="cat-form-label">Or Custom Cloudinary Image URL</label>
+            <input type="text" id="adminCatImg" class="cat-form-input" placeholder="https://res.cloudinary.com/..." oninput="previewCatUrl(this.value)" />
           </div>
 
           <button type="submit" class="cat-btn-submit" id="btnSaveCategory" style="background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#ffffff; margin-top:8px; margin-bottom:12px;">
@@ -420,8 +479,12 @@
     }
   }
 
+  const DEFAULT_CAT_IMAGE = 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png';
+
   function fixImgUrl(path) {
-    if (!path) return '/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';
+    if (!path || !path.trim()) return DEFAULT_CAT_IMAGE;
+    path = path.trim();
+    if (path.startsWith('/assets/') || path.startsWith('~/assets/')) return DEFAULT_CAT_IMAGE;
     if (path.startsWith('http://') || path.startsWith('https://')) return path;
     if (path.startsWith('~/')) return '/' + path.substring(2);
     if (!path.startsWith('/')) return '/' + path;
@@ -432,20 +495,127 @@
     loadAdminCategoriesTable();
   });
 
-  function previewCatUploadFile(input) {
+  function setCatPreviewSrc(url) {
+    const previewBox = document.getElementById('catPreviewBox');
+    const previewImg = document.getElementById('catPreviewImg');
+    const overlay = document.getElementById('catPreviewLoadingOverlay');
+    if (!previewBox || !previewImg) return;
+
+    if (url && url.trim()) {
+      const cleanUrl = fixImgUrl(url);
+      if (overlay) overlay.style.display = 'flex';
+      previewImg.onload = () => { if (overlay) overlay.style.display = 'none'; };
+      previewImg.onerror = () => { if (overlay) overlay.style.display = 'none'; };
+      previewImg.src = cleanUrl;
+      previewBox.style.display = 'block';
+      if (previewImg.complete && previewImg.naturalWidth > 0) {
+        if (overlay) overlay.style.display = 'none';
+      }
+    } else {
+      if (overlay) overlay.style.display = 'none';
+      previewBox.style.display = 'none';
+      previewImg.src = '';
+    }
+  }
+
+  async function previewCatUploadFile(input) {
     if (input.files && input.files[0]) {
       const file = input.files[0];
-      if (file.size > 10 * 1024 * 1024) {
-        alert('File size exceeds 10 MB limit.');
+      if (file.size > 15 * 1024 * 1024) {
+        showToast('File size exceeds 15 MB limit.', 'warning');
         input.value = '';
         return;
       }
       selectedCategoryFile = file;
       const previewBox = document.getElementById('catPreviewBox');
       const previewImg = document.getElementById('catPreviewImg');
-      previewImg.src = URL.createObjectURL(file);
+      const overlay = document.getElementById('catPreviewLoadingOverlay');
+      const statusBox = document.getElementById('catUploadStatusBox');
+      
+      const blobUrl = URL.createObjectURL(file);
+      if (overlay) overlay.style.display = 'flex';
+      previewImg.onload = () => { if (overlay) overlay.style.display = 'none'; };
+      previewImg.onerror = () => { if (overlay) overlay.style.display = 'none'; };
+      previewImg.src = blobUrl;
       previewBox.style.display = 'block';
+
+      // Continuously display "Image is uploading..." message
+      if (statusBox) {
+        statusBox.style.display = 'flex';
+        statusBox.style.background = '#fffbeb';
+        statusBox.style.borderColor = '#f59e0b';
+        statusBox.style.color = '#b45309';
+        statusBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size:18px; color:#b45309;"></i> <span>Image is uploading... Please wait</span>';
+      }
+      if (typeof showToast === 'function') {
+        showToast('Image is uploading... Please wait', 'info', 'Uploading Cover Image');
+      }
+
+      // Auto-upload to Cloudinary immediately to obtain dynamic HTTPS URL
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const uploadRes = await fetch('/api/catalogapi/upload-image?folder=sat_jewels/categories', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include'
+        });
+        const uploadData = await uploadRes.json();
+        if (uploadData.success && uploadData.imageUrl) {
+          selectedCategoryFile = null; // Mark as uploaded
+          document.getElementById('adminCatImg').value = uploadData.imageUrl;
+          setCatPreviewSrc(uploadData.imageUrl);
+          if (statusBox) {
+            statusBox.style.display = 'flex';
+            statusBox.style.background = '#f0fdf4';
+            statusBox.style.borderColor = '#86efac';
+            statusBox.style.color = '#15803d';
+            statusBox.innerHTML = '<i class="fa-solid fa-circle-check" style="font-size:18px; color:#16a34a;"></i> <span>Image uploaded successfully to Cloudinary!</span>';
+            setTimeout(() => { if (statusBox) statusBox.style.display = 'none'; }, 4000);
+          }
+          if (typeof showToast === 'function') {
+            showToast('Category image uploaded to Cloudinary!', 'success');
+          }
+        } else {
+          if (statusBox) {
+            statusBox.style.display = 'flex';
+            statusBox.style.background = '#fef2f2';
+            statusBox.style.borderColor = '#fca5a5';
+            statusBox.style.color = '#b91c1c';
+            statusBox.innerHTML = '<i class="fa-solid fa-circle-xmark" style="font-size:18px; color:#dc2626;"></i> <span>Upload failed. You can still retry upon saving.</span>';
+          }
+          showToast(uploadData.message || 'Cloudinary upload failed.', 'warning');
+        }
+      } catch (err) {
+        console.warn('Auto upload note:', err);
+        if (statusBox) {
+          statusBox.style.display = 'flex';
+          statusBox.style.background = '#fef2f2';
+          statusBox.style.borderColor = '#fca5a5';
+          statusBox.style.color = '#b91c1c';
+          statusBox.innerHTML = '<i class="fa-solid fa-circle-xmark" style="font-size:18px; color:#dc2626;"></i> <span>Upload error: ' + err.message + '</span>';
+        }
+      }
     }
+  }
+
+  function previewCatUrl(url) {
+    if (url && url.trim()) {
+      setCatPreviewSrc(url);
+    } else if (!selectedCategoryFile) {
+      setCatPreviewSrc('');
+    }
+  }
+
+  function clearCatPreview() {
+    selectedCategoryFile = null;
+    const fileInput = document.getElementById('adminCatFileInput');
+    if (fileInput) fileInput.value = '';
+    const urlInput = document.getElementById('adminCatImg');
+    if (urlInput) urlInput.value = '';
+    setCatPreviewSrc('');
+    const statusBox = document.getElementById('catUploadStatusBox');
+    if (statusBox) statusBox.style.display = 'none';
   }
 
   async function loadAdminCategoriesTable() {
@@ -484,7 +654,16 @@
 
         return `
           <tr>
-            <td style="text-align:center;"><img src="${cleanImg}" class="cat-table-img" alt="${c.name}" /></td>
+            <td style="text-align:center;">
+              <div style="position:relative; width:48px; height:48px; margin:0 auto; border-radius:8px; overflow:hidden; background:#f8fafc; border:1px solid #e2e8f0; display:flex; align-items:center; justify-content:center;">
+                <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#f8fafc; color:#b45309; font-size:10px; font-weight:700;">
+                  <i class="fa-solid fa-spinner fa-spin"></i>
+                </div>
+                <img src="${cleanImg}" class="cat-table-img" alt="${c.name}" loading="lazy" style="position:relative; z-index:1; width:100%; height:100%; object-fit:cover;"
+                     onload="const ov=this.previousElementSibling; if(ov) ov.style.display='none';"
+                     onerror="this.onerror=null; this.src=DEFAULT_CAT_IMAGE; const ov=this.previousElementSibling; if(ov) ov.style.display='none';" />
+              </div>
+            </td>
             <td>
               <div style="font-weight:700;font-size:14px;color:#0f172a;">${c.name}</div>
               <div style="font-size:12px;color:#b45309;margin-top:2px;font-weight:600;">
@@ -555,6 +734,12 @@
   async function handleAddNewCategory(e) {
     e.preventDefault();
     const btn = document.getElementById('btnSaveCategory');
+    const existingId = document.getElementById('adminCatId').value.trim();
+    const isEdit = !!existingId;
+    const defaultBtnHtml = isEdit 
+      ? '<i class="fa-solid fa-cloud-arrow-up"></i> Update Category Image &amp; Details'
+      : '<i class="fa-solid fa-plus-circle"></i> Save &amp; Publish New Category';
+
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Database...';
 
@@ -562,31 +747,72 @@
       let finalImgUrl = document.getElementById('adminCatImg').value.trim();
 
       if (selectedCategoryFile) {
-        const formData = new FormData();
-        formData.append('file', selectedCategoryFile);
-        const uploadRes = await fetch('/api/catalogapi/upload-image?folder=sat_jewels/categories', {
-          method: 'POST',
-          body: formData
-        });
-        const uploadData = await uploadRes.json();
-        if (uploadData.success && uploadData.imageUrl) {
-          finalImgUrl = uploadData.imageUrl;
+        const statusBox = document.getElementById('catUploadStatusBox');
+        if (statusBox) {
+          statusBox.style.display = 'flex';
+          statusBox.style.background = '#fffbeb';
+          statusBox.style.borderColor = '#f59e0b';
+          statusBox.style.color = '#b45309';
+          statusBox.innerHTML = '<i class="fa-solid fa-spinner fa-spin" style="font-size:18px; color:#b45309;"></i> <span>Image is uploading... Please wait</span>';
+        }
+        showToast('Image is uploading... Please wait', 'info', 'Uploading Cover Image');
+        try {
+          const formData = new FormData();
+          formData.append('file', selectedCategoryFile);
+          const uploadRes = await fetch('/api/catalogapi/upload-image?folder=sat_jewels/categories', {
+            method: 'POST',
+            body: formData,
+            credentials: 'include'
+          });
+          const uploadData = await uploadRes.json();
+          if (uploadData.success && uploadData.imageUrl) {
+            finalImgUrl = uploadData.imageUrl;
+            document.getElementById('adminCatImg').value = uploadData.imageUrl;
+            if (statusBox) {
+              statusBox.style.display = 'flex';
+              statusBox.style.background = '#f0fdf4';
+              statusBox.style.borderColor = '#86efac';
+              statusBox.style.color = '#15803d';
+              statusBox.innerHTML = '<i class="fa-solid fa-circle-check" style="font-size:18px; color:#16a34a;"></i> <span>Image uploaded successfully!</span>';
+              setTimeout(() => { if (statusBox) statusBox.style.display = 'none'; }, 3000);
+            }
+          } else {
+            showToast(uploadData.message || 'Image upload failed. Please try again.', 'error');
+            btn.disabled = false;
+            btn.innerHTML = defaultBtnHtml;
+            return;
+          }
+        } catch (uploadErr) {
+          showToast('Image upload failed: ' + uploadErr.message, 'error');
+          btn.disabled = false;
+          btn.innerHTML = defaultBtnHtml;
+          return;
         }
       }
 
       if (!finalImgUrl) {
-        finalImgUrl = 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png';
+        showToast('Please upload a cover image for this category.', 'warning');
+        btn.disabled = false;
+        btn.innerHTML = defaultBtnHtml;
+        return;
       }
 
-      const existingId = document.getElementById('adminCatId').value.trim();
       const catName = document.getElementById('adminCatName').value.trim();
+      if (!catName) {
+        showToast('Please enter Category Name.', 'warning');
+        btn.disabled = false;
+        btn.innerHTML = defaultBtnHtml;
+        return;
+      }
+
       const generatedSlug = catName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const catType = document.getElementById('adminCategoryType').value;
       const parentId = catType === 'Sub Category' ? (document.getElementById('adminParentId').value || null) : null;
 
       const categoryPayload = {
-        id: existingId || generatedSlug || ('cat-' + Date.now()),
+        id: existingId ? existingId : "0",
         name: catName,
+        slug: generatedSlug,
         parentId: parentId,
         categoryType: catType,
         subCategoryName: catName,
@@ -602,42 +828,53 @@
       const saveRes = await fetch('/api/catalogapi/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(categoryPayload)
+        body: JSON.stringify(categoryPayload),
+        credentials: 'include'
       });
 
       const saveData = await saveRes.json();
-      if (saveRes.ok) {
-        showToast(`Category "${catName}" published to database!`, 'success', 'Saved Successfully');
+      if (saveRes.ok && saveData.success) {
+        showToast(saveData.message || `Category "${catName}" saved successfully!`, 'success', 'Saved Successfully');
         document.getElementById('addCategoryForm').reset();
         document.getElementById('adminCatId').value = '';
-        document.getElementById('catPreviewBox').style.display = 'none';
-        selectedCategoryFile = null;
+        clearCatPreview();
         btn.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Save &amp; Publish New Category';
         loadAdminCategoriesTable();
       } else {
-        showToast(saveData.message || 'Error saving category', 'error');
+        const errorText = saveData.message 
+          || (saveData.errors ? Object.values(saveData.errors).flat().join(', ') : '')
+          || saveData.title 
+          || 'Error saving category';
+        showToast(errorText, 'error');
+        btn.innerHTML = defaultBtnHtml;
       }
     } catch (e) {
-      showToast('Error connecting to database endpoint.', 'error');
+      showToast('Error connecting to database endpoint: ' + (e.message || e), 'error');
+      btn.innerHTML = defaultBtnHtml;
     } finally {
       btn.disabled = false;
     }
   }
 
   function editCategory(id) {
-    const cat = (window.adminCategoriesCache || []).find(c => c.id == id || c.name == id);
+    const cat = (window.adminCategoriesCache || []).find(c => 
+      String(c.id).toLowerCase() === String(id).toLowerCase() || 
+      (c.name && c.name.toLowerCase() === String(id).toLowerCase())
+    );
     if (!cat) return;
+
+    selectedCategoryFile = null;
+    const fileInput = document.getElementById('adminCatFileInput');
+    if (fileInput) fileInput.value = '';
 
     document.getElementById('adminCatId').value = cat.id;
     document.getElementById('adminCatName').value = cat.name;
     if (document.getElementById('adminCatSub')) document.getElementById('adminCatSub').value = cat.subtitle || '';
     if (document.getElementById('adminCatBadge')) document.getElementById('adminCatBadge').value = cat.badge || 'Popular';
-    if (document.getElementById('adminCatImg')) document.getElementById('adminCatImg').value = cat.imageUrl || '';
     
-    if (cat.imageUrl) {
-      document.getElementById('catPreviewImg').src = cat.imageUrl;
-      document.getElementById('catPreviewBox').style.display = 'block';
-    }
+    const catUrl = (cat.imageUrl || '').trim();
+    if (document.getElementById('adminCatImg')) document.getElementById('adminCatImg').value = catUrl;
+    setCatPreviewSrc(catUrl);
 
     const btn = document.getElementById('btnSaveCategory');
     if (btn) btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Update Category Image &amp; Details';

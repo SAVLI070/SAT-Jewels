@@ -530,22 +530,34 @@ namespace SAT1.BAL
         public class OrderStatusCountsDto
         {
             public int TotalCount { get; set; }
+            public int PendingCount { get; set; }
             public int PaidCount { get; set; }
             public int DispatchedCount { get; set; }
             public int InTransitCount { get; set; }
             public int DeliveredCount { get; set; }
         }
 
-        public async Task<OrderStatusCountsDto> GetOrderStatusCountsAsync()
+        public async Task<OrderStatusCountsDto> GetOrderStatusCountsAsync(string? userId = null, string? userEmail = null)
         {
-            var statusSummaries = await _context.Orders
-                .AsNoTracking()
+            var query = _context.Orders.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(userId) || !string.IsNullOrWhiteSpace(userEmail))
+            {
+                var uId = userId?.Trim();
+                var email = userEmail?.Trim().ToLower();
+                query = query.Where(o => 
+                    (!string.IsNullOrEmpty(uId) && o.UserId == uId) || 
+                    (!string.IsNullOrEmpty(email) && o.CustomerEmail.ToLower() == email));
+            }
+
+            var statusSummaries = await query
                 .Select(o => new { o.OrderStatus, o.CurrentTrackingStatus })
                 .ToListAsync();
 
             return new OrderStatusCountsDto
             {
                 TotalCount = statusSummaries.Count,
+                PendingCount = statusSummaries.Count(o => o.OrderStatus.Contains("Pending", StringComparison.OrdinalIgnoreCase)),
                 PaidCount = statusSummaries.Count(o => o.OrderStatus.Contains("Paid", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Completed", StringComparison.OrdinalIgnoreCase)),
                 DispatchedCount = statusSummaries.Count(o => o.OrderStatus.Contains("Dispatched", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Booked", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Shipped", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && (o.CurrentTrackingStatus.Contains("Dispatched", StringComparison.OrdinalIgnoreCase) || o.CurrentTrackingStatus.Contains("Booked", StringComparison.OrdinalIgnoreCase) || o.CurrentTrackingStatus.Contains("Shipped", StringComparison.OrdinalIgnoreCase)))),
                 InTransitCount = statusSummaries.Count(o => o.OrderStatus.Contains("Transit", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.Contains("Transit", StringComparison.OrdinalIgnoreCase))),
@@ -553,11 +565,20 @@ namespace SAT1.BAL
             };
         }
 
-        public async Task<List<Order>> GetAllOrdersWithTrackingAsync(string? statusFilter = null, string? search = null)
+        public async Task<List<Order>> GetAllOrdersWithTrackingAsync(string? statusFilter = null, string? search = null, string? userId = null, string? userEmail = null)
         {
             var query = _context.Orders
                 .Include(o => o.TrackingHistory)
                 .AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(userId) || !string.IsNullOrWhiteSpace(userEmail))
+            {
+                var uId = userId?.Trim();
+                var email = userEmail?.Trim().ToLower();
+                query = query.Where(o => 
+                    (!string.IsNullOrEmpty(uId) && o.UserId == uId) || 
+                    (!string.IsNullOrEmpty(email) && o.CustomerEmail.ToLower() == email));
+            }
 
             if (!string.IsNullOrWhiteSpace(statusFilter) && !statusFilter.Equals("all", StringComparison.OrdinalIgnoreCase))
             {
@@ -567,6 +588,10 @@ namespace SAT1.BAL
                     query = query.Where(o => 
                         o.OrderStatus.ToLower().Contains("paid") || 
                         o.OrderStatus.ToLower().Contains("completed"));
+                }
+                else if (cleanStatus == "pending")
+                {
+                    query = query.Where(o => o.OrderStatus.ToLower().Contains("pending"));
                 }
                 else if (cleanStatus == "shipmentbooked" || cleanStatus == "dispatched")
                 {
@@ -609,11 +634,20 @@ namespace SAT1.BAL
             return await query.OrderByDescending(o => o.CreatedAt).ToListAsync();
         }
 
-        public async Task<(List<Order> Orders, int TotalCount)> GetOrdersPagedAsync(string? statusFilter = null, string? search = null, int page = 1, int pageSize = 15)
+        public async Task<(List<Order> Orders, int TotalCount)> GetOrdersPagedAsync(string? statusFilter = null, string? search = null, string? userId = null, string? userEmail = null, int page = 1, int pageSize = 15)
         {
             var query = _context.Orders
                 .Include(o => o.TrackingHistory)
                 .AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(userId) || !string.IsNullOrWhiteSpace(userEmail))
+            {
+                var uId = userId?.Trim();
+                var email = userEmail?.Trim().ToLower();
+                query = query.Where(o => 
+                    (!string.IsNullOrEmpty(uId) && o.UserId == uId) || 
+                    (!string.IsNullOrEmpty(email) && o.CustomerEmail.ToLower() == email));
+            }
 
             if (!string.IsNullOrWhiteSpace(statusFilter) && !statusFilter.Equals("all", StringComparison.OrdinalIgnoreCase))
             {
@@ -623,6 +657,10 @@ namespace SAT1.BAL
                     query = query.Where(o => 
                         o.OrderStatus.ToLower().Contains("paid") || 
                         o.OrderStatus.ToLower().Contains("completed"));
+                }
+                else if (cleanStatus == "pending")
+                {
+                    query = query.Where(o => o.OrderStatus.ToLower().Contains("pending"));
                 }
                 else if (cleanStatus == "shipmentbooked" || cleanStatus == "dispatched" || cleanStatus == "shipped")
                 {
@@ -773,10 +811,63 @@ namespace SAT1.BAL
 
         public async Task<(List<UserWithStatsDto> Users, int TotalCount)> GetUsersPagedAsync(int page = 1, int pageSize = 15)
         {
-            var allUsers = await GetAllUsersWithStatsAsync();
-            int totalCount = allUsers.Count;
-            var paged = allUsers.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-            return (paged, totalCount);
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 15;
+
+            int totalCount = await _context.Users.CountAsync();
+            var pagedUsers = await _context.Users
+                .AsNoTracking()
+                .OrderByDescending(u => u.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            if (pagedUsers.Count == 0)
+            {
+                return (new List<UserWithStatsDto>(), totalCount);
+            }
+
+            var userIds = pagedUsers.Select(u => u.Id).ToHashSet();
+            var userEmails = pagedUsers.Select(u => u.Email.ToLower()).ToHashSet();
+
+            var relevantOrders = await _context.Orders
+                .AsNoTracking()
+                .Where(o => (!string.IsNullOrEmpty(o.UserId) && userIds.Contains(o.UserId)) ||
+                            (!string.IsNullOrEmpty(o.CustomerEmail) && userEmails.Contains(o.CustomerEmail.ToLower())))
+                .ToListAsync();
+
+            var result = new List<UserWithStatsDto>();
+            foreach (var u in pagedUsers)
+            {
+                var uOrders = relevantOrders.Where(o =>
+                    (!string.IsNullOrWhiteSpace(o.UserId) && o.UserId == u.Id) ||
+                    (!string.IsNullOrWhiteSpace(o.CustomerEmail) && o.CustomerEmail.Equals(u.Email, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+
+                var paidOrders = uOrders.Where(o =>
+                    !string.IsNullOrWhiteSpace(o.OrderStatus) &&
+                    !o.OrderStatus.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) &&
+                    !o.OrderStatus.Equals("Pending", StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+
+                var lastOrder = uOrders.OrderByDescending(o => o.CreatedAt).FirstOrDefault();
+
+                result.Add(new UserWithStatsDto
+                {
+                    Id = u.Id,
+                    FullName = string.IsNullOrWhiteSpace(u.FullName) ? "Valued Client" : u.FullName,
+                    Email = u.Email,
+                    Phone = u.Phone,
+                    Role = u.Role,
+                    CreatedAt = u.CreatedAt,
+                    TotalOrders = uOrders.Count,
+                    LifetimeSpendUSD = paidOrders.Sum(o => o.TotalAmountUSD),
+                    LastOrderNumber = lastOrder?.OrderNumber ?? "None",
+                    LastOrderStatus = lastOrder?.OrderStatus ?? "No Orders"
+                });
+            }
+
+            return (result, totalCount);
         }
 
         public async Task<bool> DeleteProductAsync(string id)

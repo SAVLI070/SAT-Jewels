@@ -83,7 +83,7 @@ namespace SAT1.Controllers
                 return RedirectToAction("MyAccount", "Account");
             }
 
-            // IDOR Protection: Verify caller is owner or admin; otherwise mask customer PII
+            // IDOR Protection: Verify caller is owner or admin
             bool isAuthorized = false;
             if (User.Identity?.IsAuthenticated == true)
             {
@@ -101,17 +101,11 @@ namespace SAT1.Controllers
 
             if (!isAuthorized)
             {
-                // Mask sensitive customer PII to prevent data harvesting via guessed Order IDs
-                order.ShippingStreet = "Confidential Delivery Address";
-                if (!string.IsNullOrWhiteSpace(order.ShippingPhone) && order.ShippingPhone.Length >= 4)
+                if (User.Identity?.IsAuthenticated != true)
                 {
-                    order.ShippingPhone = "***-***-" + order.ShippingPhone.Substring(order.ShippingPhone.Length - 4);
+                    return RedirectToAction("SignIn", "Account", new { returnUrl = Url.Action("Confirmation", "Order", new { orderId }) });
                 }
-                if (!string.IsNullOrEmpty(order.CustomerEmail) && order.CustomerEmail.Contains('@'))
-                {
-                    var parts = order.CustomerEmail.Split('@');
-                    order.CustomerEmail = (parts[0].Length > 2 ? parts[0].Substring(0, 2) : "*") + "***@" + parts[1];
-                }
+                return RedirectToAction("MyAccount", "Account");
             }
 
             return View(order);

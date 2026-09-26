@@ -212,7 +212,8 @@ namespace SAT1.BAL
 
             if (!string.IsNullOrWhiteSpace(status) && !status.Equals("All", StringComparison.OrdinalIgnoreCase))
             {
-                query = query.Where(r => r.Status == status);
+                var s = status.Trim().ToLower();
+                query = query.Where(r => r.Status.ToLower() == s);
             }
 
             int totalCount = await query.CountAsync();

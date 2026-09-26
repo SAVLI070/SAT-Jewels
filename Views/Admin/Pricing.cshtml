@@ -204,7 +204,7 @@
             <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
               <div class="pricing-offset-box">
                 <span style="color: #64748b; font-weight: 700; font-size: 12px; margin-right: 2px;">+$</span>
-                <input type="number" step="10" min="0" class="rule-offset-input" value="@metal.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" />
+                <input type="number" step="any" min="0" class="rule-offset-input" value="@metal.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" />
                 <span style="color: #94a3b8; font-size: 10px; margin-left: 2px;">USD</span>
               </div>
 
@@ -246,7 +246,7 @@
             <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
               <div class="pricing-offset-box">
                 <span style="color: #64748b; font-weight: 700; font-size: 12px; margin-right: 2px;">+$</span>
-                <input type="number" step="50" min="0" class="rule-offset-input" value="@carat.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" />
+                <input type="number" step="any" min="0" class="rule-offset-input" value="@carat.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" />
                 <span style="color: #94a3b8; font-size: 10px; margin-left: 2px;">USD</span>
               </div>
 
@@ -288,7 +288,7 @@
             <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
               <div class="pricing-offset-box">
                 <span style="color: #64748b; font-weight: 700; font-size: 12px; margin-right: 2px;">+$</span>
-                <input type="number" step="5" min="0" class="rule-offset-input" value="@size.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" />
+                <input type="number" step="any" min="0" class="rule-offset-input" value="@size.PriceOffsetUSD.ToString("F0")" onchange="updateLiveSimulator()" />
                 <span style="color: #94a3b8; font-size: 10px; margin-left: 2px;">USD</span>
               </div>
 
@@ -335,7 +335,7 @@
 
       <div style="margin-bottom: 20px;">
         <label style="display: block; font-size: 12px; font-weight: 700; color: #475569; margin-bottom: 6px;">Price Offset (USD)</label>
-        <input type="number" step="5" id="newRuleOffset" required placeholder="e.g. 50" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px;" />
+        <input type="number" step="any" id="newRuleOffset" required placeholder="e.g. 50" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 14px;" />
       </div>
 
       <div style="display: flex; justify-content: flex-end; gap: 10px;">

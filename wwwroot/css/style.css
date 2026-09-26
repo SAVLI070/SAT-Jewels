@@ -602,9 +602,9 @@ a {
 }
 
 .nav-inner {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
   width: 100%;
 }
@@ -2965,9 +2965,26 @@ a {
     margin-top: 2px !important;
     opacity: 0.65 !important;
   }
-  .collections-grid, .how-grid, .why-grid { grid-template-columns: 1fr; }
+  .nav-inner {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    width: 100% !important;
+  }
+  .sat-nav-brand-wrap {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 150px) !important;
+    overflow: hidden !important;
+  }
   .nav-links, .btn-ghost, .btn-primary {
     display: none;
+  }
+  .nav-actions {
+    flex-shrink: 0 !important;
+    margin-left: auto !important;
+    display: flex !important;
+    align-items: center !important;
   }
   .hamburger {
     display: block;

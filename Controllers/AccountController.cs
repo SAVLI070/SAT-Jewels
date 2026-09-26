@@ -57,6 +57,7 @@ namespace SAT1.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> HandleSignIn(string email, string password, bool rememberMe = false, string? returnUrl = null)
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
@@ -100,7 +101,7 @@ namespace SAT1.Controllers
                 return Redirect("/admin");
             }
 
-            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+            if (!string.IsNullOrWhiteSpace(returnUrl) && (Url.IsLocalUrl(returnUrl) || (returnUrl.StartsWith("/") && !returnUrl.StartsWith("//") && !returnUrl.StartsWith("/\\"))))
             {
                 return Redirect(returnUrl);
             }
@@ -147,6 +148,7 @@ namespace SAT1.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> HandleSignUp(string fullName, string email, string phone, string password, string confirmPassword, string? returnUrl = null)
         {
             ViewData["InitialMode"] = "signup";
@@ -238,10 +240,25 @@ namespace SAT1.Controllers
                 return View("Auth");
             }
 
-            TempData["SuccessMessage"] = "Registration successful! Please sign in with your email and password.";
-            TempData["PreFillEmail"] = user.Email;
+            // Auto sign-in new client immediately
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id),
+                new Claim(ClaimTypes.Name, user.FullName),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Role, user.Role ?? "Client")
+            };
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+            var authProperties = new AuthenticationProperties { IsPersistent = false };
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
 
-            return RedirectToAction("SignIn", new { returnUrl });
+            if (!string.IsNullOrWhiteSpace(returnUrl) && (Url.IsLocalUrl(returnUrl) || (returnUrl.StartsWith("/") && !returnUrl.StartsWith("//") && !returnUrl.StartsWith("/\\"))))
+            {
+                return Redirect(returnUrl);
+            }
+
+            return Redirect("/Account/MyAccount");
         }
 
         [HttpGet]
@@ -249,15 +266,43 @@ namespace SAT1.Controllers
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            foreach (var cookie in Request.Cookies.Keys)
+            var deleteOptionsHttpOnly = new CookieOptions
             {
-                Response.Cookies.Delete(cookie);
+                Path = "/",
+                Expires = DateTimeOffset.UtcNow.AddDays(-1),
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax,
+                Secure = Request.IsHttps
+            };
+
+            var deleteOptionsPlain = new CookieOptions
+            {
+                Path = "/",
+                Expires = DateTimeOffset.UtcNow.AddDays(-1),
+                HttpOnly = false,
+                SameSite = SameSiteMode.Lax,
+                Secure = Request.IsHttps
+            };
+
+            var allCookieNames = new HashSet<string>(Request.Cookies.Keys, StringComparer.OrdinalIgnoreCase)
+            {
+                "SATJewel_Session_v5",
+                "SATJewel_AuthSession",
+                "SATJewel_AuthSession_v2",
+                "SATJewel_AuthSession_v3",
+                "SATJewel_AuthSession_v4",
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                ".AspNetCore.Cookies",
+                ".AspNetCore.Antiforgery"
+            };
+
+            foreach (var cookie in allCookieNames)
+            {
+                Response.Cookies.Delete(cookie, deleteOptionsHttpOnly);
+                Response.Cookies.Delete(cookie, deleteOptionsPlain);
             }
 
-            Response.Cookies.Delete("SATJewel_AuthSession");
-            Response.Cookies.Delete("SATJewel_AuthSession_v2");
-            Response.Cookies.Delete("SATJewel_AuthSession_v3");
-
+            Response.Headers["Clear-Site-Data"] = "\"cache\", \"cookies\", \"storage\"";
             Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0, private";
             Response.Headers["Pragma"] = "no-cache";
             Response.Headers["Expires"] = "-1";
@@ -367,6 +412,7 @@ namespace SAT1.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveAddress(UserAddress model)
         {
             if (User.Identity?.IsAuthenticated != true)
@@ -396,6 +442,7 @@ namespace SAT1.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAddress(string addressId)
         {
             if (User.Identity?.IsAuthenticated != true)
@@ -411,6 +458,7 @@ namespace SAT1.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> SetDefaultAddress(string addressId)
         {
             if (User.Identity?.IsAuthenticated != true)

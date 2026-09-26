@@ -219,6 +219,10 @@ namespace SAT1.BAL
                 int count = Math.Max(prodCount, catCount);
 
                 var cdnUrl = imageRules.GetValueOrDefault(c.CategoryId.ToString()) ?? imageRules.GetValueOrDefault(c.Id) ?? c.ImageUrl;
+                if (string.IsNullOrWhiteSpace(cdnUrl) || cdnUrl.StartsWith("/assets/") || cdnUrl.StartsWith("~/assets/"))
+                {
+                    cdnUrl = Category.GetDefaultImageUrl(c.CategoryId, c.Name, c.Slug);
+                }
 
                 result.Add(new CategoryAdminDto
                 {
@@ -274,6 +278,10 @@ namespace SAT1.BAL
             foreach (var c in categories)
             {
                 var cdnUrl = imageRules.GetValueOrDefault(c.CategoryId.ToString()) ?? imageRules.GetValueOrDefault(c.Id) ?? c.ImageUrl;
+                if (string.IsNullOrWhiteSpace(cdnUrl) || cdnUrl.StartsWith("/assets/") || cdnUrl.StartsWith("~/assets/"))
+                {
+                    cdnUrl = Category.GetDefaultImageUrl(c.CategoryId, c.Name, c.Slug);
+                }
                 var catIdLower = c.Id.ToLower();
                 var catSlugLower = c.Slug.ToLower();
                 var catNameLower = c.Name.ToLower();
@@ -352,6 +360,10 @@ namespace SAT1.BAL
                 int count = Math.Max(prodCount, catCount);
 
                 var cdnUrl = imageRules.GetValueOrDefault(c.CategoryId.ToString()) ?? imageRules.GetValueOrDefault(c.Id) ?? c.ImageUrl;
+                if (string.IsNullOrWhiteSpace(cdnUrl) || cdnUrl.StartsWith("/assets/") || cdnUrl.StartsWith("~/assets/"))
+                {
+                    cdnUrl = Category.GetDefaultImageUrl(c.CategoryId, c.Name, c.Slug);
+                }
 
                 result.Add(new CategoryAdminDto
                 {
@@ -396,7 +408,7 @@ namespace SAT1.BAL
             {
                 // If previous image was Cloudinary and changed, delete the old image to free up space
                 var oldRule = await _context.DynamicPricingRules
-                    .FirstOrDefaultAsync(r => r.RuleType == "CategoryImageUrl" && r.Code == existing.CategoryId.ToString());
+                    .FirstOrDefaultAsync(r => r.RuleType == "CategoryImageUrl" && (r.Code == existing.CategoryId.ToString() || r.Code == existing.Slug || r.Code == existing.Id));
                 var oldImgUrl = oldRule?.DisplayName ?? existing.ImageUrl;
 
                 if (!string.IsNullOrWhiteSpace(oldImgUrl) && oldImgUrl != category.ImageUrl && oldImgUrl.Contains("res.cloudinary.com"))
@@ -433,6 +445,8 @@ namespace SAT1.BAL
             }
             else
             {
+                await _adminBal.EnsureSequencesSyncedAsync();
+
                 _context.Categories.Add(category);
                 await _context.SaveChangesAsync();
 
@@ -570,12 +584,11 @@ namespace SAT1.BAL
             {
                 try
                 {
-                    var allDb = await _context.CatalogItems
-                        .Where(i => i.IsActive)
+                    var filtered = await _context.CatalogItems
+                        .Where(i => i.IsActive && activeCatIds.Contains(i.CategoryId.ToLower()))
                         .OrderByDescending(i => i.CreatedAt)
                         .ToListAsync();
 
-                    var filtered = allDb.Where(i => activeCatIds.Contains(i.CategoryId.ToLower())).ToList();
                     if (filtered.Count > 0) return filtered;
                 }
                 catch { }
@@ -1083,26 +1096,23 @@ namespace SAT1.BAL
 
             if (catalogItem != null)
             {
-                // Query dedicated MetalOptions and CaratOptions database tables
-                var dbMetals = (await _context.MetalOptions
-                    .Where(m => m.CatalogItemId == catalogItem.Id)
-                    .ToListAsync())
-                    .OrderBy(m => m.DisplayOrder)
-                    .ToList();
-
-                var dbCarats = (await _context.CaratOptions
-                    .Where(c => c.CatalogItemId == catalogItem.Id)
-                    .ToListAsync())
-                    .OrderBy(c => c.DisplayOrder)
-                    .ToList();
-
-                if (dbMetals.Any())
+                // Optional: Query dedicated MetalOptions and CaratOptions if available in DB
+                try
                 {
-                    catalogItem.MetalOptions = string.Join("|", dbMetals.Select(m => $"{m.MetalName} ({(m.PriceOffsetUSD >= 0 ? "+" : "")}{m.PriceOffsetUSD:F0})"));
+                    var dbMetals = await _context.MetalOptions
+                        .AsNoTracking()
+                        .Where(m => m.CatalogItemId == catalogItem.Id)
+                        .OrderBy(m => m.DisplayOrder)
+                        .ToListAsync();
+
+                    if (dbMetals.Any())
+                    {
+                        catalogItem.MetalOptions = string.Join("|", dbMetals.Select(m => $"{m.MetalName} ({(m.PriceOffsetUSD >= 0 ? "+" : "")}{m.PriceOffsetUSD:F0})"));
+                    }
                 }
-                if (dbCarats.Any())
+                catch
                 {
-                    catalogItem.CaratOptions = string.Join("|", dbCarats.Select(c => $"{c.CaratLabel} ({(c.PriceOffsetUSD >= 0 ? "+" : "")}{c.PriceOffsetUSD:F0})"));
+                    // Fall back to pre-existing catalogItem.MetalOptions and CaratOptions
                 }
 
                 return catalogItem;

@@ -13,6 +13,7 @@ namespace SAT1.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Route("api/products")]
+    [Route("api/product")]
     public class ProductApiController : ControllerBase
     {
         private readonly SatJewelDbContext _context;
@@ -504,6 +505,57 @@ namespace SAT1.Controllers
             }
 
             return Ok(new { success = true, message, review });
+        }
+
+        // =========================================================================
+        // 8.1 POST /api/products/upload-review-photo or /api/product/upload-review-photo
+        // Allows customer to upload real photos with their product review
+        // =========================================================================
+        [HttpPost("upload-review-photo")]
+        [HttpPost("reviews/upload-photo")]
+        public async Task<IActionResult> UploadReviewPhoto([FromServices] Microsoft.AspNetCore.Hosting.IWebHostEnvironment env, IFormFile? file)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return BadRequest(new { success = false, message = "No image file provided." });
+            }
+
+            const long maxBytes = 10 * 1024 * 1024; // 10MB
+            if (file.Length > maxBytes)
+            {
+                return BadRequest(new { success = false, message = "Image file exceeds 10MB limit." });
+            }
+
+            var ext = System.IO.Path.GetExtension(file.FileName).ToLowerInvariant();
+            var allowedExts = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            if (!allowedExts.Contains(ext))
+            {
+                return BadRequest(new { success = false, message = "Only JPG, PNG, and WebP images are allowed." });
+            }
+
+            try
+            {
+                var webRoot = env.WebRootPath ?? System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "wwwroot");
+                var folder = System.IO.Path.Combine(webRoot, "uploads", "reviews");
+                if (!System.IO.Directory.Exists(folder))
+                {
+                    System.IO.Directory.CreateDirectory(folder);
+                }
+
+                var fileName = $"rev_{Guid.NewGuid():N}{ext}";
+                var fullPath = System.IO.Path.Combine(folder, fileName);
+                using (var stream = new System.IO.FileStream(fullPath, System.IO.FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var photoUrl = $"/uploads/reviews/{fileName}";
+                return Ok(new { success = true, photoUrl });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { success = false, message = "Failed to save photo: " + ex.Message });
+            }
         }
     }
 }
