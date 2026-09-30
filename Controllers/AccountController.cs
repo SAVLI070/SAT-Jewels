@@ -109,6 +109,75 @@ namespace SAT1.Controllers
             return Redirect("/");
         }
 
+        public class GoogleAuthRequest
+        {
+            public string? Credential { get; set; }
+            public string? ReturnUrl { get; set; }
+        }
+
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        public async Task<IActionResult> GoogleSignIn([FromBody] GoogleAuthRequest req)
+        {
+            if (string.IsNullOrWhiteSpace(req?.Credential))
+            {
+                return Json(new { success = false, message = "Missing Google identity credential token." });
+            }
+
+            try
+            {
+                var parts = req.Credential.Split('.');
+                if (parts.Length < 2)
+                {
+                    return Json(new { success = false, message = "Invalid credential payload format." });
+                }
+
+                var base64 = parts[1].Replace('-', '+').Replace('_', '/');
+                switch (base64.Length % 4)
+                {
+                    case 2: base64 += "=="; break;
+                    case 3: base64 += "="; break;
+                }
+
+                var json = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(base64));
+                using var doc = System.Text.Json.JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                var email = root.TryGetProperty("email", out var e) ? e.GetString() : "";
+                var name = root.TryGetProperty("name", out var n) ? n.GetString() : "";
+                var sub = root.TryGetProperty("sub", out var s) ? s.GetString() : "";
+
+                if (string.IsNullOrEmpty(email))
+                {
+                    return Json(new { success = false, message = "Unable to retrieve verified email from Google identity." });
+                }
+
+                var user = await _authBal.GetOrCreateGoogleUserAsync(email, name ?? "Valued Client", sub ?? "");
+
+                var claims = new List<Claim>
+                {
+                    new Claim(ClaimTypes.NameIdentifier, user.Id),
+                    new Claim(ClaimTypes.Name, user.FullName),
+                    new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.Role, user.Role ?? "Client")
+                };
+
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+                var redirectTarget = !string.IsNullOrWhiteSpace(req.ReturnUrl) && (Url.IsLocalUrl(req.ReturnUrl) || req.ReturnUrl.StartsWith("/")) 
+                    ? req.ReturnUrl 
+                    : "/Account/MyAccount";
+
+                return Json(new { success = true, redirectUrl = redirectTarget, message = $"Welcome back, {user.FullName}!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Google Sign-In failed: " + ex.Message });
+            }
+        }
+
 
 
         // Real-Time Duplicate Email and Phone Availability Verification

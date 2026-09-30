@@ -9,3 +9,5 @@ appsettings.*.json
 !appsettings.Development.json.template
 backups/
 *.sql
+wwwroot/uploads/
+scratch*

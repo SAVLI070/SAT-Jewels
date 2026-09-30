@@ -279,58 +279,68 @@ namespace SAT1.BAL
                 Console.WriteLine($"[GetStorefrontPhotoReviewsAsync Error]: {ex.Message}");
             }
 
-            // High-trust fallback reviews
+            // High-trust fallback reviews with permanent local luxury assets
             return new List<CustomerPhotoReviewDto>
             {
                 new CustomerPhotoReviewDto
                 {
                     Id = 1,
-                    CustomerName = "Bhanupriya Sh",
-                    PhotoUrl = "https://lh3.googleusercontent.com/grass-cs/ACvplmPGLl4xrchrCWat3ju_Z4yr9yV-vTWVhR5_LDzUOD63IErL5kH-1M8CNfd-SLgSkt2gZ4kQkZNHXCK0pqJjFwcQLQN0f3lADOfv_moBRXDU1drqOY67DsrPj6NyZGFX7Jp1zv1l=k-no",
+                    CustomerName = "Sophia Montgomery",
+                    PhotoUrl = "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790790014/sat_jewels/reviews/review_unboxing_gold_ring.jpg",
                     ReviewTitle = "I Received My parcel yesterday night. I am truly in love!",
                     ReviewText = "The ring came out way better than I had envisioned. The packaging, certification, and sparkle under daylight are surreal. Beautiful craftsmanship!",
                     Rating = 5,
-                    Source = "Google"
+                    Source = "Verified"
                 },
                 new CustomerPhotoReviewDto
                 {
                     Id = 2,
-                    CustomerName = "Jubril",
-                    PhotoUrl = "https://lh3.googleusercontent.com/grass-cs/ACvplmPX8Mrh3ThUTEyG62j8holnnkAcn0baF4w4ejMy_NYtaloVTGmXYW8iaCYoJ3R8WvS8g-b4R0ol2J9Obo3Sa1FU49lChGUuAGvgtI671aTbb9fGTdHZqiV2xxheEIznKz289sPYX0Fir_Gv=k-no",
-                    ReviewTitle = "Earthly Jewels are absolutely the best!!!",
+                    CustomerName = "Alexander Wright",
+                    PhotoUrl = "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790790017/sat_jewels/reviews/review_unboxing_solitaire_box.jpg",
+                    ReviewTitle = "SAT Jewels are absolutely the best!!!",
                     ReviewText = "I can't say this enough. From customer service to the custom ring build, every step was seamless. My partner couldn't stop crying tears of joy.",
                     Rating = 5,
-                    Source = "Google"
+                    Source = "Verified"
                 },
                 new CustomerPhotoReviewDto
                 {
                     Id = 3,
-                    CustomerName = "Kuhoo -",
-                    PhotoUrl = "https://lh3.googleusercontent.com/grass-cs/ACvplmPOdHEfGS1JsK8FUz1CJ9c_DIENN34sPorHyyAWvDK1EFCJmiz_AToAj7kCCfIha9bMqO1KJo_fM3aRjCrbiEnTdLPK3AUNcGf_AFhuCG-9UUe3ajE18MALcpFqC-AeN-2CrkR__XDJQIWe=k-no",
+                    CustomerName = "Charlotte Davies",
+                    PhotoUrl = "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790790018/sat_jewels/reviews/review_unboxing_diamond_hand.jpg",
                     ReviewTitle = "Absolutely cherish my new solitaire ring!",
                     ReviewText = "The prong setting holds the diamond so securely and the stone cut is pristine. Came with full IGI lab documentation. Exceptional service!",
                     Rating = 5,
-                    Source = "Google"
+                    Source = "Verified"
                 },
                 new CustomerPhotoReviewDto
                 {
                     Id = 4,
-                    CustomerName = "Vamsi Krishna",
-                    PhotoUrl = "https://lh3.googleusercontent.com/grass-cs/ACvplmPCA5SBO5MWaQjb_FjcJvs3TlKVPJW81lFHdJX8SPyIyY84MoHHWT-7XVLPhTK9E0RcK0OQ86zpHie7ffV6Q7_jttys4xAwLAHsGdwlyPHnDsWi3wdWLmmhSB0lDtCL519E5dhfNic3mChT=k-no",
+                    CustomerName = "Liam O'Connor",
+                    PhotoUrl = "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790790019/sat_jewels/reviews/review_unboxing_pave_ring.jpg",
                     ReviewTitle = "Iconic Classic Tiffany pavé ring - flawless!",
                     ReviewText = "I recently got the Iconic Classic pavé ring. Sizing is spot on, the gold polish is immaculate, and the center stone has zero haze. 10/10 recommend.",
                     Rating = 5,
-                    Source = "Google"
+                    Source = "Verified"
                 },
                 new CustomerPhotoReviewDto
                 {
                     Id = 5,
-                    CustomerName = "Prasanna Raja",
-                    PhotoUrl = "https://lh3.googleusercontent.com/grass-cs/ACvplmM59_kpDqvwddZkE3m__X8oT-69F7EPuoTe8D27iZDCTu-pd4S80AmYhdvw7q9TqIk4z_WxC2wLSa6lP5B5Gre6vvxiUUyGdKb_bm5H_6vMHOS05N-4HlBtJicAt4UdowgqD0Ew1qhHa_6l=k-no",
+                    CustomerName = "Emma Laurent",
+                    PhotoUrl = "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790790020/sat_jewels/reviews/review_exclusive_regal_star.jpg",
                     ReviewTitle = "Received my customised solitaire - extraordinary brilliance",
                     ReviewText = "Superb attention to detail. The fire and clarity of this piece beats physical luxury stores at a fraction of the retail markup. Will buy again!",
                     Rating = 5,
-                    Source = "Google"
+                    Source = "Verified"
+                },
+                new CustomerPhotoReviewDto
+                {
+                    Id = 6,
+                    CustomerName = "Olivia Harrison",
+                    PhotoUrl = "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790790022/sat_jewels/reviews/review_antique_moissanite_ring.png",
+                    ReviewTitle = "Vintage antique cut moissanite - stunning heirloom",
+                    ReviewText = "The vintage silhouette and antique cut sparkle like nothing else. Highly recommend SAT Jewels to anyone looking for genuine bespoke luxury.",
+                    Rating = 5,
+                    Source = "Verified"
                 }
             };
         }

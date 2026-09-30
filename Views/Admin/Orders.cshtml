@@ -271,21 +271,20 @@
                       <i class="fa-solid fa-truck-fast"></i> Tracking
                     </button>
 
-                    @if (!string.IsNullOrWhiteSpace(o.ShippingPhone))
-                    {
-                      <button type="button" class="btn-quick-wa"
-                              data-number="@o.OrderNumber"
-                              data-name="@o.ShippingFullName"
-                              data-phone="@o.ShippingPhone"
-                              data-carrier="@o.CarrierName"
-                              data-awb="@o.TrackingNumber"
-                              data-url="@o.TrackingUrl"
-                              data-cert="@(o.IncludesPhysicalGiaCert ? "true" : "false")"
-                              onclick="sendWhatsAppFromBtn(this)"
-                              style="background: #25d366; color: #ffffff; border: none; padding: 7px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center;" title="Send Delivery Message via WhatsApp">
-                        <i class="fa-brands fa-whatsapp" style="font-size: 15px;"></i>
-                      </button>
-                    }
+                    <button type="button" class="btn-quick-msg-hub"
+                            data-id="@o.OrderId"
+                            data-number="@o.OrderNumber"
+                            data-name="@o.ShippingFullName"
+                            data-email="@o.CustomerEmail"
+                            data-phone="@o.ShippingPhone"
+                            data-carrier="@o.CarrierName"
+                            data-awb="@o.TrackingNumber"
+                            data-url="@o.TrackingUrl"
+                            data-cert="@(o.IncludesPhysicalGiaCert ? "true" : "false")"
+                            onclick="openCustomerContactHub(this)"
+                            style="background: #2563eb; color: #ffffff; border: none; padding: 7px 11px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="Send Notification (WhatsApp & Email)">
+                      <i class="fa-solid fa-paper-plane" style="font-size: 12px;"></i> Message
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -440,6 +439,81 @@
       </button>
     </div>
 
+  </div>
+</div>
+
+<!-- DEDICATED CUSTOMER CONTACT HUB MODAL (WHATSAPP & EMAIL WITH TRACKING) -->
+<div id="contactHubModal" style="display: none; position: fixed; inset: 0; z-index: 999999; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); align-items: center; justify-content: center; padding: 20px;" onclick="closeContactHubModal(event)">
+  <div style="background: #ffffff; border-radius: 18px; max-width: 560px; width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2); padding: 28px; position: relative;" onclick="event.stopPropagation()">
+    
+    <button type="button" onclick="closeContactHubModal()" style="position: absolute; top: 20px; right: 20px; background: #f1f5f9; border: none; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #64748b; cursor: pointer; transition: all 0.2s;">
+      &times;
+    </button>
+
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+      <div style="width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #2563eb; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+        <i class="fa-solid fa-paper-plane"></i>
+      </div>
+      <div>
+        <h3 id="hubModalTitle" style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0;">Customer Dispatch Notification</h3>
+        <p id="hubCustomerSubtitle" style="font-size: 12.5px; color: #64748b; margin: 3px 0 0;">WhatsApp &amp; Email Dispatch Messenger</p>
+      </div>
+    </div>
+
+    <!-- Editable Order Details Form -->
+    <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+          <label style="display: block; font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase;">Order Number</label>
+          <input type="text" id="hubOrderNumber" oninput="updateContactHubPreview()" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #0f172a;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase;">Courier / Carrier</label>
+          <input type="text" id="hubCarrier" oninput="updateContactHubPreview()" placeholder="DHL Express / FedEx / Blue Dart" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #0f172a;" />
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div>
+          <label style="display: block; font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase;">Customer WhatsApp</label>
+          <input type="text" id="hubPhone" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #0f172a;" />
+        </div>
+        <div>
+          <label style="display: block; font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase;">Customer Email</label>
+          <input type="email" id="hubEmail" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #0f172a;" />
+        </div>
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase;">Tracking Number (AWB)</label>
+        <input type="text" id="hubAwb" oninput="updateContactHubPreview()" placeholder="Enter AWB or Tracking ID..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #0f172a; font-family: monospace;" />
+      </div>
+
+      <div>
+        <label style="display: block; font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase;">Tracking Link</label>
+        <input type="url" id="hubTrackingUrl" oninput="updateContactHubPreview()" placeholder="https://www.dhl.com/en/express/tracking.html?AWB=..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #0f172a;" />
+      </div>
+
+      <input type="hidden" id="hubCustomerName" />
+      <input type="hidden" id="hubHasCert" />
+
+      <!-- Live Message Preview -->
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px;">
+        <div style="font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Message Preview</div>
+        <p id="hubMessagePreview" style="font-size: 12.5px; color: #334155; line-height: 1.55; margin: 0; white-space: pre-wrap; font-style: italic;"></p>
+      </div>
+    </div>
+
+    <!-- Dual Action Buttons -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <button type="button" onclick="sendContactHubWhatsApp()" style="background: #25d366; color: #ffffff; border: none; padding: 13px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37,211,102,0.3);">
+        <i class="fa-brands fa-whatsapp" style="font-size: 18px;"></i> Open WhatsApp
+      </button>
+
+      <button type="button" onclick="sendContactHubEmail()" style="background: #2563eb; color: #ffffff; border: none; padding: 13px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">
+        <i class="fa-solid fa-envelope" style="font-size: 16px;"></i> Send Email
+      </button>
+    </div>
   </div>
 </div>
 
@@ -628,5 +702,93 @@
       btn.disabled = false;
       btn.innerHTML = originalText;
     }
+  }
+
+  // --- DEDICATED CUSTOMER CONTACT HUB LOGIC ---
+  function openCustomerContactHub(btn) {
+    const num = btn.dataset.number || '';
+    const name = btn.dataset.name || 'Valued Customer';
+    const email = btn.dataset.email || '';
+    const phone = btn.dataset.phone || '';
+    const carrier = btn.dataset.carrier || 'DHL Express';
+    const awb = btn.dataset.awb || '';
+    const url = btn.dataset.url || '';
+    const cert = btn.dataset.cert;
+
+    document.getElementById('hubOrderNumber').value = num;
+    document.getElementById('hubCustomerName').value = name;
+    document.getElementById('hubEmail').value = email;
+    document.getElementById('hubPhone').value = phone;
+    document.getElementById('hubCarrier').value = carrier;
+    document.getElementById('hubAwb').value = awb;
+    document.getElementById('hubTrackingUrl').value = url;
+    document.getElementById('hubHasCert').value = cert === 'true' ? 'true' : 'false';
+
+    document.getElementById('hubModalTitle').innerText = `Order #${num} — Contact Customer`;
+    document.getElementById('hubCustomerSubtitle').innerText = `${name} • ${phone ? phone : 'No Phone'} • ${email ? email : 'No Email'}`;
+
+    updateContactHubPreview();
+    document.getElementById('contactHubModal').style.display = 'flex';
+  }
+
+  function closeContactHubModal(e) {
+    document.getElementById('contactHubModal').style.display = 'none';
+  }
+
+  function getContactHubMessage() {
+    const name = document.getElementById('hubCustomerName').value || 'Valued Customer';
+    const num = document.getElementById('hubOrderNumber').value || '';
+    const carrier = document.getElementById('hubCarrier').value.trim() || 'Courier';
+    const awb = document.getElementById('hubAwb').value.trim();
+    const url = document.getElementById('hubTrackingUrl').value.trim();
+    const hasCert = document.getElementById('hubHasCert').value === 'true';
+
+    let msg = `Hello ${name}! Greetings from SAT Fine Jewelry.\n\nYour bespoke order #${num} has been securely packaged and dispatched via ${carrier}.`;
+    if (awb) {
+      msg += `\nTracking ID: ${awb}`;
+    }
+    if (url) {
+      msg += `\nTrack your delivery: ${url}`;
+    }
+    if (hasCert) {
+      msg += `\nYour official sealed physical GIA Gemological Certificate is safely enclosed inside your parcel.`;
+    }
+    msg += `\n\nThank you for choosing SAT Jewel! Should you have any questions, our master artisans are here to assist.`;
+    return msg;
+  }
+
+  function updateContactHubPreview() {
+    const preview = document.getElementById('hubMessagePreview');
+    if (preview) {
+      preview.innerText = getContactHubMessage();
+    }
+  }
+
+  function sendContactHubWhatsApp() {
+    const phone = document.getElementById('hubPhone').value.trim();
+    if (!phone || phone.replace(/[^\d]/g, '').length < 7) {
+      alert('Please enter a valid mobile number with country code for WhatsApp.');
+      return;
+    }
+    let cleanPhone = phone.replace(/[^\d]/g, '');
+    if (cleanPhone.length === 10) {
+      cleanPhone = '1' + cleanPhone;
+    }
+    const msg = getContactHubMessage();
+    const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+    window.open(waUrl, '_blank');
+  }
+
+  function sendContactHubEmail() {
+    const email = document.getElementById('hubEmail').value.trim();
+    if (!email || !email.includes('@@')) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+    const num = document.getElementById('hubOrderNumber').value || '';
+    const subject = `Your SAT Jewel Order #${num} Has Been Dispatched!`;
+    const msg = getContactHubMessage();
+    const mailtoUrl = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(msg)}`;
+    window.location.href = mailtoUrl;
   }
 </script>

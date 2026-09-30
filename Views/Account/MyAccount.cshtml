@@ -699,7 +699,7 @@
             Our jewelry specialists are here to assist with custom ring sizing, shipment scheduling, care polishing, or private atelier inquiries.
           </p>
           <div class="space-y-2 pt-1">
-            <a class="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-full bg-gradient-to-r from-secondary to-primary-container text-on-primary font-label-md text-label-md font-semibold hover:brightness-105 transition-all shadow-[0_0_12px_rgba(212,175,55,0.2)]" href="https://wa.me/918320972779" target="_blank">
+            <a class="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-full bg-gradient-to-r from-secondary to-primary-container text-on-primary font-label-md text-label-md font-semibold hover:brightness-105 transition-all shadow-[0_0_12px_rgba(212,175,55,0.2)]" href="https://wa.me/917698727798" target="_blank">
               <span class="material-symbols-outlined text-[18px]">chat</span>
               <span>Message SAT Customer Care</span>
             </a>
@@ -727,7 +727,7 @@
       <span class="material-symbols-outlined text-[14px]">close</span>
     </button>
   </div>
-  <a aria-label="Direct SAT Customer Support on WhatsApp" class="w-13 h-13 p-3 rounded-full bg-[#25D366] text-surface-container-lowest flex items-center justify-center shadow-[0_4px_25px_rgba(37,211,102,0.4)] hover:scale-110 active:scale-95 transition-transform" href="https://wa.me/918320972779" target="_blank">
+  <a aria-label="Direct SAT Customer Support on WhatsApp" class="w-13 h-13 p-3 rounded-full bg-[#25D366] text-surface-container-lowest flex items-center justify-center shadow-[0_4px_25px_rgba(37,211,102,0.4)] hover:scale-110 active:scale-95 transition-transform" href="https://wa.me/917698727798" target="_blank">
     <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
       <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"></path>
     </svg>
@@ -840,7 +840,17 @@
         </div>
         <div>
           <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">Country</label>
-          <input type="text" id="addrInputCountry" name="Country" value="United States" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none" />
+          <select id="addrInputCountry" name="Country" onchange="onModalCountryChanged()" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none">
+            <option value="United States" selected>United States</option>
+            <option value="India">India</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Canada">Canada</option>
+            <option value="Australia">Australia</option>
+            <option value="United Arab Emirates">United Arab Emirates</option>
+            <option value="Singapore">Singapore</option>
+            <option value="Germany">Germany</option>
+            <option value="France">France</option>
+          </select>
         </div>
       </div>
 
@@ -856,12 +866,14 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
-          <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">City</label>
-          <input type="text" id="addrInputCity" name="City" required placeholder="City" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none" />
+          <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">State / Province</label>
+          <select id="addrInputState" name="State" required onchange="onModalStateChanged()" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none">
+          </select>
         </div>
         <div>
-          <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">State</label>
-          <input type="text" id="addrInputState" name="State" required placeholder="State" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none" />
+          <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">City</label>
+          <select id="addrInputCity" name="City" required class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none">
+          </select>
         </div>
         <div>
           <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">Postal Code</label>
@@ -1089,7 +1101,7 @@
     <div class="pt-2 border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between gap-3">
       <span class="text-xs text-on-surface-variant">All services are complimentary for verified SAT clients.</span>
       <div class="flex items-center gap-2 w-full sm:w-auto">
-        <a href="https://wa.me/918320972779?text=Hello%20SAT%20Jewels,%20I%20would%20like%20to%20schedule%20a%20Ring%20Care%20and%20Spa%20service%20for%20my%20commission." target="_blank" class="w-full sm:w-auto px-4 py-2 rounded-full bg-[#25D366] text-black font-semibold text-xs flex items-center justify-center gap-1.5 hover:brightness-105 transition-all shadow-md">
+        <a href="https://wa.me/917698727798?text=Hello%20SAT%20Jewels,%20I%20would%20like%20to%20schedule%20a%20Ring%20Care%20and%20Spa%20service%20for%20my%20commission." target="_blank" class="w-full sm:w-auto px-4 py-2 rounded-full bg-[#25D366] text-black font-semibold text-xs flex items-center justify-center gap-1.5 hover:brightness-105 transition-all shadow-md">
           <span>Book via WhatsApp</span>
         </a>
         <button type="button" onclick="closeRingCareModal()" class="px-4 py-2 rounded-full bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface text-xs font-semibold cursor-pointer">
@@ -1261,6 +1273,141 @@
     }
   });
 
+  const MODAL_GEO_DATA = {
+    "India": {
+      "Gujarat": ["Surat", "Ahmedabad", "Vadodara", "Rajkot", "Bhavnagar", "Navsari", "Gandhinagar", "Jamnagar"],
+      "Maharashtra": ["Mumbai", "Pune", "Nagpur", "Thane", "Nashik", "Aurangabad"],
+      "Delhi": ["New Delhi", "Central Delhi", "South Delhi", "North Delhi", "West Delhi"],
+      "Karnataka": ["Bengaluru", "Mysuru", "Mangaluru", "Hubballi", "Belagavi"],
+      "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem"],
+      "Telangana": ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar"],
+      "Rajasthan": ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Bikaner"],
+      "Uttar Pradesh": ["Lucknow", "Kanpur", "Agra", "Varanasi", "Noida", "Ghaziabad"],
+      "West Bengal": ["Kolkata", "Howrah", "Durgapur", "Siliguri", "Asansol"],
+      "Punjab": ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Mohali"],
+      "Haryana": ["Gurugram", "Faridabad", "Panipat", "Ambala", "Karnal"],
+      "Kerala": ["Kochi", "Thiruvananthapuram", "Kozhikode", "Thrissur"],
+      "Madhya Pradesh": ["Indore", "Bhopal", "Gwalior", "Jabalpur"],
+      "Goa": ["Panaji", "Margao", "Vasco da Gama", "Mapusa"]
+    },
+    "United States": {
+      "California": ["Los Angeles", "San Francisco", "San Diego", "San Jose", "Beverly Hills", "Irvine", "Sacramento"],
+      "New York": ["New York City", "Brooklyn", "Manhattan", "Queens", "Buffalo", "Rochester", "Albany"],
+      "Texas": ["Houston", "Dallas", "Austin", "San Antonio", "Fort Worth", "Plano"],
+      "Florida": ["Miami", "Orlando", "Tampa", "Fort Lauderdale", "Jacksonville", "Naples"],
+      "Illinois": ["Chicago", "Naperville", "Aurora", "Rockford", "Joliet"],
+      "Pennsylvania": ["Philadelphia", "Pittsburgh", "Allentown", "Erie"],
+      "Ohio": ["Columbus", "Cleveland", "Cincinnati", "Dayton"],
+      "Georgia": ["Atlanta", "Savannah", "Augusta", "Alpharetta"],
+      "North Carolina": ["Charlotte", "Raleigh", "Durham", "Greensboro"],
+      "New Jersey": ["Jersey City", "Newark", "Princeton", "Hoboken"],
+      "Washington": ["Seattle", "Bellevue", "Tacoma", "Spokane"],
+      "Massachusetts": ["Boston", "Cambridge", "Worcester", "Springfield"],
+      "Nevada": ["Las Vegas", "Reno", "Henderson", "Carson City"],
+      "Colorado": ["Denver", "Colorado Springs", "Boulder", "Aspen"],
+      "Arizona": ["Phoenix", "Scottsdale", "Tucson", "Mesa"],
+      "Virginia": ["Virginia Beach", "Richmond", "Arlington", "Alexandria"],
+      "Michigan": ["Detroit", "Grand Rapids", "Ann Arbor", "Lansing"]
+    },
+    "United Kingdom": {
+      "England": ["London", "Manchester", "Birmingham", "Leeds", "Liverpool", "Bristol", "Newcastle"],
+      "Scotland": ["Edinburgh", "Glasgow", "Aberdeen", "Dundee"],
+      "Wales": ["Cardiff", "Swansea", "Newport"],
+      "Northern Ireland": ["Belfast", "Derry", "Lisburn"]
+    },
+    "Canada": {
+      "Ontario": ["Toronto", "Ottawa", "Mississauga", "Hamilton", "London"],
+      "Quebec": ["Montreal", "Quebec City", "Laval", "Gatineau"],
+      "British Columbia": ["Vancouver", "Victoria", "Surrey", "Burnaby", "Richmond"],
+      "Alberta": ["Calgary", "Edmonton", "Red Deer", "Lethbridge"]
+    },
+    "Australia": {
+      "New South Wales": ["Sydney", "Newcastle", "Central Coast", "Wollongong"],
+      "Victoria": ["Melbourne", "Geelong", "Ballarat", "Bendigo"],
+      "Queensland": ["Brisbane", "Gold Coast", "Sunshine Coast", "Townsville", "Cairns"],
+      "Western Australia": ["Perth", "Mandurah", "Bunbury"],
+      "South Australia": ["Adelaide", "Mount Gambier"],
+      "Tasmania": ["Hobart", "Launceston"]
+    },
+    "United Arab Emirates": {
+      "Dubai": ["Dubai City", "Downtown Dubai", "Dubai Marina", "Palm Jumeirah", "Jumeirah Beach"],
+      "Abu Dhabi": ["Abu Dhabi City", "Al Ain", "Al Dhafra", "Yas Island"],
+      "Sharjah": ["Sharjah City", "Khor Fakkan", "Kalba"],
+      "Ajman": ["Ajman City"],
+      "Ras Al Khaimah": ["Ras Al Khaimah City"]
+    },
+    "Singapore": {
+      "Central": ["Singapore", "Orchard", "Marina Bay", "Downtown Core", "Bugis", "Novena"],
+      "East": ["Tampines", "Bedok", "Pasir Ris", "Changi"],
+      "West": ["Jurong East", "Clementi", "Bukit Batok"],
+      "North": ["Woodlands", "Yishun", "Sembawang"]
+    },
+    "Germany": {
+      "Bavaria": ["Munich", "Nuremberg", "Augsburg", "Regensburg"],
+      "Berlin": ["Berlin City", "Mitte", "Charlottenburg", "Pankow"],
+      "North Rhine-Westphalia": ["Cologne", "Düsseldorf", "Dortmund", "Essen", "Bonn"],
+      "Hesse": ["Frankfurt", "Wiesbaden", "Kassel", "Darmstadt"],
+      "Hamburg": ["Hamburg City", "Altona", "Wandsbek"]
+    },
+    "France": {
+      "Île-de-France": ["Paris", "Boulogne-Billancourt", "Saint-Denis", "Versailles"],
+      "Provence-Alpes-Côte d'Azur": ["Marseille", "Nice", "Toulon", "Aix-en-Provence", "Cannes"],
+      "Auvergne-Rhône-Alpes": ["Lyon", "Saint-Étienne", "Grenoble", "Villeurbanne"],
+      "Nouvelle-Aquitaine": ["Bordeaux", "Limoges", "Poitiers", "Pau"]
+    }
+  };
+
+  function populateModalStateCity(country, targetState, targetCity) {
+    const stateEl = document.getElementById('addrInputState');
+    if (!stateEl) return;
+    stateEl.innerHTML = '';
+    const states = MODAL_GEO_DATA[country] || {};
+    const stateKeys = Object.keys(states);
+    if (stateKeys.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = targetState || 'Standard';
+      opt.textContent = targetState || 'Standard';
+      stateEl.appendChild(opt);
+    } else {
+      stateKeys.forEach(st => {
+        const opt = document.createElement('option');
+        opt.value = st;
+        opt.textContent = st;
+        if (targetState && targetState.toLowerCase() === st.toLowerCase()) opt.selected = true;
+        stateEl.appendChild(opt);
+      });
+    }
+    onModalStateChanged(targetCity);
+  }
+
+  function onModalCountryChanged() {
+    const country = document.getElementById('addrInputCountry')?.value || 'United States';
+    populateModalStateCity(country);
+  }
+
+  function onModalStateChanged(targetCity) {
+    const country = document.getElementById('addrInputCountry')?.value || 'United States';
+    const state = document.getElementById('addrInputState')?.value || '';
+    const cityEl = document.getElementById('addrInputCity');
+    if (!cityEl) return;
+    cityEl.innerHTML = '';
+    const cities = (MODAL_GEO_DATA[country] && MODAL_GEO_DATA[country][state]) ? MODAL_GEO_DATA[country][state] : [];
+    if (cities.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = targetCity || 'Metro Area';
+      opt.textContent = targetCity || 'Metro Area';
+      cityEl.appendChild(opt);
+    } else {
+      cities.forEach(ct => {
+        const opt = document.createElement('option');
+        opt.value = ct;
+        opt.textContent = ct;
+        if (targetCity && targetCity.toLowerCase() === ct.toLowerCase()) opt.selected = true;
+        cityEl.appendChild(opt);
+      });
+    }
+  }
+
   // Address Modal Helpers
   function openAddressModal() {
     document.getElementById('addrModalTitle').textContent = 'Add Shipping Address';
@@ -1269,11 +1416,10 @@
     document.getElementById('addrInputPhone').value = '@phone';
     document.getElementById('addrInputStreet').value = '';
     document.getElementById('addrInputSuite').value = '';
-    document.getElementById('addrInputCity').value = '';
-    document.getElementById('addrInputState').value = '';
     document.getElementById('addrInputZip').value = '';
     document.getElementById('addrInputCountry').value = 'United States';
     document.getElementById('addrInputDefault').checked = false;
+    populateModalStateCity('United States', 'New York', 'New York City');
     document.getElementById('addressModal').style.display = 'flex';
   }
 
@@ -1285,11 +1431,11 @@
     document.getElementById('addrInputPhone').value = addr.Phone || '';
     document.getElementById('addrInputStreet').value = addr.StreetAddress || '';
     document.getElementById('addrInputSuite').value = addr.ApartmentSuite || '';
-    document.getElementById('addrInputCity').value = addr.City || '';
-    document.getElementById('addrInputState').value = addr.State || '';
     document.getElementById('addrInputZip').value = addr.PostalCode || '';
-    document.getElementById('addrInputCountry').value = addr.Country || 'United States';
+    const country = addr.Country || 'United States';
+    document.getElementById('addrInputCountry').value = country;
     document.getElementById('addrInputDefault').checked = !!addr.IsDefault;
+    populateModalStateCity(country, addr.State, addr.City);
     document.getElementById('addressModal').style.display = 'flex';
   }
 

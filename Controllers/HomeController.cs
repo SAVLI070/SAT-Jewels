@@ -112,6 +112,70 @@ namespace SAT1.Controllers
             return View();
         }
 
+        [HttpPost]
+        public async Task<IActionResult> SubmitCustomRingInquiry(
+            [FromForm] string name,
+            [FromForm] string email,
+            [FromForm] string phone,
+            [FromForm] string category,
+            [FromForm] string? metal,
+            [FromForm] string? ringSize,
+            [FromForm] string? budget,
+            [FromForm] string? details,
+            IFormFile? designImage)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(phone))
+                {
+                    return Json(new { success = false, message = "Please provide your Name, Email, and Phone number." });
+                }
+
+                string uploadedImageUrl = "";
+                if (designImage != null && designImage.Length > 0)
+                {
+                    var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "custom_inquiries");
+                    if (!Directory.Exists(uploadsDir))
+                    {
+                        Directory.CreateDirectory(uploadsDir);
+                    }
+                    var ext = Path.GetExtension(designImage.FileName).ToLowerInvariant();
+                    if (string.IsNullOrEmpty(ext)) ext = ".jpg";
+                    var fileName = $"{Guid.NewGuid():N}{ext}";
+                    var filePath = Path.Combine(uploadsDir, fileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await designImage.CopyToAsync(stream);
+                    }
+                    uploadedImageUrl = $"/uploads/custom_inquiries/{fileName}";
+                }
+
+                var inquiry = new CustomRingInquiry
+                {
+                    FullName = name.Trim(),
+                    Email = email.Trim(),
+                    Phone = phone.Trim(),
+                    Category = string.IsNullOrWhiteSpace(category) ? "Custom Ring" : category.Trim(),
+                    MetalPreference = metal?.Trim() ?? "14K Yellow Gold",
+                    RingSize = ringSize?.Trim() ?? "US 7.0",
+                    TargetBudget = budget?.Trim() ?? "",
+                    Details = details?.Trim() ?? "",
+                    ImageUrl = uploadedImageUrl,
+                    Status = "New",
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                _context.CustomRingInquiries.Add(inquiry);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true, inquiryId = inquiry.Id, message = "Your bespoke inquiry has been successfully submitted!" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error saving request: " + ex.Message });
+            }
+        }
+
         [HttpGet]
         public IActionResult CraftProcess()
         {

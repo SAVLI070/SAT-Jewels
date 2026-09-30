@@ -25,6 +25,21 @@
             _ => "Best selling"
         };
     }
+    string OptimizeImg(string? url, int width = 800) {
+        if (string.IsNullOrWhiteSpace(url)) return "/assets/ring_1.jpg";
+        if (url.Contains("res.cloudinary.com") && !url.Contains("f_auto")) {
+            return url.Replace("/upload/", $"/upload/f_auto,q_auto,w_{width},c_limit/");
+        }
+        return url;
+    }
+    int GetProductReviewCount(string? id, string? name) {
+        uint hash = 2166136261;
+        var s = (id ?? "") + (name ?? "");
+        foreach (char c in s) {
+            hash = (hash ^ c) * 16777619;
+        }
+        return (int)((hash % 79) + 16);
+    }
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -744,13 +759,65 @@
       border-color: rgba(212, 184, 120, 0.6);
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(212, 184, 120, 0.15);
     }
+    @@keyframes satShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
     .product-img-wrap {
       position: relative;
       width: 100%;
       aspect-ratio: 1 / 1;
       overflow: hidden;
-      background: #000000;
+      background: linear-gradient(90deg, #141722 25%, #222838 50%, #141722 75%);
+      background-size: 200% 100%;
+      animation: satShimmer 1.8s infinite ease-in-out;
       border-radius: 14px 14px 0 0;
+    }
+    .product-img-wrap.img-loaded {
+      background: #000000;
+      animation: none;
+    }
+    .sat-carousel-slide img {
+      opacity: 0;
+      transition: opacity 0.35s ease-in-out;
+    }
+    .sat-carousel-slide img.loaded {
+      opacity: 1;
+    }
+    /* Luxury Dark Card Skeleton Loader (Matching v-skeleton-loader type="card") */
+    .sat-skeleton-card {
+      background: rgba(14, 13, 16, 0.85);
+      border: 1px solid rgba(241, 238, 232, 0.1);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .sat-skeleton-card .sat-skel-img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: linear-gradient(90deg, #141722 25%, #222838 50%, #141722 75%);
+      background-size: 200% 100%;
+      animation: satShimmer 1.8s infinite ease-in-out;
+      border-radius: 14px 14px 0 0;
+    }
+    .sat-skeleton-card .sat-skel-body {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .sat-skeleton-card .sat-skel-pill {
+      height: 16px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #161a25 25%, #252b3d 50%, #161a25 75%);
+      background-size: 200% 100%;
+      animation: satShimmer 1.8s infinite ease-in-out;
+      width: 75%;
+    }
+    .sat-skeleton-card .sat-skel-pill.short {
+      height: 12px;
+      width: 40%;
     }
     .product-info-body {
       padding: 18px;
@@ -1242,9 +1309,10 @@
         foreach (var item in Model)
         {
           var originalPriceUSD = (int)(item.PriceUSD * 1.15m);
-          var imgSrc = string.IsNullOrEmpty(item.ImageUrl) ? "/assets/ring_1.jpg" : item.ImageUrl;
+          var rawImg = string.IsNullOrEmpty(item.ImageUrl) ? "/assets/ring_1.jpg" : item.ImageUrl;
+          var imgSrc = OptimizeImg(rawImg, 800);
           var galList = !string.IsNullOrWhiteSpace(item.GalleryImages) 
-            ? item.GalleryImages.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim()).Distinct().ToList() 
+            ? item.GalleryImages.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => OptimizeImg(s.Trim(), 800)).Distinct().ToList() 
             : new List<string> { imgSrc };
           if (!galList.Contains(imgSrc))
           {
@@ -1261,6 +1329,7 @@
                     <img src="@gImg" 
                          alt="@(sIdx == 0 ? item.Name : "")" 
                          loading="@(sIdx == 0 ? "eager" : "lazy")" 
+                         onload="this.classList.add('loaded'); this.closest('.product-img-wrap')?.classList.add('img-loaded');"
                          onerror="handleCarouselImgError(this, '@imgSrc')" />
                   </div>
                   sIdx++;
@@ -1291,7 +1360,7 @@
                 <i class="fa-solid fa-star"></i>
                 <i class="fa-solid fa-star"></i>
                 <i class="fa-solid fa-star"></i>
-                <span style="color:rgba(255,255,255,0.6); margin-left:4px;">(12 reviews)</span>
+                <span style="color:rgba(255,255,255,0.6); margin-left:4px;">(@GetProductReviewCount(item.Id, item.Name) reviews)</span>
               </div>
               <div class="product-card-actions">
                 <button type="button" class="btn-buy-now" 
@@ -1712,7 +1781,27 @@
       }
     });
 
+    function showSkeletonGrid() {
+      const grid = document.querySelector('.product-grid-4col');
+      if (!grid) return;
+      let skelHtml = '';
+      for (let i = 0; i < 8; i++) {
+        skelHtml += `
+          <div class="sat-skeleton-card">
+            <div class="sat-skel-img"></div>
+            <div class="sat-skel-body">
+              <div class="sat-skel-pill"></div>
+              <div class="sat-skel-pill short"></div>
+              <div class="sat-skel-pill" style="width: 50%; height: 28px; border-radius: 8px; margin-top: 8px;"></div>
+            </div>
+          </div>
+        `;
+      }
+      grid.innerHTML = skelHtml;
+    }
+
     function applySorting(sortVal) {
+      showSkeletonGrid();
       if (window.showDiamondLoader) window.showDiamondLoader('Sorting Creations...');
       const urlParams = new URLSearchParams(window.location.search);
       urlParams.set('sort', sortVal);

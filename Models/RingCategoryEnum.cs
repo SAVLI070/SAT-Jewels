@@ -22,6 +22,9 @@ namespace SAT1.Models
         [Display(Name = "Necklaces")]
         Necklaces = 6,
 
+        [Display(Name = "Diamonds")]
+        Diamonds = 7,
+
         // Legacy Enum Aliases mapping to primary 6 categories
         AnniversaryRings = 1,
         RoseCutRings = 1,

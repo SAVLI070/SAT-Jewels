@@ -313,6 +313,55 @@
       letter-spacing: 0.5px;
     }
 
+    /* Mobile Responsive Overrides */
+    @@media (max-width: 768px) {
+      body {
+        padding: 16px 10px;
+        overflow-x: hidden;
+      }
+      .toolbar {
+        max-width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .toolbar a, .toolbar button {
+        width: 100%;
+        justify-content: center;
+      }
+      .gia-sheet {
+        padding: 22px 14px;
+        max-width: 100%;
+        border-radius: 6px;
+      }
+      .gia-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+      .gia-report-badge {
+        text-align: left;
+        width: 100%;
+      }
+      .product-ribbon {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .gia-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+      .proportions-list {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .gia-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+      }
+    }
+
     /* Print Styles */
     @@media print {
       body {

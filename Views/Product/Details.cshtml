@@ -32,6 +32,9 @@
     }
 
     var originalPriceUSD = (int)(Model.Price * 1.15m);
+    var isLooseDiamond = (categoryName != null && categoryName.Contains("Diamond", StringComparison.OrdinalIgnoreCase))
+        || (Model.CategoryId != null && (Model.CategoryId == "7" || Model.CategoryId.ToLower() == "diamonds"))
+        || (!string.IsNullOrEmpty(Model.Spec) && Model.Spec.Contains("Loose Diamond", StringComparison.OrdinalIgnoreCase));
 
     // Parse Metal Options
     var rawMetalStr = Model.MetalOptions ?? string.Empty;
@@ -50,19 +53,13 @@
         .Select(g => g.First())
         .ToList();
 
-    if (metalList.Count < 10)
+    if (metalList.Count == 0 && !isLooseDiamond)
     {
         metalList = new[] {
-            new { Name = "10K Yellow Gold", Offset = 0m },
-            new { Name = "10K White Gold", Offset = 0m },
-            new { Name = "10K Rose Gold", Offset = 0m },
-            new { Name = "14K Yellow Gold", Offset = 180m },
-            new { Name = "14K White Gold", Offset = 180m },
-            new { Name = "14K Rose Gold", Offset = 180m },
-            new { Name = "18K Yellow Gold", Offset = 480m },
-            new { Name = "18K White Gold", Offset = 480m },
-            new { Name = "18K Rose Gold", Offset = 480m },
-            new { Name = "950 Platinum", Offset = 850m }
+            new { Name = "14K Yellow Gold", Offset = 0m },
+            new { Name = "14K White Gold", Offset = 0m },
+            new { Name = "18K Yellow Gold", Offset = 300m },
+            new { Name = "950 Platinum", Offset = 650m }
         }.ToList();
     }
 
@@ -83,18 +80,12 @@
         .Select(g => g.First())
         .ToList();
 
-    if (caratList.Count < 9)
+    if (caratList.Count == 0 && !isLooseDiamond)
     {
         caratList = new[] {
-            new { Label = "0.50 CT", Offset = 0m },
-            new { Label = "0.75 CT", Offset = 150m },
-            new { Label = "1.00 CT", Offset = 350m },
-            new { Label = "1.25 CT", Offset = 550m },
-            new { Label = "1.50 CT", Offset = 750m },
-            new { Label = "2.00 CT", Offset = 1200m },
-            new { Label = "3.00 CT", Offset = 2400m },
-            new { Label = "4.00 CT", Offset = 3800m },
-            new { Label = "5.00 CT", Offset = 5500m }
+            new { Label = "1.00 CT", Offset = 0m },
+            new { Label = "1.50 CT", Offset = 450m },
+            new { Label = "2.00 CT", Offset = 950m }
         }.ToList();
     }
 
@@ -368,6 +359,19 @@
       aspect-ratio: 3 / 4;
       z-index: 10;
     }
+    @@keyframes satShimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+    .sat-skeleton-shimmer {
+      background: linear-gradient(90deg, #141722 25%, #252b3d 50%, #141722 75%) !important;
+      background-size: 200% 100% !important;
+      animation: satShimmer 1.8s infinite ease-in-out !important;
+    }
+    .pd-hero-img-card.sat-skeleton-shimmer img,
+    .pd-gallery-card.sat-skeleton-shimmer img {
+      opacity: 0;
+    }
     .pd-hero-img-card {
       position: relative;
       width: 100%;
@@ -383,7 +387,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.4s ease;
+      transition: opacity 0.35s ease, transform 0.4s ease;
     }
     .pd-hero-img-card:hover img {
       transform: scale(1.04);
@@ -1482,8 +1486,8 @@
       
       <!-- 1. LEFT TALL STICKY COLUMN: Hero Primary Image (Stuck throughout scroll, scrolls only at the end) -->
       <div class="pd-hero-sticky-col">
-        <div class="pd-hero-img-card">
-          <img id="heroMainImg" src="@mainImage" alt="@Model.Name" onerror="this.onerror=null;this.src='/assets/ring_1.jpg';" />
+        <div class="pd-hero-img-card sat-skeleton-shimmer">
+          <img id="heroMainImg" src="@mainImage" alt="@Model.Name" onload="this.parentElement.classList.remove('sat-skeleton-shimmer');" onerror="this.onerror=null;this.src='/assets/ring_1.jpg';this.parentElement.classList.remove('sat-skeleton-shimmer');" />
           <span class="hero-badge-tag" id="heroBadgeTag">💎 Lab Grown Diamond</span>
         </div>
       </div>
@@ -1493,8 +1497,8 @@
         @for (int i = 0; i < galleryList.Count; i++)
         {
           var img = galleryList[i];
-          <div class="pd-gallery-card @(i == 0 ? "active" : "")" data-index="@i" onclick="switchHeroImage('@img', @i)">
-            <img src="@img" alt="Angle @(i+1)" onerror="this.onerror=null;this.closest('.pd-gallery-card').style.display='none';" />
+          <div class="pd-gallery-card sat-skeleton-shimmer @(i == 0 ? "active" : "")" data-index="@i" onclick="switchHeroImage('@img', @i)">
+            <img src="@img" alt="Angle @(i+1)" onload="this.parentElement.classList.remove('sat-skeleton-shimmer');" onerror="this.onerror=null;this.closest('.pd-gallery-card').style.display='none';" />
           </div>
         }
       </div>
@@ -1524,7 +1528,7 @@
 
         <!-- Trust Pills -->
         <div class="pd-trust-row">
-          <span class="pd-trust-pill"><i class="fa-solid fa-certificate"></i> <span id="certPillText">IGI / GIA Certified</span></span>
+          <span class="pd-trust-pill"><i class="fa-solid fa-certificate"></i> <span id="certPillText">IGI Certified</span></span>
           <span class="pd-trust-pill"><i class="fa-solid fa-shield-check"></i> BIS Hallmarked</span>
           <span class="pd-trust-pill"><i class="fa-solid fa-truck-fast"></i> Free Insured Express</span>
         </div>
@@ -1534,72 +1538,98 @@
           </a>
         </div>
 
-        <!-- LUXURY ANIMATED STONE SWITCH -->
-        <div class="stone-switch-wrap">
-          <div class="stone-switch-label">
-            <span>Center Stone Type</span>
-            <span id="lblStoneChoice" style="color:#fbbf24;">Lab Grown Diamond</span>
+        @if (isLooseDiamond)
+        {
+          <div style="background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 12px; padding: 18px 20px; margin: 12px 0;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <span style="font-size: 1.2rem; color: #d4b878;">💎</span>
+              <span style="font-size: 14.5px; font-weight: 700; color: #ffffff; letter-spacing: 0.04em;">IGI CERTIFIED LOOSE LAB DIAMOND</span>
+            </div>
+            <div style="font-size: 13px; color: #e2e8f0; line-height: 1.6; font-weight: 500;">
+              @(string.IsNullOrWhiteSpace(Model.Spec) ? "Precision-cut loose lab-grown diamond with certified gemological authentication, maximum optical brilliance, and 100% sustainable origin." : Model.Spec)
+            </div>
+            <div style="margin-top: 14px; font-size: 12px; color: #94a3b8; display: flex; gap: 16px; flex-wrap: wrap;">
+              <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-check" style="color: #10b981;"></i> 100% Conflict Free</span>
+              <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-check" style="color: #10b981;"></i> Precision Faceted</span>
+              <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-check" style="color: #10b981;"></i> Ready for Custom Setting</span>
+            </div>
           </div>
-          <div class="stone-slider-box" id="stoneSliderBox">
-            <div class="stone-pill-glider"></div>
-            <button type="button" class="stone-opt-btn active" id="btnLabDiamond" onclick="setStoneType('LabGrownDiamond', this)">
-              💎 Lab Grown Diamond
-            </button>
-            <button type="button" class="stone-opt-btn" id="btnMoissanite" onclick="setStoneType('Moissanite', this)">
-              ✨ Moissanite
-            </button>
-          </div>
-        </div>
-
-        <!-- Metal Purity & Color Swatches -->
-        <div style="margin-top: 6px;">
-          <div class="opt-label">Metal Purity &amp; Color: <span id="lblMetal">@(metalList.FirstOrDefault()?.Name ?? "14K Yellow Gold")</span></div>
-          <div class="metal-swatch-list">
-            @foreach (var metal in metalList)
-            {
-              var isDef = (metal == metalList.First());
-              <button type="button" class="metal-swatch-btn @(isDef ? "active" : "")" onclick="setMetal('@metal.Name', this)">
-                <i class="fa-solid fa-ring"></i> @metal.Name
+        }
+        else
+        {
+          <!-- LUXURY ANIMATED STONE SWITCH -->
+          <div class="stone-switch-wrap">
+            <div class="stone-switch-label">
+              <span>Center Stone Type</span>
+              <span id="lblStoneChoice" style="color:#fbbf24;">Lab Grown Diamond</span>
+            </div>
+            <div class="stone-slider-box" id="stoneSliderBox">
+              <div class="stone-pill-glider"></div>
+              <button type="button" class="stone-opt-btn active" id="btnLabDiamond" onclick="setStoneType('LabGrownDiamond', this)">
+                💎 Lab Grown Diamond
               </button>
-            }
-          </div>
-        </div>
-
-        <!-- Carat Size Selector -->
-        <div>
-          <div class="opt-label">Center Diamond Size: <span id="lblCarat">@(caratList.FirstOrDefault()?.Label ?? "1.50 CT")</span></div>
-          <div class="carat-btn-list">
-            @foreach (var carat in caratList)
-            {
-              var isDef = (carat == caratList.First());
-              <button type="button" class="carat-btn @(isDef ? "active" : "")" onclick="setCarat('@carat.Label', this)">
-                @carat.Label
+              <button type="button" class="stone-opt-btn" id="btnMoissanite" onclick="setStoneType('Moissanite', this)">
+                ✨ Moissanite
               </button>
-            }
+            </div>
           </div>
-        </div>
 
-        <!-- Ring Size Selection (Dynamically Controlled from Admin) -->
-        <div>
-          <div class="opt-label">Select Ring Size (US): <span style="font-size:11px; text-decoration:underline; cursor:pointer;" onclick="alert('💍 SAT Jewel Ring Size Guide:\n\nUS 4.0: 14.9 mm\nUS 5.0: 15.7 mm\nUS 6.0: 16.5 mm (Standard)\nUS 7.0: 17.3 mm\nUS 8.0: 18.2 mm\nUS 9.0: 19.0 mm\nUS 10.0: 19.8 mm\nUS 11.0: 20.6 mm\nUS 12.0: 21.4 mm\n\nAll bespoke sizes available upon request.')">Size Guide</span></div>
-          <select class="pd-select" id="selRingSize" onchange="handleRingSizeChange()">
-            <option value="US 4.0 (14.9mm)">US 4.0 (14.9mm)</option>
-            <option value="US 5.0 (15.7mm)">US 5.0 (15.7mm)</option>
-            <option value="US 6.0 (16.5mm)" selected>US 6.0 (16.5mm)</option>
-            <option value="US 7.0 (17.3mm)">US 7.0 (17.3mm)</option>
-            <option value="US 8.0 (18.2mm)">US 8.0 (18.2mm)</option>
-            <option value="US 9.0 (19.0mm)">US 9.0 (19.0mm)</option>
-            <option value="US 10.0 (19.8mm)">US 10.0 (19.8mm)</option>
-            <option value="US 11.0 (20.6mm)">US 11.0 (20.6mm)</option>
-            <option value="US 12.0 (21.4mm)">US 12.0 (21.4mm)</option>
-          </select>
-        </div>
+          <!-- Metal Purity & Color Swatches -->
+          @if (metalList.Count > 0)
+          {
+            <div style="margin-top: 6px;">
+              <div class="opt-label">Metal Purity &amp; Color: <span id="lblMetal">@(metalList.FirstOrDefault()?.Name ?? "14K Yellow Gold")</span></div>
+              <div class="metal-swatch-list">
+                @foreach (var metal in metalList)
+                {
+                  var isDef = (metal == metalList.First());
+                  <button type="button" class="metal-swatch-btn @(isDef ? "active" : "")" onclick="setMetal('@metal.Name', this)">
+                    <i class="fa-solid fa-ring"></i> @metal.Name
+                  </button>
+                }
+              </div>
+            </div>
+          }
 
-        <!-- Free Laser Engraving -->
-        <div>
-          <div class="opt-label">Free Laser Engraving</div>
-          <input type="text" class="pd-input" id="txtEngraving" placeholder="Engrave Text (e.g. Forever & Always ♡)" maxlength="30" />
-        </div>
+          <!-- Carat Size Selector -->
+          @if (caratList.Count > 0)
+          {
+            <div>
+              <div class="opt-label">Center Diamond Size: <span id="lblCarat">@(caratList.FirstOrDefault()?.Label ?? "1.50 CT")</span></div>
+              <div class="carat-btn-list">
+                @foreach (var carat in caratList)
+                {
+                  var isDef = (carat == caratList.First());
+                  <button type="button" class="carat-btn @(isDef ? "active" : "")" onclick="setCarat('@carat.Label', this)">
+                    @carat.Label
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Ring Size Selection (Dynamically Controlled from Admin) -->
+          <div>
+            <div class="opt-label">Select Ring Size (US): <span style="font-size:11px; text-decoration:underline; cursor:pointer;" onclick="alert('💍 SAT Jewel Ring Size Guide:\n\nUS 4.0: 14.9 mm\nUS 5.0: 15.7 mm\nUS 6.0: 16.5 mm (Standard)\nUS 7.0: 17.3 mm\nUS 8.0: 18.2 mm\nUS 9.0: 19.0 mm\nUS 10.0: 19.8 mm\nUS 11.0: 20.6 mm\nUS 12.0: 21.4 mm\n\nAll bespoke sizes available upon request.')">Size Guide</span></div>
+            <select class="pd-select" id="selRingSize" onchange="handleRingSizeChange()">
+              <option value="US 4.0 (14.9mm)">US 4.0 (14.9mm)</option>
+              <option value="US 5.0 (15.7mm)">US 5.0 (15.7mm)</option>
+              <option value="US 6.0 (16.5mm)" selected>US 6.0 (16.5mm)</option>
+              <option value="US 7.0 (17.3mm)">US 7.0 (17.3mm)</option>
+              <option value="US 8.0 (18.2mm)">US 8.0 (18.2mm)</option>
+              <option value="US 9.0 (19.0mm)">US 9.0 (19.0mm)</option>
+              <option value="US 10.0 (19.8mm)">US 10.0 (19.8mm)</option>
+              <option value="US 11.0 (20.6mm)">US 11.0 (20.6mm)</option>
+              <option value="US 12.0 (21.4mm)">US 12.0 (21.4mm)</option>
+            </select>
+          </div>
+
+          <!-- Free Laser Engraving -->
+          <div>
+            <div class="opt-label">Free Laser Engraving</div>
+            <input type="text" class="pd-input" id="txtEngraving" placeholder="Engrave Text (e.g. Forever & Always ♡)" maxlength="30" />
+          </div>
+        }
 
         <!-- Physical GIA Hardcopy Certificate Add-on Option -->
         <div style="background: rgba(212, 178, 112, 0.08); border: 1px solid rgba(212, 178, 112, 0.35); border-radius: 10px; padding: 12px 16px; margin: 16px 0;">
@@ -1628,7 +1658,7 @@
               <span id="detailsWishlistText" class="hidden sm:inline">Wishlist</span>
             </button>
           </div>
-          <a href="https://wa.me/19175550199?text=Hello%20SAT%20Jewel%2C%20I%20am%20interested%20in%20@Uri.EscapeDataString(Model.Name)" target="_blank" class="btn-whatsapp-chat">
+          <a href="https://wa.me/917698727798?text=Hello%20SAT%20Jewel%2C%20I%20am%20interested%20in%20@Uri.EscapeDataString(Model.Name)" target="_blank" class="btn-whatsapp-chat">
             <i class="fa-brands fa-whatsapp" style="font-size:18px;"></i> WhatsApp Us for Bespoke Request
           </a>
         </div>
@@ -1712,7 +1742,7 @@
               <i class="fa-solid fa-chevron-down"></i>
             </div>
             <div class="acc-body" id="accCertText">
-              Includes physical IGI / GIA Certificate of Authenticity card and microscopic girdle laser inscription matching laboratory reports.
+              Includes physical IGI Certificate of Authenticity card and microscopic girdle laser inscription matching laboratory reports.
             </div>
           </div>
 
@@ -1875,7 +1905,7 @@
           var firstLetter = !string.IsNullOrEmpty(rev.CustomerName) ? rev.CustomerName.Substring(0, 1).ToUpper() : "C";
           <div class="review-photo-card">
             <div class="review-photo-box">
-              <img src="@rev.PhotoUrl" alt="@rev.CustomerName Review" loading="lazy" />
+              <img src="@rev.PhotoUrl" alt="@rev.CustomerName Review" loading="lazy" onerror="this.onerror=null; this.src='/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';" />
             </div>
             <div class="review-card-body">
               <div class="reviewer-meta-row">
@@ -1910,7 +1940,7 @@
           var firstLetter = !string.IsNullOrEmpty(rev.CustomerName) ? rev.CustomerName.Substring(0, 1).ToUpper() : "C";
           <div class="review-photo-card">
             <div class="review-photo-box">
-              <img src="@rev.PhotoUrl" alt="@rev.CustomerName Review" loading="lazy" />
+              <img src="@rev.PhotoUrl" alt="@rev.CustomerName Review" loading="lazy" onerror="this.onerror=null; this.src='/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';" />
             </div>
             <div class="review-card-body">
               <div class="reviewer-meta-row">
@@ -2056,13 +2086,13 @@
   <partial name="_Footer" />
 
   <script>
-    // Global State for Dynamic Recalculation (Dual Stone Category Pricing: Lab Grown Diamond vs Moissanite)
+    const isLooseDiamond = @(isLooseDiamond ? "true" : "false");
     const basePriceUSD = @Model.Price;
     const moissaniteBasePriceUSD = @(Model.MoissanitePrice > 0 ? Model.MoissanitePrice : Math.Round(Model.Price * 0.55m));
     let currentStoneType = 'LabGrownDiamond'; // 'LabGrownDiamond' or 'Moissanite'
-    let selectedMetal = '@(metalList.FirstOrDefault()?.Name ?? "14K Yellow Gold")';
-    let selectedCarat = '@(caratList.FirstOrDefault()?.Label ?? "1.50 CT")';
-    let selectedRingSize = 'US 6.0 (16.5mm)';
+    let selectedMetal = '@(metalList.FirstOrDefault()?.Name ?? (isLooseDiamond ? "Loose Diamond" : "14K Yellow Gold"))';
+    let selectedCarat = '@(caratList.FirstOrDefault()?.Label ?? (isLooseDiamond ? "Certified" : "1.50 CT"))';
+    let selectedRingSize = isLooseDiamond ? 'Loose Gem' : 'US 6.0 (16.5mm)';
 
     // Metal, Carat & Ring Size Adjustments Pre-populated from Server
     let metalAdjustments = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(metalList.ToDictionary(m => (string)m.Name, m => (decimal)m.Offset)));
@@ -2131,21 +2161,23 @@
     function setStoneType(type, btn) {
       currentStoneType = type;
       const box = document.getElementById('stoneSliderBox');
-      document.querySelectorAll('.stone-opt-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
+      if (box) {
+        document.querySelectorAll('.stone-opt-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
 
-      if (type === 'Moissanite') {
-        box.classList.add('moissanite-active');
-        document.getElementById('lblStoneChoice').textContent = 'Moissanite Diamond';
-        document.getElementById('heroBadgeTag').textContent = '✨ Moissanite';
-        document.getElementById('certPillText').textContent = 'SGL / GRA Certified';
-        document.getElementById('accCertText').innerHTML = 'Includes physical SGL / GRA Authenticity Card verifying Grade D Colorless Moissanite.';
-      } else {
-        box.classList.remove('moissanite-active');
-        document.getElementById('lblStoneChoice').textContent = 'Lab Grown Diamond';
-        document.getElementById('heroBadgeTag').textContent = '💎 Lab Grown Diamond';
-        document.getElementById('certPillText').textContent = 'IGI / GIA Certified';
-        document.getElementById('accCertText').innerHTML = 'Includes physical IGI / GIA Certificate of Authenticity card and girdle laser inscription.';
+        if (type === 'Moissanite') {
+          box.classList.add('moissanite-active');
+          document.getElementById('lblStoneChoice').textContent = 'Moissanite Diamond';
+          document.getElementById('heroBadgeTag').textContent = '✨ Moissanite';
+          document.getElementById('certPillText').textContent = 'SGL / GRA Certified';
+          document.getElementById('accCertText').innerHTML = 'Includes physical SGL / GRA Authenticity Card verifying Grade D Colorless Moissanite.';
+        } else {
+          box.classList.remove('moissanite-active');
+          document.getElementById('lblStoneChoice').textContent = 'Lab Grown Diamond';
+          document.getElementById('heroBadgeTag').textContent = '💎 Lab Grown Diamond';
+          document.getElementById('certPillText').textContent = 'IGI Certified';
+          document.getElementById('accCertText').innerHTML = 'Includes physical IGI Certificate of Authenticity card and girdle laser inscription.';
+        }
       }
 
       recalculatePrice();
@@ -2153,7 +2185,8 @@
 
     function setMetal(name, btn) {
       selectedMetal = name;
-      document.getElementById('lblMetal').textContent = name;
+      const lbl = document.getElementById('lblMetal');
+      if (lbl) lbl.textContent = name;
       document.querySelectorAll('.metal-swatch-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       recalculatePrice();
@@ -2161,7 +2194,8 @@
 
     function setCarat(label, btn) {
       selectedCarat = label;
-      document.getElementById('lblCarat').textContent = label;
+      const lbl = document.getElementById('lblCarat');
+      if (lbl) lbl.textContent = label;
       document.querySelectorAll('.carat-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       recalculatePrice();
@@ -2176,26 +2210,38 @@
     }
 
     function recalculatePrice() {
-      const metalAdj = metalAdjustments[selectedMetal] || 0;
-      const caratAdj = caratAdjustments[selectedCarat] || 0;
-      const ringSizeAdj = ringSizeAdjustments[selectedRingSize] || 0;
+      const metalAdj = isLooseDiamond ? 0 : (metalAdjustments[selectedMetal] || 0);
+      const caratAdj = isLooseDiamond ? 0 : (caratAdjustments[selectedCarat] || 0);
+      const ringSizeAdj = isLooseDiamond ? 0 : (ringSizeAdjustments[selectedRingSize] || 0);
 
       const activeBasePrice = (currentStoneType === 'Moissanite') ? moissaniteBasePriceUSD : basePriceUSD;
-      let finalPrice = Math.max(100, Math.round(activeBasePrice + metalAdj + caratAdj + ringSizeAdj));
+      let finalPrice = isLooseDiamond ? Math.round(basePriceUSD) : Math.max(100, Math.round(activeBasePrice + metalAdj + caratAdj + ringSizeAdj));
       let originalPrice = Math.floor(finalPrice * 1.15);
       let monthly = (finalPrice / 4).toFixed(2);
 
       window.activeVariantPriceUSD = finalPrice;
 
-      document.getElementById('displayPriceUSD').textContent = `$ ${finalPrice.toLocaleString('en-US')} USD`;
-      document.getElementById('displayPriceOrigUSD').textContent = `$ ${originalPrice.toLocaleString('en-US')}`;
-      document.getElementById('displayMonthlyInstallment').textContent = `$${monthly}/month`;
-      document.getElementById('btnOrderPrice').textContent = `$${finalPrice.toLocaleString('en-US')}`;
-      document.getElementById('floatingPriceVal').textContent = `$ ${finalPrice.toLocaleString('en-US')}`;
+      const dispUSD = document.getElementById('displayPriceUSD');
+      if (dispUSD) dispUSD.textContent = `$ ${finalPrice.toLocaleString('en-US')} USD`;
+      const dispOrig = document.getElementById('displayPriceOrigUSD');
+      if (dispOrig) dispOrig.textContent = `$ ${originalPrice.toLocaleString('en-US')}`;
+      const dispMonthly = document.getElementById('displayMonthlyInstallment');
+      if (dispMonthly) dispMonthly.textContent = `$${monthly}/month`;
+      const btnPrice = document.getElementById('btnOrderPrice');
+      if (btnPrice) btnPrice.textContent = `$${finalPrice.toLocaleString('en-US')}`;
+      const floatPrice = document.getElementById('floatingPriceVal');
+      if (floatPrice) floatPrice.textContent = `$ ${finalPrice.toLocaleString('en-US')}`;
 
-      const stoneLabel = currentStoneType === 'Moissanite' ? 'Moissanite' : 'Lab Diamond';
-      const sizeShort = (selectedRingSize || 'US 6.0').split(' ')[0] + ' ' + ((selectedRingSize || '').split(' ')[1] || '');
-      document.getElementById('floatingSpecsSub').textContent = `${selectedMetal} • ${selectedCarat} • ${sizeShort} • ${stoneLabel}`;
+      const floatSpecs = document.getElementById('floatingSpecsSub');
+      if (floatSpecs) {
+        if (isLooseDiamond) {
+          floatSpecs.textContent = `Emerald Cut • Loose Lab Diamond • IGI Certified`;
+        } else {
+          const stoneLabel = currentStoneType === 'Moissanite' ? 'Moissanite' : 'Lab Diamond';
+          const sizeShort = (selectedRingSize || 'US 6.0').split(' ')[0] + ' ' + ((selectedRingSize || '').split(' ')[1] || '');
+          floatSpecs.textContent = `${selectedMetal} • ${selectedCarat} • ${sizeShort} • ${stoneLabel}`;
+        }
+      }
 
       updateGiaCertUrl();
     }
@@ -2394,7 +2440,10 @@
         const chkCert = document.getElementById('chkPhysicalGiaCert');
         const includeCert = chkCert ? chkCert.checked : false;
 
-        const variantTitle = `@Model.Name (${stoneName}, ${selectedMetal}, ${selectedCarat}, Size: ${ringSize}${engraving ? `, Engraved: "${engraving}"` : ''})`;
+        const isLoose = @(isLooseDiamond ? "true" : "false");
+        const variantTitle = isLoose 
+          ? `@Model.Name (IGI Certified Loose Diamond)` 
+          : `@Model.Name (${stoneName}, ${selectedMetal}, ${selectedCarat}, Size: ${ringSize}${engraving ? `, Engraved: "${engraving}"` : ''})`;
 
         function getCartStorageKey() {
           const isUserAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
@@ -2412,11 +2461,11 @@
           id: '@Model.Id',
           name: variantTitle,
           priceUSD: finalPrice,
-          metal: selectedMetal,
-          carat: selectedCarat,
-          stone: stoneName,
-          size: ringSize,
-          engraving: engraving,
+          metal: isLoose ? 'Loose Diamond' : selectedMetal,
+          carat: isLoose ? 'Certified' : selectedCarat,
+          stone: 'Lab Grown Diamond',
+          size: isLoose ? 'Loose Gem' : ringSize,
+          engraving: isLoose ? '' : engraving,
           img: '@mainImage',
           quantity: 1,
           includePhysicalGiaCert: includeCert

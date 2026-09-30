@@ -1,3 +1,4 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     Layout = null;
     var initialMode = (ViewData["InitialMode"] ?? "signin").ToString();
@@ -7,6 +8,7 @@
         returnUrl = Context.Request.Query["returnUrl"].ToString();
     }
     var error = ViewBag.ErrorMessage as string;
+    var googleClientId = Configuration["Authentication:Google:ClientId"] ?? "";
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -379,7 +381,7 @@
 
     .sat-social-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 10px;
     }
     .btn-sat-social {
@@ -598,13 +600,8 @@
             <span>Or Continue With</span>
           </div>
 
-          <div class="sat-social-grid">
-            <button type="button" class="btn-sat-social" onclick="alert('Google authentication connected for SAT Jewel.')">
-              <i class="fa-brands fa-google" style="color:#ea4335;"></i> Google
-            </button>
-            <button type="button" class="btn-sat-social" onclick="alert('Apple ID authentication connected for SAT Jewel.')">
-              <i class="fa-brands fa-apple"></i> Apple ID
-            </button>
+          <div class="sat-social-grid" style="display:flex; justify-content:center; width:100%;">
+            <div id="googleBtnSignIn" style="width:100%; display:flex; justify-content:center;"></div>
           </div>
         </div>
 
@@ -680,13 +677,8 @@
             <span>Or Connect With</span>
           </div>
 
-          <div class="sat-social-grid">
-            <button type="button" class="btn-sat-social" onclick="alert('Google authentication connected for SAT Jewel.')">
-              <i class="fa-brands fa-google" style="color:#ea4335;"></i> Google
-            </button>
-            <button type="button" class="btn-sat-social" onclick="alert('Apple ID authentication connected for SAT Jewel.')">
-              <i class="fa-brands fa-apple"></i> Apple ID
-            </button>
+          <div class="sat-social-grid" style="display:flex; justify-content:center; width:100%;">
+            <div id="googleBtnSignUp" style="width:100%; display:flex; justify-content:center;"></div>
           </div>
         </div>
 
@@ -935,6 +927,72 @@
 
       document.getElementById('formSignUp').submit();
       return true;
+    }
+  </script>
+
+  <!-- Google Identity Services SDK -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script>
+    const GOOGLE_CLIENT_ID = "@googleClientId";
+    const RETURN_URL = "@returnUrl";
+
+    function initGoogleAuth() {
+      if (!GOOGLE_CLIENT_ID || typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+        return;
+      }
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleCredentialResponse,
+        ux_mode: 'popup'
+      });
+
+      const btnIn = document.getElementById('googleBtnSignIn');
+      if (btnIn) {
+        google.accounts.id.renderButton(btnIn, {
+          theme: 'outline',
+          size: 'large',
+          width: 320,
+          text: 'signin_with',
+          shape: 'pill'
+        });
+      }
+
+      const btnUp = document.getElementById('googleBtnSignUp');
+      if (btnUp) {
+        google.accounts.id.renderButton(btnUp, {
+          theme: 'outline',
+          size: 'large',
+          width: 320,
+          text: 'signup_with',
+          shape: 'pill'
+        });
+      }
+    }
+
+    window.addEventListener('load', () => {
+      initGoogleAuth();
+      setTimeout(initGoogleAuth, 400);
+      setTimeout(initGoogleAuth, 1200);
+    });
+
+    async function handleGoogleCredentialResponse(response) {
+      if (!response || !response.credential) return;
+      try {
+        const res = await fetch('/Account/GoogleSignIn', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ credential: response.credential, returnUrl: RETURN_URL })
+        });
+        const result = await res.json();
+        if (result.success && result.redirectUrl) {
+          window.location.href = result.redirectUrl;
+        } else {
+          alert(result.message || "Google Sign-In could not be verified. Please try again.");
+        }
+      } catch (err) {
+        console.error("Google Sign-In Error:", err);
+        alert("Google Sign-In could not connect. Please try again or sign in with your email.");
+      }
     }
   </script>
 </body>

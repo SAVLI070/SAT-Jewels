@@ -2,9 +2,9 @@
     var title = (ViewData["Title"] ?? "SAT Jewel | Buy Certified Lab Grown Diamond Engagement Rings & Fine Jewelry").ToString();
     var description = (ViewData["Description"] ?? "Shop bespoke fine jewelry, certified lab grown diamond engagement rings, solitaires, and wedding bands online at factory-direct pricing. 100% GIA & IGI certified diamonds with free insured worldwide shipping.").ToString();
     var keywords = (ViewData["Keywords"] ?? "buy jewelry online, diamond engagement rings, lab grown diamonds, lab grown diamond engagement rings, solitaire diamond ring, custom engagement rings, moissanite rings, certified diamonds, wedding bands, diamond necklace, diamond earrings, tennis bracelet, fine jewelry USA, GIA certified diamonds, SAT Jewel").ToString();
-    var canonicalUrl = (ViewData["CanonicalUrl"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}").ToString();
-    var ogImage = (ViewData["OgImage"] ?? $"{Context.Request.Scheme}://{Context.Request.Host}/assets/sat_jewels_shop_bg.jpg").ToString();
-    var siteUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
+    var canonicalUrl = (ViewData["CanonicalUrl"] ?? $"https://www.satjewel.com{Context.Request.Path}").ToString();
+    var ogImage = (ViewData["OgImage"] ?? "https://www.satjewel.com/assets/auth_luxury_highjewelry.jpg").ToString();
+    var siteUrl = "https://www.satjewel.com";
 }
 
 <!-- Primary Search Engine Meta Tags -->
@@ -29,6 +29,10 @@
 <meta property="og:title" content="@title" />
 <meta property="og:description" content="@description" />
 <meta property="og:image" content="@ogImage" />
+<meta property="og:image:secure_url" content="@ogImage" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="800" />
 <meta property="og:site_name" content="SAT Jewel" />
 <meta property="og:locale" content="en_US" />
 
@@ -97,15 +101,19 @@
   ],
   "contactPoint": {
     "@@type": "ContactPoint",
-    "telephone": "+91-83209-72779",
+    "telephone": "+91 76987 27798",
     "contactType": "customer service",
     "availableLanguage": ["English", "Hindi", "Gujarati"],
     "areaServed": ["US", "CA", "GB", "IN", "AU"]
   },
   "sameAs": [
-    "https://wa.me/918320972779",
-    "https://instagram.com/satjewels",
-    "https://pinterest.com/satjewels"
+    "https://wa.me/917698727798",
+    "https://www.instagram.com/satjewels?stkn=MXh0OHRkMXRieGVheg%3D%3D&utm_source=qr",
+    "https://www.facebook.com/share/1CKwfTQ5vL/?mibextid=wwXIfr",
+    "https://youtube.com/@@satjewels-s3n?si=EhwoYd2YpJ_6yNmd",
+    "https://x.com/satjewels124?s=11",
+    "https://pin.it/LbeCb0U0z",
+    "https://www.linkedin.com/in/sat-jewels-54713043b?utm_source=share_via&utm_content=profile&utm_medium=member_ios"
   ]
 }
 </script>

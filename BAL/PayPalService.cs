@@ -86,7 +86,7 @@ namespace SAT1.BAL
                 application_context = new
                 {
                     user_action = "PAY_NOW",
-                    shipping_preference = "GET_FROM_FILE"
+                    shipping_preference = "NO_SHIPPING"
                 }
             };
 

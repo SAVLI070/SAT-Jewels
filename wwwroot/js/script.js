@@ -126,16 +126,6 @@ function initLogoTransition() {
 
   if (!logoContainer || !overlay) return;
 
-  const isMobile = window.innerWidth <= 768;
-  if (isMobile) {
-    if (overlay) {
-      overlay.style.display = 'none';
-      overlay.classList.add('fade-out');
-    }
-    logoContainer.style.display = 'none';
-    return;
-  }
-
   logoContainer.classList.add('intro-animating');
 
   let pageLoaded = false;
@@ -171,6 +161,11 @@ function initLogoTransition() {
       pageLoaded = true;
       finishLoadingOverlay();
     });
+    // Safety fallback: maximum 4.5s
+    setTimeout(() => {
+      pageLoaded = true;
+      finishLoadingOverlay();
+    }, 4500);
   }
 }
 

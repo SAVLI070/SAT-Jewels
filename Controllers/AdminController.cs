@@ -257,5 +257,55 @@ namespace SAT1.Controllers
             var success = await reviewBal.DeleteReviewAsync(reviewId);
             return Json(new { success, message = success ? "Review deleted successfully." : "Failed to delete review." });
         }
+
+        [HttpGet("customrequests")]
+        [HttpGet("custom-requests")]
+        [HttpGet("customrings")]
+        public async Task<IActionResult> CustomRequests([FromServices] SatJewelDbContext db, string? status, int page = 1, int pageSize = 15)
+        {
+            if (!CheckAccess()) return HandleUnauthorized();
+            ViewBag.Title = "Bespoke Custom Jewelry Inquiries";
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 15;
+
+            var query = db.CustomRingInquiries.AsNoTracking().AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(status) && !status.Equals("All", StringComparison.OrdinalIgnoreCase))
+            {
+                query = query.Where(x => x.Status == status);
+            }
+
+            var totalCount = await query.CountAsync();
+            var items = await query.OrderByDescending(x => x.CreatedAt)
+                                   .Skip((page - 1) * pageSize)
+                                   .Take(pageSize)
+                                   .ToListAsync();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.TotalPages = Math.Max(1, (int)Math.Ceiling(totalCount / (double)pageSize));
+            ViewBag.StatusFilter = status ?? "All";
+
+            return View(items);
+        }
+
+        [HttpPost("api/custom-requests/update-status")]
+        public async Task<IActionResult> UpdateCustomRequestStatus([FromServices] SatJewelDbContext db, [FromForm] int id, [FromForm] string status)
+        {
+            if (!CheckAccess()) return Unauthorized(new { success = false, message = "Admin privileges required." });
+            var inquiry = await db.CustomRingInquiries.FindAsync(id);
+            if (inquiry == null) return NotFound(new { success = false, message = "Inquiry not found." });
+
+            inquiry.Status = status;
+            await db.SaveChangesAsync();
+            return Json(new { success = true, message = $"Inquiry #{id} status updated to {status}." });
+        }
+
+        [HttpGet("Admin/ShippingExceptions")]
+        public IActionResult ShippingExceptions()
+        {
+            return RedirectToAction("Orders");
+        }
     }
 }

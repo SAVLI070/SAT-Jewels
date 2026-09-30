@@ -647,35 +647,75 @@
       if (details) msg += `*Details/Specs:* ${details}\n`;
       msg += `\nI have attached my reference image and would love to discuss crafting this with your master jewelers!`;
 
-      const waUrl = `https://wa.me/918320972779?text=${encodeURIComponent(msg)}`;
+      const waUrl = `https://wa.me/917698727798?text=${encodeURIComponent(msg)}`;
       window.open(waUrl, '_blank');
     }
 
-    function handleCustomDesignSubmit(e) {
+    async function handleCustomDesignSubmit(e) {
       e.preventDefault();
       const alertBox = document.getElementById('customModalAlert');
       const btn = document.getElementById('btnSubmitCustom');
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
 
-      setTimeout(() => {
-        alertBox.style.display = 'block';
-        alertBox.style.background = 'rgba(34, 197, 94, 0.2)';
-        alertBox.style.border = '1px solid #22c55e';
-        alertBox.style.color = '#86efac';
-        alertBox.innerHTML = '<i class="fa-solid fa-circle-check"></i> Thank you! Your bespoke jewelry design request has been received. Our concierge team will reach out with 3D renderings and estimates within 24 hours.';
-        
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-check"></i> Request Submitted!';
-        
-        setTimeout(() => {
-          closeCustomDesignModal();
-          alertBox.style.display = 'none';
-          document.getElementById('customDesignForm').reset();
-          document.getElementById('custImgPreview').style.display = 'none';
-          document.getElementById('custUploadText').innerText = 'Click to choose an image file (PNG, JPG, WEBP)';
+      const formData = new FormData();
+      formData.append('name', document.getElementById('custName').value.trim());
+      formData.append('email', document.getElementById('custEmail').value.trim());
+      formData.append('phone', document.getElementById('custPhone').value.trim());
+      formData.append('category', document.getElementById('custCategory').value);
+      formData.append('metal', document.getElementById('custMetal').value);
+      formData.append('budget', document.getElementById('custBudget').value.trim());
+      formData.append('details', document.getElementById('custDetails').value.trim());
+
+      const fileInput = document.getElementById('custImageInput');
+      if (fileInput && fileInput.files && fileInput.files[0]) {
+        formData.append('designImage', fileInput.files[0]);
+      }
+
+      try {
+        const resp = await fetch('/Home/SubmitCustomRingInquiry', {
+          method: 'POST',
+          body: formData
+        });
+        const res = await resp.json();
+
+        if (res.success) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(34, 197, 94, 0.2)';
+          alertBox.style.border = '1px solid #22c55e';
+          alertBox.style.color = '#86efac';
+          alertBox.innerHTML = '<i class="fa-solid fa-circle-check"></i> Thank you! Your bespoke request has been saved. Our master gemologists will review your specifications and reach out within 24 hours.';
+          
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Request Submitted!';
+
+          setTimeout(() => {
+            closeCustomDesignModal();
+            alertBox.style.display = 'none';
+            document.getElementById('customDesignForm').reset();
+            document.getElementById('custImgPreview').style.display = 'none';
+            document.getElementById('custUploadText').innerText = 'Click to choose an image file (PNG, JPG, WEBP)';
+            btn.innerHTML = '<i class="fa-solid fa-gem"></i> Submit Custom Request Online';
+          }, 3000);
+        } else {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+          alertBox.style.border = '1px solid #ef4444';
+          alertBox.style.color = '#fca5a5';
+          alertBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> ' + (res.message || 'Submission failed.');
+          btn.disabled = false;
           btn.innerHTML = '<i class="fa-solid fa-gem"></i> Submit Custom Request Online';
-        }, 3000);
+        }
+      } catch (err) {
+        alertBox.style.display = 'block';
+        alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+        alertBox.style.border = '1px solid #ef4444';
+        alertBox.style.color = '#fca5a5';
+        alertBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> An error occurred while submitting your custom inquiry.';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-gem"></i> Submit Custom Request Online';
+      }
+    }
     function syncCartBadge() {
       try {
         const email = '@(User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower()?.Trim() ?? "")';

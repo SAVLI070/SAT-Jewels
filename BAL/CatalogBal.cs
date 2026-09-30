@@ -97,7 +97,7 @@ namespace SAT1.BAL
             const string cacheKey = "Global_PricingRules";
             if (!_cache.TryGetValue(cacheKey, out List<DynamicPricingRule>? rules) || rules == null)
             {
-                rules = await _context.DynamicPricingRules.AsNoTracking().Where(r => r.IsActive).ToListAsync();
+                rules = await _context.DynamicPricingRules.AsNoTracking().ToListAsync();
                 _cache.Set(cacheKey, rules, TimeSpan.FromMinutes(15));
             }
             return rules;
@@ -138,7 +138,8 @@ namespace SAT1.BAL
             { "3", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366773/sat_jewels/categories/cat_3_bridal_sets.jpg" },
             { "4", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366775/sat_jewels/categories/cat_4_earrings.jpg" },
             { "5", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366777/sat_jewels/categories/cat_5_bracelets.jpg" },
-            { "6", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366779/sat_jewels/categories/cat_6_necklaces.jpg" }
+            { "6", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366779/sat_jewels/categories/cat_6_necklaces.jpg" },
+            { "7", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790789297/sat_jewels/catalog/diamonds/emerald_mv15-42c.jpg" }
         };
 
         private async Task EnsureDefaultCategoriesAsync()
@@ -1016,30 +1017,53 @@ namespace SAT1.BAL
                         }
                     }
 
-                    var pricingRules = await GetCachedActivePricingRulesAsync();
-                    var defaultMetals = await GetCachedMetalsAsync();
-                    metalVariants = defaultMetals.Select(m => {
-                        var rule = pricingRules.FirstOrDefault(r => r.RuleType == "Metal" && (
-                            (m.Name.Contains("10K") && r.Code.Contains("10k")) ||
-                            (m.Name.Contains("14K") && r.Code.Contains("14k")) ||
-                            (m.Name.Contains("18K") && r.Code.Contains("18k")) ||
-                            (m.Name.Contains("Platinum") && r.Code.Contains("platinum")) ||
-                            (m.Name.Contains("Silver") && r.Code.Contains("silver"))
-                        ));
-                        decimal offset = rule?.PriceOffsetUSD ?? (m.Name.Contains("14K") ? 180 : m.Name.Contains("18K") ? 480 : m.Name.Contains("Platinum") ? 850 : 0);
-                        return $"{m.Name} (+{offset:F0} USD)";
-                    }).ToList();
+                    if (metalVariants.Count == 0 || caratVariants.Count == 0)
+                    {
+                        var catItemSync = await _context.CatalogItems.AsNoTracking().FirstOrDefaultAsync(c => c.Id == $"sat-prod-{p.ProductId}" || c.Id == p.ProductId.ToString());
+                        if (catItemSync != null)
+                        {
+                            if (metalVariants.Count == 0 && !string.IsNullOrWhiteSpace(catItemSync.MetalOptions))
+                            {
+                                metalVariants = catItemSync.MetalOptions.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList();
+                            }
+                            if (caratVariants.Count == 0 && !string.IsNullOrWhiteSpace(catItemSync.CaratOptions))
+                            {
+                                caratVariants = catItemSync.CaratOptions.Split('|', StringSplitOptions.RemoveEmptyEntries).ToList();
+                            }
+                        }
+                    }
 
-                    var defaultCarats = await GetCachedCaratsAsync();
-                    caratVariants = defaultCarats.Select(c => {
-                        var rule = pricingRules.FirstOrDefault(r => r.RuleType == "Carat" && (
-                            r.DisplayName.Contains(c.CaratWeight.ToString("0.00")) || 
-                            r.Code.Contains(c.CaratWeight.ToString("0.00").Replace(".", "_")) ||
-                            c.Label.Contains(r.DisplayName.Replace(" CT", "").Trim())
-                        ));
-                        decimal offset = rule?.PriceOffsetUSD ?? (c.CaratWeight >= 3.0m ? 2600 : c.CaratWeight >= 2.0m ? 1100 : c.CaratWeight >= 1.5m ? 450 : 0);
-                        return $"{c.Label} (+{offset:F0} USD)";
-                    }).ToList();
+                    if (metalVariants.Count == 0 && p.CategoryId != 7)
+                    {
+                        var pricingRules = await GetCachedActivePricingRulesAsync();
+                        var defaultMetals = await GetCachedMetalsAsync();
+                        metalVariants = defaultMetals.Select(m => {
+                            var rule = pricingRules.FirstOrDefault(r => r.IsActive && r.RuleType == "Metal" && (
+                                (m.Name.Contains("10K") && r.Code.Contains("10k")) ||
+                                (m.Name.Contains("14K") && r.Code.Contains("14k")) ||
+                                (m.Name.Contains("18K") && r.Code.Contains("18k")) ||
+                                (m.Name.Contains("Platinum") && r.Code.Contains("platinum")) ||
+                                (m.Name.Contains("Silver") && r.Code.Contains("silver"))
+                            ));
+                            decimal offset = rule?.PriceOffsetUSD ?? (m.Name.Contains("14K") ? 180 : m.Name.Contains("18K") ? 480 : m.Name.Contains("Platinum") ? 850 : 0);
+                            return $"{m.Name} (+{offset:F0} USD)";
+                        }).ToList();
+                    }
+
+                    if (caratVariants.Count == 0 && p.CategoryId != 7)
+                    {
+                        var pricingRules = await GetCachedActivePricingRulesAsync();
+                        var defaultCarats = await GetCachedCaratsAsync();
+                        caratVariants = defaultCarats.Select(c => {
+                            var rule = pricingRules.FirstOrDefault(r => r.IsActive && r.RuleType == "Carat" && (
+                                r.DisplayName.Contains(c.CaratWeight.ToString("0.00")) || 
+                                r.Code.Contains(c.CaratWeight.ToString("0.00").Replace(".", "_")) ||
+                                c.Label.Contains(r.DisplayName.Replace(" CT", "").Trim())
+                            ));
+                            decimal offset = rule?.PriceOffsetUSD ?? (c.CaratWeight >= 3.0m ? 2600 : c.CaratWeight >= 2.0m ? 1100 : c.CaratWeight >= 1.5m ? 450 : 0);
+                            return $"{c.Label} (+{offset:F0} USD)";
+                        }).ToList();
+                    }
 
                     return new CatalogItem
                     {

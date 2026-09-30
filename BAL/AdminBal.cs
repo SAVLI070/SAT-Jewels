@@ -108,7 +108,7 @@ namespace SAT1.BAL
             var userRole = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
             var userEmail = user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower() ?? "";
             
-            return userRole == "Admin" || user.IsInRole("Admin") || userEmail == "admin@satjewel.com" || userEmail == "admin@satjewels.com";
+            return userRole == "Admin" || user.IsInRole("Admin") || userEmail == "admin@satjewel.com" || userEmail == "admin@satjewels.com" || userEmail == "satjewels31@gmail.com";
         }
 
         public async Task EnsureSequencesSyncedAsync()

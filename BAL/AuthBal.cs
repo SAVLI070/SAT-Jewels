@@ -228,5 +228,25 @@ namespace SAT1.BAL
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<User> GetOrCreateGoogleUserAsync(string email, string name, string googleId)
+        {
+            var trimmedEmail = email.Trim().ToLower();
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == trimmedEmail);
+            if (user == null)
+            {
+                user = new User
+                {
+                    Id = "user_" + Guid.NewGuid().ToString("N").Substring(0, 10),
+                    FullName = !string.IsNullOrWhiteSpace(name) ? name.Trim() : "Valued Client",
+                    Email = trimmedEmail,
+                    Role = "Client",
+                    CreatedAt = DateTime.UtcNow
+                };
+                _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+            return user;
+        }
     }
 }

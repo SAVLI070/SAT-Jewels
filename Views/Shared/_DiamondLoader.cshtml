@@ -26,14 +26,9 @@
           curPath.includes('/account/signin') || curPath.includes('/account/login') || curPath.includes('/account/auth') || curPath.includes('/account/register') || curPath.includes('/account/handlesignin') || curPath.includes('/account/handlesignup')) {
         return; // Exclude main landing page, admin portal, and sign in/register pages
       }
-      const perfNav = (performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || performance.navigation;
-      const isReload = perfNav && (perfNav.type === 'reload' || perfNav.type === 1);
-      if (isReload) {
+      if (document.readyState !== 'complete') {
         const ldr = document.getElementById('satLottieLoader');
         if (ldr) ldr.classList.add('active');
-        setTimeout(function() {
-          if (ldr) ldr.classList.remove('active');
-        }, 1200);
       }
     } catch(e) {}
   })();
@@ -174,10 +169,10 @@
     if (loader) {
       loader.classList.add('active');
       clearTimeout(loaderDismissTimer);
-      // Fast auto-hide timeout: never block UI for more than 1.2 seconds
+      // Safety timeout: 15 seconds maximum to prevent locking if an external asset hangs
       loaderDismissTimer = setTimeout(() => {
         window.hideDiamondLoader();
-      }, 1200);
+      }, 15000);
     }
   };
 
@@ -225,18 +220,33 @@
     } catch(e) {}
   });
 
-  // Keep loader fast: dismiss on DOMContentLoaded or immediately if ready
-  if (document.readyState === 'interactive' || document.readyState === 'complete') {
-    window.hideDiamondLoader();
-  } else {
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(window.hideDiamondLoader, 100);
-    });
-    window.addEventListener('load', function() {
+  // Keep loader visible until the page and images are fully loaded
+  function onPageFullyLoaded() {
+    const keyImages = Array.from(document.querySelectorAll('.main-image-container img, .product-main-img, #mainImg, img[loading="eager"]'));
+    const pending = keyImages.filter(img => !img.complete);
+    if (pending.length > 0) {
+      let resolved = 0;
+      const done = () => {
+        resolved++;
+        if (resolved >= pending.length) {
+          window.hideDiamondLoader();
+        }
+      };
+      pending.forEach(img => {
+        img.addEventListener('load', done, { once: true });
+        img.addEventListener('error', done, { once: true });
+      });
+      setTimeout(window.hideDiamondLoader, 2500);
+    } else {
       window.hideDiamondLoader();
-    });
+    }
   }
-  setTimeout(window.hideDiamondLoader, 800);
+
+  if (document.readyState === 'complete') {
+    onPageFullyLoaded();
+  } else {
+    window.addEventListener('load', onPageFullyLoaded);
+  }
 
   // Auto-hide when restored from back/forward cache
   window.addEventListener('pageshow', function() {

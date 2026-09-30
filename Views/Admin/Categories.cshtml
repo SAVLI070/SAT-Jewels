@@ -453,7 +453,6 @@
               <th>Image</th>
               <th>Category Title & Sub-Cat</th>
               <th>Hierarchy & Tags</th>
-              <th>Stone / Cut</th>
               <th>Visibility</th>
               <th>Action</th>
             </tr>
@@ -628,7 +627,7 @@
       if (!tbody) return;
 
       if (!categories || categories.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--taupe-beige);">No categories found in AWS RDS database.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--taupe-beige);">No categories found in AWS RDS database.</td></tr>';
         return;
       }
 
@@ -646,11 +645,6 @@
         const typeBadge = c.parentId 
           ? '<span class="badge-hierarchy-sub"><i class="fa-solid fa-folder-tree"></i> Sub-Category</span>'
           : '<span class="badge-hierarchy-parent"><i class="fa-solid fa-crown"></i> Main Category</span>';
-
-        const diamondBadge = `<span class="badge-diamond-type">${c.diamondType || 'Lab Grown'}</span>`;
-        const cutBadge = c.diamondCutShape && c.diamondCutShape !== 'All Shapes'
-          ? `<span style="font-size:11px; color:#b45309; font-weight:700;">${c.diamondCutShape}</span>`
-          : '<span style="font-size:11px; color:#64748b;">All Shapes</span>';
 
         return `
           <tr>
@@ -677,12 +671,6 @@
               </div>
             </td>
             <td>
-              <div style="display:flex; flex-direction:column; gap:4px;">
-                ${diamondBadge}
-                ${cutBadge}
-              </div>
-            </td>
-            <td>
               <div class="cat-toggle-wrap">
                 <label class="cat-switch">
                   <input type="checkbox" ${c.isActive ? 'checked' : ''} onchange="toggleCategoryActive('${c.id}', this.checked)" />
@@ -694,9 +682,14 @@
               </div>
             </td>
             <td>
-              <button type="button" onclick="editCategory('${c.id}')" style="background:#fef3c7; border:1px solid #d97706; color:#b45309; padding:6px 12px; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; transition:all 0.2s;">
-                <i class="fa-solid fa-pen-to-square"></i> Edit
-              </button>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <button type="button" onclick="editCategory('${c.id}')" style="background:#fef3c7; border:1px solid #d97706; color:#b45309; padding:6px 12px; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; transition:all 0.2s; display:inline-flex; align-items:center; gap:5px;">
+                  <i class="fa-solid fa-pen-to-square"></i> Edit
+                </button>
+                <button type="button" onclick="deleteCategory('${c.id}', '${(c.name || '').replace(/'/g, "\\'")}')" style="background:#fee2e2; border:1px solid #ef4444; color:#dc2626; padding:6px 12px; border-radius:6px; font-weight:700; cursor:pointer; font-size:12px; transition:all 0.2s; display:inline-flex; align-items:center; gap:5px;">
+                  <i class="fa-solid fa-trash-can"></i> Delete
+                </button>
+              </div>
             </td>
           </tr>
         `;
@@ -714,19 +707,56 @@
         if (typeof showToast === 'function') {
           showToast(`Category visibility updated to ${isActive ? 'Visible' : 'Hidden'} on storefront. Products remain safe in DB!`, isActive ? 'success' : 'info', 'Visibility Updated');
         }
-        loadAdminCategoriesTable();
+        await loadAdminCategoriesTable();
       } else {
         if (typeof showToast === 'function') {
           showToast(data.message || 'Error updating category visibility', 'error');
         } else {
           alert(data.message || 'Error updating category visibility');
         }
+        await loadAdminCategoriesTable();
       }
     } catch (e) {
       if (typeof showToast === 'function') {
         showToast('Network error updating category visibility', 'error');
       } else {
         alert('Network error updating category visibility');
+      }
+      await loadAdminCategoriesTable();
+    }
+  }
+
+  async function deleteCategory(id, name) {
+    if (!confirm(`Are you sure you want to permanently delete category "${name}"?\nProducts attached to this category will remain safe in database.`)) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/catalogapi/categories/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        if (typeof showToast === 'function') {
+          showToast(`Category "${name}" deleted successfully.`, 'success', 'Deleted');
+        } else {
+          alert(`Category "${name}" deleted successfully.`);
+        }
+        await loadAdminCategoriesTable();
+      } else {
+        const msg = data.message || 'Error deleting category';
+        if (typeof showToast === 'function') {
+          showToast(msg, 'error');
+        } else {
+          alert(msg);
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      if (typeof showToast === 'function') {
+        showToast('Network error while deleting category', 'error');
+      } else {
+        alert('Network error while deleting category');
       }
     }
   }

@@ -25,6 +25,7 @@ namespace SAT1.Models
         public DbSet<DynamicPricingRule> DynamicPricingRules { get; set; } = null!;
         public DbSet<OrderTrackingHistory> OrderTrackingHistory { get; set; } = null!;
         public DbSet<ProductReview> ProductReviews { get; set; } = null!;
+        public DbSet<CustomRingInquiry> CustomRingInquiries { get; set; } = null!;
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {

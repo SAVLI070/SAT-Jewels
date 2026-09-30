@@ -115,6 +115,10 @@ builder.Services.AddScoped<SAT1.BAL.OrderTrackingService>();
 builder.Services.AddScoped<SAT1.BAL.PayPalService>();
 builder.Services.AddScoped<SAT1.BAL.RazorpayService>();
 builder.Services.AddScoped<SAT1.BAL.OrderBusinessService>();
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+});
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -368,57 +372,40 @@ if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
 }
-else
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-
-    // Canonical Domain & HTTPS Enforcement for satjewel.com
-    app.Use(async (context, next) =>
-    {
-        var host = context.Request.Host.Host;
-        var scheme = context.Request.Scheme;
-
-        // Redirect www.satjewel.com -> satjewel.com
-        if (string.Equals(host, "www.satjewel.com", StringComparison.OrdinalIgnoreCase))
-        {
-            var newUrl = $"https://satjewel.com{context.Request.PathBase}{context.Request.Path}{context.Request.QueryString}";
-            context.Response.StatusCode = StatusCodes.Status301MovedPermanently;
-            context.Response.Headers.Location = newUrl;
-            return;
-        }
-
-        // Redirect http -> https for satjewel.com
-        if (string.Equals(scheme, "http", StringComparison.OrdinalIgnoreCase) &&
-            string.Equals(host, "satjewel.com", StringComparison.OrdinalIgnoreCase))
-        {
-            var newUrl = $"https://satjewel.com{context.Request.PathBase}{context.Request.Path}{context.Request.QueryString}";
-            context.Response.StatusCode = StatusCodes.Status301MovedPermanently;
-            context.Response.Headers.Location = newUrl;
-            return;
-        }
-
-        await next();
-    });
-
-    // Only redirect if an HTTPS port is configured (avoids warning when running behind SSL-terminating proxies)
-    if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("HTTPS_PORT")) || 
-        !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ASPNETCORE_HTTPS_PORT")) ||
-        builder.Configuration.GetValue<int?>("https_port") != null)
-    {
-        app.UseHttpsRedirection();
-    }
-}
 
 app.UseStatusCodePagesWithReExecute("/Home/Restricted");
+
+app.UseResponseCompression();
 
 app.Use(async (context, next) =>
 {
     context.Response.OnStarting(() =>
     {
-        context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0, private";
-        context.Response.Headers["Pragma"] = "no-cache";
-        context.Response.Headers["Expires"] = "-1";
+        var reqPath = context.Request.Path.Value?.ToLower() ?? "";
+        bool isStatic = reqPath.StartsWith("/assets/") || 
+                        reqPath.StartsWith("/css/") || 
+                        reqPath.StartsWith("/js/") ||
+                        reqPath.EndsWith(".css") || 
+                        reqPath.EndsWith(".js") || 
+                        reqPath.EndsWith(".jpg") || 
+                        reqPath.EndsWith(".jpeg") || 
+                        reqPath.EndsWith(".png") || 
+                        reqPath.EndsWith(".webp") || 
+                        reqPath.EndsWith(".svg") || 
+                        reqPath.EndsWith(".woff2") || 
+                        reqPath.EndsWith(".ico");
+
+        if (isStatic)
+        {
+            context.Response.Headers["Cache-Control"] = "public, max-age=2592000, immutable";
+        }
+        else
+        {
+            context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0, private";
+            context.Response.Headers["Pragma"] = "no-cache";
+            context.Response.Headers["Expires"] = "-1";
+        }
+
         context.Response.Headers["X-Content-Type-Options"] = "nosniff";
         context.Response.Headers["X-Frame-Options"] = "SAMEORIGIN";
         context.Response.Headers["X-XSS-Protection"] = "1; mode=block";
@@ -430,7 +417,13 @@ app.Use(async (context, next) =>
     await next();
 });
 
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=2592000, immutable";
+    }
+});
 
 app.UseRouting();
 
@@ -480,6 +473,7 @@ app.Use(async (context, next) =>
     await next();
 });
 
+app.MapGet("/health", () => Results.Ok("OK"));
 app.MapControllers();
 
 app.MapControllerRoute(
