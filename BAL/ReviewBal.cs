@@ -27,6 +27,7 @@ namespace SAT1.BAL
         public int Rating { get; set; } = 5;
         public string Source { get; set; } = "Google"; // "Google" or "Verified"
         public string DateString { get; set; } = "Recently";
+        public string RelativeTime { get; set; } = "Recently";
     }
 
     public class ReviewBal
@@ -238,6 +239,17 @@ namespace SAT1.BAL
             return true;
         }
 
+        public static string FormatRelativeTime(DateTime dt)
+        {
+            var span = DateTime.UtcNow - dt.ToUniversalTime();
+            if (span.TotalDays < 0) return "Recently";
+            if (span.TotalDays < 30) return "Recently";
+            if (span.TotalDays < 60) return "1 month ago";
+            if (span.TotalDays < 365) return $"{(int)(span.TotalDays / 30)} months ago";
+            if (span.TotalDays < 730) return "last year";
+            return $"{(int)(span.TotalDays / 365)} years ago";
+        }
+
         // Storefront: Get Curated Customer Photo Reviews for Product Carousel & Marquee
         public async Task<List<CustomerPhotoReviewDto>> GetStorefrontPhotoReviewsAsync(string? productId = null)
         {
@@ -254,9 +266,23 @@ namespace SAT1.BAL
                 }
 
                 var dbReviews = await query
-                    .OrderByDescending(r => r.CreatedAt)
-                    .Take(12)
+                    .OrderBy(r => r.ReviewId >= 1684 ? 0 : 1)
+                    .ThenBy(r => r.ReviewId >= 1684 ? r.ReviewId : -r.ReviewId)
+                    .Take(15)
                     .ToListAsync();
+
+                // If specific product has fewer than 8 reviews, supplement with top storewide approved photo reviews
+                if (dbReviews.Count < 8 && !string.IsNullOrEmpty(productId))
+                {
+                    var existingIds = dbReviews.Select(d => d.ReviewId).ToList();
+                    var extraReviews = await _context.ProductReviews
+                        .AsNoTracking()
+                        .Where(r => r.Status == "Approved" && !existingIds.Contains(r.ReviewId))
+                        .OrderByDescending(r => r.CreatedAt)
+                        .Take(15 - dbReviews.Count)
+                        .ToListAsync();
+                    dbReviews.AddRange(extraReviews);
+                }
 
                 if (dbReviews.Count > 0)
                 {
@@ -265,12 +291,13 @@ namespace SAT1.BAL
                         Id = dbr.ReviewId,
                         CustomerName = dbr.CustomerName,
                         AvatarUrl = dbr.AvatarUrl,
-                        PhotoUrl = !string.IsNullOrEmpty(dbr.PhotoUrl) ? dbr.PhotoUrl : "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg",
+                        PhotoUrl = !string.IsNullOrEmpty(dbr.PhotoUrl) ? dbr.PhotoUrl : "",
                         ReviewTitle = dbr.ReviewTitle,
                         ReviewText = dbr.ReviewText,
                         Rating = dbr.Rating,
                         Source = "Google",
-                        DateString = dbr.CreatedAt.ToString("MMM dd, yyyy")
+                        DateString = dbr.CreatedAt.ToString("MMM dd, yyyy"),
+                        RelativeTime = FormatRelativeTime(dbr.CreatedAt)
                     }).ToList();
                 }
             }

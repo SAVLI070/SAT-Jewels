@@ -572,6 +572,77 @@
       justify-content: center;
       flex-wrap: wrap;
     }
+  /* Table Toggle Switch Styling (Same as Category Visibility) */
+  .cat-toggle-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .cat-switch {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .cat-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .cat-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #cbd5e1;
+    transition: .3s;
+    border-radius: 20px;
+  }
+
+  .cat-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  input:checked + .cat-slider {
+    background-color: #10b981;
+  }
+
+  input:checked + .cat-slider:before {
+    transform: translateX(16px);
+  }
+
+  .status-tag-active {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: #f0fdf4;
+    border: 1px solid #86efac;
+    color: #16a34a;
+    line-height: 1.2;
+  }
+
+  .status-tag-hidden {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    color: #64748b;
+    line-height: 1.2;
   }
 </style>
 
@@ -959,7 +1030,15 @@
             
             <div style="display:flex;align-items:center;justify-content:space-between;margin-top:auto;padding-top:8px;border-top:1px solid #f1f5f9;">
               <span class="product-square-price">$${Number(item.priceUSD || item.price || 0).toLocaleString()}</span>
-              <span class="status-pill-badge" style="font-weight:700;font-size:11px;padding:3px 8px;border-radius:8px;background:#f0fdf4;color:#16a34a;border:1px solid #86efac;">Active</span>
+              <div class="cat-toggle-wrap" onclick="event.stopPropagation();" title="Toggle storefront product visibility">
+                <label class="cat-switch">
+                  <input type="checkbox" ${item.isActive !== false ? 'checked' : ''} onchange="toggleProductActive('${item.id}', '${catId}', this.checked, event)" />
+                  <span class="cat-slider"></span>
+                </label>
+                <span class="${item.isActive !== false ? 'status-tag-active' : 'status-tag-hidden'}">
+                  ${item.isActive !== false ? 'Visible' : 'Hidden'}
+                </span>
+              </div>
             </div>
 
             <div class="product-square-card-actions">
@@ -1175,6 +1254,41 @@
       console.error('Error deleting catalog item:', err);
       if (typeof showToast === 'function') {
         showToast('Error deleting item from database.', 'error');
+      }
+    }
+  }
+
+  async function toggleProductActive(id, catId, isActive, event) {
+    if (event) event.stopPropagation();
+    try {
+      const res = await fetch(`/api/catalogapi/items/${encodeURIComponent(id)}/toggle-visibility?active=${isActive}`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        if (typeof showToast === 'function') {
+          showToast(`Product visibility updated to ${isActive ? 'Visible' : 'Hidden'} on storefront.`, isActive ? 'success' : 'info', 'Visibility Updated');
+        }
+        // Update local items array so re-render reflects changes immediately
+        const cKey = (catId || '').toString().toLowerCase();
+        if (loadedCategoryItems[cKey]) {
+          const it = loadedCategoryItems[cKey].find(x => String(x.id) === String(id));
+          if (it) it.isActive = isActive;
+        }
+        if (categoryFilteredItemsMap[catId]) {
+          const it = categoryFilteredItemsMap[catId].find(x => String(x.id) === String(id));
+          if (it) it.isActive = isActive;
+          renderCategoryItemsGrid(catId, categoryFilteredItemsMap[catId], categoryPageMap[catId] || 1);
+        }
+      } else {
+        if (typeof showToast === 'function') {
+          showToast(data.message || 'Error updating product visibility', 'error');
+        } else {
+          alert(data.message || 'Error updating product visibility');
+        }
+      }
+    } catch (e) {
+      console.error('Error toggling product visibility:', e);
+      if (typeof showToast === 'function') {
+        showToast('Failed to communicate with server', 'error');
       }
     }
   }

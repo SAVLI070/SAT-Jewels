@@ -73,7 +73,7 @@ namespace SAT1.Models
             if (categoryId == 4 || clean.Contains("earring")) return "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366775/sat_jewels/categories/cat_4_earrings.jpg";
             if (categoryId == 5 || clean.Contains("bracelet")) return "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366777/sat_jewels/categories/cat_5_bracelets.jpg";
             if (categoryId == 6 || clean.Contains("necklace") || clean.Contains("pendant")) return "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366779/sat_jewels/categories/cat_6_necklaces.jpg";
-            if (categoryId == 7 || clean.Contains("diamond")) return "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790789297/sat_jewels/catalog/diamonds/emerald_mv15-42c.jpg";
+            if (categoryId == 7 || clean.Contains("diamond")) return "/assets/categories/cat_diamonds.png";
 
             return categoryId switch
             {
@@ -83,7 +83,7 @@ namespace SAT1.Models
                 4 => "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366775/sat_jewels/categories/cat_4_earrings.jpg",
                 5 => "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366777/sat_jewels/categories/cat_5_bracelets.jpg",
                 6 => "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366779/sat_jewels/categories/cat_6_necklaces.jpg",
-                7 => "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790789297/sat_jewels/catalog/diamonds/emerald_mv15-42c.jpg",
+                7 => "/assets/categories/cat_diamonds.png",
                 _ => "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png"
             };
         }

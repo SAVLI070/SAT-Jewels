@@ -99,12 +99,29 @@
     color: #ffffff;
   }
 
-  /* Collection Cards Grid */
+  /* Collection Cards Grid & Smooth 6-Item Carousel */
+  .cat-carousel-viewport {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+    border-radius: 12px;
+    margin-top: 8px;
+  }
+  .cat-carousel-track {
+    display: flex;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+    width: 100%;
+  }
+  .cat-carousel-slide {
+    flex: 0 0 100%;
+    width: 100%;
+    min-width: 100%;
+    box-sizing: border-box;
+  }
   .cat-cards-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
-    margin-top: 8px;
     width: 100%;
     box-sizing: border-box;
   }
@@ -455,31 +472,48 @@
       </div>
     </div>
 
-    <form id="adminAddProductForm" onsubmit="handlePublishProduct(event)">
+    <form id="adminAddProductForm" novalidate onsubmit="handlePublishProduct(event)">
       
       <!-- STEP 1: Details & Category -->
       <div id="wStep1" class="wizard-content-step">
         <div style="margin-bottom:20px;">
-          <label style="font-size:13px; font-weight:700; color:var(--champagne-gold); display:block; margin-bottom:6px;">Select Main Collection Category *</label>
-          <div class="cat-cards-grid" id="adminCatCardsGrid">
-            <div class="cat-select-card active" data-category-id="1" data-category-slug="engagement-rings" data-category-name="Engagement Rings" data-category-name-lower="engagement rings" onclick="setCategory(1, 'Engagement Rings', this)">
-              <i class="fa-solid fa-gem"></i> <span>1. Engagement Rings</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="font-size:13px; font-weight:700; color:var(--champagne-gold); margin:0;">Select Main Collection Category *</label>
+            <div id="catCarouselNav" style="display:none; align-items:center; gap:8px;">
+              <button type="button" id="btnCatPrev" onclick="navigateCatPage(-1)" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 9px; font-size:11px; font-weight:700; color:#0f172a; cursor:pointer;" title="Previous categories" disabled>
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <span id="catPageIndicator" style="font-size:11.5px; font-weight:700; color:#64748b;">1 / 1</span>
+              <button type="button" id="btnCatNext" onclick="navigateCatPage(1)" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 9px; font-size:11px; font-weight:700; color:#0f172a; cursor:pointer;" title="Next categories">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
             </div>
-            <div class="cat-select-card" data-category-id="2" data-category-slug="wedding-rings" data-category-name="Wedding Rings" data-category-name-lower="wedding rings" onclick="setCategory(2, 'Wedding Rings', this)">
-              <i class="fa-solid fa-ring"></i> <span>2. Wedding Rings</span>
-            </div>
-            <div class="cat-select-card" data-category-id="3" data-category-slug="bridal-sets" data-category-name="Bridal Sets" data-category-name-lower="bridal sets" onclick="setCategory(3, 'Bridal Sets', this)">
-              <i class="fa-solid fa-heart"></i> <span>3. Bridal Sets</span>
-            </div>
-            <div class="cat-select-card" data-category-id="4" data-category-slug="earrings" data-category-name="Earrings" data-category-name-lower="earrings" onclick="setCategory(4, 'Earrings', this)">
-              <svg class="cat-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>
-              <span>4. Earrings</span>
-            </div>
-            <div class="cat-select-card" data-category-id="5" data-category-slug="bracelets" data-category-name="Bracelets" data-category-name-lower="bracelets" onclick="setCategory(5, 'Bracelets', this)">
-              <i class="fa-solid fa-link"></i> <span>5. Bracelets</span>
-            </div>
-            <div class="cat-select-card" data-category-id="6" data-category-slug="necklaces" data-category-name="Necklaces" data-category-name-lower="necklaces" onclick="setCategory(6, 'Necklaces', this)">
-              <i class="fa-solid fa-crown"></i> <span>6. Necklaces</span>
+          </div>
+          <div class="cat-carousel-viewport" id="adminCatViewport">
+            <div class="cat-carousel-track" id="adminCatCarouselTrack">
+              <div class="cat-carousel-slide">
+                <div class="cat-cards-grid" id="adminCatCardsGrid">
+                  <div class="cat-select-card active" data-category-id="1" data-category-slug="engagement-rings" data-category-name="Engagement Rings" data-category-name-lower="engagement rings" onclick="setCategory(1, 'Engagement Rings', this)">
+                    <i class="fa-solid fa-gem"></i> <span>1. Engagement Rings</span>
+                  </div>
+                  <div class="cat-select-card" data-category-id="2" data-category-slug="wedding-rings" data-category-name="Wedding Rings" data-category-name-lower="wedding rings" onclick="setCategory(2, 'Wedding Rings', this)">
+                    <i class="fa-solid fa-ring"></i> <span>2. Wedding Rings</span>
+                  </div>
+                  <div class="cat-select-card" data-category-id="3" data-category-slug="bridal-sets" data-category-name="Bridal Sets" data-category-name-lower="bridal sets" onclick="setCategory(3, 'Bridal Sets', this)">
+                    <i class="fa-solid fa-heart"></i> <span>3. Bridal Sets</span>
+                  </div>
+                  <div class="cat-select-card" data-category-id="4" data-category-slug="earrings" data-category-name="Earrings" data-category-name-lower="earrings" onclick="setCategory(4, 'Earrings', this)">
+                    <svg class="cat-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>
+                    <span>4. Earrings</span>
+                  </div>
+                  <div class="cat-select-card" data-category-id="5" data-category-slug="bracelets" data-category-name="Bracelets" data-category-name-lower="bracelets" onclick="setCategory(5, 'Bracelets', this)">
+                    <i class="fa-solid fa-link"></i> <span>5. Bracelets</span>
+                  </div>
+                  <div class="cat-select-card" data-category-id="6" data-category-slug="necklaces" data-category-name="Necklaces" data-category-name-lower="necklaces" onclick="setCategory(6, 'Necklaces', this)">
+                    <i class="fa-solid fa-crown"></i> <span>6. Necklaces</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <input type="hidden" id="adminCategoryId" value="1" />
@@ -650,7 +684,7 @@
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:28px;">
           <button type="button" onclick="switchWizardStep(3)" style="background:#ffffff; border:1px solid #cbd5e1; color:#0f172a; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;">&lt; Back</button>
-          <button type="submit" class="btn-submit-item" id="btnPublishItem" style="padding:12px 28px; font-size:14px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#fff; border:none; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 16px rgba(180,83,9,0.25);">
+          <button type="button" onclick="handlePublishProduct(event)" class="btn-submit-item" id="btnPublishItem" style="padding:12px 28px; font-size:14px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#fff; border:none; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 16px rgba(180,83,9,0.25);">
             <i class="fa-solid fa-paper-plane"></i> Save &amp; Publish to Neon DB
           </button>
         </div>
@@ -1151,6 +1185,27 @@
     document.querySelectorAll('.matrix-chk').forEach(chk => chk.checked = checked);
   }
 
+  let currentCatCarouselPage = 0;
+  let totalCatCarouselPages = 1;
+
+  function navigateCatPage(delta) {
+    const track = document.getElementById('adminCatCarouselTrack');
+    const viewport = document.getElementById('adminCatViewport');
+    const prevBtn = document.getElementById('btnCatPrev');
+    const nextBtn = document.getElementById('btnCatNext');
+    const indicator = document.getElementById('catPageIndicator');
+    if (!track) return;
+
+    currentCatCarouselPage = Math.max(0, Math.min(currentCatCarouselPage + delta, totalCatCarouselPages - 1));
+    const offset = viewport ? (currentCatCarouselPage * viewport.clientWidth) : 0;
+    track.style.transform = `translateX(-${offset}px)`;
+
+    if (indicator) indicator.textContent = `${currentCatCarouselPage + 1} / ${totalCatCarouselPages}`;
+    if (prevBtn) prevBtn.disabled = (currentCatCarouselPage === 0);
+    if (nextBtn) nextBtn.disabled = (currentCatCarouselPage >= totalCatCarouselPages - 1);
+  }
+  window.addEventListener('resize', () => { if (typeof navigateCatPage === 'function') navigateCatPage(0); });
+
   async function loadAdminCategories() {
     try {
       const res = await fetch('/api/catalogapi/admin-categories');
@@ -1162,44 +1217,87 @@
       const visibleCategories = categories.filter(c => c.isActive !== false);
       if (visibleCategories.length === 0) return;
 
-      const grid = document.getElementById('adminCatCardsGrid') || document.querySelector('.cat-cards-grid');
-      if (!grid) return;
+      const track = document.getElementById('adminCatCarouselTrack');
+      const nav = document.getElementById('catCarouselNav');
+      if (!track) return;
 
-      const currentSelectedId = document.getElementById('adminCategoryId').value;
+      const currentSelectedId = document.getElementById('adminCategoryId')?.value;
+      const chunkSize = 6;
+      totalCatCarouselPages = Math.max(1, Math.ceil(visibleCategories.length / chunkSize));
 
-      grid.innerHTML = visibleCategories.map((c, idx) => {
-        const idVal = c.id;
-        const nameVal = c.name;
-        const slugVal = c.slug || nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        const isActiveSelection = String(currentSelectedId) === String(idVal) || (!currentSelectedId && idx === 0);
+      if (nav) {
+        nav.style.display = totalCatCarouselPages > 1 ? 'flex' : 'none';
+      }
 
-        let iconMarkup = `<i class="fa-solid fa-gem"></i>`;
-        const lower = nameVal.toLowerCase();
-        if (lower.includes('wedding')) {
-          iconMarkup = `<i class="fa-solid fa-ring"></i>`;
-        } else if (lower.includes('bridal')) {
-          iconMarkup = `<i class="fa-solid fa-heart"></i>`;
-        } else if (lower.includes('earring')) {
-          iconMarkup = `<svg class="cat-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>`;
-        } else if (lower.includes('bracelet')) {
-          iconMarkup = `<i class="fa-solid fa-link"></i>`;
-        } else if (lower.includes('necklace')) {
-          iconMarkup = `<i class="fa-solid fa-crown"></i>`;
-        }
+      // Group into slides of up to 6 categories
+      let slidesHtml = '';
+      let targetSlideIndex = 0;
 
-        return `
-          <div class="cat-select-card ${isActiveSelection ? 'active' : ''}" 
-               data-category-id="${idVal}" 
-               data-category-slug="${slugVal}" 
-               data-category-name="${nameVal}" 
-               data-category-name-lower="${lower}" 
-               onclick="setCategory('${idVal}', '${nameVal.replace(/'/g, "\\'")}', this)">
-            ${iconMarkup} <span>${nameVal}</span>
+      for (let p = 0; p < totalCatCarouselPages; p++) {
+        const slice = visibleCategories.slice(p * chunkSize, (p + 1) * chunkSize);
+        slidesHtml += `
+          <div class="cat-carousel-slide">
+            <div class="cat-cards-grid">
+              ${slice.map((c, idx) => {
+                const idVal = c.id;
+                const nameVal = c.name;
+                const slugVal = c.slug || nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                const isSelected = String(currentSelectedId) === String(idVal) || (!currentSelectedId && p === 0 && idx === 0);
+                if (isSelected) targetSlideIndex = p;
+
+                let iconMarkup = `<i class="fa-solid fa-gem"></i>`;
+                const lower = nameVal.toLowerCase();
+                if (lower.includes('wedding')) {
+                  iconMarkup = `<i class="fa-solid fa-ring"></i>`;
+                } else if (lower.includes('bridal')) {
+                  iconMarkup = `<i class="fa-solid fa-heart"></i>`;
+                } else if (lower.includes('earring')) {
+                  iconMarkup = `<svg class="cat-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>`;
+                } else if (lower.includes('bracelet')) {
+                  iconMarkup = `<i class="fa-solid fa-link"></i>`;
+                } else if (lower.includes('necklace')) {
+                  iconMarkup = `<i class="fa-solid fa-crown"></i>`;
+                } else if (lower.includes('diamond')) {
+                  iconMarkup = `<i class="fa-solid fa-gem"></i>`;
+                }
+
+                return `
+                  <div class="cat-select-card ${isSelected ? 'active' : ''}" 
+                       data-category-id="${idVal}" 
+                       data-category-slug="${slugVal}" 
+                       data-category-name="${nameVal}" 
+                       data-category-name-lower="${lower}" 
+                       onclick="setCategory('${idVal}', '${nameVal.replace(/'/g, "\\'")}', this)">
+                    ${iconMarkup} <span>${nameVal}</span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
           </div>
         `;
-      }).join('');
+      }
 
-      const activeCard = grid.querySelector('.cat-select-card.active') || grid.querySelector('.cat-select-card');
+      track.innerHTML = slidesHtml;
+
+      // Add touch swipe support for mobile
+      let touchStartX = 0;
+      let touchEndX = 0;
+      if (track.parentElement) {
+        track.parentElement.addEventListener('touchstart', e => {
+          touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+        track.parentElement.addEventListener('touchend', e => {
+          touchEndX = e.changedTouches[0].screenX;
+          if (touchStartX - touchEndX > 50) navigateCatPage(1);
+          if (touchEndX - touchStartX > 50) navigateCatPage(-1);
+        }, { passive: true });
+      }
+
+      // Navigate to the slide of the selected category
+      currentCatCarouselPage = targetSlideIndex;
+      navigateCatPage(0);
+
+      const activeCard = track.querySelector('.cat-select-card.active') || track.querySelector('.cat-select-card');
       if (activeCard) {
         setCategory(activeCard.dataset.categoryId, activeCard.dataset.categoryName, activeCard);
       }
@@ -1336,8 +1434,16 @@
     const categoryId = parseInt(document.getElementById('adminCategoryId').value) || 1;
     const shapeId = parseInt(document.getElementById('adminShapeId').value) || 1;
 
-    if (!title || priceUSD <= 0) {
-      showToast('Please fill out Title and Base Price.', 'warning');
+    if (!title) {
+      switchWizardStep(1);
+      showToast('Item Title / Name is required.', 'warning');
+      document.getElementById('adminTitle')?.focus();
+      return;
+    }
+    if (priceUSD <= 0) {
+      switchWizardStep(1);
+      showToast('Please enter a valid Base Price ($ USD) greater than 0.', 'warning');
+      document.getElementById('adminPrice')?.focus();
       return;
     }
 
@@ -1371,6 +1477,7 @@
 
     const imageUrls = currentUploadedUrls.filter(u => u && !u.startsWith('blob:'));
     if (imageUrls.length === 0) {
+      switchWizardStep(2);
       showToast('Please upload at least 1 product photo to Cloudinary before saving.', 'warning');
       return;
     }

@@ -7,7 +7,7 @@
     var photoReviews = ViewBag.PhotoReviews as List<SAT1.BAL.CustomerPhotoReviewDto> ?? new List<SAT1.BAL.CustomerPhotoReviewDto>();
 
     string FixImg(string? path) {
-        if (string.IsNullOrWhiteSpace(path)) return "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg";
+        if (string.IsNullOrWhiteSpace(path)) return "/assets/hero_slider_1_solitaire.jpg";
         if (path.StartsWith("http://") || path.StartsWith("https://")) return path;
         if (path.StartsWith("~/")) return path.Substring(1);
         if (!path.StartsWith("/")) return "/" + path;
@@ -1905,7 +1905,7 @@
           var firstLetter = !string.IsNullOrEmpty(rev.CustomerName) ? rev.CustomerName.Substring(0, 1).ToUpper() : "C";
           <div class="review-photo-card">
             <div class="review-photo-box">
-              <img src="@rev.PhotoUrl" alt="@rev.CustomerName Review" loading="lazy" onerror="this.onerror=null; this.src='/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';" />
+              <img src="@rev.PhotoUrl" alt="@rev.CustomerName Review" loading="lazy" onerror="this.onerror=null; this.src='/assets/hero_slider_1_solitaire.jpg';" />
             </div>
             <div class="review-card-body">
               <div class="reviewer-meta-row">
@@ -1940,7 +1940,7 @@
           var firstLetter = !string.IsNullOrEmpty(rev.CustomerName) ? rev.CustomerName.Substring(0, 1).ToUpper() : "C";
           <div class="review-photo-card">
             <div class="review-photo-box">
-              <img src="@rev.PhotoUrl" alt="@rev.CustomerName Review" loading="lazy" onerror="this.onerror=null; this.src='/assets/ivevar/exclusive_regal_star_diamond_ring.jpg';" />
+              <img src="@rev.PhotoUrl" alt="@rev.CustomerName Review" loading="lazy" onerror="this.onerror=null; this.src='/assets/hero_slider_1_solitaire.jpg';" />
             </div>
             <div class="review-card-body">
               <div class="reviewer-meta-row">

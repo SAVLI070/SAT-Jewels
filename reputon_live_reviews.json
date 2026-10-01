@@ -1,0 +1,337 @@
+{
+  "language": "en",
+  "business": [
+    {
+      "address": "420- (Ivevar) Silverstone Arcade, Causeway Rd, Katargam, Surat, Gujarat 395004, India",
+      "cid": "58073944847623503",
+      "icon": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkETdaSUfCezAsBOwAjBm3DYEii3kUERfzmKAQ9VVGLrkfB_5qEQDFTtGWLfpr0W2arKnufjEo-U_NJIfVnDT3vmPQACryK-oApczGwo0B-3NqWUswMg0z9OKYOa5jde44LBKey23U83jGO=w408-h544-k-no",
+      "imageUrl": "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkETdaSUfCezAsBOwAjBm3DYEii3kUERfzmKAQ9VVGLrkfB_5qEQDFTtGWLfpr0W2arKnufjEo-U_NJIfVnDT3vmPQACryK-oApczGwo0B-3NqWUswMg0z9OKYOa5jde44LBKey23U83jGO=w408-h544-k-no",
+      "name": "Ivevar Luxury",
+      "openHours": {
+        "1": {
+          "open24h": true
+        },
+        "2": {
+          "open24h": true
+        },
+        "3": {
+          "open24h": true
+        },
+        "4": {
+          "open24h": true
+        },
+        "5": {
+          "open24h": true
+        },
+        "6": {
+          "open24h": true
+        },
+        "7": {
+          "intervals": [
+            {
+              "start": "08:00",
+              "end": "20:00"
+            }
+          ]
+        }
+      },
+      "phoneNumber": "+919429041039",
+      "placeId": "ChIJNbjnRvFP4DsRTyVZ9fFRzgA",
+      "rating": 5.0,
+      "reviews": [
+        {
+          "id": "ChZDSUhNMG9nS0VJQ0FnSUNIOFBxa093EAE",
+          "authorName": "JN INTERIOR",
+          "authorUrl": "https://www.google.com/maps/contrib/116203658695911026606?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a-/ALV-UjVv3jlkDmCBDkfUSB4xBCSIK4jsg0n54l3frNno1C-zf4xLuLCJ=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "2 years ago",
+          "text": "Experience the ultimate in luxury with this exquisite diamond watch, where unparalleled craftsmanship meets dazzling brilliance. A masterpiece that adds a touch of opulence to your everyday look.\u201d",
+          "time": 1725095243,
+          "images": [
+            {
+              "url": "https://lh3.googleusercontent.com/grass-cs/ACvplmMBJuTtJSNecFQtMVIaooZpzqGHnYPxPtZFwERtxaN5FRulbJG0v2WXltqGmbgCPg0LDbjzJRoe_1PikrDTFsAI_I-Bmu0r4PgsLwabEkNVw8K8Hr_JYgyzPsO6SpeyPtT2_GHt2w=k-no",
+              "thumbnailUrl": "https://lh3.googleusercontent.com/grass-cs/ACvplmMBJuTtJSNecFQtMVIaooZpzqGHnYPxPtZFwERtxaN5FRulbJG0v2WXltqGmbgCPg0LDbjzJRoe_1PikrDTFsAI_I-Bmu0r4PgsLwabEkNVw8K8Hr_JYgyzPsO6SpeyPtT2_GHt2w=k-no"
+            }
+          ],
+          "hide": false,
+          "hashId": -1747271955
+        },
+        {
+          "id": "ChZDSUhNMG9nS0VJQ0FnSURScVpiQkRREAE",
+          "authorName": "Vimal Goyani",
+          "authorUrl": "https://www.google.com/maps/contrib/104176507387489820680?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a-/ALV-UjX8Iqu-SVN8QcMU7IofgOtUurotjr4vK7byDbLc_wuSRrHYKbVM=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "Excellent pattern and work.nice design and much more variation and customer support is excellent.",
+          "time": 1682683652,
+          "images": [
+            {
+              "url": "https://lh3.googleusercontent.com/grass-cs/ACvplmOnKDv6qAQavOyDtmySTn4PPo-lgtguK0aieJKNBbO39o5iixHNZ6egn6iwvUuULIj8fgkuiMt4SkHe9xv9qH1J222pXto7YDMTM-FZ2f60h4PKiQNHti4ZLcA9gPriVi2gIMypmg=k-no",
+              "thumbnailUrl": "https://lh3.googleusercontent.com/grass-cs/ACvplmOnKDv6qAQavOyDtmySTn4PPo-lgtguK0aieJKNBbO39o5iixHNZ6egn6iwvUuULIj8fgkuiMt4SkHe9xv9qH1J222pXto7YDMTM-FZ2f60h4PKiQNHti4ZLcA9gPriVi2gIMypmg=k-no"
+            }
+          ],
+          "hide": false,
+          "hashId": 178477560
+        },
+        {
+          "id": "ChdDSUhNMG9nS0VJQ0FnSURScWE2b2l3RRAB",
+          "authorName": "shailesh lathiya",
+          "authorUrl": "https://www.google.com/maps/contrib/116371978093828963680?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJMFx__3we-AYTN3CGKOihvntr61yVAOwl2aHGYRtZIlRKQFQ=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "Very gorgeous and attractive looking watch with precious diamond. I like it.",
+          "time": 1682684174,
+          "images": [
+            {
+              "url": "https://lh3.googleusercontent.com/grass-cs/ACvplmM2s42O6aluVs3UUdSYTDepm2Tuf4A9dLIVdZ4LH5wRPEudCJMLbVQvFTf4ZE5FuFZvPNRP6CKarXvLwn2g3ZLOOmNhfbjThoXTP-p_Sah6WZP0Qm991QCL4Z97IOn5oTauyuYQ=k-no",
+              "thumbnailUrl": "https://lh3.googleusercontent.com/grass-cs/ACvplmM2s42O6aluVs3UUdSYTDepm2Tuf4A9dLIVdZ4LH5wRPEudCJMLbVQvFTf4ZE5FuFZvPNRP6CKarXvLwn2g3ZLOOmNhfbjThoXTP-p_Sah6WZP0Qm991QCL4Z97IOn5oTauyuYQ=k-no"
+            }
+          ],
+          "hide": false,
+          "hashId": 1060899586
+        },
+        {
+          "id": "Ci9DQUlRQUNvZENodHljRjlvT21oT09FWjFRMDUxWDJoUVptZFVTVmhMWmt0aWJrRRAB",
+          "authorName": "Bubai Paul",
+          "authorUrl": "https://www.google.com/maps/contrib/118117150816079344288?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocLI1Amjrj1BiNLDhD0VIG52IdwghYtb6U73aKRQpogd_jfdrA=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "a year ago",
+          "text": "Worth it !!! I recommend This guys For quality works",
+          "time": 1748648014,
+          "images": [
+            {
+              "url": "https://lh3.googleusercontent.com/grass-cs/ACvplmN-4Lo8tMWOx6vnU81rzLOjJ-l2PftXe89T0jz_-9FBBft1xnRgVvK9QGxno1UjsOm4AQ6xh1rMJ2GsHi-70ReY7XHzHM8yP2VlFd265L4jZ6-cNMh8Y58DhV4PSA_odSOeeY4WGZ_Qh54=k-no",
+              "thumbnailUrl": "https://lh3.googleusercontent.com/grass-cs/ACvplmN-4Lo8tMWOx6vnU81rzLOjJ-l2PftXe89T0jz_-9FBBft1xnRgVvK9QGxno1UjsOm4AQ6xh1rMJ2GsHi-70ReY7XHzHM8yP2VlFd265L4jZ6-cNMh8Y58DhV4PSA_odSOeeY4WGZ_Qh54=k-no"
+            }
+          ],
+          "hide": false,
+          "hashId": -567207248
+        },
+        {
+          "id": "Ci9DQUlRQUNvZENodHljRjlvT2xoVFMwRnlkRTAxYW5WM01HSlRZelpIY0RSWlFuYxAB",
+          "authorName": "HRA Greyman (Hiro)",
+          "authorUrl": "https://www.google.com/maps/contrib/105582606097285748299?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJ_lBPMH-DLuWM8wdtN1qM_qKGEnOH9cm3nMqYmCzJi4YXQcOc=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "5 months ago",
+          "text": "Masterpiece of quality\n\nIlove ivevar",
+          "time": 1775560910,
+          "images": [
+            {
+              "url": "https://lh3.googleusercontent.com/grass-cs/ACvplmMoKEZ4acES2HPvvnW_g7RxHQG0YL-R_RxIfgE0Tpp5PWp5NjiJzK8bndCxUg6K5S5kRoO9y1jFBKcTKkUwltnG6BBYwsMgzEJVTg-mbS1ypVPlPMiO0UV3kt1Iu2ymkWb41Brx0G0RELU9=k-no",
+              "thumbnailUrl": "https://lh3.googleusercontent.com/grass-cs/ACvplmMoKEZ4acES2HPvvnW_g7RxHQG0YL-R_RxIfgE0Tpp5PWp5NjiJzK8bndCxUg6K5S5kRoO9y1jFBKcTKkUwltnG6BBYwsMgzEJVTg-mbS1ypVPlPMiO0UV3kt1Iu2ymkWb41Brx0G0RELU9=k-no"
+            }
+          ],
+          "hide": false,
+          "hashId": -177200651
+        },
+        {
+          "id": "Ci9DQUlRQUNvZENodHljRjlvT25oS01WZDVaVlJJTjFsQkxYbGhjbDlSYUVOQ1ptYxAB",
+          "authorName": "Mo Mo",
+          "authorUrl": "https://www.google.com/maps/contrib/102656846599984525779?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJ1Dg0cSwvx9nkwnyGPR0zyHvMo645ok2vXIMU5W8iZKymdoQ=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "9 months ago",
+          "text": "Perfect Ring For me thank You",
+          "time": 1764605876,
+          "images": [
+            {
+              "url": "https://lh3.googleusercontent.com/grass-cs/ACvplmNOYURXVEBf9l5txtJxh80G8BbT_iq5sG1d2cgnEs5Sm2spDfT2WQ0u-UKSAhIBSZPGzzeGD2r6vVq4lrDtlyloLVz3K559zG2T27bklQNos9zpV4_7dCrJbTiJnJS-EIzpEq8Vq3Dl21L9=k-no",
+              "thumbnailUrl": "https://lh3.googleusercontent.com/grass-cs/ACvplmNOYURXVEBf9l5txtJxh80G8BbT_iq5sG1d2cgnEs5Sm2spDfT2WQ0u-UKSAhIBSZPGzzeGD2r6vVq4lrDtlyloLVz3K559zG2T27bklQNos9zpV4_7dCrJbTiJnJS-EIzpEq8Vq3Dl21L9=k-no"
+            }
+          ],
+          "hide": false,
+          "hashId": -475874041
+        },
+        {
+          "id": "ChdDSUhNMG9nS0VJQ0FnSURScExiS3lRRRAB",
+          "authorName": "Sunil Kumar Dass",
+          "authorUrl": "https://www.google.com/maps/contrib/103862897267666362783?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKl5sOMUWmup3puz57SCNO_MWoAL-Q7jcuz0_1Y2AIhCLnGMw=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "Just received my custom-Designed ring and it looks even better than I imagined! Leah helped me throughout the entire process, making the experience not just stress-free, but rather delightful. Their quality and customer service really sets the bar for custom-designed jewelry..Thanks Ivevar",
+          "time": 1681803916,
+          "hide": false,
+          "hashId": 828233818
+        },
+        {
+          "id": "ChdDSUhNMG9nS0VJQ0FnSURScEtiQy13RRAB",
+          "authorName": "Uttam Dayani",
+          "authorUrl": "https://www.google.com/maps/contrib/109265025962477577342?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a-/ALV-UjU_qUNweMG7mqCHybhevkfsePrRjPBEdBdYoPxicNx3PD2Nh6kj=s120-c-rp-mo-ba12-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "I worked with Aumsri, she was so kind and sweet! Everything I asked of her she delivered! I love her customer service skills and I had a great experience with ice box! I will definitely be shopping again. see You soon Ivevar",
+          "time": 1681803453,
+          "hide": false,
+          "hashId": 994026201
+        },
+        {
+          "id": "ChZDSUhNMG9nS0VJQ0FnSURScE1hRFRnEAE",
+          "authorName": "rutvik goyani",
+          "authorUrl": "https://www.google.com/maps/contrib/114151458497531544537?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a-/ALV-UjUzp2-oSngrGZFxbnkM-cMh92-mkSjtTCTr03dfBayYrEZa77Jj=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "I went into Icebox to buy some diamond earrings and was helped by Aumsri. She was super friendly and professional. She took the time to listen to what I was looking for and understand what my taste is in jewelry. Her depth in knowing about diamonds and pieces was very impressive. She was helpful in showing me pieces that would be of my interest and she was patient with me in making my decision. I really had a good experience at Icebox with her good customer service and professionalism. I didn't feel like she was just trying to get me to make a purchase like many jeweler employees do.Thanks ivevar",
+          "time": 1681803393,
+          "hide": false,
+          "hashId": 724767620
+        },
+        {
+          "id": "ChZDSUhNMG9nS0VJQ0FnSURScElhRlBnEAE",
+          "authorName": "Ketan Gabani",
+          "authorUrl": "https://www.google.com/maps/contrib/110246011718346236507?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJpOj_i8NGqiLF6FHqoJ1dJI7EARioHpJ_gteehv-WSwrHEnQ=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "First time customer with IVEVAR, and I\u2019m not disappointed in the  slightest bit. I had an amazing worker named Aumsri, very professional and treated me like family. Thank you bro for the excellent service, Ivevar is lucky to have you. Thank you IVEVAR for making my proposal one to never forget.",
+          "time": 1681803275,
+          "hide": false,
+          "hashId": 83334524
+        },
+        {
+          "id": "ChZDSUhNMG9nS0VJQ0FnSURScWRQNkVREAE",
+          "authorName": "Kunj Kankotiya",
+          "authorUrl": "https://www.google.com/maps/contrib/114918283493374182301?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKTfiOVizV8YQrQEq47kysYxTIU5HunPf3XyP9fd_zm0y37OA=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "Edited 3 years ago",
+          "text": "Everything is excellent. All item is superb and unique design. Excellent place to buying diamond items. Also huge collection of diamond studded watches and other luxurious items.",
+          "time": 1683216740,
+          "hide": false,
+          "hashId": -1687461503
+        },
+        {
+          "id": "ChZDSUhNMG9nS0VJQ0FnSURScEs2NUd3EAE",
+          "authorName": "Gadhiya Sonal",
+          "authorUrl": "https://www.google.com/maps/contrib/104036357444319675704?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocKlDoxv9bnhCkzaenF0_YGAZE0w0BfakAkDSb9Ztf3DrxAbfw=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "It was a very good experience, the design and the ambience and the service was excellent. I was purchased Rainbow Necklace and Ring, So much nice \ud83d\udc4d\ud83d\ude42",
+          "time": 1681804420,
+          "hide": false,
+          "hashId": -2066953345
+        },
+        {
+          "id": "ChdDSUhNMG9nS0VJQ0FnSURScWYzUC13RRAB",
+          "authorName": "himmat lathiya`",
+          "authorUrl": "https://www.google.com/maps/contrib/106633742069632536778?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a-/ALV-UjVnEXrk9mKcLSgdpDXaZTfzB1L0yTXjU-s26HYBKrY0dUjjuZBp=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "Overall experience\nDesign & collection are good.. that too with the affordable rate. I visited to Mulund shop even the shop service is good.",
+          "time": 1682749305,
+          "hide": false,
+          "hashId": 404664536
+        },
+        {
+          "id": "ChZDSUhNMG9nS0VJQ0FnSURScWNYRWFnEAE",
+          "authorName": "Kevin Davra",
+          "authorUrl": "https://www.google.com/maps/contrib/102138228349267348209?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a-/ALV-UjW_gITpeDFGaqEHRW2fWYJcQmX6e9ISRhI5vHng72KiwRhkCFT8=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "I personally ordered from them they are prominent in their field of jewellery. Ranages from Rings to watches. Exhilarating design are there.",
+          "time": 1682686422,
+          "hide": false,
+          "hashId": -1246041352
+        },
+        {
+          "id": "ChZDSUhNMG9nS0VJQ0FnSURScWFYeEpnEAE",
+          "authorName": "mahe vitthani",
+          "authorUrl": "https://www.google.com/maps/contrib/113471408517849962306?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a-/ALV-UjVbIHaiA0Mg7o9NZhuUzlTFNEGpmi-TMgWcC5IjuHPZhlHoAaM=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "Awesome designs and collections, no one can beat in the designs of lvevar , must recommend to buy.",
+          "time": 1682686565,
+          "hide": false,
+          "hashId": -222254677
+        },
+        {
+          "id": "ChdDSUhNMG9nS0VJQ0FnSURScVlXYTZ3RRAB",
+          "authorName": "hitesh vastarpara",
+          "authorUrl": "https://www.google.com/maps/contrib/116349730824729910373?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocI2-b2LPx-D3p70ugtHHAbuuQPliqsoBaD3o3KBijm-Zi_Hhg=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "Great experience with deal.\nWhere you feel luxurious style and also get fast delivery.",
+          "time": 1682686516,
+          "hide": false,
+          "hashId": 276779453
+        },
+        {
+          "id": "ChdDSUhNMG9nS0VJQ0FnSURScEk2UzBBRRAB",
+          "authorName": "Anvi Savani",
+          "authorUrl": "https://www.google.com/maps/contrib/103635261357350887155?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJFnRLxf5mOOTy7efgfkKfCmRqvgk0kNJdGQwzZ-T-jBcLP5w=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "Good service and budget watch so much excellent \ud83d\udc4d\ud83c\udffb perfect diamond fitting in my watch \u231a",
+          "time": 1681804148,
+          "hide": false,
+          "hashId": 1277728316
+        },
+        {
+          "id": "ChdDSUhNMG9nS0VJQ0FnSURScExhdGdBRRAB",
+          "authorName": "Radhu Changani",
+          "authorUrl": "https://www.google.com/maps/contrib/118016889191194401533?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a-/ALV-UjWy7-ZSZu9_eRs8Ep94YOuceXDxWHlndpZRjDDv2dpG5xYJLPM0=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "Edited 3 years ago",
+          "text": "Good service best rate best design executive collection.",
+          "time": 1682685868,
+          "hide": false,
+          "hashId": -871046835
+        },
+        {
+          "id": "ChZDSUhNMG9nS0VJQ0FnSURScWFHX0dREAE",
+          "authorName": "Jignesh Dobariya",
+          "authorUrl": "https://www.google.com/maps/contrib/106791237591444596829?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocJneiHgLKDU41zhOAmuWjGETWgIgej16fhJIy5Fy2u8vnEwBA=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "That's amazing\nTotal different\nLooks like good",
+          "time": 1682685045,
+          "hide": false,
+          "hashId": -2115798686
+        },
+        {
+          "id": "ChZDSUhNMG9nS0VJQ0FnSURScVo3UlNnEAE",
+          "authorName": "Paresh Dayani",
+          "authorUrl": "https://www.google.com/maps/contrib/117766283173084035261?hl=en",
+          "profilePhotoUrl": "https://lh3.googleusercontent.com/a/ACg8ocLshemSbB5f748Emz9QDCVu9ttaazaT8r9dUi3kwK6EhW32dw=s120-c-rp-mo-br100",
+          "rating": 5,
+          "relativeTimeDescription": "3 years ago",
+          "text": "Good service best rate best design executive collection",
+          "time": 1682684503,
+          "hide": false,
+          "hashId": 132698829
+        }
+      ],
+      "reviewsNumber": 135,
+      "summary": {
+        "items": [
+          "Excellent customer service and support;",
+          "High-quality craftsmanship and unique designs;",
+          "Luxurious products with a wide variety."
+        ],
+        "updated": "2026-09-18T06:03:40.008058151Z",
+        "placeHash": 971088158
+      },
+      "url": "https://maps.google.com/?cid=58073944847623503",
+      "writeReviewUrl": "https://search.google.com/local/writereview?placeid=ChIJNbjnRvFP4DsRTyVZ9fFRzgA"
+    }
+  ],
+  "widgets": [],
+  "customCSS": null,
+  "verified": true,
+  "updatedTime": 1790791687
+}

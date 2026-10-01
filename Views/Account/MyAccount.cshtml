@@ -3,11 +3,9 @@
     Layout = null;
     ViewData["Title"] = "Client Account & Vault — SAT Jewel";
     var user = Model;
-    var rawName = user?.FullName ?? User.Identity?.Name ?? "Sahil";
-    string displayName = !string.IsNullOrWhiteSpace(rawName) && rawName.Trim() != "@" ? rawName.Trim() : "Sahil";
-    var email = user?.Email ?? User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "s@gmail.com";
-    var phone = !string.IsNullOrWhiteSpace(user?.Phone) ? user.Phone : "+1 (812) 829-1686";
-    var initial = (!string.IsNullOrWhiteSpace(displayName) ? displayName.Substring(0, 1) : "S").ToUpper();
+    var rawName = !string.IsNullOrWhiteSpace(user?.FullName) ? user.FullName : (User.Identity?.Name ?? User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value ?? "Valued Collector");
+    string displayName = !string.IsNullOrWhiteSpace(rawName) && rawName.Trim() != "@" ? rawName.Trim() : "Valued Collector";
+    var email = !string.IsNullOrWhiteSpace(user?.Email) ? user.Email : (User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? "");
 
     var orders = ViewBag.Orders as List<SAT1.Models.Order> ?? new List<SAT1.Models.Order>();
     var addresses = ViewBag.Addresses as List<SAT1.Models.UserAddress> ?? new List<SAT1.Models.UserAddress>();
@@ -17,6 +15,17 @@
     var orderCount = orders.Count;
     var wishlistCount = wishlist.Count;
     var addressCount = addresses.Count;
+
+    var rawPhone = !string.IsNullOrWhiteSpace(user?.Phone) 
+        ? user.Phone 
+        : (!string.IsNullOrWhiteSpace(User.FindFirst(System.Security.Claims.ClaimTypes.MobilePhone)?.Value) 
+            ? User.FindFirst(System.Security.Claims.ClaimTypes.MobilePhone)?.Value 
+            : (!string.IsNullOrWhiteSpace(defaultAddr?.Phone) ? defaultAddr.Phone : ""));
+
+    var phone = !string.IsNullOrWhiteSpace(rawPhone) 
+        ? System.Net.WebUtility.HtmlDecode(rawPhone).Replace("&#x2B;", "+").Replace("&#43;", "+").Trim() 
+        : "";
+    var initial = (!string.IsNullOrWhiteSpace(displayName) ? displayName.Substring(0, 1) : "V").ToUpper();
 
     var activeOrders = orders.Where(o => o.OrderStatus != "Delivered" && o.OrderStatus != "Cancelled").ToList();
     var pastOrders = orders.Where(o => o.OrderStatus == "Delivered" || o.OrderStatus == "Cancelled").ToList();
@@ -42,6 +51,29 @@
     }
     ::-webkit-scrollbar { display: none; }
   </style>
+  <!-- SweetAlert2 Luxury Modal Framework -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    window.alert = function(msg) {
+      if (window.Swal) {
+        let icon = 'info';
+        const str = String(msg || '');
+        if (str.includes('❌') || str.toLowerCase().includes('error') || str.toLowerCase().includes('failed') || str.toLowerCase().includes('denied')) icon = 'error';
+        else if (str.includes('✨') || str.includes('🎉') || str.toLowerCase().includes('success') || str.toLowerCase().includes('saved') || str.toLowerCase().includes('added')) icon = 'success';
+        else if (str.includes('⚠️') || str.toLowerCase().includes('warning') || str.toLowerCase().includes('required') || str.toLowerCase().includes('please')) icon = 'warning';
+        
+        Swal.fire({
+          icon: icon,
+          title: icon === 'success' ? 'Success' : (icon === 'error' ? 'Notice' : (icon === 'warning' ? 'Attention' : 'SAT Jewel')),
+          text: str.replace(/[✨🎉❌⚠️🚫]/g, '').trim(),
+          confirmButtonColor: '#d4b878',
+          background: '#1c1b1c',
+          color: '#e5e2e3'
+        });
+      }
+    };
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <script id="tailwind-config">
     tailwind.config = {
@@ -302,7 +334,14 @@
                 <div class="flex items-center gap-3 text-on-surface-variant font-body-sm text-body-sm mt-1 flex-wrap">
                   <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px] text-outline">mail</span> @email</span>
                   <span class="w-1 h-1 rounded-full bg-outline"></span>
-                  <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px] text-outline">call</span> @phone</span>
+                  @if (!string.IsNullOrWhiteSpace(phone))
+                  {
+                    <span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[15px] text-outline">call</span> @phone</span>
+                  }
+                  else
+                  {
+                    <a href="/Account/EditProfile" class="flex items-center gap-1.5 text-secondary hover:underline"><span class="material-symbols-outlined text-[15px]">add_call</span> Add Phone Number</a>
+                  }
                 </div>
               </div>
             </div>
@@ -825,18 +864,18 @@
       </button>
     </div>
 
-    <form method="post" action="/Account/SaveAddress" class="space-y-3">
+    <form method="post" action="/Account/SaveAddress" class="space-y-3" onsubmit="return validateAccountAddressModal(event)">
       @Html.AntiForgeryToken()
       <input type="hidden" id="addrInputId" name="AddressId" value="" />
       <div>
         <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">Full Name</label>
-        <input type="text" id="addrInputName" name="FullName" required placeholder="Recipient full legal name" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none" />
+        <input type="text" id="addrInputName" name="FullName" required placeholder="Recipient full legal name" oninput="this.value = this.value.replace(/[^a-zA-Z\s\.\-']/g, '')" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none" />
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
           <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">Phone Number</label>
-          <input type="text" id="addrInputPhone" name="Phone" placeholder="+1 (555) 000-0000" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none" />
+          <input type="text" id="addrInputPhone" name="Phone" placeholder="+1 (555) 000-0000" oninput="this.value = this.value.replace(/[^0-9\+\-\s\(\)]/g, '')" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none" />
         </div>
         <div>
           <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">Country</label>
@@ -872,12 +911,13 @@
         </div>
         <div>
           <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">City</label>
-          <select id="addrInputCity" name="City" required class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none">
+          <select id="addrInputCity" name="City" required onchange="validateModalPostalLive()" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none">
           </select>
         </div>
         <div>
           <label class="block font-label-caps text-label-caps uppercase text-outline mb-1">Postal Code</label>
-          <input type="text" id="addrInputZip" name="PostalCode" required placeholder="Zip code" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none" />
+          <input type="text" id="addrInputZip" name="PostalCode" required placeholder="Zip code" oninput="this.value = this.value.replace(/[^0-9\-]/g, ''); validateModalPostalLive();" class="w-full px-3 py-2 rounded-lg bg-surface-container border border-outline-variant/30 text-on-surface font-body-sm focus:border-secondary outline-none" />
+          <div id="addrZipFeedback" class="text-xs pt-1 hidden"></div>
         </div>
       </div>
 
@@ -1380,9 +1420,214 @@
     onModalStateChanged(targetCity);
   }
 
+  const US_STATE_ZIP_PREFIXES = {
+    "California": ["90", "91", "92", "93", "94", "95", "96"],
+    "New York": ["10", "11", "12", "13", "14"],
+    "Texas": ["75", "76", "77", "78", "79", "73", "88"],
+    "Florida": ["32", "33", "34"],
+    "Illinois": ["60", "61", "62"],
+    "Pennsylvania": ["15", "16", "17", "18", "19"],
+    "Ohio": ["43", "44", "45"],
+    "Georgia": ["30", "31", "39"],
+    "North Carolina": ["27", "28"],
+    "New Jersey": ["07", "08"],
+    "Washington": ["98", "99"],
+    "Massachusetts": ["01", "02"],
+    "Nevada": ["88", "89"],
+    "Colorado": ["80", "81"],
+    "Arizona": ["85", "86"],
+    "Virginia": ["20", "22", "23", "24"],
+    "Michigan": ["48", "49"]
+  };
+
+  const INDIA_STATE_PIN_PREFIXES = {
+    "Gujarat": ["36", "37", "38", "39"],
+    "Maharashtra": ["40", "41", "42", "43", "44"],
+    "Delhi": ["11"],
+    "Karnataka": ["56", "57", "58", "59"],
+    "Tamil Nadu": ["60", "61", "62", "63", "64"],
+    "Telangana": ["50"],
+    "Rajasthan": ["30", "31", "32", "33", "34"],
+    "Uttar Pradesh": ["20", "21", "22", "23", "24", "25", "26", "27", "28"],
+    "West Bengal": ["70", "71", "72", "73", "74"],
+    "Punjab": ["14", "15"],
+    "Haryana": ["12", "13"],
+    "Kerala": ["67", "68", "69"],
+    "Madhya Pradesh": ["45", "46", "47", "48"],
+    "Goa": ["40"]
+  };
+
+  function validatePostalStrict(postal, country, state, city) {
+    if (!postal || !postal.trim()) {
+      return { valid: false, message: 'Postal / ZIP code is required.' };
+    }
+    const clean = postal.trim();
+    const digitsOnly = clean.replace(/\D/g, '');
+
+    if (country === 'United States') {
+      if (digitsOnly.length === 6) {
+        return {
+          valid: false,
+          message: `"${clean}" is a 6-digit Indian PIN. For United States, enter a 5-digit ZIP code (e.g. 90210).`
+        };
+      }
+      if (!/^\d{5}(-\d{4})?$/.test(clean)) {
+        return { valid: false, message: 'Please enter a valid 5-digit US ZIP code (e.g. 90210 or 10001).' };
+      }
+
+      const prefix = clean.substring(0, 2);
+      if (state && US_STATE_ZIP_PREFIXES[state]) {
+        const allowed = US_STATE_ZIP_PREFIXES[state];
+        if (!allowed.includes(prefix)) {
+          let foundState = Object.keys(US_STATE_ZIP_PREFIXES).find(s => US_STATE_ZIP_PREFIXES[s].includes(prefix));
+          const hint = state === 'California' ? 'e.g. 90001 or 90210' : (state === 'New York' ? 'e.g. 10001 or 10021' : '');
+          return {
+            valid: false,
+            message: foundState 
+              ? `ZIP code ${clean} belongs to ${foundState}, not ${state}. ${hint ? '(' + hint + ')' : ''}`
+              : `ZIP code ${clean} does not match state of ${state}.`
+          };
+        }
+      }
+      return { valid: true, message: `Valid ${state || 'United States'} postal format & armored service area.` };
+    }
+
+    if (country === 'India') {
+      if (digitsOnly.length === 5) {
+        return {
+          valid: false,
+          message: `"${clean}" is a 5-digit US ZIP code. India requires a 6-digit PIN code (e.g. 411001 for Pune, Maharashtra).`
+        };
+      }
+      if (!/^\d{6}$/.test(clean)) {
+        return { valid: false, message: 'Please enter a valid 6-digit Indian PIN code (e.g. 411001).' };
+      }
+
+      const prefix = clean.substring(0, 2);
+      if (state && INDIA_STATE_PIN_PREFIXES[state]) {
+        const allowed = INDIA_STATE_PIN_PREFIXES[state];
+        if (!allowed.includes(prefix)) {
+          let foundState = Object.keys(INDIA_STATE_PIN_PREFIXES).find(s => INDIA_STATE_PIN_PREFIXES[s].includes(prefix));
+          const hint = state === 'Maharashtra' ? 'starts with 40-44, e.g. 411001 for Pune' : (state === 'Gujarat' ? 'starts with 36-39, e.g. 395006 for Surat' : '');
+          return {
+            valid: false,
+            message: foundState
+              ? `PIN code ${clean} belongs to ${foundState}, not ${state}. ${hint ? '(' + hint + ')' : ''}`
+              : `PIN code ${clean} does not match state of ${state}.`
+          };
+        }
+      }
+      return { valid: true, message: `Valid ${state || 'India'} PIN format & armored service area.` };
+    }
+
+    if (country === 'Canada') {
+      if (!/^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/.test(clean)) {
+        return { valid: false, message: 'Please enter a valid Canadian Postal Code (e.g. K1A 0B1).' };
+      }
+      return { valid: true, message: 'Valid Canada postal format & armored service area.' };
+    }
+
+    if (country === 'United Kingdom') {
+      if (!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i.test(clean)) {
+        return { valid: false, message: 'Please enter a valid UK postcode (e.g. SW1A 1AA).' };
+      }
+      return { valid: true, message: 'Valid UK postal format & armored service area.' };
+    }
+
+    if (country === 'Australia') {
+      if (!/^\d{4}$/.test(clean)) {
+        return { valid: false, message: 'Please enter a valid 4-digit Australian postcode (e.g. 2000).' };
+      }
+      return { valid: true, message: 'Valid Australia postal format & armored service area.' };
+    }
+
+    if (clean.length < 3) {
+      return { valid: false, message: 'Please enter a valid postal code.' };
+    }
+
+    return { valid: true, message: `Valid ${country} postal format & armored service area.` };
+  }
+
+  function validateModalPostalLive() {
+    const country = document.getElementById('addrInputCountry')?.value || 'United States';
+    const state = document.getElementById('addrInputState')?.value || '';
+    const city = document.getElementById('addrInputCity')?.value || '';
+    const zipInput = document.getElementById('addrInputZip');
+    const feedback = document.getElementById('addrZipFeedback');
+    if (!zipInput || !feedback) return { valid: true };
+
+    const postal = zipInput.value.trim();
+    if (!postal) {
+      feedback.className = 'text-xs pt-1 hidden';
+      feedback.textContent = '';
+      zipInput.style.borderColor = '';
+      return { valid: false, message: 'Postal / ZIP code is required.' };
+    }
+
+    const check = validatePostalStrict(postal, country, state, city);
+    feedback.className = 'text-xs pt-1 flex items-center gap-1 ' + (check.valid ? 'text-emerald-400' : 'text-rose-400');
+    feedback.innerHTML = check.valid
+      ? `<span class="material-symbols-outlined text-[14px]">check_circle</span> <span>${check.message}</span>`
+      : `<span class="material-symbols-outlined text-[14px]">warning</span> <span>${check.message}</span>`;
+    
+    zipInput.style.borderColor = check.valid ? '#10b981' : '#f43f5e';
+    return check;
+  }
+
+  function validateAccountAddressModal(e) {
+    const nameInput = document.getElementById('addrInputName');
+    const nameVal = nameInput ? nameInput.value.trim() : '';
+    if (!nameVal || /\d/.test(nameVal)) {
+      e.preventDefault();
+      if (window.Swal) {
+        Swal.fire({ icon: 'warning', title: 'Invalid Name', text: 'Full Name cannot contain numbers. Only alphabetical letters are allowed.', confirmButtonColor: '#d4b878' });
+      } else {
+        alert('Full Name cannot contain numbers. Only alphabetical letters are allowed.');
+      }
+      if (nameInput) nameInput.focus();
+      return false;
+    }
+
+    const phoneInput = document.getElementById('addrInputPhone');
+    const phoneVal = phoneInput ? phoneInput.value.trim() : '';
+    if (phoneVal) {
+      if (/[a-zA-Z]/.test(phoneVal)) {
+        e.preventDefault();
+        if (window.Swal) {
+          Swal.fire({ icon: 'warning', title: 'Invalid Phone Number', text: 'Phone number cannot contain alphabetical letters.', confirmButtonColor: '#d4b878' });
+        } else {
+          alert('Phone number cannot contain alphabetical letters.');
+        }
+        if (phoneInput) phoneInput.focus();
+        return false;
+      }
+      const digits = phoneVal.replace(/\D/g, '');
+      if (digits.length < 10) {
+        e.preventDefault();
+        if (window.Swal) {
+          Swal.fire({ icon: 'warning', title: 'Invalid Phone Number', text: 'Please enter a valid phone number with at least 10 digits.', confirmButtonColor: '#d4b878' });
+        } else {
+          alert('Please enter a valid phone number with at least 10 digits.');
+        }
+        if (phoneInput) phoneInput.focus();
+        return false;
+      }
+    }
+
+    const check = validateModalPostalLive();
+    if (!check.valid) {
+      e.preventDefault();
+      const zipInput = document.getElementById('addrInputZip');
+      if (zipInput) zipInput.focus();
+      return false;
+    }
+    return true;
+  }
+
   function onModalCountryChanged() {
     const country = document.getElementById('addrInputCountry')?.value || 'United States';
     populateModalStateCity(country);
+    validateModalPostalLive();
   }
 
   function onModalStateChanged(targetCity) {
@@ -1406,6 +1651,7 @@
         cityEl.appendChild(opt);
       });
     }
+    validateModalPostalLive();
   }
 
   // Address Modal Helpers
@@ -1413,13 +1659,17 @@
     document.getElementById('addrModalTitle').textContent = 'Add Shipping Address';
     document.getElementById('addrInputId').value = '';
     document.getElementById('addrInputName').value = '@displayName';
-    document.getElementById('addrInputPhone').value = '@phone';
+    document.getElementById('addrInputPhone').value = '@Html.Raw(phone)';
     document.getElementById('addrInputStreet').value = '';
     document.getElementById('addrInputSuite').value = '';
     document.getElementById('addrInputZip').value = '';
     document.getElementById('addrInputCountry').value = 'United States';
     document.getElementById('addrInputDefault').checked = false;
     populateModalStateCity('United States', 'New York', 'New York City');
+    const feedback = document.getElementById('addrZipFeedback');
+    if (feedback) feedback.className = 'text-xs pt-1 hidden';
+    const zipInput = document.getElementById('addrInputZip');
+    if (zipInput) zipInput.style.borderColor = '';
     document.getElementById('addressModal').style.display = 'flex';
   }
 
@@ -1428,7 +1678,7 @@
     document.getElementById('addrModalTitle').textContent = 'Edit Shipping Address';
     document.getElementById('addrInputId').value = addr.AddressId || '';
     document.getElementById('addrInputName').value = addr.FullName || '';
-    document.getElementById('addrInputPhone').value = addr.Phone || '';
+    document.getElementById('addrInputPhone').value = (addr.Phone || '').replace(/&#x2B;/g, '+').replace(/&#43;/g, '+');
     document.getElementById('addrInputStreet').value = addr.StreetAddress || '';
     document.getElementById('addrInputSuite').value = addr.ApartmentSuite || '';
     document.getElementById('addrInputZip').value = addr.PostalCode || '';
@@ -1436,6 +1686,7 @@
     document.getElementById('addrInputCountry').value = country;
     document.getElementById('addrInputDefault').checked = !!addr.IsDefault;
     populateModalStateCity(country, addr.State, addr.City);
+    validateModalPostalLive();
     document.getElementById('addressModal').style.display = 'flex';
   }
 

@@ -9,13 +9,36 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Saved Addresses — SAT Jewel Bespoke Vault</title>
-  <link rel="icon" type="image/png" href="/assets/sat_logo_transparent.png" />
-  <link rel="shortcut icon" type="image/png" href="/assets/sat_logo_transparent.png" />
-  <link rel="apple-touch-icon" href="/assets/sat_logo_transparent.png" />
+  <link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="shortcut icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="apple-touch-icon" href="/assets/sat_emblem_clean.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="~/css/style.css" />
+  <!-- SweetAlert2 Luxury Modal Framework -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    window.alert = function(msg) {
+      if (window.Swal) {
+        let icon = 'info';
+        const str = String(msg || '');
+        if (str.includes('❌') || str.toLowerCase().includes('error') || str.toLowerCase().includes('failed') || str.toLowerCase().includes('denied')) icon = 'error';
+        else if (str.includes('✨') || str.includes('🎉') || str.toLowerCase().includes('success') || str.toLowerCase().includes('saved') || str.toLowerCase().includes('deleted')) icon = 'success';
+        else if (str.includes('⚠️') || str.toLowerCase().includes('warning') || str.toLowerCase().includes('required')) icon = 'warning';
+        
+        Swal.fire({
+          icon: icon,
+          title: icon === 'success' ? 'Success' : (icon === 'error' ? 'Notice' : (icon === 'warning' ? 'Attention' : 'SAT Jewel')),
+          text: str.replace(/[✨🎉❌⚠️🚫]/g, '').trim(),
+          confirmButtonColor: '#d4b878',
+          background: '#16141a',
+          color: '#ffffff'
+        });
+      }
+    };
+  </script>
   <style>
     body {
       background: radial-gradient(circle at 50% 20%, #16141a 0%, #06070a 100%);
@@ -304,12 +327,12 @@
 
         <div class="form-group">
           <label>Full Name</label>
-          <input type="text" id="modalFullName" name="FullName" class="form-control" placeholder="John Doe" required />
+          <input type="text" id="modalFullName" name="FullName" class="form-control" placeholder="John Doe" required oninput="this.value = this.value.replace(/[^a-zA-Z\s\.\-']/g, '')" />
         </div>
 
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="text" id="modalPhone" name="Phone" class="form-control" placeholder="555-123-4567" />
+          <input type="text" id="modalPhone" name="Phone" class="form-control" placeholder="555-123-4567" oninput="this.value = this.value.replace(/[^0-9\+\-\s\(\)]/g, '')" />
         </div>
 
         <div class="form-group">
@@ -325,18 +348,18 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>City</label>
-            <input type="text" id="modalCity" name="City" class="form-control" placeholder="New York" required />
+            <input type="text" id="modalCity" name="City" class="form-control" placeholder="New York" required oninput="this.value = this.value.replace(/[^a-zA-Z\s\.\-']/g, '')" />
           </div>
           <div class="form-group">
             <label>State / Province</label>
-            <input type="text" id="modalState" name="State" class="form-control" placeholder="NY" required />
+            <input type="text" id="modalState" name="State" class="form-control" placeholder="NY" oninput="this.value = this.value.replace(/[^a-zA-Z\s\.\-']/g, ''); onModalPostalLive();" required />
           </div>
         </div>
 
         <div class="form-row-2">
           <div class="form-group">
             <label>Zip / Postal Code</label>
-            <input type="text" id="modalPostalCode" name="PostalCode" class="form-control" placeholder="10001" required />
+            <input type="text" id="modalPostalCode" name="PostalCode" class="form-control" placeholder="10001" oninput="this.value = this.value.replace(/[^0-9\-]/g, ''); onModalPostalLive();" onblur="onModalPostalLive()" required />
             <div id="postalErrorMsg" style="color:#ef4444; font-size:11.5px; margin-top:4px; display:none;"></div>
           </div>
           <div class="form-group">
@@ -368,6 +391,141 @@
   </div>
 
   <script>
+    const US_STATE_ZIP_PREFIXES = {
+      "California": ["90", "91", "92", "93", "94", "95", "96"],
+      "New York": ["10", "11", "12", "13", "14"],
+      "Texas": ["75", "76", "77", "78", "79", "73", "88"],
+      "Florida": ["32", "33", "34"],
+      "Illinois": ["60", "61", "62"],
+      "Pennsylvania": ["15", "16", "17", "18", "19"],
+      "Ohio": ["43", "44", "45"],
+      "Georgia": ["30", "31", "39"],
+      "North Carolina": ["27", "28"],
+      "New Jersey": ["07", "08"],
+      "Washington": ["98", "99"],
+      "Massachusetts": ["01", "02"],
+      "Nevada": ["88", "89"],
+      "Colorado": ["80", "81"],
+      "Arizona": ["85", "86"],
+      "Virginia": ["20", "22", "23", "24"],
+      "Michigan": ["48", "49"]
+    };
+
+    const INDIA_STATE_PIN_PREFIXES = {
+      "Gujarat": ["36", "37", "38", "39"],
+      "Maharashtra": ["40", "41", "42", "43", "44"],
+      "Delhi": ["11"],
+      "Karnataka": ["56", "57", "58", "59"],
+      "Tamil Nadu": ["60", "61", "62", "63", "64"],
+      "Telangana": ["50"],
+      "Rajasthan": ["30", "31", "32", "33", "34"],
+      "Uttar Pradesh": ["20", "21", "22", "23", "24", "25", "26", "27", "28"],
+      "West Bengal": ["70", "71", "72", "73", "74"],
+      "Punjab": ["14", "15"],
+      "Haryana": ["12", "13"],
+      "Kerala": ["67", "68", "69"],
+      "Madhya Pradesh": ["45", "46", "47", "48"],
+      "Goa": ["40"]
+    };
+
+    function validatePostalStrict(postal, country, state) {
+      if (!postal || !postal.trim()) {
+        return { valid: false, message: 'Postal / ZIP code is required.' };
+      }
+      const clean = postal.trim();
+      const digitsOnly = clean.replace(/\D/g, '');
+
+      if (country === 'United States') {
+        if (digitsOnly.length === 6) {
+          return {
+            valid: false,
+            message: `"${clean}" is a 6-digit Indian PIN. For United States, enter a 5-digit ZIP code (e.g. 90210).`
+          };
+        }
+        if (!/^\d{5}(-\d{4})?$/.test(clean)) {
+          return { valid: false, message: 'Please enter a valid 5-digit US ZIP code (e.g. 90210 or 10001).' };
+        }
+
+        const prefix = clean.substring(0, 2);
+        if (state) {
+          const matchedKey = Object.keys(US_STATE_ZIP_PREFIXES).find(k => k.toLowerCase() === state.trim().toLowerCase());
+          if (matchedKey) {
+            const allowed = US_STATE_ZIP_PREFIXES[matchedKey];
+            if (!allowed.includes(prefix)) {
+              let foundState = Object.keys(US_STATE_ZIP_PREFIXES).find(s => US_STATE_ZIP_PREFIXES[s].includes(prefix));
+              const hint = matchedKey === 'California' ? 'e.g. 90001 or 90210' : (matchedKey === 'New York' ? 'e.g. 10001 or 10021' : '');
+              return {
+                valid: false,
+                message: foundState 
+                  ? `ZIP code ${clean} belongs to ${foundState}, not ${matchedKey}. ${hint ? '(' + hint + ')' : ''}`
+                  : `ZIP code ${clean} does not match state of ${matchedKey}.`
+              };
+            }
+          }
+        }
+        return { valid: true, message: `Valid ${state || 'United States'} postal format & armored service area.` };
+      }
+
+      if (country === 'India') {
+        if (digitsOnly.length === 5) {
+          return {
+            valid: false,
+            message: `"${clean}" is a 5-digit US ZIP code. India requires a 6-digit PIN code (e.g. 411001 for Pune, Maharashtra).`
+          };
+        }
+        if (!/^\d{6}$/.test(clean)) {
+          return { valid: false, message: 'Please enter a valid 6-digit Indian PIN code (e.g. 395006 or 411001).' };
+        }
+
+        const prefix = clean.substring(0, 2);
+        if (state) {
+          const matchedKey = Object.keys(INDIA_STATE_PIN_PREFIXES).find(k => k.toLowerCase() === state.trim().toLowerCase());
+          if (matchedKey) {
+            const allowed = INDIA_STATE_PIN_PREFIXES[matchedKey];
+            if (!allowed.includes(prefix)) {
+              let foundState = Object.keys(INDIA_STATE_PIN_PREFIXES).find(s => INDIA_STATE_PIN_PREFIXES[s].includes(prefix));
+              return {
+                valid: false,
+                message: foundState 
+                  ? `PIN code ${clean} belongs to ${foundState}, not ${matchedKey}.`
+                  : `PIN code ${clean} does not match state of ${matchedKey}.`
+              };
+            }
+          }
+        }
+        return { valid: true, message: `Valid ${state || 'India'} PIN code & delivery route.` };
+      }
+
+      if (country === 'Canada') {
+        const caRegex = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
+        if (!caRegex.test(clean)) {
+          return { valid: false, message: 'Please enter a valid Canadian Postal Code (e.g. K1A 0B1).' };
+        }
+        return { valid: true, message: 'Valid Canadian postal routing code.' };
+      }
+
+      if (country === 'United Kingdom') {
+        const ukRegex = /^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i;
+        if (!ukRegex.test(clean)) {
+          return { valid: false, message: 'Please enter a valid UK Postcode (e.g. SW1A 1AA).' };
+        }
+        return { valid: true, message: 'Valid Royal Mail routing code.' };
+      }
+
+      if (country === 'Australia') {
+        if (!/^\d{4}$/.test(clean)) {
+          return { valid: false, message: 'Please enter a valid 4-digit Australian Postcode (e.g. 2000).' };
+        }
+        return { valid: true, message: 'Valid Australia Post routing code.' };
+      }
+
+      if (clean.length < 3) {
+        return { valid: false, message: 'Please enter a valid postal / ZIP code.' };
+      }
+
+      return { valid: true, message: 'Valid postal code format.' };
+    }
+
     function updatePostalPlaceholder() {
       const country = document.getElementById('modalCountry').value;
       const postalInput = document.getElementById('modalPostalCode');
@@ -385,61 +543,90 @@
     }
 
     function validateAddressForm(e) {
-      const country = document.getElementById('modalCountry').value;
-      const postal = (document.getElementById('modalPostalCode').value || '').trim();
-      const err = document.getElementById('postalErrorMsg');
+      const name = (document.getElementById('modalFullName').value || '').trim();
+      if (!name || /\d/.test(name)) {
+        if (window.Swal) {
+          Swal.fire({ icon: 'warning', title: 'Invalid Name', text: 'Full Name cannot contain numbers. Only alphabetical letters are allowed.', confirmButtonColor: '#d4b878' });
+        } else {
+          alert('Full Name cannot contain numbers. Only alphabetical letters are allowed.');
+        }
+        e.preventDefault();
+        return false;
+      }
 
-      let isValid = true;
-      let msg = '';
+      const city = (document.getElementById('modalCity').value || '').trim();
+      if (!city || /\d/.test(city)) {
+        if (window.Swal) {
+          Swal.fire({ icon: 'warning', title: 'Invalid City', text: 'City cannot contain numbers. Only alphabetical letters are allowed.', confirmButtonColor: '#d4b878' });
+        } else {
+          alert('City cannot contain numbers. Only alphabetical letters are allowed.');
+        }
+        e.preventDefault();
+        return false;
+      }
 
-      if (country === 'United States') {
-        const usRegex = /^\d{5}(-\d{4})?$/;
-        if (!usRegex.test(postal)) {
-          isValid = false;
-          msg = 'Please enter a valid 5-digit US ZIP code (e.g. 10001).';
+      const phone = (document.getElementById('modalPhone').value || '').trim();
+      if (phone) {
+        if (/[a-zA-Z]/.test(phone)) {
+          if (window.Swal) {
+            Swal.fire({ icon: 'warning', title: 'Invalid Phone Number', text: 'Phone number cannot contain alphabetical letters.', confirmButtonColor: '#d4b878' });
+          } else {
+            alert('Phone number cannot contain alphabetical letters.');
+          }
+          e.preventDefault();
+          return false;
         }
-      } else if (country === 'Canada') {
-        const caRegex = /^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/;
-        if (!caRegex.test(postal)) {
-          isValid = false;
-          msg = 'Please enter a valid Canadian Postal Code (e.g. K1A 0B1).';
-        }
-      } else if (country === 'United Kingdom') {
-        const ukRegex = /^[A-Z]{1,2}\d[A-Z\d]? ?\d[A-Z]{2}$/i;
-        if (!ukRegex.test(postal)) {
-          isValid = false;
-          msg = 'Please enter a valid UK Postcode (e.g. SW1A 1AA).';
-        }
-      } else if (country === 'India') {
-        const inRegex = /^\d{6}$/;
-        if (!inRegex.test(postal)) {
-          isValid = false;
-          msg = 'Please enter a valid 6-digit Indian PIN code (e.g. 395006).';
-        }
-      } else if (country === 'Australia') {
-        const auRegex = /^\d{4}$/;
-        if (!auRegex.test(postal)) {
-          isValid = false;
-          msg = 'Please enter a valid 4-digit Australian Postcode (e.g. 2000).';
-        }
-      } else {
-        if (postal.length < 3) {
-          isValid = false;
-          msg = 'Please enter a valid postal / ZIP code.';
+        const digits = phone.replace(/\D/g, '');
+        if (digits.length < 10) {
+          if (window.Swal) {
+            Swal.fire({ icon: 'warning', title: 'Invalid Phone Number', text: 'Please enter a valid phone number with at least 10 digits.', confirmButtonColor: '#d4b878' });
+          } else {
+            alert('Please enter a valid phone number with at least 10 digits.');
+          }
+          e.preventDefault();
+          return false;
         }
       }
 
-      if (!isValid) {
+      const country = document.getElementById('modalCountry').value;
+      const state = (document.getElementById('modalState').value || '').trim();
+      const postal = (document.getElementById('modalPostalCode').value || '').trim();
+      const err = document.getElementById('postalErrorMsg');
+
+      const check = validatePostalStrict(postal, country, state);
+
+      if (!check.valid) {
         if (err) {
-          err.innerText = msg;
+          err.innerText = check.message;
           err.style.display = 'block';
         } else {
-          alert(msg);
+          alert(check.message);
         }
         e.preventDefault();
         return false;
       }
       return true;
+    }
+
+    function onModalPostalLive() {
+      const country = document.getElementById('modalCountry').value;
+      const state = (document.getElementById('modalState').value || '').trim();
+      const postal = (document.getElementById('modalPostalCode').value || '').trim();
+      const err = document.getElementById('postalErrorMsg');
+      if (!err) return;
+      if (!postal) {
+        err.style.display = 'none';
+        return;
+      }
+      const check = validatePostalStrict(postal, country, state);
+      err.style.display = 'block';
+      if (check.valid) {
+        err.style.color = '#4ade80';
+        err.innerText = check.message;
+      } else {
+        err.style.color = '#ef4444';
+        err.innerText = check.message;
+      }
     }
 
     function openAddAddressModal() {
@@ -464,7 +651,7 @@
       document.getElementById('modalTitle').innerText = 'Edit Saved Address';
       document.getElementById('modalAddressId').value = item.AddressId || '';
       document.getElementById('modalFullName').value = item.FullName || '';
-      document.getElementById('modalPhone').value = item.Phone || '';
+      document.getElementById('modalPhone').value = (item.Phone || '').replace(/&#x2B;/g, '+').replace(/&#43;/g, '+');
       document.getElementById('modalStreetAddress').value = item.StreetAddress || '';
       document.getElementById('modalApartmentSuite').value = item.ApartmentSuite || '';
       document.getElementById('modalCity').value = item.City || '';

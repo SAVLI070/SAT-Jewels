@@ -15,6 +15,163 @@ namespace SAT1.Controllers
         private readonly AuthBal _authBal;
         private readonly SatJewelDbContext _context;
 
+        private static readonly Dictionary<string, string[]> UsStateZipPrefixes = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "California", new[] { "90", "91", "92", "93", "94", "95", "96" } },
+            { "New York", new[] { "10", "11", "12", "13", "14" } },
+            { "Texas", new[] { "75", "76", "77", "78", "79", "73", "88" } },
+            { "Florida", new[] { "32", "33", "34" } },
+            { "Illinois", new[] { "60", "61", "62" } },
+            { "Pennsylvania", new[] { "15", "16", "17", "18", "19" } },
+            { "Ohio", new[] { "43", "44", "45" } },
+            { "Georgia", new[] { "30", "31", "39" } },
+            { "North Carolina", new[] { "27", "28" } },
+            { "New Jersey", new[] { "07", "08" } },
+            { "Washington", new[] { "98", "99" } },
+            { "Massachusetts", new[] { "01", "02" } },
+            { "Nevada", new[] { "88", "89" } },
+            { "Colorado", new[] { "80", "81" } },
+            { "Arizona", new[] { "85", "86" } },
+            { "Virginia", new[] { "20", "22", "23", "24" } },
+            { "Michigan", new[] { "48", "49" } }
+        };
+
+        private static readonly Dictionary<string, string[]> IndiaStatePinPrefixes = new(StringComparer.OrdinalIgnoreCase)
+        {
+            { "Gujarat", new[] { "36", "37", "38", "39" } },
+            { "Maharashtra", new[] { "40", "41", "42", "43", "44" } },
+            { "Delhi", new[] { "11" } },
+            { "Karnataka", new[] { "56", "57", "58", "59" } },
+            { "Tamil Nadu", new[] { "60", "61", "62", "63", "64" } },
+            { "Telangana", new[] { "50" } },
+            { "Rajasthan", new[] { "30", "31", "32", "33", "34" } },
+            { "Uttar Pradesh", new[] { "20", "21", "22", "23", "24", "25", "26", "27", "28" } },
+            { "West Bengal", new[] { "70", "71", "72", "73", "74" } },
+            { "Punjab", new[] { "14", "15" } },
+            { "Haryana", new[] { "12", "13" } },
+            { "Kerala", new[] { "67", "68", "69" } },
+            { "Madhya Pradesh", new[] { "45", "46", "47", "48" } },
+            { "Goa", new[] { "40" } }
+        };
+
+        public static bool ValidateEmailStrict(string? email, out string errorMessage)
+        {
+            errorMessage = "";
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                errorMessage = "Please enter your email address.";
+                return false;
+            }
+
+            var clean = email.Trim();
+            if (!Regex.IsMatch(clean, @"^[a-zA-Z0-9_\-\.\+]+@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,}$"))
+            {
+                errorMessage = "Please enter a valid email format (e.g. name@example.com).";
+                return false;
+            }
+
+            var parts = clean.Split('@');
+            if (parts.Length != 2)
+            {
+                errorMessage = "Invalid email format.";
+                return false;
+            }
+
+            var local = parts[0];
+            var domain = parts[1].ToLowerInvariant();
+
+            if (domain == "gmail.com" || domain == "googlemail.com")
+            {
+                var stripped = local.Replace(".", "");
+                if (stripped.Length < 6)
+                {
+                    errorMessage = "Gmail usernames must be at least 6 characters long (e.g. s@gmail.com is invalid).";
+                    return false;
+                }
+                if (stripped.Length > 30)
+                {
+                    errorMessage = "Gmail usernames cannot exceed 30 characters.";
+                    return false;
+                }
+                if (local.StartsWith(".") || local.EndsWith(".") || local.Contains(".."))
+                {
+                    errorMessage = "Gmail username cannot start or end with a period or contain consecutive periods.";
+                    return false;
+                }
+            }
+            else if (domain == "yahoo.com" || domain == "outlook.com" || domain == "hotmail.com" || domain == "icloud.com")
+            {
+                if (local.Length < 4)
+                {
+                    errorMessage = $"Email username must be at least 4 characters for {domain}.";
+                    return false;
+                }
+            }
+            else
+            {
+                if (local.Length < 3)
+                {
+                    errorMessage = "Email username must be at least 3 characters.";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public static bool ValidatePhoneStrict(string? phone, bool isRequired, out string errorMessage)
+        {
+            errorMessage = "";
+            if (string.IsNullOrWhiteSpace(phone))
+            {
+                if (isRequired)
+                {
+                    errorMessage = "Mobile phone number is required.";
+                    return false;
+                }
+                return true;
+            }
+
+            var digits = Regex.Replace(phone, @"[^\d]", "");
+            if (digits.Length < 10 || digits.Length > 15)
+            {
+                errorMessage = "Mobile number must be a valid 10-digit number (e.g. 555-123-4567).";
+                return false;
+            }
+
+            // Reject all repeating identical digits (e.g. 1111111111, 0000000000)
+            if (Regex.IsMatch(digits, @"^(\d)\1+$"))
+            {
+                errorMessage = "Invalid phone number: repeating dummy numbers (like 1111111111) are not allowed.";
+                return false;
+            }
+
+            // Reject sequential dummy digits
+            string[] sequential = { "0123456789", "1234567890", "9876543210", "0987654321" };
+            if (sequential.Any(s => digits.Contains(s)))
+            {
+                errorMessage = "Please enter a genuine, active mobile phone number.";
+                return false;
+            }
+
+            // Check 10-digit US / NANP area code
+            if (digits.Length == 10)
+            {
+                if (digits[0] == '0' || digits[0] == '1')
+                {
+                    errorMessage = "US area code cannot start with 0 or 1.";
+                    return false;
+                }
+                if (digits[3] == '0' || digits[3] == '1')
+                {
+                    errorMessage = "US phone exchange code cannot start with 0 or 1.";
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         public AccountController(AuthBal authBal, SatJewelDbContext context)
         {
             _authBal = authBal;
@@ -37,6 +194,10 @@ namespace SAT1.Controllers
         {
             ViewData["InitialMode"] = "signin";
             ViewData["ReturnUrl"] = returnUrl;
+            if (TempData["ErrorMessage"] != null)
+            {
+                ViewBag.ErrorMessage = TempData["ErrorMessage"]?.ToString();
+            }
             if (TempData["SuccessMessage"] != null)
             {
                 ViewBag.SuccessMessage = TempData["SuccessMessage"]?.ToString();
@@ -53,7 +214,23 @@ namespace SAT1.Controllers
         {
             ViewData["InitialMode"] = "signup";
             ViewData["ReturnUrl"] = returnUrl;
+            if (TempData["ErrorMessage"] != null)
+            {
+                ViewBag.ErrorMessage = TempData["ErrorMessage"]?.ToString();
+            }
             return View("Auth");
+        }
+
+        [HttpGet]
+        public IActionResult HandleSignIn(string? returnUrl = null)
+        {
+            return RedirectToAction("SignIn", new { returnUrl });
+        }
+
+        [HttpGet]
+        public IActionResult HandleSignUp(string? returnUrl = null)
+        {
+            return RedirectToAction("SignUp", new { returnUrl });
         }
 
         [HttpPost]
@@ -62,19 +239,24 @@ namespace SAT1.Controllers
         {
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             {
-                ViewBag.ErrorMessage = "Please enter your email and password.";
-                ViewData["InitialMode"] = "signin";
-                ViewData["ReturnUrl"] = returnUrl;
-                return View("Auth");
+                TempData["ErrorMessage"] = "Please enter your email and password.";
+                TempData["PreFillEmail"] = email;
+                return RedirectToAction("SignIn", new { returnUrl });
+            }
+
+            if (!ValidateEmailStrict(email, out string emailErr))
+            {
+                TempData["ErrorMessage"] = emailErr;
+                TempData["PreFillEmail"] = email;
+                return RedirectToAction("SignIn", new { returnUrl });
             }
 
             var user = await _authBal.ValidateUserCredentialsAsync(email, password);
             if (user == null)
             {
-                ViewBag.ErrorMessage = "Invalid credentials. Please verify your email and password.";
-                ViewData["InitialMode"] = "signin";
-                ViewData["ReturnUrl"] = returnUrl;
-                return View("Auth");
+                TempData["ErrorMessage"] = "Invalid credentials. Please verify your email and password.";
+                TempData["PreFillEmail"] = email;
+                return RedirectToAction("SignIn", new { returnUrl });
             }
 
             var claims = new List<Claim>
@@ -96,17 +278,30 @@ namespace SAT1.Controllers
 
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authProperties);
 
-            if (user.Role == "Admin")
+            bool isAdmin = user.Role == "Admin" || 
+                           user.Email.Equals("admin@satjewel.com", StringComparison.OrdinalIgnoreCase) || 
+                           user.Email.Equals("admin@satjewels.com", StringComparison.OrdinalIgnoreCase) || 
+                           user.Email.Equals("satjewels31@gmail.com", StringComparison.OrdinalIgnoreCase);
+
+            if (isAdmin)
             {
+                if (!string.IsNullOrWhiteSpace(returnUrl) && (Url.IsLocalUrl(returnUrl) || returnUrl.StartsWith("/")) && returnUrl.ToLower().StartsWith("/admin"))
+                {
+                    return Redirect(returnUrl);
+                }
                 return Redirect("/admin");
             }
 
+            // Normal customer: Never redirect to /admin
             if (!string.IsNullOrWhiteSpace(returnUrl) && (Url.IsLocalUrl(returnUrl) || (returnUrl.StartsWith("/") && !returnUrl.StartsWith("//") && !returnUrl.StartsWith("/\\"))))
             {
-                return Redirect(returnUrl);
+                if (!returnUrl.ToLower().StartsWith("/admin"))
+                {
+                    return Redirect(returnUrl);
+                }
             }
 
-            return Redirect("/");
+            return Redirect("/Account/MyAccount");
         }
 
         public class GoogleAuthRequest
@@ -153,22 +348,54 @@ namespace SAT1.Controllers
                 }
 
                 var user = await _authBal.GetOrCreateGoogleUserAsync(email, name ?? "Valued Client", sub ?? "");
+                
+                // Extract phone from Google token if present and user has no phone set yet
+                var tokenPhone = root.TryGetProperty("phone_number", out var p) ? p.GetString() : (root.TryGetProperty("phone", out var ph) ? ph.GetString() : null);
+                if (!string.IsNullOrWhiteSpace(tokenPhone) && string.IsNullOrWhiteSpace(user.Phone))
+                {
+                    user.Phone = System.Net.WebUtility.HtmlDecode(tokenPhone).Replace("&#x2B;", "+").Replace("&#43;", "+").Trim();
+                    await _context.SaveChangesAsync();
+                }
+
+                bool isAdmin = user.Role == "Admin" || 
+                               user.Email.Equals("admin@satjewel.com", StringComparison.OrdinalIgnoreCase) || 
+                               user.Email.Equals("admin@satjewels.com", StringComparison.OrdinalIgnoreCase) || 
+                               user.Email.Equals("satjewels31@gmail.com", StringComparison.OrdinalIgnoreCase);
 
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, user.Id),
                     new Claim(ClaimTypes.Name, user.FullName),
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.Role, user.Role ?? "Client")
+                    new Claim(ClaimTypes.Role, isAdmin ? "Admin" : (user.Role ?? "Client"))
                 };
+
+                if (!string.IsNullOrWhiteSpace(user.Phone))
+                {
+                    claims.Add(new Claim(ClaimTypes.MobilePhone, user.Phone));
+                }
 
                 var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var principal = new ClaimsPrincipal(identity);
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
-                var redirectTarget = !string.IsNullOrWhiteSpace(req.ReturnUrl) && (Url.IsLocalUrl(req.ReturnUrl) || req.ReturnUrl.StartsWith("/")) 
-                    ? req.ReturnUrl 
-                    : "/Account/MyAccount";
+                string redirectTarget = "/Account/MyAccount";
+                if (isAdmin)
+                {
+                    redirectTarget = !string.IsNullOrWhiteSpace(req.ReturnUrl) && (Url.IsLocalUrl(req.ReturnUrl) || req.ReturnUrl.StartsWith("/"))
+                        ? req.ReturnUrl
+                        : "/admin";
+                }
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(req.ReturnUrl) && (Url.IsLocalUrl(req.ReturnUrl) || req.ReturnUrl.StartsWith("/")))
+                    {
+                        if (!req.ReturnUrl.ToLower().StartsWith("/admin"))
+                        {
+                            redirectTarget = req.ReturnUrl;
+                        }
+                    }
+                }
 
                 return Json(new { success = true, redirectUrl = redirectTarget, message = $"Welcome back, {user.FullName}!" });
             }
@@ -186,34 +413,52 @@ namespace SAT1.Controllers
         {
             bool emailExists = false;
             bool phoneExists = false;
+            bool isInvalidFormat = false;
+            bool isInvalidPhone = false;
             string? emailMsg = null;
             string? phoneMsg = null;
 
             if (!string.IsNullOrWhiteSpace(email))
             {
-                var cleanEmail = email.Trim().ToLower();
-                emailExists = await _context.Users.AnyAsync(u => u.Email.ToLower() == cleanEmail);
-                if (emailExists)
+                if (!ValidateEmailStrict(email, out string emailErr))
                 {
-                    emailMsg = "An account with this email address already exists. Please Sign In.";
+                    isInvalidFormat = true;
+                    emailMsg = emailErr;
+                }
+                else
+                {
+                    var cleanEmail = email.Trim().ToLower();
+                    emailExists = await _context.Users.AnyAsync(u => u.Email.ToLower() == cleanEmail);
+                    if (emailExists)
+                    {
+                        emailMsg = "An account with this email address already exists. Please Sign In.";
+                    }
                 }
             }
 
             if (!string.IsNullOrWhiteSpace(phone))
             {
-                var phoneDigits = Regex.Replace(phone, @"[^\d]", "");
-                if (phoneDigits.Length >= 10)
+                if (!ValidatePhoneStrict(phone, false, out string phoneErr))
                 {
-                    var suffix = phoneDigits.Substring(phoneDigits.Length - 10);
-                    phoneExists = await _context.Users.AnyAsync(u => u.Phone != null && u.Phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("+", "").EndsWith(suffix));
-                    if (phoneExists)
+                    isInvalidPhone = true;
+                    phoneMsg = phoneErr;
+                }
+                else
+                {
+                    var phoneDigits = Regex.Replace(phone, @"[^\d]", "");
+                    if (phoneDigits.Length >= 10)
                     {
-                        phoneMsg = "This mobile number is already registered to another account.";
+                        var suffix = phoneDigits.Substring(phoneDigits.Length - 10);
+                        phoneExists = await _context.Users.AnyAsync(u => u.Phone != null && u.Phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("+", "").EndsWith(suffix));
+                        if (phoneExists)
+                        {
+                            phoneMsg = "This mobile number is already registered to another account.";
+                        }
                     }
                 }
             }
 
-            return Json(new { emailExists, phoneExists, emailMsg, phoneMsg });
+            return Json(new { emailExists, phoneExists, isInvalidFormat, isInvalidPhone, emailMsg, phoneMsg });
         }
 
         [HttpPost]
@@ -240,10 +485,10 @@ namespace SAT1.Controllers
                 return View("Auth");
             }
 
-            // 3. Email Format Validation
-            if (!Regex.IsMatch(email.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            // 3. Email Format & Domain Rule Validation
+            if (!ValidateEmailStrict(email, out string emailError))
             {
-                ViewBag.ErrorMessage = "Please enter a valid email address.";
+                ViewBag.ErrorMessage = emailError;
                 return View("Auth");
             }
 
@@ -256,17 +501,19 @@ namespace SAT1.Controllers
                 return View("Auth");
             }
 
-            // 5. Mobile Phone Number Validation (Must be exactly 10 digits if provided) & Duplicate Check
+            // 5. Mobile Phone Number Validation (Must be valid phone digits, not repeating dummy) & Duplicate Check
+            string cleanPhone = "";
             if (!string.IsNullOrWhiteSpace(phone))
             {
-                var phoneDigits = Regex.Replace(phone, @"[^\d]", "");
-                if (phoneDigits.Length != 10)
+                cleanPhone = System.Net.WebUtility.HtmlDecode(phone).Replace("&#x2B;", "+").Replace("&#43;", "+").Trim();
+                if (!ValidatePhoneStrict(cleanPhone, false, out string phoneError))
                 {
-                    ViewBag.ErrorMessage = "Mobile number must be a valid 10-digit USA phone number (e.g. 555-123-4567).";
+                    ViewBag.ErrorMessage = phoneError;
                     return View("Auth");
                 }
 
-                var suffix = phoneDigits.Substring(phoneDigits.Length - 10);
+                var phoneDigits = Regex.Replace(cleanPhone, @"[^\d]", "");
+                var suffix = phoneDigits.Length >= 10 ? phoneDigits.Substring(phoneDigits.Length - 10) : phoneDigits;
                 var phoneTaken = await _context.Users.AnyAsync(u => u.Phone != null && u.Phone.Replace(" ", "").Replace("-", "").Replace("(", "").Replace(")", "").Replace("+", "").EndsWith(suffix));
                 if (phoneTaken)
                 {
@@ -294,7 +541,7 @@ namespace SAT1.Controllers
             User? user = null;
             try
             {
-                user = await _authBal.RegisterNewUserAsync(fullName, email, phone, password, confirmPassword);
+                user = await _authBal.RegisterNewUserAsync(fullName, email, cleanPhone, password, confirmPassword);
             }
             catch (Exception ex)
             {
@@ -390,12 +637,20 @@ namespace SAT1.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var email = User.FindFirstValue(ClaimTypes.Email) ?? "";
 
-            var user = await _authBal.GetUserByIdAsync(userId) ?? new User
+            var user = await _authBal.GetUserByIdAsync(userId);
+            if (user == null && !string.IsNullOrEmpty(email))
             {
-                FullName = User.Identity?.Name ?? "VIP Member",
-                Email = email,
-                Role = User.FindFirstValue(ClaimTypes.Role) ?? "Client"
-            };
+                user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+            }
+            if (user == null)
+            {
+                user = new User
+                {
+                    FullName = User.Identity?.Name ?? "VIP Member",
+                    Email = email,
+                    Role = User.FindFirstValue(ClaimTypes.Role) ?? "Client"
+                };
+            }
 
             var orders = await _authBal.GetUserOrdersAsync(userId, email);
             var addresses = await _authBal.GetUserAddressesAsync(userId ?? "");
@@ -429,12 +684,20 @@ namespace SAT1.Controllers
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var email = User.FindFirstValue(ClaimTypes.Email) ?? "";
 
-            var user = await _authBal.GetUserByIdAsync(userId) ?? new User
+            var user = await _authBal.GetUserByIdAsync(userId);
+            if (user == null && !string.IsNullOrEmpty(email))
             {
-                FullName = User.Identity?.Name ?? "VIP Member",
-                Email = email,
-                Role = User.FindFirstValue(ClaimTypes.Role) ?? "Client"
-            };
+                user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email.ToLower() == email.ToLower());
+            }
+            if (user == null)
+            {
+                user = new User
+                {
+                    FullName = User.Identity?.Name ?? "VIP Member",
+                    Email = email,
+                    Role = User.FindFirstValue(ClaimTypes.Role) ?? "Client"
+                };
+            }
 
             return View(user);
         }
@@ -454,16 +717,38 @@ namespace SAT1.Controllers
             }
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null && !string.IsNullOrEmpty(userEmail))
+            {
+                user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == userEmail.ToLower());
+            }
+
+            if (user == null)
             {
                 return BadRequest(new { success = false, message = "User not found" });
             }
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user != null)
             {
-                if (!string.IsNullOrWhiteSpace(req?.FullName)) user.FullName = req.FullName.Trim();
-                if (!string.IsNullOrWhiteSpace(req?.Phone)) user.Phone = req.Phone.Trim();
+                if (!string.IsNullOrWhiteSpace(req?.FullName))
+                {
+                    var cleanName = req.FullName.Trim();
+                    if (!Regex.IsMatch(cleanName, @"^[a-zA-Z\s\.\-']+$"))
+                    {
+                        return BadRequest(new { success = false, message = "Full Name cannot contain numbers. Only alphabetical letters are allowed." });
+                    }
+                    user.FullName = cleanName;
+                }
+                if (!string.IsNullOrWhiteSpace(req?.Phone))
+                {
+                    var cleanPhone = System.Net.WebUtility.HtmlDecode(req.Phone).Replace("&#x2B;", "+").Replace("&#43;", "+").Trim();
+                    if (Regex.IsMatch(cleanPhone, @"[a-zA-Z]"))
+                    {
+                        return BadRequest(new { success = false, message = "Phone number cannot contain alphabetical letters." });
+                    }
+                    user.Phone = cleanPhone;
+                }
                 await _context.SaveChangesAsync();
             }
 
@@ -491,6 +776,81 @@ namespace SAT1.Controllers
 
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "";
             model.UserId = userId;
+
+            // Strict alphabet validation for FullName & City
+            if (!string.IsNullOrWhiteSpace(model.FullName))
+            {
+                var cleanName = model.FullName.Trim();
+                if (!Regex.IsMatch(cleanName, @"^[a-zA-Z\s\.\-']+$"))
+                {
+                    TempData["ErrorMessage"] = "Recipient Full Name cannot contain numbers. Only alphabetical letters are allowed.";
+                    return Redirect("/Account/MyAccount?tab=addresses#addresses");
+                }
+                model.FullName = cleanName;
+            }
+            if (!string.IsNullOrWhiteSpace(model.City))
+            {
+                var cleanCity = model.City.Trim();
+                if (!Regex.IsMatch(cleanCity, @"^[a-zA-Z\s\.\-']+$"))
+                {
+                    TempData["ErrorMessage"] = "City cannot contain numbers. Only alphabetical letters are allowed.";
+                    return Redirect("/Account/MyAccount?tab=addresses#addresses");
+                }
+                model.City = cleanCity;
+            }
+            if (!string.IsNullOrWhiteSpace(model.Phone))
+            {
+                model.Phone = System.Net.WebUtility.HtmlDecode(model.Phone).Replace("&#x2B;", "+").Replace("&#43;", "+").Trim();
+                if (Regex.IsMatch(model.Phone, @"[a-zA-Z]"))
+                {
+                    TempData["ErrorMessage"] = "Phone number cannot contain alphabetical letters.";
+                    return Redirect("/Account/MyAccount?tab=addresses#addresses");
+                }
+            }
+
+            // Validate ZIP / Postal Code strictly against Country & State
+            if (string.Equals(model.Country, "United States", StringComparison.OrdinalIgnoreCase))
+            {
+                var postal = (model.PostalCode ?? "").Trim();
+                if (!Regex.IsMatch(postal, @"^\d{5}(-\d{4})?$"))
+                {
+                    TempData["ErrorMessage"] = "Please enter a valid 5-digit US ZIP code.";
+                    return Redirect("/Account/MyAccount?tab=addresses#addresses");
+                }
+                var prefix = postal.Length >= 2 ? postal.Substring(0, 2) : "";
+                if (!string.IsNullOrWhiteSpace(model.State) && UsStateZipPrefixes.TryGetValue(model.State.Trim(), out var allowed))
+                {
+                    if (!allowed.Contains(prefix))
+                    {
+                        var foundState = UsStateZipPrefixes.FirstOrDefault(kvp => kvp.Value.Contains(prefix)).Key;
+                        TempData["ErrorMessage"] = foundState != null
+                            ? $"ZIP code {postal} belongs to {foundState}, not {model.State}."
+                            : $"ZIP code {postal} does not match state of {model.State}.";
+                        return Redirect("/Account/MyAccount?tab=addresses#addresses");
+                    }
+                }
+            }
+            else if (string.Equals(model.Country, "India", StringComparison.OrdinalIgnoreCase))
+            {
+                var postal = (model.PostalCode ?? "").Trim();
+                if (!Regex.IsMatch(postal, @"^\d{6}$"))
+                {
+                    TempData["ErrorMessage"] = "Please enter a valid 6-digit Indian PIN code.";
+                    return Redirect("/Account/MyAccount?tab=addresses#addresses");
+                }
+                var prefix = postal.Length >= 2 ? postal.Substring(0, 2) : "";
+                if (!string.IsNullOrWhiteSpace(model.State) && IndiaStatePinPrefixes.TryGetValue(model.State.Trim(), out var allowed))
+                {
+                    if (!allowed.Contains(prefix))
+                    {
+                        var foundState = IndiaStatePinPrefixes.FirstOrDefault(kvp => kvp.Value.Contains(prefix)).Key;
+                        TempData["ErrorMessage"] = foundState != null
+                            ? $"PIN code {postal} belongs to {foundState}, not {model.State}."
+                            : $"PIN code {postal} does not match state of {model.State}.";
+                        return Redirect("/Account/MyAccount?tab=addresses#addresses");
+                    }
+                }
+            }
 
             var existing = !string.IsNullOrWhiteSpace(model.AddressId) 
                 ? await _authBal.GetAddressByIdAsync(model.AddressId, userId) 

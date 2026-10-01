@@ -173,8 +173,8 @@ namespace SAT1.Controllers
                     CategoryId = "2",
                     Spec = "18K Gold | 1.5ct GIA VVS1 | Brilliant Cut",
                     PriceUSD = 2400,
-                    ImageUrl = "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg",
-                    GalleryImages = "/assets/ivevar/exclusive_regal_star_diamond_ring.jpg",
+                    ImageUrl = "/assets/hero_slider_1_solitaire.jpg",
+                    GalleryImages = "/assets/hero_slider_1_solitaire.jpg",
                     IsActive = true
                 };
             }

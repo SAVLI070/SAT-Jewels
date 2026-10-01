@@ -9,6 +9,10 @@
     }
     var error = ViewBag.ErrorMessage as string;
     var googleClientId = Configuration["Authentication:Google:ClientId"] ?? "";
+    if (string.IsNullOrWhiteSpace(googleClientId) || googleClientId.Contains("YOUR_GOOGLE_CLIENT_ID"))
+    {
+        googleClientId = "215157271405-b4ocvc0s8j9erhdqjk736okv9ev5a9rk.apps.googleusercontent.com";
+    }
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -600,8 +604,19 @@
             <span>Or Continue With</span>
           </div>
 
-          <div class="sat-social-grid" style="display:flex; justify-content:center; width:100%;">
-            <div id="googleBtnSignIn" style="width:100%; display:flex; justify-content:center;"></div>
+          <div class="sat-social-grid" style="position:relative; width:100%;">
+            <div class="sat-google-btn-wrapper" style="position:relative; width:100%; height:46px; border-radius:12px; overflow:hidden; cursor:pointer;" onclick="if(window.google && google.accounts && google.accounts.id) google.accounts.id.prompt();">
+              <button type="button" class="btn-sat-social" style="width:100%; height:100%; pointer-events:none; border-color:rgba(212,184,120,0.35); background:rgba(255,255,255,0.05); font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:10px;">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>Continue with Google</span>
+              </button>
+              <div id="googleBtnSignIn" style="position:absolute; inset:0; opacity:0.001; cursor:pointer; width:100%; height:100%; overflow:hidden;"></div>
+            </div>
           </div>
         </div>
 
@@ -677,8 +692,19 @@
             <span>Or Connect With</span>
           </div>
 
-          <div class="sat-social-grid" style="display:flex; justify-content:center; width:100%;">
-            <div id="googleBtnSignUp" style="width:100%; display:flex; justify-content:center;"></div>
+          <div class="sat-social-grid" style="position:relative; width:100%;">
+            <div class="sat-google-btn-wrapper" style="position:relative; width:100%; height:46px; border-radius:12px; overflow:hidden; cursor:pointer;" onclick="if(window.google && google.accounts && google.accounts.id) google.accounts.id.prompt();">
+              <button type="button" class="btn-sat-social" style="width:100%; height:100%; pointer-events:none; border-color:rgba(212,184,120,0.35); background:rgba(255,255,255,0.05); font-size:13px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:10px;">
+                <svg width="18" height="18" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>Join with Google</span>
+              </button>
+              <div id="googleBtnSignUp" style="position:absolute; inset:0; opacity:0.001; cursor:pointer; width:100%; height:100%; overflow:hidden;"></div>
+            </div>
           </div>
         </div>
 
@@ -728,6 +754,72 @@
       }
     }
 
+    function validateEmailStrict(email) {
+      if (!email || !email.trim()) {
+        return { valid: false, message: 'Please enter your email address.' };
+      }
+      const clean = email.trim();
+      const basicRegex = /^[a-zA-Z0-9_\-\.\+]+@@[a-zA-Z0-9\-]+(\.[a-zA-Z0-9\-]+)*\.[a-zA-Z]{2,}$/;
+      if (!basicRegex.test(clean)) {
+        return { valid: false, message: 'Please enter a valid email format (e.g. name@example.com).' };
+      }
+      const parts = clean.split('@@');
+      if (parts.length !== 2) {
+        return { valid: false, message: 'Invalid email format.' };
+      }
+      const local = parts[0];
+      const domain = parts[1].toLowerCase();
+
+      if (domain === 'gmail.com' || domain === 'googlemail.com') {
+        const rawLocal = local.replace(/\./g, '');
+        if (rawLocal.length < 6) {
+          return { valid: false, message: 'Gmail usernames must be at least 6 characters long (e.g. s@gmail.com is invalid).' };
+        }
+        if (rawLocal.length > 30) {
+          return { valid: false, message: 'Gmail usernames cannot exceed 30 characters.' };
+        }
+        if (local.startsWith('.') || local.endsWith('.') || local.includes('..')) {
+          return { valid: false, message: 'Gmail usernames cannot start/end with a period or have consecutive periods.' };
+        }
+      } else if (domain === 'yahoo.com' || domain === 'outlook.com' || domain === 'hotmail.com' || domain === 'icloud.com') {
+        if (local.length < 4) {
+          return { valid: false, message: `Email username must be at least 4 characters for ${domain}.` };
+        }
+      } else {
+        if (local.length < 3) {
+          return { valid: false, message: 'Email username must be at least 3 characters.' };
+        }
+      }
+      return { valid: true, message: '' };
+    }
+
+    function validatePhoneStrict(phone) {
+      if (!phone || !phone.trim()) return { valid: true, message: '' }; // optional
+      const digits = phone.replace(/\D/g, '');
+      if (digits.length < 10 || digits.length > 15) {
+        return { valid: false, message: 'Mobile number must be a valid 10-digit phone number.' };
+      }
+      // Check repeating digits (1111111111, 0000000000, etc.)
+      if (/^(\d)\1+$/.test(digits)) {
+        return { valid: false, message: 'Please enter a valid mobile number (repeating digits like 1111111111 are not allowed).' };
+      }
+      // Check common sequential dummy numbers
+      const sequential = ['0123456789', '1234567890', '9876543210', '0987654321'];
+      if (sequential.some(s => digits.includes(s))) {
+        return { valid: false, message: 'Please enter a genuine, active mobile phone number.' };
+      }
+      // Check 10-digit US / NANP area code
+      if (digits.length === 10) {
+        if (digits[0] === '0' || digits[0] === '1') {
+          return { valid: false, message: 'US area code cannot start with 0 or 1.' };
+        }
+        if (digits[3] === '0' || digits[3] === '1') {
+          return { valid: false, message: 'US phone exchange code cannot start with 0 or 1.' };
+        }
+      }
+      return { valid: true, message: '' };
+    }
+
     function handleSignInSubmit(e) {
       const email = document.getElementById('inputSignInEmail');
       const pwd = document.getElementById('inputSignInPassword');
@@ -745,6 +837,19 @@
         }
         if (!email.value.trim()) email.focus();
         else pwd.focus();
+        return false;
+      }
+
+      // Verify email format and domain length
+      const emailCheck = validateEmailStrict(email.value.trim());
+      if (!emailCheck.valid) {
+        e.preventDefault();
+        if (alertBox && alertMsg) {
+          alertMsg.textContent = emailCheck.message;
+          alertBox.style.display = "flex";
+          alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        email.focus();
         return false;
       }
 
@@ -786,7 +891,7 @@
       if (!emailInput || !feedback) return;
 
       const val = emailInput.value.trim();
-      if (!val || val.indexOf('@@') === -1 || val.indexOf('.') === -1) {
+      if (!val) {
         feedback.style.display = 'none';
         emailInput.style.borderColor = '';
         emailInput.style.boxShadow = '';
@@ -794,11 +899,30 @@
         return;
       }
 
+      // Immediate strict format check (blocks invalid dummy emails like s@gmail.com instantly)
+      const check = validateEmailStrict(val);
+      if (!check.valid) {
+        feedback.style.display = 'block';
+        feedback.style.color = '#f87171';
+        feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${check.message}`;
+        emailInput.style.borderColor = '#ef4444';
+        emailInput.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.4)';
+        isEmailDuplicate = true;
+        return;
+      }
+
       emailCheckTimeout = setTimeout(async () => {
         try {
           const res = await fetch('/Account/CheckAvailability?email=' + encodeURIComponent(val));
           const data = await res.json();
-          if (data.emailExists) {
+          if (data.isInvalidFormat) {
+            isEmailDuplicate = true;
+            emailInput.style.borderColor = '#ef4444';
+            emailInput.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.4)';
+            feedback.style.display = 'block';
+            feedback.style.color = '#f87171';
+            feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${data.emailMsg}`;
+          } else if (data.emailExists) {
             isEmailDuplicate = true;
             emailInput.style.borderColor = '#ef4444';
             emailInput.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.4)';
@@ -811,12 +935,12 @@
             emailInput.style.boxShadow = '0 0 12px rgba(34, 197, 94, 0.3)';
             feedback.style.display = 'block';
             feedback.style.color = '#4ade80';
-            feedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> Email is available.`;
+            feedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> Email is valid and available.`;
           }
         } catch (e) {
           console.error(e);
         }
-      }, 350);
+      }, 300);
     }
 
     function checkPhoneAvailabilityLive() {
@@ -826,8 +950,7 @@
       if (!phoneInput || !feedback) return;
 
       const val = phoneInput.value.trim();
-      const digits = val.replace(/\D/g, '');
-      if (digits.length < 10) {
+      if (!val) {
         feedback.style.display = 'none';
         phoneInput.style.borderColor = '';
         phoneInput.style.boxShadow = '';
@@ -835,11 +958,30 @@
         return;
       }
 
+      // Immediate strict phone format check
+      const check = validatePhoneStrict(val);
+      if (!check.valid) {
+        feedback.style.display = 'block';
+        feedback.style.color = '#f87171';
+        feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${check.message}`;
+        phoneInput.style.borderColor = '#ef4444';
+        phoneInput.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.4)';
+        isPhoneDuplicate = true;
+        return;
+      }
+
       phoneCheckTimeout = setTimeout(async () => {
         try {
           const res = await fetch('/Account/CheckAvailability?phone=' + encodeURIComponent(val));
           const data = await res.json();
-          if (data.phoneExists) {
+          if (data.isInvalidPhone) {
+            isPhoneDuplicate = true;
+            phoneInput.style.borderColor = '#ef4444';
+            phoneInput.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.4)';
+            feedback.style.display = 'block';
+            feedback.style.color = '#f87171';
+            feedback.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${data.phoneMsg}`;
+          } else if (data.phoneExists) {
             isPhoneDuplicate = true;
             phoneInput.style.borderColor = '#ef4444';
             phoneInput.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.4)';
@@ -852,12 +994,12 @@
             phoneInput.style.boxShadow = '0 0 12px rgba(34, 197, 94, 0.3)';
             feedback.style.display = 'block';
             feedback.style.color = '#4ade80';
-            feedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> Mobile number is available.`;
+            feedback.innerHTML = `<i class="fa-solid fa-circle-check"></i> Mobile number is valid and available.`;
           }
         } catch (e) {
           console.error(e);
         }
-      }, 350);
+      }, 300);
     }
 
     async function handleSignUpSubmit(e) {
@@ -885,9 +1027,35 @@
         return false;
       }
 
+      // Strict email validation
+      const emailCheck = validateEmailStrict(email.value.trim());
+      if (!emailCheck.valid) {
+        if (alertBox && alertMsg) {
+          alertMsg.textContent = emailCheck.message;
+          alertBox.style.display = "flex";
+          alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        email.focus();
+        return false;
+      }
+
+      // Strict phone validation (if entered)
+      if (phone && phone.value.trim()) {
+        const phoneCheck = validatePhoneStrict(phone.value.trim());
+        if (!phoneCheck.valid) {
+          if (alertBox && alertMsg) {
+            alertMsg.textContent = phoneCheck.message;
+            alertBox.style.display = "flex";
+            alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+          phone.focus();
+          return false;
+        }
+      }
+
       if (isEmailDuplicate) {
         if (alertBox && alertMsg) {
-          alertMsg.textContent = "An account with this email address already exists. Please Sign In.";
+          alertMsg.textContent = "Please enter a valid, unregistered email address.";
           alertBox.style.display = "flex";
           alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
@@ -897,7 +1065,7 @@
 
       if (isPhoneDuplicate) {
         if (alertBox && alertMsg) {
-          alertMsg.textContent = "This mobile number is already registered to another account. Please use another number.";
+          alertMsg.textContent = "Please enter a valid, unregistered mobile phone number.";
           alertBox.style.display = "flex";
           alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
@@ -940,32 +1108,54 @@
       if (!GOOGLE_CLIENT_ID || typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
         return;
       }
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleCredentialResponse,
-        ux_mode: 'popup'
-      });
 
-      const btnIn = document.getElementById('googleBtnSignIn');
-      if (btnIn) {
-        google.accounts.id.renderButton(btnIn, {
-          theme: 'outline',
-          size: 'large',
-          width: 320,
-          text: 'signin_with',
-          shape: 'pill'
+      try {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: handleGoogleCredentialResponse,
+          ux_mode: 'popup',
+          auto_select: false,
+          cancel_on_tap_outside: false,
+          itp_support: true,
+          context: 'signin'
         });
-      }
 
-      const btnUp = document.getElementById('googleBtnSignUp');
-      if (btnUp) {
-        google.accounts.id.renderButton(btnUp, {
-          theme: 'outline',
-          size: 'large',
-          width: 320,
-          text: 'signup_with',
-          shape: 'pill'
+        const btnIn = document.getElementById('googleBtnSignIn');
+        if (btnIn) {
+          google.accounts.id.renderButton(btnIn, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            width: 320,
+            text: 'signin_with',
+            shape: 'pill',
+            logo_alignment: 'left'
+          });
+        }
+
+        const btnUp = document.getElementById('googleBtnSignUp');
+        if (btnUp) {
+          google.accounts.id.renderButton(btnUp, {
+            type: 'standard',
+            theme: 'outline',
+            size: 'large',
+            width: 320,
+            text: 'signup_with',
+            shape: 'pill',
+            logo_alignment: 'left'
+          });
+        }
+
+        // Display Google One Tap prompt directly on the same page
+        google.accounts.id.prompt((notification) => {
+          if (notification.isNotDisplayed()) {
+            console.warn("Google One Tap prompt not displayed:", notification.getNotDisplayedReason());
+          } else if (notification.isSkippedMoment()) {
+            console.warn("Google One Tap prompt skipped:", notification.getSkippedReason());
+          }
         });
+      } catch (err) {
+        console.error("Error initializing Google Identity Services:", err);
       }
     }
 
@@ -977,6 +1167,17 @@
 
     async function handleGoogleCredentialResponse(response) {
       if (!response || !response.credential) return;
+
+      // Show responsive feedback
+      const activeAlert = document.querySelector('.sat-pane.active .sat-auth-alert');
+      if (activeAlert) {
+        activeAlert.style.display = 'flex';
+        activeAlert.style.background = 'rgba(212, 184, 120, 0.15)';
+        activeAlert.style.borderColor = 'rgba(212, 184, 120, 0.4)';
+        activeAlert.style.color = '#f1eee8';
+        activeAlert.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Verifying Google account & signing in...</span>';
+      }
+
       try {
         const res = await fetch('/Account/GoogleSignIn', {
           method: 'POST',
@@ -988,10 +1189,12 @@
           window.location.href = result.redirectUrl;
         } else {
           alert(result.message || "Google Sign-In could not be verified. Please try again.");
+          if (activeAlert) activeAlert.style.display = 'none';
         }
       } catch (err) {
         console.error("Google Sign-In Error:", err);
         alert("Google Sign-In could not connect. Please try again or sign in with your email.");
+        if (activeAlert) activeAlert.style.display = 'none';
       }
     }
   </script>

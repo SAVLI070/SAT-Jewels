@@ -240,6 +240,22 @@ namespace SAT1.Controllers
             return Ok(new { success = true, message = "Catalog item deleted successfully." });
         }
 
+        // 5B. TOGGLE PRODUCT VISIBILITY (Hide / Show on Storefront without Deleting) - Protected (OWASP A01)
+        [HttpPost("items/{id}/toggle-visibility")]
+        [HttpPost("products/{id}/toggle-visibility")]
+        public async Task<IActionResult> ToggleProductVisibility(string id, [FromQuery] bool active)
+        {
+            if (!IsAdminUser())
+            {
+                return StatusCode(403, new { success = false, message = "Access Denied: Admin authorization required." });
+            }
+
+            var success = await _catalogBal.ToggleProductVisibilityAsync(id, active);
+            if (!success) return NotFound(new { message = "Product not found" });
+
+            return Ok(new { success = true, message = $"Product visibility updated to {(active ? "Visible" : "Hidden")}" });
+        }
+
         // OWASP A01 & A04: SERVER-SIDE AUTHORITATIVE PRICE VALIDATION
         [HttpPost("validate-cart-price")]
         public async Task<IActionResult> ValidateCartPrice([FromBody] PriceCheckRequest req)

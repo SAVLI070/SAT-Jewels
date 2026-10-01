@@ -25,6 +25,30 @@
 
   <!-- Stylesheet -->
   <link rel="stylesheet" href="~/css/style.css" />
+
+  <!-- SweetAlert2 Luxury Modal Framework -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    window.alert = function(msg) {
+      if (window.Swal) {
+        let icon = 'info';
+        const str = String(msg || '');
+        if (str.includes('❌') || str.toLowerCase().includes('error') || str.toLowerCase().includes('failed') || str.toLowerCase().includes('denied')) icon = 'error';
+        else if (str.includes('✨') || str.includes('🎉') || str.toLowerCase().includes('success') || str.toLowerCase().includes('saved') || str.toLowerCase().includes('submitted')) icon = 'success';
+        else if (str.includes('⚠️') || str.toLowerCase().includes('warning') || str.toLowerCase().includes('required')) icon = 'warning';
+        
+        Swal.fire({
+          icon: icon,
+          title: icon === 'success' ? 'Success' : (icon === 'error' ? 'Notice' : (icon === 'warning' ? 'Attention' : 'SAT Jewel')),
+          text: str.replace(/[✨🎉❌⚠️🚫]/g, '').trim(),
+          confirmButtonColor: '#d4b878',
+          background: '#16141a',
+          color: '#ffffff'
+        });
+      }
+    };
+  </script>
 </head>
 
 <body>

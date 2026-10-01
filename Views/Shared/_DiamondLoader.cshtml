@@ -17,22 +17,7 @@
   </div>
 </div>
 
-<script>
-  (function() {
-    try {
-      const curPath = (window.location.pathname || '').toLowerCase();
-      if (curPath === '/' || curPath === '' || curPath === '/home' || curPath === '/home/index' || curPath === '/home/landingnew' ||
-          curPath.startsWith('/admin') || curPath.includes('/admin/') ||
-          curPath.includes('/account/signin') || curPath.includes('/account/login') || curPath.includes('/account/auth') || curPath.includes('/account/register') || curPath.includes('/account/handlesignin') || curPath.includes('/account/handlesignup')) {
-        return; // Exclude main landing page, admin portal, and sign in/register pages
-      }
-      if (document.readyState !== 'complete') {
-        const ldr = document.getElementById('satLottieLoader');
-        if (ldr) ldr.classList.add('active');
-      }
-    } catch(e) {}
-  })();
-</script>
+<!-- Inline loader activation removed: pages now render immediately without overlay -->
 
 <style>
   .sat-lottie-overlay,
@@ -169,10 +154,11 @@
     if (loader) {
       loader.classList.add('active');
       clearTimeout(loaderDismissTimer);
-      // Safety timeout: 15 seconds maximum to prevent locking if an external asset hangs
+      // Hard fail-safe auto-dismissal: 800ms max for normal actions, 4000ms for payment
+      const maxDuration = (animType === 'payment') ? 4000 : 800;
       loaderDismissTimer = setTimeout(() => {
         window.hideDiamondLoader();
-      }, 15000);
+      }, maxDuration);
     }
   };
 
@@ -200,112 +186,27 @@
   window.showLottieLoader = window.showDiamondLoader;
   window.hideLottieLoader = window.hideDiamondLoader;
 
-  // Dismiss if user touches overlay to prevent background lock
+  // Immediate fail-safe dismissal on tap/click
   const ldrEl = document.getElementById('satLottieLoader');
   if (ldrEl) {
     ldrEl.addEventListener('touchstart', window.hideDiamondLoader, { passive: true });
     ldrEl.addEventListener('click', window.hideDiamondLoader);
   }
 
-  // Show loader on page reload / navigation unload (except on main landing page, admin, and sign-in/register)
-  window.addEventListener('beforeunload', function() {
-    try {
-      const curP = (window.location.pathname || '').toLowerCase();
-      if (curP === '/' || curP === '' || curP === '/home' || curP === '/home/index' || curP === '/home/landingnew' ||
-          curP.startsWith('/admin') || curP.includes('/admin/') ||
-          curP.includes('/account/signin') || curP.includes('/account/login') || curP.includes('/account/auth') || curP.includes('/account/register')) {
-        return;
-      }
-      window.showDiamondLoader();
-    } catch(e) {}
-  });
-
-  // Keep loader visible until the page and images are fully loaded
-  function onPageFullyLoaded() {
-    const keyImages = Array.from(document.querySelectorAll('.main-image-container img, .product-main-img, #mainImg, img[loading="eager"]'));
-    const pending = keyImages.filter(img => !img.complete);
-    if (pending.length > 0) {
-      let resolved = 0;
-      const done = () => {
-        resolved++;
-        if (resolved >= pending.length) {
-          window.hideDiamondLoader();
-        }
-      };
-      pending.forEach(img => {
-        img.addEventListener('load', done, { once: true });
-        img.addEventListener('error', done, { once: true });
-      });
-      setTimeout(window.hideDiamondLoader, 2500);
-    } else {
-      window.hideDiamondLoader();
-    }
-  }
-
-  if (document.readyState === 'complete') {
-    onPageFullyLoaded();
+  // Auto-hide as soon as DOM is ready, on window load, and on back/forward cache restore
+  if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    window.hideDiamondLoader();
   } else {
-    window.addEventListener('load', onPageFullyLoaded);
+    document.addEventListener('DOMContentLoaded', window.hideDiamondLoader);
   }
+  window.addEventListener('load', window.hideDiamondLoader);
+  window.addEventListener('pageshow', window.hideDiamondLoader);
+  window.addEventListener('popstate', window.hideDiamondLoader);
 
-  // Auto-hide when restored from back/forward cache
-  window.addEventListener('pageshow', function() {
-    window.hideDiamondLoader();
-  });
-  window.addEventListener('popstate', function() {
-    window.hideDiamondLoader();
-  });
+  // Fail-safe immediate hide after short tick
+  setTimeout(window.hideDiamondLoader, 200);
 
-  // Universal Link Interceptor for Instant Feedback
-  document.addEventListener('click', function(e) {
-    const link = e.target.closest('a');
-    if (!link) return;
-
-    const href = link.getAttribute('href');
-    if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('tel:') || href.startsWith('mailto:') || link.target === '_blank' || link.hasAttribute('download')) {
-      return;
-    }
-
-    try {
-      const url = new URL(link.href, window.location.origin);
-      if (url.origin !== window.location.origin) return;
-
-      // Skip if staying on exact same URL
-      if (url.pathname === window.location.pathname && url.search === window.location.search) {
-        return;
-      }
-
-      const path = url.pathname.toLowerCase();
-      if (path === '/' || path === '' || path === '/home' || path === '/home/index' || path === '/home/landingnew' ||
-          path.startsWith('/admin') || path.includes('/admin/') ||
-          path.includes('/account/signin') || path.includes('/account/login') || path.includes('/account/auth') || path.includes('/account/register')) {
-        return; // Exclude main landing page, admin portal, and sign-in / register pages
-      }
-
-      // Do NOT trigger full-screen blocking loader for pagination or shape/sort filters
-      if (url.searchParams.has('page') || url.searchParams.has('sort') || url.searchParams.has('shape')) {
-        return;
-      }
-
-      let msg = 'Loading Atelier...';
-
-      if (path.includes('/account/myaccount') || path.includes('/account/profile') || path.includes('/account/orders')) {
-        msg = 'Opening Private Account...';
-      } else if (path.includes('/product/details')) {
-        msg = 'Loading Creation Details...';
-      } else if (path.includes('/product/category') || path === '/product') {
-        msg = 'Curating Collection...';
-      } else if (path.includes('/cart')) {
-        msg = 'Opening Shopping Bag...';
-      } else if (path.includes('/order') || path.includes('/checkout')) {
-        msg = 'Securing Your Order...';
-      }
-
-      window.showDiamondLoader(msg);
-    } catch (err) {}
-  });
-
-  // Form submission interceptor
+  // Form submission interceptor (for payment/checkout/cart actions)
   document.addEventListener('submit', function(e) {
     const form = e.target;
     if (form && !form.target && !form.getAttribute('action')?.startsWith('javascript:')) {
@@ -319,10 +220,8 @@
       let msg = 'Processing Request...';
       if (action.includes('/cart') || action.includes('/checkout') || action.includes('/order')) {
         msg = 'Securing Your Order...';
-      } else if (action.includes('/category')) {
-        msg = 'Filtering Creations...';
+        window.showDiamondLoader(msg, 'payment');
       }
-      window.showDiamondLoader(msg);
     }
   });
 })();

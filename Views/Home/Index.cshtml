@@ -1,8 +1,10 @@
 @inject SAT1.BAL.CatalogBal CatalogBal
+@inject SAT1.BAL.ReviewBal ReviewBal
 @{
     ViewData["Title"] = "Fine Jewelry & AI Diamond Intelligence";
     var catCounts = ViewBag.CategoryCountsByNumericId as Dictionary<long, int> ?? new Dictionary<long, int>();
     var publicCategories = await CatalogBal.GetPublicCategoriesAsync();
+    var googleReviews = await ReviewBal.GetStorefrontPhotoReviewsAsync();
 }
 
 <!-- Intro Animation Overlay -->
@@ -213,7 +215,7 @@
         <!-- 1. Round -->
         <a href="/Product/Category?id=1&shape=Round" class="shape-line-item">
           <div class="shape-icon-box">
-            <img src="/assets/shapes/real/round.png" alt="Round Diamond Cut" />
+            <img src="/assets/shapes/real/round.png?v=sat2" alt="Round Diamond Cut" />
           </div>
           <span class="shape-label-text">Round</span>
         </a>
@@ -221,7 +223,7 @@
         <!-- 2. Marquise -->
         <a href="/Product/Category?id=1&shape=Marquise" class="shape-line-item">
           <div class="shape-icon-box">
-            <img src="/assets/shapes/real/marquise.png" alt="Marquise Diamond Cut" />
+            <img src="/assets/shapes/real/marquise.png?v=sat2" alt="Marquise Diamond Cut" />
           </div>
           <span class="shape-label-text">Marquise</span>
         </a>
@@ -229,7 +231,7 @@
         <!-- 3. Asscher -->
         <a href="/Product/Category?id=1&shape=Asscher" class="shape-line-item">
           <div class="shape-icon-box">
-            <img src="/assets/shapes/real/asscher.png" alt="Asscher Diamond Cut" />
+            <img src="/assets/shapes/real/asscher.png?v=sat2" alt="Asscher Diamond Cut" />
           </div>
           <span class="shape-label-text">Asscher</span>
         </a>
@@ -237,7 +239,7 @@
         <!-- 4. Pear -->
         <a href="/Product/Category?id=1&shape=Pear" class="shape-line-item">
           <div class="shape-icon-box">
-            <img src="/assets/shapes/real/pear.png" alt="Pear Diamond Cut" />
+            <img src="/assets/shapes/real/pear.png?v=sat2" alt="Pear Diamond Cut" />
           </div>
           <span class="shape-label-text">Pear</span>
         </a>
@@ -245,7 +247,7 @@
         <!-- 5. Princess -->
         <a href="/Product/Category?id=1&shape=Princess" class="shape-line-item">
           <div class="shape-icon-box">
-            <img src="/assets/shapes/real/princess.png" alt="Princess Diamond Cut" />
+            <img src="/assets/shapes/real/princess.png?v=sat2" alt="Princess Diamond Cut" />
           </div>
           <span class="shape-label-text">Princess</span>
         </a>
@@ -253,7 +255,7 @@
         <!-- 6. Cushion -->
         <a href="/Product/Category?id=1&shape=Cushion" class="shape-line-item">
           <div class="shape-icon-box">
-            <img src="/assets/shapes/real/cushion.png" alt="Cushion Diamond Cut" />
+            <img src="/assets/shapes/real/cushion.png?v=sat2" alt="Cushion Diamond Cut" />
           </div>
           <span class="shape-label-text">Cushion</span>
         </a>
@@ -261,7 +263,7 @@
         <!-- 7. Radiant -->
         <a href="/Product/Category?id=1&shape=Radiant" class="shape-line-item">
           <div class="shape-icon-box">
-            <img src="/assets/shapes/real/radiant.png" alt="Radiant Diamond Cut" />
+            <img src="/assets/shapes/real/radiant.png?v=sat2" alt="Radiant Diamond Cut" />
           </div>
           <span class="shape-label-text">Radiant</span>
         </a>
@@ -269,7 +271,7 @@
         <!-- 8. Oval -->
         <a href="/Product/Category?id=1&shape=Oval" class="shape-line-item">
           <div class="shape-icon-box">
-            <img src="/assets/shapes/real/oval.png" alt="Oval Diamond Cut" />
+            <img src="/assets/shapes/real/oval.png?v=sat2" alt="Oval Diamond Cut" />
           </div>
           <span class="shape-label-text">Oval</span>
         </a>
@@ -277,7 +279,7 @@
         <!-- 9. Emerald -->
         <a href="/Product/Category?id=1&shape=Emerald" class="shape-line-item">
           <div class="shape-icon-box">
-            <img src="/assets/shapes/real/emerald.png" alt="Emerald Diamond Cut" />
+            <img src="/assets/shapes/real/emerald.png?v=sat2" alt="Emerald Diamond Cut" />
           </div>
           <span class="shape-label-text">Emerald</span>
         </a>
@@ -285,7 +287,7 @@
         <!-- 10. Heart -->
         <a href="/Product/Category?id=1&shape=Heart" class="shape-line-item">
           <div class="shape-icon-box">
-            <img src="/assets/shapes/real/heart.png" alt="Heart Diamond Cut" />
+            <img src="/assets/shapes/real/heart.png?v=sat2" alt="Heart Diamond Cut" />
           </div>
           <span class="shape-label-text">Heart</span>
         </a>
@@ -518,6 +520,391 @@
     </div>
   </div>
 </section>
+
+<!-- SAT JEWEL CLIENT REVIEWS & GOOGLE VERIFIED CAROUSEL -->
+<section id="customer-reviews" class="sat-customer-reviews-section">
+  <!-- Carousel Area with Left & Right Arrow Buttons -->
+  <div class="sat-reviews-carousel-outer">
+    <button type="button" class="sat-carousel-arrow sat-arrow-left" onclick="scrollSatReviews(-1)" aria-label="Previous Reviews">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+
+    <div class="sat-reviews-viewport" id="satReviewsViewport">
+      <div class="sat-reviews-track" id="satReviewsTrack">
+        @if (googleReviews != null && googleReviews.Count > 0)
+        {
+          foreach (var rev in googleReviews)
+          {
+            var initial = !string.IsNullOrEmpty(rev.CustomerName) ? rev.CustomerName.Trim().Substring(0, 1).ToUpper() : "C";
+            var bgCol = "#5b9e4d";
+            if (initial == "H") bgCol = "#795548";
+            else if (initial == "M") bgCol = "#78909c";
+            else if (initial == "S") bgCol = "#1976d2";
+            else if (initial == "J") bgCol = "#7b1fa2";
+            else if (initial == "V") bgCol = "#d32f2f";
+            else if (initial == "K") bgCol = "#f57c00";
+            else if (initial == "G") bgCol = "#00897b";
+            else if (initial == "A") bgCol = "#c2185b";
+
+            <div class="sat-google-review-card">
+              <!-- Top Row: Avatar + Name/Date + Google Logo -->
+              <div class="sat-card-top-row">
+                <div class="sat-card-user-meta">
+                  <div class="sat-user-avatar-circle" style="background-color: @bgCol;">@initial</div>
+                  <div class="sat-user-text">
+                    <div class="sat-user-name">@rev.CustomerName</div>
+                    <div class="sat-user-time">@(string.IsNullOrEmpty(rev.RelativeTime) ? "last year" : rev.RelativeTime)</div>
+                  </div>
+                </div>
+                <!-- Official Multi-Color Google G Logo -->
+                <div class="sat-google-g-badge">
+                  <svg viewBox="0 0 24 24" width="22" height="22">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                  </svg>
+                </div>
+              </div>
+
+              <!-- Rating Row: 5 Gold Stars + Blue Verified Check Badge -->
+              <div class="sat-card-stars-row">
+                <div class="sat-gold-stars">
+                  @for (int s = 0; s < rev.Rating; s++)
+                  {
+                    <i class="fa-solid fa-star"></i>
+                  }
+                </div>
+                <div class="sat-verified-check-badge" title="Google Verified Buyer">
+                  <i class="fa-solid fa-circle-check"></i>
+                </div>
+              </div>
+
+              <!-- Content Row: Review text on left, Photo thumbnail on right -->
+              <div class="sat-card-content-row">
+                <div class="sat-review-text-wrap">
+                  <p class="sat-review-p">@rev.ReviewText</p>
+                </div>
+                @if (!string.IsNullOrEmpty(rev.PhotoUrl))
+                {
+                  <div class="sat-card-thumb-slot" onclick="openPhotoLightbox('@rev.PhotoUrl', '@rev.CustomerName')" title="Click to view full photo">
+                    <img src="@rev.PhotoUrl" alt="@rev.CustomerName review photo" loading="lazy" />
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+    <button type="button" class="sat-carousel-arrow sat-arrow-right" onclick="scrollSatReviews(1)" aria-label="Next Reviews">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
+</section>
+
+<!-- Photo Lightbox Modal -->
+<div id="satPhotoLightbox" class="sat-lightbox-modal" onclick="closePhotoLightbox(event)">
+  <div class="sat-lightbox-inner">
+    <button type="button" class="sat-lightbox-close" onclick="closePhotoLightbox()">&times;</button>
+    <img id="satLightboxImg" src="" alt="Client jewelry unboxing" />
+    <div id="satLightboxCaption" class="sat-lightbox-caption"></div>
+  </div>
+</div>
+
+<style>
+/* CUSTOMER REVIEWS SECTION (IMAGE 1 REPLICA) */
+.sat-customer-reviews-section {
+  width: 100%;
+  background: #000000;
+  padding: 0 0 60px 0;
+  position: relative;
+  overflow: hidden;
+}
+.sat-reviews-banner-wrap {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 0 32px 0;
+  background: #000;
+  overflow: hidden;
+}
+.sat-reviews-banner-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  max-height: 380px;
+}
+.sat-reviews-carousel-outer {
+  position: relative;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 0 54px;
+  box-sizing: border-box;
+}
+.sat-carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+.sat-carousel-arrow:hover {
+  background: #ffffff;
+  color: #0f172a;
+  transform: translateY(-50%) scale(1.08);
+}
+.sat-arrow-left {
+  left: 6px;
+}
+.sat-arrow-right {
+  right: 6px;
+}
+.sat-reviews-viewport {
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding: 6px 2px 14px;
+}
+.sat-reviews-viewport::-webkit-scrollbar {
+  display: none;
+}
+.sat-reviews-track {
+  display: flex;
+  gap: 20px;
+  width: max-content;
+}
+.sat-google-review-card {
+  width: 380px;
+  min-width: 380px;
+  max-width: 380px;
+  min-height: 200px;
+  background: #f1f5f9;
+  border-radius: 24px;
+  padding: 22px 24px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.sat-google-review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+.sat-card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.sat-card-user-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sat-user-avatar-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+.sat-user-name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.25;
+}
+.sat-user-time {
+  font-size: 12.5px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+.sat-google-g-badge {
+  flex-shrink: 0;
+}
+.sat-card-stars-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.sat-gold-stars {
+  color: #f59e0b;
+  font-size: 15px;
+  letter-spacing: 2px;
+}
+.sat-verified-check-badge {
+  color: #3b82f6;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+}
+.sat-card-content-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 14px;
+  min-height: 76px;
+}
+.sat-review-text-wrap {
+  flex: 1;
+}
+.sat-review-p {
+  color: #334155;
+  font-size: 13.5px;
+  line-height: 1.5;
+  margin: 0;
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.sat-card-thumb-slot {
+  width: 74px;
+  height: 74px;
+  border-radius: 14px;
+  overflow: hidden;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease;
+}
+.sat-card-thumb-slot:hover {
+  transform: scale(1.06);
+}
+.sat-card-thumb-slot img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* LIGHTBOX MODAL */
+.sat-lightbox-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(10px);
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.sat-lightbox-inner {
+  position: relative;
+  max-width: 680px;
+  width: 100%;
+  background: #0d0c12;
+  border: 1px solid rgba(212, 184, 120, 0.4);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  text-align: center;
+}
+.sat-lightbox-inner img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  display: block;
+  background: #000;
+}
+.sat-lightbox-caption {
+  padding: 14px 20px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  background: rgba(18, 17, 24, 0.95);
+  border-top: 1px solid rgba(212, 184, 120, 0.2);
+}
+.sat-lightbox-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s;
+}
+.sat-lightbox-close:hover {
+  background: rgba(220, 38, 38, 0.8);
+  border-color: #ef4444;
+}
+
+@@media (max-width: 768px) {
+  .sat-reviews-carousel-outer {
+    padding: 0 40px;
+  }
+  .sat-google-review-card {
+    width: 310px;
+    min-width: 310px;
+    max-width: 310px;
+    padding: 18px 20px;
+  }
+}
+</style>
+
+<script>
+function scrollSatReviews(direction) {
+  const container = document.getElementById('satReviewsViewport');
+  if (!container) return;
+  const scrollAmount = 400 * direction;
+  container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+}
+
+function openPhotoLightbox(photoUrl, customerName) {
+  const modal = document.getElementById('satPhotoLightbox');
+  const img = document.getElementById('satLightboxImg');
+  const caption = document.getElementById('satLightboxCaption');
+  if (!modal || !img) return;
+  img.src = photoUrl;
+  if (caption) caption.textContent = `Client Jewelry Creation — ${customerName}`;
+  modal.style.display = 'flex';
+}
+
+function closePhotoLightbox(e) {
+  if (e && e.target && e.target.closest('.sat-lightbox-inner') && !e.target.classList.contains('sat-lightbox-close')) {
+    return;
+  }
+  const modal = document.getElementById('satPhotoLightbox');
+  if (modal) modal.style.display = 'none';
+}
+</script>
 
 <!-- PRODUCTS / COLLECTION VIEW MODAL -->
 <div class="collection-modal" id="collectionModal" onclick="handleModalBackdropClick(event, 'collectionModal')">

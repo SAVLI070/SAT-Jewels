@@ -238,6 +238,7 @@ using (var scope = app.Services.CreateScope())
                 ""created_at"" timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT ""PK_product_reviews"" PRIMARY KEY (""id"")
             );
+            ALTER TABLE ""products"" ADD COLUMN IF NOT EXISTS ""is_active"" boolean NOT NULL DEFAULT true;
 
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""PaymentProvider"" text NOT NULL DEFAULT 'PayPal';
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""ProviderOrderId"" text NOT NULL DEFAULT '';
@@ -375,7 +376,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseStatusCodePagesWithReExecute("/Home/Restricted");
 
-app.UseResponseCompression();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseResponseCompression();
+}
 
 app.Use(async (context, next) =>
 {
@@ -454,9 +458,16 @@ app.Use(async (context, next) =>
             context.Response.Redirect($"/Account/SignIn?returnUrl={returnUrl}");
             return;
         }
-        else if (!string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase))
+
+        var userEmail = context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower() ?? "";
+        bool isAdmin = string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase) ||
+                       userEmail == "admin@satjewel.com" ||
+                       userEmail == "admin@satjewels.com" ||
+                       userEmail == "satjewels31@gmail.com";
+
+        if (!isAdmin)
         {
-            context.Response.Redirect("/Home/Restricted");
+            context.Response.Redirect("/Account/MyAccount");
             return;
         }
     }

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SAT1.Models;
+using System.Text.RegularExpressions;
 
 namespace SAT1.Controllers
 {
@@ -129,6 +130,17 @@ namespace SAT1.Controllers
                 if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(phone))
                 {
                     return Json(new { success = false, message = "Please provide your Name, Email, and Phone number." });
+                }
+
+                if (Regex.IsMatch(name.Trim(), @"\d"))
+                {
+                    return Json(new { success = false, message = "Name cannot contain numbers. Only alphabetical letters are allowed." });
+                }
+
+                var cleanPhone = System.Net.WebUtility.HtmlDecode(phone).Replace("&#x2B;", "+").Replace("&#43;", "+").Trim();
+                if (Regex.IsMatch(cleanPhone, @"[a-zA-Z]"))
+                {
+                    return Json(new { success = false, message = "Phone number cannot contain alphabetical letters." });
                 }
 
                 string uploadedImageUrl = "";

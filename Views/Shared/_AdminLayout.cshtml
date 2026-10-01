@@ -10,6 +10,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>@title — SAT Jewel Admin</title>
 
+  <!-- Favicon / Tab Icons (Golden SJ Emblem) -->
+  <link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="shortcut icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="apple-touch-icon" href="/assets/sat_emblem_clean.png" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,900;1,400;1,700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -557,6 +562,26 @@
         });
       } else {
         alert(message);
+      }
+    };
+
+    // Global window.alert override for Admin
+    window.alert = function(msg) {
+      if (typeof Swal !== 'undefined') {
+        let icon = 'info';
+        const str = String(msg || '');
+        if (str.includes('❌') || str.toLowerCase().includes('error') || str.toLowerCase().includes('failed') || str.toLowerCase().includes('denied')) icon = 'error';
+        else if (str.includes('✨') || str.includes('🎉') || str.toLowerCase().includes('success') || str.toLowerCase().includes('saved') || str.toLowerCase().includes('submitted') || str.toLowerCase().includes('published')) icon = 'success';
+        else if (str.includes('⚠️') || str.toLowerCase().includes('warning') || str.toLowerCase().includes('required')) icon = 'warning';
+        
+        Swal.fire({
+          icon: icon,
+          title: icon === 'success' ? 'Success' : (icon === 'error' ? 'Notice' : (icon === 'warning' ? 'Attention' : 'System Notice')),
+          text: str.replace(/[✨🎉❌⚠️🚫]/g, '').trim(),
+          confirmButtonColor: '#0f172a',
+          background: '#ffffff',
+          color: '#0f172a'
+        });
       }
     };
     // Ensure no-op loader functions on admin side

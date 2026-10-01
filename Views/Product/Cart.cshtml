@@ -24,6 +24,29 @@
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <script src="https://unpkg.com/@@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <!-- SweetAlert2 Luxury Modal Framework -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    window.alert = function(msg) {
+      if (window.Swal) {
+        let icon = 'info';
+        const str = String(msg || '');
+        if (str.includes('❌') || str.toLowerCase().includes('error') || str.toLowerCase().includes('failed') || str.toLowerCase().includes('denied')) icon = 'error';
+        else if (str.includes('✨') || str.includes('🎉') || str.toLowerCase().includes('success') || str.toLowerCase().includes('saved') || str.toLowerCase().includes('confirmed')) icon = 'success';
+        else if (str.includes('⚠️') || str.toLowerCase().includes('warning') || str.toLowerCase().includes('required')) icon = 'warning';
+        
+        Swal.fire({
+          icon: icon,
+          title: icon === 'success' ? 'Success' : (icon === 'error' ? 'Notice' : (icon === 'warning' ? 'Attention' : 'SAT Jewel')),
+          text: str.replace(/[✨🎉❌⚠️🚫]/g, '').trim(),
+          confirmButtonColor: '#d4b878',
+          background: '#131314',
+          color: '#f1eee8'
+        });
+      }
+    };
+  </script>
 
   <style>
     @@layer base {
@@ -303,42 +326,80 @@
                     <div class="flex items-center justify-between">
                       <label class="font-label-caps text-label-caps text-primary uppercase tracking-wider flex items-center gap-1.5" for="address-vault-select">
                         <span class="material-symbols-outlined text-[15px]">bookmark</span>
-                        <span>Quick Select From Saved Address Vault:</span>
+                        <span>Select Delivery Address:</span>
                       </label>
                       <a class="font-label-sm text-label-sm text-on-surface-variant hover:text-primary transition-colors underline-offset-2 hover:underline" href="/Account/MyAccount?tab=addresses">Manage Vault (@savedAddresses.Count Saved)</a>
                     </div>
                     <div class="relative">
-                      <select class="w-full bg-surface-container-highest text-on-surface font-body-md text-body-md rounded-lg px-4 py-3 appearance-none focus:outline-none focus:bg-surface-bright cursor-pointer pr-10" id="address-vault-select" onchange="loadSavedAddress(this.value)">
-                        <option value="">-- Choose a Saved Shipping Address --</option>
+                      <select class="w-full bg-surface-container-highest text-on-surface font-body-md text-body-md rounded-lg px-4 py-3 appearance-none focus:outline-none focus:bg-surface-bright cursor-pointer pr-10" id="address-vault-select" onchange="onAddressSelectChanged(this.value)">
                         @foreach (var addr in savedAddresses)
                         {
                           <option value="@Html.Raw(System.Text.Json.JsonSerializer.Serialize(addr))" selected="@(addr.IsDefault ? "selected" : null)">
                             @(addr.IsDefault ? "⭐ [DEFAULT] " : "")@addr.FullName - @addr.StreetAddress, @addr.City, @addr.State (@addr.Country - @addr.PostalCode)
                           </option>
                         }
+                        <option value="__new__">➕ Add / Enter New Delivery Address...</option>
                       </select>
                       <span class="material-symbols-outlined text-on-surface-variant text-[20px] absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none">unfold_more</span>
                     </div>
                   </div>
+
+                  <!-- Clean Selected Address Preview Card (shown when saved address selected) -->
+                  <div id="selectedAddressCard" class="p-5 rounded-xl bg-surface-container-low border border-primary/40 space-y-3" style="display: block;">
+                    <div class="flex items-start justify-between gap-4">
+                      <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0 mt-0.5">
+                          <span class="material-symbols-outlined text-[22px]">verified_user</span>
+                        </div>
+                        <div class="space-y-1">
+                          <div class="flex items-center gap-2 flex-wrap">
+                            <h4 id="cardFullName" class="font-headline-sm text-[16px] text-on-surface font-semibold"></h4>
+                            <span id="cardDefaultBadge" class="px-2 py-0.5 rounded bg-primary/20 text-primary font-label-caps text-[10px] font-bold uppercase tracking-wider">Default Address</span>
+                          </div>
+                          <p class="font-body-md text-body-md text-primary flex items-center gap-1.5 font-medium">
+                            <span class="material-symbols-outlined text-[16px]">call</span>
+                            <span id="cardPhoneText"></span>
+                          </p>
+                          <p id="cardStreet" class="font-body-md text-body-md text-on-surface"></p>
+                          <p id="cardLocation" class="font-body-sm text-body-sm text-on-surface-variant"></p>
+                        </div>
+                      </div>
+                      <button type="button" onclick="showAddressInputForm(true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-primary font-label-sm text-label-sm font-semibold transition-colors shrink-0 cursor-pointer">
+                        <span class="material-symbols-outlined text-[16px]">edit</span>
+                        <span>Edit / Change</span>
+                      </button>
+                    </div>
+                  </div>
                 }
 
-                <!-- Address Input Form Grid -->
-                <form id="shippingAddressForm" oninput="checkAddressValidation(); if(event.target.style) { event.target.style.borderColor=''; event.target.style.boxShadow=''; }" onsubmit="return false;">
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Full Name -->
-                    <div class="space-y-1.5">
-                      <label class="block font-label-sm text-label-sm text-on-surface-variant">Recipient Full Name <span class="text-primary">*</span></label>
-                      <div class="relative">
-                        <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipFullName" type="text" value="@userName" placeholder="e.g. Sahil Khurana" required />
-                        <span class="material-symbols-outlined text-on-surface-variant text-[18px] absolute right-3 top-1/2 -translate-y-1/2">person</span>
-                      </div>
+                <!-- Address Input Form Grid Container (hidden by default when saved address exists) -->
+                <div id="addressFormInputsContainer" style="@(savedAddresses.Count > 0 ? "display: none;" : "display: block;")">
+                  @if (savedAddresses.Count > 0)
+                  {
+                    <div class="flex items-center justify-between pb-3">
+                      <span class="font-label-caps text-[11px] text-primary uppercase tracking-wider font-semibold">Enter Delivery Details:</span>
+                      <button type="button" onclick="showAddressInputForm(false)" class="text-on-surface-variant hover:text-primary font-label-sm text-label-sm underline transition-colors cursor-pointer flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">arrow_back</span>
+                        <span>Back to Saved Address</span>
+                      </button>
                     </div>
+                  }
+                  <form id="shippingAddressForm" oninput="checkAddressValidation(); if(event.target.style) { event.target.style.borderColor=''; event.target.style.boxShadow=''; }" onsubmit="return false;">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <!-- Full Name -->
+                      <div class="space-y-1.5">
+                        <label class="block font-label-sm text-label-sm text-on-surface-variant">Recipient Full Name <span class="text-primary">*</span></label>
+                        <div class="relative">
+                          <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipFullName" type="text" value="@userName" placeholder="e.g. Sahil Khurana" oninput="this.value = this.value.replace(/[^a-zA-Z\s\.\-']/g, '')" required />
+                          <span class="material-symbols-outlined text-on-surface-variant text-[18px] absolute right-3 top-1/2 -translate-y-1/2">person</span>
+                        </div>
+                      </div>
 
                     <!-- Phone Number -->
                     <div class="space-y-1.5">
                       <label class="block font-label-sm text-label-sm text-on-surface-variant">Contact Phone (For Courier Tracking SMS) <span class="text-primary">*</span></label>
                       <div class="relative">
-                        <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipPhone" type="tel" placeholder="+91 81282 91686" required />
+                        <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipPhone" type="tel" placeholder="+91 81282 91686" oninput="this.value = this.value.replace(/[^0-9\+\-\s\(\)]/g, '')" required />
                         <span class="material-symbols-outlined text-on-surface-variant text-[18px] absolute right-3 top-1/2 -translate-y-1/2">call</span>
                       </div>
                     </div>
@@ -391,7 +452,7 @@
                     <!-- Postal / ZIP Code -->
                     <div class="space-y-1.5">
                       <label class="block font-label-sm text-label-sm text-on-surface-variant">Postal / ZIP Code <span class="text-primary">*</span></label>
-                      <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipPostalCode" type="text" placeholder="396445" required />
+                      <input class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md rounded-lg px-3.5 py-2.5 focus:outline-none focus:bg-surface-container-high transition-colors" id="shipPostalCode" type="text" placeholder="396445" oninput="this.value = this.value.replace(/[^0-9\-]/g, ''); validatePostalCode();" required />
                       <div id="postalCodeFeedback" class="hidden items-center gap-1.5 text-tertiary pt-0.5">
                         <span class="material-symbols-outlined text-[16px]">check_circle</span>
                         <span class="font-label-sm text-label-sm">Valid international postal format &amp; armored service area.</span>
@@ -424,8 +485,8 @@
                         </div>
                       </label>
                     </div>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             }
             else
@@ -695,21 +756,21 @@
   </main>
 
   <!-- Sticky Bottom PayPal Action Bar (Stuck at bottom with amount to pay) -->
-  <div id="mobileStickyPaymentBar" class="fixed bottom-0 left-0 right-0 z-50 bg-[#0e0e0f]/95 backdrop-blur-xl border-t border-outline-variant/40 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,0.8)]">
+  <div id="mobileStickyPaymentBar" class="fixed bottom-0 left-0 right-0 z-50 bg-[#0e0e0f]/95 backdrop-blur-xl border-t border-outline-variant/40 px-4 py-2.5 shadow-[0_-10px_35px_rgba(0,0,0,0.8)] pr-24 sm:pr-28">
     <div class="flex items-center justify-between gap-4 max-w-[1240px] mx-auto">
       <div class="flex flex-col min-w-0">
         <span class="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant font-semibold">Total to Pay</span>
         <span id="mobileStickyTotalDisplay" class="font-headline-sm text-[18px] sm:text-[22px] text-primary font-bold tracking-tight truncate">$0.00 USD</span>
       </div>
-      <div id="sticky-paypal-button-container" class="flex-1 max-w-[280px] sm:max-w-[340px] min-h-[46px] flex items-center justify-end">
-        <button type="button" id="btnStickyPaypalTrigger" onclick="handleMobilePaymentClick()" class="w-full h-[46px] px-6 rounded-lg bg-[#ffc439] hover:bg-[#ffb619] flex items-center justify-center shadow-[0_4px_16px_rgba(255,196,57,0.35)] transition-all active:scale-[0.98] cursor-pointer" title="Pay with PayPal">
-          <svg class="h-6 w-auto" viewBox="0 0 100 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M11.667 3.5H4.833a1.5 1.5 0 00-1.48 1.258L.48 20.306a.75.75 0 00.74.86h3.407a1 1 0 00.986-.838l.942-5.96a1 1 0 01.987-.84h1.792c3.96 0 6.666-1.922 7.266-5.72.333-2.106-.187-3.766-1.48-4.815-1.28-.973-3.213-1.493-5.453-1.493z" fill="#003087"/>
-            <path d="M37.133 9.426a5.733 5.733 0 00-2.32-.426h-4.38a1 1 0 00-.987.838l-1.92 12.167a.75.75 0 00.74.861h2.98a.8.8 0 00.79-.672l.546-3.461a.8.8 0 01.79-.673h1.84c3.487 0 6.22-1.413 7.02-5.507.367-1.887-.1-3.26-1.127-4.127h-.006zM50.48 9h-2.92a.8.8 0 00-.79.673l-.113.72-.18-.26c-.733-1.04-2.313-1.467-3.92-1.467-3.667 0-6.793 2.78-7.393 6.6-.334 2.054.126 3.967 1.26 5.254 1.046 1.18 2.606 1.746 4.386 1.746 3.1 0 4.827-1.993 4.827-1.993l-.114.72a.75.75 0 00.74.86h2.747a.8.8 0 00.79-.673L51.27 9.86A.75.75 0 0050.48 9zm-5.38 6.467c-.313 1.986-1.867 3.32-3.86 3.32-1.007 0-1.847-.327-2.36-.92-.514-.593-.687-1.44-.487-2.387.307-1.96 1.887-3.32 3.86-3.32 1.007 0 1.84.334 2.354.927.52.6.693 1.44.493 2.38z" fill="#003087"/>
-            <path d="M69.047 9h-2.92a.8.8 0 00-.79.673l-3.933 11.967-1.827-11.78a.8.8 0 00-.793-.673h-2.96a.75.75 0 00-.74.866l3.373 15.694a.8.8 0 00.79.673h2.893a.8.8 0 00.79-.673L69.837 9.86A.75.75 0 0069.047 9z" fill="#0079C1"/>
-            <path d="M78.687 3.5h-6.834a1.5 1.5 0 00-1.48 1.258L67.5 20.306a.75.75 0 00.74.86h3.407a1 1 0 00.987-.838l.94-5.96a1 1 0 01.986-.84h1.794c3.96 0 6.666-1.922 7.266-5.72.334-2.106-.186-3.766-1.48-4.815-1.28-.973-3.213-1.493-5.453-1.493z" fill="#0079C1"/>
-            <path d="M100.153 9.426a5.733 5.733 0 00-2.32-.426h-4.38a1 1 0 00-.986.838l-1.92 12.167a.75.75 0 00.74.861h2.98a.8.8 0 00.79-.672l.547-3.461a.8.8 0 01.79-.673h1.84c3.486 0 6.22-1.413 7.02-5.507.366-1.887-.1-3.26-1.127-4.127h-.007zM113.5 9h-2.92a.8.8 0 00-.79.673l-.113.72-.18-.26c-.734-1.04-2.314-1.467-3.92-1.467-3.667 0-6.794 2.78-7.394 6.6-.333 2.054.127 3.967 1.26 5.254 1.047 1.18 2.607 1.746 4.387 1.746 3.1 0 4.827-1.993 4.827-1.993l-.113.72a.75.75 0 00.74.86h2.746a.8.8 0 00.79-.673L114.29 9.86A.75.75 0 00113.5 9zm-5.38 6.467c-.313 1.986-1.867 3.32-3.86 3.32-1.007 0-1.847-.327-2.36-.92-.514-.593-.687-1.44-.487-2.387.307-1.96 1.887-3.32 3.86-3.32 1.007 0 1.84.334 2.353.927.52.6.694 1.44.494 2.38z" fill="#0079C1"/>
-            <path d="M117.84 21.033a.75.75 0 01-.74-.86l2.36-14.966a.8.8 0 01.79-.674h2.98a.75.75 0 01.74.86l-2.36 14.967a.8.8 0 01-.79.673h-2.98z" fill="#0079C1"/>
+      <div id="sticky-paypal-button-container" class="flex-1 max-w-[280px] sm:max-w-[320px] min-h-[46px] flex items-center justify-end">
+        <button type="button" id="btnStickyPaypalTrigger" onclick="handleMobilePaymentClick()" class="w-full h-[46px] px-6 rounded-lg bg-[#ffc439] hover:bg-[#ffb619] flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(255,196,57,0.35)] transition-all active:scale-[0.98] cursor-pointer" title="Pay with PayPal">
+          <svg class="h-6 w-auto" viewBox="0 0 130 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g transform="translate(0, 3)">
+              <path d="M9.8 2.5H4.2C3.5 2.5 2.9 3 2.8 3.7L0.1 20.9C0 21.4 0.4 21.9 0.9 21.9H4.1C4.7 21.9 5.2 21.5 5.3 20.9L6.1 15.8C6.2 15.2 6.7 14.7 7.3 14.7H9.2C13.2 14.7 15.9 12.7 16.5 8.8C16.8 6.7 16.3 5 15 3.9C13.8 2.9 11.9 2.5 9.8 2.5Z" fill="#003087"/>
+              <path d="M12.4 8.7C12 11.2 10.3 12.5 7.8 12.5H6.2L7.3 5.4C7.4 5 7.8 4.7 8.2 4.7H9.1C10.5 4.7 11.7 5 12.2 5.7C12.6 6.3 12.7 7.4 12.4 8.7Z" fill="#0079C1"/>
+              <path d="M8.2 8.7C8.1 9.3 7.6 9.8 7 9.8H5.4L6.3 4.2C6.4 3.7 6.8 3.4 7.2 3.4H8.1C9.5 3.4 10.7 3.7 11.2 4.4C10.7 5.6 9.4 7.2 8.2 8.7Z" fill="#00457C"/>
+            </g>
+            <text x="24" y="23" font-family="'Plus Jakarta Sans', Arial, sans-serif" font-weight="800" font-style="italic" font-size="20" fill="#003087">Pay<tspan fill="#0079C1">Pal</tspan></text>
           </svg>
         </button>
       </div>
@@ -875,15 +936,16 @@
     let currentCartSummary = 'Bespoke Jewelry Order';
 
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. Initialize cart state from storage
+      // 1. Initialize cart state from storage with auto-migration
       renderCart();
 
       // 2. Initialize saved address if available
       if (isUserAuthenticated) {
         const savedSelect = document.getElementById('address-vault-select');
         if (savedSelect && savedSelect.value) {
-          loadSavedAddress(savedSelect.value);
+          onAddressSelectChanged(savedSelect.value);
         } else {
+          showAddressInputForm(true);
           const initCountry = document.getElementById('shipCountry')?.value || 'India';
           populateStateDropdown(initCountry, 'Gujarat', 'Navsari');
         }
@@ -919,6 +981,79 @@
       return 'sat_cart_guest';
     }
 
+    function getActiveCartItems() {
+      const activeKey = getCartStorageKey();
+      let items = [];
+
+      // 1. Try active key
+      try {
+        const raw = localStorage.getItem(activeKey);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) items = parsed;
+          else if (parsed && typeof parsed === 'object') items = [parsed];
+        }
+      } catch(e) {}
+
+      // 2. If authenticated and user cart is empty, check sat_cart_guest and migrate
+      if (items.length === 0 && activeKey !== 'sat_cart_guest') {
+        try {
+          const guestRaw = localStorage.getItem('sat_cart_guest');
+          if (guestRaw) {
+            const parsedGuest = JSON.parse(guestRaw);
+            if (Array.isArray(parsedGuest) && parsedGuest.length > 0) {
+              items = parsedGuest;
+              localStorage.setItem(activeKey, JSON.stringify(items));
+              localStorage.removeItem('sat_cart_guest');
+            } else if (parsedGuest && typeof parsedGuest === 'object') {
+              items = [parsedGuest];
+              localStorage.setItem(activeKey, JSON.stringify(items));
+              localStorage.removeItem('sat_cart_guest');
+            }
+          }
+        } catch(e) {}
+      }
+
+      // 3. Fallback to generic 'sat_cart' legacy key
+      if (items.length === 0) {
+        try {
+          const legacyRaw = localStorage.getItem('sat_cart');
+          if (legacyRaw) {
+            const parsedLegacy = JSON.parse(legacyRaw);
+            if (Array.isArray(parsedLegacy) && parsedLegacy.length > 0) {
+              items = parsedLegacy;
+              localStorage.setItem(activeKey, JSON.stringify(items));
+            } else if (parsedLegacy && typeof parsedLegacy === 'object') {
+              items = [parsedLegacy];
+              localStorage.setItem(activeKey, JSON.stringify(items));
+            }
+          }
+        } catch(e) {}
+      }
+
+      // 4. Fallback: Search all keys in localStorage for sat_cart_*
+      if (items.length === 0) {
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith('sat_cart_') && k !== activeKey && k !== 'sat_cart_physical_cert') {
+              const val = localStorage.getItem(k);
+              if (val) {
+                const p = JSON.parse(val);
+                if (Array.isArray(p) && p.length > 0) {
+                  items = p;
+                  localStorage.setItem(activeKey, JSON.stringify(items));
+                  break;
+                }
+              }
+            }
+          }
+        } catch(e) {}
+      }
+
+      return items;
+    }
+
     function renderCart() {
       const container = document.getElementById('cartItemsContainer');
       const badgeEl = document.getElementById('navCartBadge');
@@ -932,9 +1067,7 @@
       if (!container) return;
 
       try {
-        const key = getCartStorageKey();
-        const saved = localStorage.getItem(key);
-        const items = saved ? JSON.parse(saved) : [];
+        const items = getActiveCartItems();
         const totalQty = items.reduce((sum, i) => sum + (Number(i.quantity) || 1), 0);
         if (badgeEl) badgeEl.textContent = totalQty;
         document.querySelectorAll('#navCartBadge, #navCartCount, .auth-nav-cart-count, .sat-cart-count-badge').forEach(el => {
@@ -1276,23 +1409,105 @@
       checkAddressValidation();
     }
 
-    function loadSavedAddress(jsonStr) {
-      if (!jsonStr) return;
+    function onAddressSelectChanged(val) {
+      if (val === '__new__') {
+        showAddressInputForm(true);
+        // Clear inputs for entering a brand new address
+        const nameEl = document.getElementById('shipFullName');
+        if (nameEl && !nameEl.value) nameEl.value = '@userName';
+        const streetEl = document.getElementById('shipStreet');
+        if (streetEl) streetEl.value = '';
+        const phoneEl = document.getElementById('shipPhone');
+        if (phoneEl && phoneEl.value.includes('DEFAULT')) phoneEl.value = '';
+        const postalEl = document.getElementById('shipPostalCode');
+        if (postalEl) postalEl.value = '';
+        const initCountry = document.getElementById('shipCountry')?.value || 'India';
+        populateStateDropdown(initCountry, 'Gujarat', 'Navsari');
+        checkAddressValidation();
+        return;
+      }
+
+      if (!val) {
+        showAddressInputForm(true);
+        return;
+      }
+
       try {
-        const item = JSON.parse(jsonStr);
-        if (item.FullName) document.getElementById('shipFullName').value = item.FullName;
-        if (item.Phone) document.getElementById('shipPhone').value = item.Phone;
-        if (item.StreetAddress) document.getElementById('shipStreet').value = item.StreetAddress;
-        if (item.PostalCode) document.getElementById('shipPostalCode').value = item.PostalCode;
-        if (item.Country) {
-          const countryEl = document.getElementById('shipCountry');
-          if (countryEl) countryEl.value = item.Country;
-        }
-        populateStateDropdown(item.Country || 'India', item.State, item.City);
+        const item = typeof val === 'string' ? JSON.parse(val) : val;
+        loadSavedAddressIntoFields(item);
+        updateSelectedAddressCard(item);
+        showAddressInputForm(false);
         checkAddressValidation();
       } catch (e) {
-        console.error(e);
+        console.error('Error parsing saved address:', e);
+        showAddressInputForm(true);
       }
+    }
+
+    function showAddressInputForm(show) {
+      const formContainer = document.getElementById('addressFormInputsContainer');
+      const card = document.getElementById('selectedAddressCard');
+      if (formContainer) {
+        formContainer.style.display = show ? 'block' : 'none';
+      }
+      if (card) {
+        card.style.display = show ? 'none' : 'block';
+      }
+    }
+
+    function updateSelectedAddressCard(item) {
+      const card = document.getElementById('selectedAddressCard');
+      if (!card || !item) return;
+
+      const nameEl = document.getElementById('cardFullName');
+      const phoneText = document.getElementById('cardPhoneText');
+      const streetEl = document.getElementById('cardStreet');
+      const locEl = document.getElementById('cardLocation');
+      const defaultBadge = document.getElementById('cardDefaultBadge');
+
+      if (nameEl) nameEl.textContent = item.FullName || '@userName' || 'Valued Client';
+      if (phoneText) {
+        if (item.Phone && item.Phone.trim()) {
+          phoneText.textContent = item.Phone;
+          phoneText.className = 'text-primary font-medium';
+        } else {
+          phoneText.textContent = 'Mobile Number Missing (Required)';
+          phoneText.className = 'text-error font-bold';
+        }
+      }
+      if (streetEl) {
+        if (item.StreetAddress && item.StreetAddress.trim()) {
+          streetEl.textContent = item.StreetAddress;
+          streetEl.className = 'font-body-md text-body-md text-on-surface';
+        } else {
+          streetEl.textContent = 'Street Address Missing (Required)';
+          streetEl.className = 'font-body-md text-body-md text-error font-bold';
+        }
+      }
+      if (locEl) {
+        const parts = [item.City, item.State, item.Country, item.PostalCode].filter(Boolean);
+        locEl.textContent = parts.join(', ');
+      }
+      if (defaultBadge) {
+        defaultBadge.style.display = item.IsDefault ? 'inline-block' : 'none';
+      }
+    }
+
+    function loadSavedAddressIntoFields(item) {
+      if (!item) return;
+      if (item.FullName) document.getElementById('shipFullName').value = item.FullName;
+      if (item.Phone) document.getElementById('shipPhone').value = item.Phone;
+      if (item.StreetAddress) document.getElementById('shipStreet').value = item.StreetAddress;
+      if (item.PostalCode) document.getElementById('shipPostalCode').value = item.PostalCode;
+      if (item.Country) {
+        const countryEl = document.getElementById('shipCountry');
+        if (countryEl) countryEl.value = item.Country;
+      }
+      populateStateDropdown(item.Country || 'India', item.State, item.City);
+    }
+
+    function loadSavedAddress(jsonStr) {
+      onAddressSelectChanged(jsonStr);
     }
 
     function onCountryChanged() {
@@ -1326,7 +1541,44 @@
       checkAddressValidation();
     }
 
-    function validatePostalCodeFormat(postal, country) {
+    const CART_US_STATE_ZIP_PREFIXES = {
+      "California": ["90", "91", "92", "93", "94", "95", "96"],
+      "New York": ["10", "11", "12", "13", "14"],
+      "Texas": ["75", "76", "77", "78", "79", "73", "88"],
+      "Florida": ["32", "33", "34"],
+      "Illinois": ["60", "61", "62"],
+      "Pennsylvania": ["15", "16", "17", "18", "19"],
+      "Ohio": ["43", "44", "45"],
+      "Georgia": ["30", "31", "39"],
+      "North Carolina": ["27", "28"],
+      "New Jersey": ["07", "08"],
+      "Washington": ["98", "99"],
+      "Massachusetts": ["01", "02"],
+      "Nevada": ["88", "89"],
+      "Colorado": ["80", "81"],
+      "Arizona": ["85", "86"],
+      "Virginia": ["20", "22", "23", "24"],
+      "Michigan": ["48", "49"]
+    };
+
+    const CART_INDIA_STATE_PIN_PREFIXES = {
+      "Gujarat": ["36", "37", "38", "39"],
+      "Maharashtra": ["40", "41", "42", "43", "44"],
+      "Delhi": ["11"],
+      "Karnataka": ["56", "57", "58", "59"],
+      "Tamil Nadu": ["60", "61", "62", "63", "64"],
+      "Telangana": ["50"],
+      "Rajasthan": ["30", "31", "32", "33", "34"],
+      "Uttar Pradesh": ["20", "21", "22", "23", "24", "25", "26", "27", "28"],
+      "West Bengal": ["70", "71", "72", "73", "74"],
+      "Punjab": ["14", "15"],
+      "Haryana": ["12", "13"],
+      "Kerala": ["67", "68", "69"],
+      "Madhya Pradesh": ["45", "46", "47", "48"],
+      "Goa": ["40"]
+    };
+
+    function validatePostalCodeFormat(postal, country, state) {
       if (!postal) return { valid: false, message: 'Postal / ZIP Code is required.' };
       const clean = postal.trim().toUpperCase();
       const digitsOnly = clean.replace(/\D/g, '');
@@ -1335,40 +1587,86 @@
         if (digitsOnly.length === 6) {
           return {
             valid: false,
-            message: `"${postal}" is a 6-digit Indian PIN. For US, enter 5-digit ZIP (e.g. 10021).`
+            message: `"${postal}" is a 6-digit Indian PIN. For US, enter 5-digit ZIP (e.g. 90210).`
           };
         }
         if (!/^\d{5}(-\d{4})?$/.test(clean)) {
-          return { valid: false, message: 'Please enter a valid 5-digit US ZIP code (e.g. 10021).' };
+          return { valid: false, message: 'Please enter a valid 5-digit US ZIP code (e.g. 90210 or 10001).' };
         }
-        return { valid: true };
+
+        const prefix = clean.substring(0, 2);
+        if (state && CART_US_STATE_ZIP_PREFIXES[state]) {
+          const allowed = CART_US_STATE_ZIP_PREFIXES[state];
+          if (!allowed.includes(prefix)) {
+            let foundState = Object.keys(CART_US_STATE_ZIP_PREFIXES).find(s => CART_US_STATE_ZIP_PREFIXES[s].includes(prefix));
+            const hint = state === 'California' ? 'e.g. 90001 or 90210' : (state === 'New York' ? 'e.g. 10001 or 10021' : '');
+            return {
+              valid: false,
+              message: foundState 
+                ? `ZIP code ${clean} belongs to ${foundState}, not ${state}. ${hint ? '(' + hint + ')' : ''}`
+                : `ZIP code ${clean} is not valid for ${state}.`
+            };
+          }
+        }
+
+        return { valid: true, message: `Valid ${state || 'United States'} postal format & armored service area.` };
       }
 
       if (country === 'India') {
         if (digitsOnly.length === 5) {
           return {
             valid: false,
-            message: `"${postal}" is a 5-digit US ZIP. For India, enter 6-digit PIN (e.g. 396445).`
+            message: `"${postal}" is a 5-digit US ZIP. For India, enter 6-digit PIN (e.g. 411001 for Pune, Maharashtra).`
           };
         }
         if (!/^\d{6}$/.test(clean)) {
-          return { valid: false, message: 'Please enter a valid 6-digit Indian PIN code (e.g. 396445).' };
+          return { valid: false, message: 'Please enter a valid 6-digit Indian PIN code (e.g. 411001).' };
         }
-        return { valid: true };
+
+        const prefix = clean.substring(0, 2);
+        if (state && CART_INDIA_STATE_PIN_PREFIXES[state]) {
+          const allowed = CART_INDIA_STATE_PIN_PREFIXES[state];
+          if (!allowed.includes(prefix)) {
+            let foundState = Object.keys(CART_INDIA_STATE_PIN_PREFIXES).find(s => CART_INDIA_STATE_PIN_PREFIXES[s].includes(prefix));
+            const hint = state === 'Maharashtra' ? 'starts with 40-44, e.g. 411001 for Pune' : (state === 'Gujarat' ? 'starts with 36-39, e.g. 395006 for Surat' : '');
+            return {
+              valid: false,
+              message: foundState
+                ? `PIN code ${clean} belongs to ${foundState}, not ${state}. ${hint ? '(' + hint + ')' : ''}`
+                : `PIN code ${clean} does not match state of ${state}.`
+            };
+          }
+        }
+
+        return { valid: true, message: `Valid ${state || 'India'} PIN format & armored service area.` };
       }
 
       if (country === 'United Kingdom') {
-        if (!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/.test(clean)) {
+        if (!/^[A-Z]{1,2}\d[A-Z\d]?\s*\d[A-Z]{2}$/i.test(clean)) {
           return { valid: false, message: 'Please enter a valid UK postcode (e.g. SW1A 1AA).' };
         }
-        return { valid: true };
+        return { valid: true, message: 'Valid UK postal format & armored service area.' };
+      }
+
+      if (country === 'Canada') {
+        if (!/^[A-Za-z]\d[A-Za-z][ -]?\d[A-Za-z]\d$/.test(clean)) {
+          return { valid: false, message: 'Please enter a valid Canadian Postal Code (e.g. K1A 0B1).' };
+        }
+        return { valid: true, message: 'Valid Canada postal format & armored service area.' };
+      }
+
+      if (country === 'Australia') {
+        if (!/^\d{4}$/.test(clean)) {
+          return { valid: false, message: 'Please enter a valid 4-digit Australian postcode (e.g. 2000).' };
+        }
+        return { valid: true, message: 'Valid Australia postal format & armored service area.' };
       }
 
       if (clean.length < 3) {
         return { valid: false, message: 'Please enter a valid postal code.' };
       }
 
-      return { valid: true };
+      return { valid: true, message: `Valid ${country} postal format & armored service area.` };
     }
 
     function getShippingAddressData() {
@@ -1392,7 +1690,7 @@
 
       if (!name || !phone || !street || !city || !state || !postal) return null;
 
-      const check = validatePostalCodeFormat(postal, country);
+      const check = validatePostalCodeFormat(postal, country, state);
       if (!check.valid) return null;
 
       return { name, phone, street, city, state, postal, country };
@@ -1407,12 +1705,14 @@
       const feedback = document.getElementById('postalCodeFeedback');
       const postalEl = document.getElementById('shipPostalCode');
       const countryEl = document.getElementById('shipCountry');
+      const stateEl = document.getElementById('shipState');
 
       const postalVal = postalEl ? postalEl.value.trim() : '';
       const countryVal = countryEl ? countryEl.value : 'India';
+      const stateVal = stateEl ? stateEl.value : '';
 
       if (postalVal && feedback) {
-        const check = validatePostalCodeFormat(postalVal, countryVal);
+        const check = validatePostalCodeFormat(postalVal, countryVal, stateVal);
         feedback.classList.remove('hidden');
         feedback.classList.add('flex');
         if (!check.valid) {
@@ -1420,7 +1720,7 @@
           feedback.innerHTML = `<span class="material-symbols-outlined text-[16px]">warning</span> <span class="font-label-sm text-label-sm">${check.message}</span>`;
         } else {
           feedback.className = 'flex items-center gap-1.5 text-tertiary pt-0.5';
-          feedback.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> <span class="font-label-sm text-label-sm">Valid ${countryVal} postal format &amp; armored service area.</span>`;
+          feedback.innerHTML = `<span class="material-symbols-outlined text-[16px]">check_circle</span> <span class="font-label-sm text-label-sm">${check.message}</span>`;
         }
       } else if (feedback) {
         feedback.classList.add('hidden');
@@ -1443,7 +1743,7 @@
           notice.className = 'p-3.5 rounded-lg bg-surface-container-low border border-outline-variant/30 flex items-center gap-3 transition-colors';
           icon.className = 'material-symbols-outlined text-primary text-[22px]';
           icon.textContent = 'lock';
-          text.innerHTML = `<strong class="text-primary font-semibold">Address Required:</strong> Complete your full name, street, city, and valid postal code above to unlock payment.`;
+          text.innerHTML = `<strong class="text-primary font-semibold">Address &amp; Mobile Required:</strong> Complete your delivery address and contact phone number above to unlock payment.`;
         }
         if (paypalBox) {
           paypalBox.classList.add('opacity-50', 'pointer-events-none');
@@ -1504,68 +1804,90 @@
     }
 
     function validateAddressFieldsInteractive() {
-      const fields = [
-        { id: 'shipFullName', label: 'Full Name' },
-        { id: 'shipPhone', label: 'Contact Phone' },
-        { id: 'shipStreet', label: 'Street Address' },
-        { id: 'shipCity', label: 'City / Town' },
-        { id: 'shipState', label: 'State / Province' },
-        { id: 'shipPostalCode', label: 'Postal / ZIP Code' }
-      ];
+      const nameEl = document.getElementById('shipFullName');
+      const phoneEl = document.getElementById('shipPhone');
+      const streetEl = document.getElementById('shipStreet');
+      const cityEl = document.getElementById('shipCity');
+      const stateEl = document.getElementById('shipState');
+      const postalEl = document.getElementById('shipPostalCode');
+      const countryEl = document.getElementById('shipCountry');
 
-      let missingLabels = [];
-      let firstMissingEl = null;
+      const name = nameEl ? nameEl.value.trim() : '';
+      const phone = phoneEl ? phoneEl.value.trim() : '';
+      const street = streetEl ? streetEl.value.trim() : '';
+      const city = cityEl ? cityEl.value.trim() : '';
+      const state = stateEl ? stateEl.value.trim() : '';
+      const postal = postalEl ? postalEl.value.trim() : '';
+      const country = countryEl ? countryEl.value : 'India';
 
-      fields.forEach(f => {
-        const el = document.getElementById(f.id);
-        if (el) {
-          if (!el.value.trim()) {
-            missingLabels.push(f.label);
-            el.style.borderColor = '#f43f5e';
-            el.style.boxShadow = '0 0 0 2px rgba(244, 63, 94, 0.4)';
-            if (!firstMissingEl) firstMissingEl = el;
-          } else {
-            el.style.borderColor = '';
-            el.style.boxShadow = '';
-          }
+      let missing = [];
+      if (!street || street.length < 5) missing.push('Home Delivery Street Address');
+      if (!phone || phone.replace(/\D/g, '').length < 7) missing.push('Contact Mobile Number');
+      if (!name) missing.push('Recipient Full Name');
+      if (!city) missing.push('City / Town');
+      if (!postal) missing.push('Postal / ZIP Code');
+
+      if (missing.length > 0) {
+        // If inputs were hidden, reveal them so user can enter the missing details
+        showAddressInputForm(true);
+
+        if (streetEl && (!street || street.length < 5)) {
+          streetEl.style.borderColor = '#f43f5e';
+          streetEl.style.boxShadow = '0 0 0 2px rgba(244, 63, 94, 0.4)';
         }
-      });
+        if (phoneEl && (!phone || phone.replace(/\D/g, '').length < 7)) {
+          phoneEl.style.borderColor = '#f43f5e';
+          phoneEl.style.boxShadow = '0 0 0 2px rgba(244, 63, 94, 0.4)';
+        }
 
-      if (missingLabels.length > 0) {
-        const summaryText = missingLabels.length <= 2 
-          ? missingLabels.join(' and ') 
-          : `${missingLabels[0]}, ${missingLabels[1]} +${missingLabels.length - 2} more`;
-        showCartNoticeToast(
-          "Shipping Details Incomplete",
-          `Please provide your ${summaryText} before proceeding to payment.`,
-          "error"
-        );
-        if (firstMissingEl) {
-          firstMissingEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          firstMissingEl.focus();
+        const missingText = missing.join(', ');
+        if (window.Swal) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Shipping Details Incomplete',
+            html: `<p style="color:#d4b878;font-size:15px;margin-bottom:8px;"><strong>Delivery Address &amp; Mobile Number are required.</strong></p><p style="color:#a1a1aa;font-size:13px;">Please complete: <strong>${missingText}</strong> before proceeding to payment.</p>`,
+            confirmButtonColor: '#d4b878',
+            background: '#16141a',
+            color: '#ffffff'
+          }).then(() => {
+            const target = (!street || street.length < 5) ? streetEl : ((!phone || phone.replace(/\D/g, '').length < 7) ? phoneEl : nameEl);
+            if (target) {
+              target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              target.focus();
+            }
+          });
+        } else {
+          showCartNoticeToast("Shipping Details Incomplete", `Please provide your ${missingText} before proceeding to payment.`, "error");
         }
         return false;
       }
 
-      const postalEl = document.getElementById('shipPostalCode');
-      const countryEl = document.getElementById('shipCountry');
-      const postalVal = postalEl ? postalEl.value.trim() : '';
-      const countryVal = countryEl ? countryEl.value : 'India';
-      const postalCheck = validatePostalCodeFormat(postalVal, countryVal);
-
+      // Check postal code
+      const postalCheck = validatePostalCodeFormat(postal, country, state);
       if (!postalCheck.valid) {
-        showCartNoticeToast("Invalid Postal Code", postalCheck.message, "warning");
+        showAddressInputForm(true);
         if (postalEl) {
           postalEl.style.borderColor = '#f43f5e';
           postalEl.style.boxShadow = '0 0 0 2px rgba(244, 63, 94, 0.4)';
           postalEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
           postalEl.focus();
         }
+        if (window.Swal) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Postal Code',
+            text: postalCheck.message,
+            confirmButtonColor: '#d4b878',
+            background: '#16141a',
+            color: '#ffffff'
+          });
+        } else {
+          showCartNoticeToast("Invalid Postal Code", postalCheck.message, "warning");
+        }
         return false;
       }
 
-      fields.forEach(f => {
-        const el = document.getElementById(f.id);
+      [nameEl, phoneEl, streetEl, cityEl, stateEl, postalEl].forEach(el => {
         if (el) {
           el.style.borderColor = '';
           el.style.boxShadow = '';
@@ -1578,10 +1900,23 @@
 
     function scrollToPaymentOrAction() {
       if (!isUserAuthenticated) {
-        showCartNoticeToast("Authentication Required", "Please sign in to your SAT Jewel account before completing order dispatch.", "warning");
-        setTimeout(() => {
-          window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
-        }, 1200);
+        if (window.Swal) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Authentication Required',
+            text: 'Please sign in to your SAT Jewel account before completing order dispatch.',
+            confirmButtonColor: '#d4b878',
+            background: '#16141a',
+            color: '#ffffff'
+          }).then(() => {
+            window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+          });
+        } else {
+          showCartNoticeToast("Authentication Required", "Please sign in to your SAT Jewel account before completing order dispatch.", "warning");
+          setTimeout(() => {
+            window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+          }, 1200);
+        }
         return;
       }
 
@@ -1603,9 +1938,7 @@
         return;
       }
 
-      const key = getCartStorageKey();
-      const saved = localStorage.getItem(key);
-      const items = saved ? JSON.parse(saved) : [];
+      const items = getActiveCartItems();
       if (!items || items.length === 0) {
         showCartNoticeToast("Bag Empty", "Your shopping bag is empty. Please select a fine jewelry creation first.", "warning");
         return;
@@ -1665,16 +1998,24 @@
 
         onClick: function(data, actions) {
           if (!isUserAuthenticated) {
-            alert('🚫 PERMISSION DENIED: You must sign in to your account before proceeding to payment.');
-            window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Sign In Required',
+                text: 'Please sign in to your account before proceeding to payment.',
+                confirmButtonColor: '#b45309',
+                background: '#18181b',
+                color: '#ffffff'
+              }).then(() => {
+                window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+              });
+            } else {
+              window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+            }
             return actions.reject();
           }
 
-          const addr = getShippingAddressData();
-          if (!addr) {
-            alert('⚠️ PERMISSION DENIED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, ZIP) is required before payment can be initialized.');
-            checkAddressValidation();
-            scrollToPaymentOrAction();
+          if (!validateAddressFieldsInteractive()) {
             return actions.reject();
           }
           showPaymentProcessing("PayPal checkout window is active. Please complete payment in the PayPal window...");
@@ -1686,13 +2027,11 @@
           const addr = getShippingAddressData();
           if (!addr) {
             hidePaymentProcessing();
-            alert('⚠️ Shipping Address Required before completing checkout.');
+            validateAddressFieldsInteractive();
             throw new Error('Shipping address incomplete.');
           }
 
-          const key = getCartStorageKey();
-          const savedCart = localStorage.getItem(key);
-          const cartItems = savedCart ? JSON.parse(savedCart) : [];
+          const cartItems = getActiveCartItems();
           const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-8') : 'sat-prod-8';
           const qty = cartItems.length > 0 ? (Number(cartItems[0].quantity) || 1) : 1;
           const mappedCartItems = cartItems.map(item => ({
@@ -1731,10 +2070,21 @@
             if (result.success && result.orderId) {
               return result.orderId;
             } else {
-              alert('Error initializing PayPal order: ' + (result.message || 'Server error'));
+              hidePaymentProcessing();
+              if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Order Initialization Error',
+                  text: result.message || 'Server error initializing PayPal transaction.',
+                  confirmButtonColor: '#b45309'
+                });
+              } else {
+                alert('Error initializing PayPal order: ' + (result.message || 'Server error'));
+              }
               throw new Error(result.message);
             }
           } catch (err) {
+            hidePaymentProcessing();
             console.error('PayPal createOrder error:', err);
             throw err;
           }
@@ -1768,25 +2118,52 @@
               const confirmedOrderId = result.orderId || data.orderID;
               window.location.href = '/Order/Confirmation?orderId=' + encodeURIComponent(confirmedOrderId);
             } else {
-              alert('⚠️ PayPal Verification Warning: ' + result.message);
+              if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                  icon: 'warning',
+                  title: 'Verification Notice',
+                  text: result.message || 'Payment verification response requires attention.',
+                  confirmButtonColor: '#b45309'
+                });
+              } else {
+                alert('⚠️ PayPal Verification Warning: ' + result.message);
+              }
             }
           })
           .catch(err => {
             hidePaymentProcessing();
             console.error('PayPal Verify Error:', err);
-            alert('Verification Error: Unable to verify payment with PayPal. Please check your account or contact support.');
+            if (typeof Swal !== 'undefined') {
+              Swal.fire({
+                icon: 'error',
+                title: 'Verification Error',
+                text: 'Unable to verify payment with PayPal. Please check your account or contact support.',
+                confirmButtonColor: '#b45309'
+              });
+            } else {
+              alert('Verification Error: Unable to verify payment with PayPal. Please check your account or contact support.');
+            }
           });
         },
 
         onCancel: function(data) {
           hidePaymentProcessing();
-          alert('PayPal checkout was cancelled. Your items remain safely in your cart.');
+          showCartNoticeToast("Checkout Paused", "PayPal checkout was cancelled. Your items remain safely in your cart.", "info");
         },
 
         onError: function(err) {
           hidePaymentProcessing();
           console.error('PayPal Checkout Error:', err);
-          alert('An error occurred during PayPal checkout. Please ensure your shipping details are entered and try again.');
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'error',
+              title: 'Checkout Error',
+              text: 'An error occurred during PayPal checkout. Please ensure your shipping details are entered and try again.',
+              confirmButtonColor: '#b45309'
+            });
+          } else {
+            alert('An error occurred during PayPal checkout. Please ensure your shipping details are entered and try again.');
+          }
         }
       };
 
@@ -1805,22 +2182,29 @@
     // Razorpay Embedded Card Payment
     async function payWithRazorpay() {
       if (!isUserAuthenticated) {
-        alert('🚫 PERMISSION DENIED: You must sign in to your account before proceeding to payment.');
-        window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Sign In Required',
+            text: 'You must sign in to your account before proceeding to payment.',
+            confirmButtonColor: '#b45309',
+            background: '#18181b',
+            color: '#ffffff'
+          }).then(() => {
+            window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+          });
+        } else {
+          window.location.href = '/Account/SignIn?returnUrl=/Product/Cart';
+        }
         return;
       }
+
+      if (!validateAddressFieldsInteractive()) return;
 
       const addr = getShippingAddressData();
-      if (!addr) {
-        alert('⚠️ PERMISSION DENIED: Complete home delivery shipping address (Full Name, Phone, Street, City, State, ZIP) is required before payment can be initialized.');
-        checkAddressValidation();
-        scrollToPaymentOrAction();
-        return;
-      }
+      if (!addr) return;
 
-      const key = getCartStorageKey();
-      const savedCart = localStorage.getItem(key);
-      const cartItems = savedCart ? JSON.parse(savedCart) : [];
+      const cartItems = getActiveCartItems();
       const firstItemId = cartItems.length > 0 ? (cartItems[0].id || cartItems[0].catalogItemId || 'sat-prod-8') : 'sat-prod-8';
       const qty = cartItems.length > 0 ? (Number(cartItems[0].quantity) || 1) : 1;
       const mappedCartItems = cartItems.map(item => ({
@@ -1857,7 +2241,16 @@
 
         const data = await res.json();
         if (!data.success) {
-          alert('Error initializing Razorpay order: ' + data.message);
+          if (typeof Swal !== 'undefined') {
+            Swal.fire({
+              icon: 'error',
+              title: 'Order Initialization Error',
+              text: data.message || 'Error initializing Razorpay order.',
+              confirmButtonColor: '#b45309'
+            });
+          } else {
+            alert('Error initializing Razorpay order: ' + data.message);
+          }
           return;
         }
 
@@ -1898,11 +2291,29 @@
                 if (window.showDiamondLoader) window.showDiamondLoader('Securing Order Confirmation...');
                 window.location.href = '/Order/Confirmation?orderId=' + encodeURIComponent(confirmedOrderId);
               } else {
-                alert('⚠️ Razorpay Signature Verification Alert: ' + verifyResult.message);
+                if (typeof Swal !== 'undefined') {
+                  Swal.fire({
+                    icon: 'warning',
+                    title: 'Verification Warning',
+                    text: verifyResult.message || 'Signature verification alert.',
+                    confirmButtonColor: '#b45309'
+                  });
+                } else {
+                  alert('⚠️ Razorpay Signature Verification Alert: ' + verifyResult.message);
+                }
               }
             } catch (err) {
               hidePaymentProcessing();
-              alert('Error verifying Razorpay payment signature.');
+              if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Verification Error',
+                  text: 'Error verifying Razorpay payment signature.',
+                  confirmButtonColor: '#b45309'
+                });
+              } else {
+                alert('Error verifying Razorpay payment signature.');
+              }
             }
           },
           prefill: {
@@ -1925,7 +2336,16 @@
       } catch (err) {
         hidePaymentProcessing();
         console.error('Razorpay Checkout Exception:', err);
-        alert('An error occurred during Razorpay card checkout. Please try again.');
+        if (typeof Swal !== 'undefined') {
+          Swal.fire({
+            icon: 'error',
+            title: 'Payment Error',
+            text: 'An error occurred during Razorpay card checkout. Please try again.',
+            confirmButtonColor: '#b45309'
+          });
+        } else {
+          alert('An error occurred during Razorpay card checkout. Please try again.');
+        }
       }
     }
   </script>

@@ -139,7 +139,7 @@ namespace SAT1.BAL
             { "4", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366775/sat_jewels/categories/cat_4_earrings.jpg" },
             { "5", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366777/sat_jewels/categories/cat_5_bracelets.jpg" },
             { "6", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366779/sat_jewels/categories/cat_6_necklaces.jpg" },
-            { "7", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790789297/sat_jewels/catalog/diamonds/emerald_mv15-42c.jpg" }
+            { "7", "/assets/categories/cat_diamonds.png" }
         };
 
         private async Task EnsureDefaultCategoriesAsync()
@@ -220,7 +220,7 @@ namespace SAT1.BAL
                 int count = Math.Max(prodCount, catCount);
 
                 var cdnUrl = imageRules.GetValueOrDefault(c.CategoryId.ToString()) ?? imageRules.GetValueOrDefault(c.Id) ?? c.ImageUrl;
-                if (string.IsNullOrWhiteSpace(cdnUrl) || cdnUrl.StartsWith("/assets/") || cdnUrl.StartsWith("~/assets/"))
+                if (string.IsNullOrWhiteSpace(cdnUrl) || cdnUrl.Contains("emerald_mv15-42c") || cdnUrl.StartsWith("/assets/") || cdnUrl.StartsWith("~/assets/"))
                 {
                     cdnUrl = Category.GetDefaultImageUrl(c.CategoryId, c.Name, c.Slug);
                 }
@@ -361,7 +361,7 @@ namespace SAT1.BAL
                 int count = Math.Max(prodCount, catCount);
 
                 var cdnUrl = imageRules.GetValueOrDefault(c.CategoryId.ToString()) ?? imageRules.GetValueOrDefault(c.Id) ?? c.ImageUrl;
-                if (string.IsNullOrWhiteSpace(cdnUrl) || cdnUrl.StartsWith("/assets/") || cdnUrl.StartsWith("~/assets/"))
+                if (string.IsNullOrWhiteSpace(cdnUrl) || cdnUrl.Contains("emerald_mv15-42c") || cdnUrl.StartsWith("/assets/") || cdnUrl.StartsWith("~/assets/"))
                 {
                     cdnUrl = Category.GetDefaultImageUrl(c.CategoryId, c.Name, c.Slug);
                 }
@@ -510,6 +510,43 @@ namespace SAT1.BAL
                     IsActive = active
                 });
             }
+
+            await _context.SaveChangesAsync();
+            InvalidateCache();
+            return true;
+        }
+
+        public async Task<bool> ToggleProductVisibilityAsync(string id, bool active)
+        {
+            if (string.IsNullOrWhiteSpace(id)) return false;
+
+            var cleanId = id.Trim().ToLower();
+            bool found = false;
+
+            string numericStr = cleanId;
+            if (cleanId.StartsWith("sat-prod-"))
+            {
+                numericStr = cleanId.Replace("sat-prod-", "");
+            }
+
+            if (long.TryParse(numericStr, out long numId))
+            {
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == numId);
+                if (product != null)
+                {
+                    product.IsActive = active;
+                    found = true;
+                }
+            }
+
+            var catItem = await _context.CatalogItems.FirstOrDefaultAsync(i => i.Id.ToLower() == cleanId || i.Id.ToLower() == numericStr);
+            if (catItem != null)
+            {
+                catItem.IsActive = active;
+                found = true;
+            }
+
+            if (!found) return false;
 
             await _context.SaveChangesAsync();
             InvalidateCache();
@@ -670,7 +707,7 @@ namespace SAT1.BAL
                 PriceUSD = p.BasePriceUSD,
                 ImageUrl = primaryImg,
                 GalleryImages = string.Join(",", orderedImgs),
-                IsActive = true,
+                IsActive = p.IsActive,
                 CreatedAt = p.CreatedAt
             };
         }
@@ -759,6 +796,12 @@ namespace SAT1.BAL
             if (page < 1) page = 1;
             if (pageSize < 1) pageSize = 12;
 
+            string cacheKey = $"PagedCatalog_{categoryId}_{page}_{pageSize}_{shape ?? "all"}_{sort ?? "default"}_{search ?? "none"}";
+            if (_cache.TryGetValue(cacheKey, out PagedCatalogResult? cached) && cached != null)
+            {
+                return cached;
+            }
+
             try
             {
                 var query = _context.Products.AsNoTracking();
@@ -824,13 +867,16 @@ namespace SAT1.BAL
 
                 var pagedProducts = dbProducts.Select(MapToCatalogItem).ToList();
 
-                return new PagedCatalogResult
+                var result = new PagedCatalogResult
                 {
                     Items = pagedProducts,
                     TotalCount = totalCount,
                     Page = page,
                     PageSize = pageSize
                 };
+
+                _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
+                return result;
             }
             catch (Exception ex)
             {
@@ -890,7 +936,7 @@ namespace SAT1.BAL
                         Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct | {p.ProductName}",
                         PriceUSD = p.BasePriceUSD,
                         ImageUrl = p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImagePath).FirstOrDefault() ?? "/assets/ring_1.jpg",
-                        IsActive = true,
+                        IsActive = p.IsActive,
                         CreatedAt = p.CreatedAt
                     })
                     .ToListAsync();
@@ -907,7 +953,6 @@ namespace SAT1.BAL
 
             return await _context.CatalogItems
                 .AsNoTracking()
-                .Where(i => i.IsActive)
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
         }
@@ -945,7 +990,7 @@ namespace SAT1.BAL
                         Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct | {p.ProductName}",
                         PriceUSD = p.BasePriceUSD,
                         ImageUrl = p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImagePath).FirstOrDefault() ?? "/assets/ring_1.jpg",
-                        IsActive = true,
+                        IsActive = p.IsActive,
                         CreatedAt = p.CreatedAt
                     })
                     .ToListAsync();
@@ -959,7 +1004,7 @@ namespace SAT1.BAL
 
             return await _context.CatalogItems
                 .AsNoTracking()
-                .Where(i => i.IsActive && i.CategoryId.ToLower() == cleanCat)
+                .Where(i => i.CategoryId.ToLower() == cleanCat)
                 .OrderByDescending(i => i.CreatedAt)
                 .ToListAsync();
         }
@@ -1095,12 +1140,22 @@ namespace SAT1.BAL
         {
             if (string.IsNullOrWhiteSpace(id)) return null;
 
+            string cacheKey = $"CatalogItem_{id.Trim().ToLower()}";
+            if (_cache.TryGetValue(cacheKey, out CatalogItem? cached) && cached != null)
+            {
+                return cached;
+            }
+
             // 1. Try numeric ProductId extraction (e.g., sat-prod-101 or 101)
             var cleanId = id.Replace("sat-prod-", "").Replace("sat-local-", "");
             if (long.TryParse(cleanId, out long numericProductId))
             {
                 var dbProd = await GetProductByNumericIdAsync(numericProductId);
-                if (dbProd != null) return dbProd;
+                if (dbProd != null)
+                {
+                    _cache.Set(cacheKey, dbProd, TimeSpan.FromMinutes(10));
+                    return dbProd;
+                }
             }
 
             // 2. Query CatalogItems table by primary key ID
@@ -1139,6 +1194,7 @@ namespace SAT1.BAL
                     // Fall back to pre-existing catalogItem.MetalOptions and CaratOptions
                 }
 
+                _cache.Set(cacheKey, catalogItem, TimeSpan.FromMinutes(10));
                 return catalogItem;
             }
 

@@ -671,7 +671,12 @@ function showLottieLoader(text) {
   if (text && textEl) {
     textEl.textContent = text;
   }
-  if (loader) loader.classList.add('active');
+  if (loader) {
+    loader.classList.add('active');
+    setTimeout(() => {
+      if (loader) loader.classList.remove('active');
+    }, 800);
+  }
 }
 
 function hideLottieLoader() {
@@ -705,44 +710,14 @@ function showPaymentSuccessModal(orderId) {
   }
 }
 
-// Global Click Interceptor for Internal Navigation
-document.addEventListener('click', (e) => {
-  const link = e.target.closest('a');
-  if (!link || link.target === '_blank' || link.hasAttribute('download')) return;
-  const href = link.getAttribute('href');
-  if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('tel:') || href.startsWith('mailto:')) return;
-
-  try {
-    const url = new URL(link.href, window.location.origin);
-    if (url.origin !== window.location.origin) return;
-    if (url.pathname === window.location.pathname && url.search === window.location.search) return;
-
-    const path = url.pathname.toLowerCase();
-    let msg = 'Loading Atelier...';
-    if (path.includes('/account/myaccount') || path.includes('/account/profile') || path.includes('/account/orders')) {
-      msg = 'Opening Private Account...';
-    } else if (path.includes('/account/signin') || path.includes('/account/login') || path.includes('/account/auth')) {
-      msg = 'Opening Sign In...';
-    } else if (path.includes('/product/details')) {
-      msg = 'Loading Creation Details...';
-    } else if (path.includes('/product/category') || path === '/product') {
-      msg = 'Curating Collection...';
-    } else if (path.includes('/cart')) {
-      msg = 'Opening Shopping Bag...';
-    } else if (path.includes('/order') || path.includes('/checkout')) {
-      msg = 'Securing Your Order...';
-    } else if (path === '/' || path === '/home' || path === '/home/index') {
-      msg = 'Entering SAT Jewel...';
-    }
-
-    if (typeof window.showDiamondLoader === 'function') {
-      window.showDiamondLoader(msg);
-    } else {
-      showLottieLoader(msg);
-    }
-  } catch (err) {}
-});
-
+// Ensure loader is hidden on page transitions and back/forward navigation
 window.addEventListener('pageshow', () => {
   hideLottieLoader();
 });
+document.addEventListener('DOMContentLoaded', () => {
+  hideLottieLoader();
+});
+window.addEventListener('load', () => {
+  hideLottieLoader();
+});
+

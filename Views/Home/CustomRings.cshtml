@@ -8,11 +8,38 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>@ViewData["Title"]</title>
+  <!-- Favicon / Tab Icons (Golden SJ Emblem) -->
+  <link rel="icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="shortcut icon" type="image/png" href="/assets/sat_emblem_clean.png" />
+  <link rel="apple-touch-icon" href="/assets/sat_emblem_clean.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
   <link rel="stylesheet" href="~/css/style.css" />
+  <!-- SweetAlert2 Luxury Modal Framework -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+    window.alert = function(msg) {
+      if (window.Swal) {
+        let icon = 'info';
+        const str = String(msg || '');
+        if (str.includes('❌') || str.toLowerCase().includes('error') || str.toLowerCase().includes('failed') || str.toLowerCase().includes('denied')) icon = 'error';
+        else if (str.includes('✨') || str.includes('🎉') || str.toLowerCase().includes('success') || str.toLowerCase().includes('saved') || str.toLowerCase().includes('submitted')) icon = 'success';
+        else if (str.includes('⚠️') || str.toLowerCase().includes('warning') || str.toLowerCase().includes('required')) icon = 'warning';
+        
+        Swal.fire({
+          icon: icon,
+          title: icon === 'success' ? 'Success' : (icon === 'error' ? 'Notice' : (icon === 'warning' ? 'Attention' : 'SAT Jewel')),
+          text: str.replace(/[✨🎉❌⚠️🚫]/g, '').trim(),
+          confirmButtonColor: '#d4b878',
+          background: '#16141a',
+          color: '#ffffff'
+        });
+      }
+    };
+  </script>
   <style>
     body {
       background: #06070a;
@@ -26,6 +53,7 @@
     .bespoke-hero-header {
       text-align: center;
       padding: 75px 24px 55px;
+      margin-top: 64px;
       background: radial-gradient(circle at 50% 30%, #16141a 0%, #06070a 100%);
       border-bottom: 1px solid rgba(212, 178, 112, 0.25);
     }
@@ -347,22 +375,6 @@
     </div>
   </header>
 
-  <!-- PAGE BREADCRUMB NAVIGATION BAR -->
-  <nav class="cat-breadcrumb-nav" style="background:#08111e; border-bottom:1px solid rgba(255,255,255,0.1); padding:14px 0; margin-top:64px;">
-    <div class="cat-container" style="max-width:1280px; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between;">
-      <div style="font-size:13px; color:rgba(255,255,255,0.7); display:flex; align-items:center; gap:8px;">
-        <a href="/" style="color:#ffffff; text-decoration:none;">Home</a>
-        <span>/</span>
-        <span style="color:var(--champagne-gold, #d4b878);">Custom Engagement Rings</span>
-      </div>
-      <div>
-        <a href="javascript:void(0);" onclick="if(window.history.length > 1) { window.history.back(); } else { window.location.href = '/'; }" style="color:var(--champagne-gold, #d4b878); font-size:13px; font-weight:600; text-decoration:none; display:flex; align-items:center; gap:6px; cursor:pointer;" title="Go Back">
-          <i class="fa-solid fa-arrow-left" style="font-size:11px;"></i> <span>Back</span>
-        </a>
-      </div>
-    </div>
-  </nav>
-
   <!-- 1. HERO TITLE HEADER -->
   <header class="bespoke-hero-header">
     <div style="max-width: 1080px; margin: 0 auto;">
@@ -516,7 +528,7 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
           <div>
             <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Your Name *</label>
-            <input type="text" id="custName" required placeholder="e.g. Sophia Miller"
+            <input type="text" id="custName" required placeholder="e.g. Sophia Miller" oninput="this.value = this.value.replace(/[^a-zA-Z\s\.\-']/g, '')"
                    style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; color:#ffffff; font-size:13.5px; outline:none;" />
           </div>
           <div>
@@ -530,7 +542,7 @@
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
           <div>
             <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">WhatsApp / Phone</label>
-            <input type="tel" id="custPhone" placeholder="+1 (555) 000-0000"
+            <input type="tel" id="custPhone" placeholder="+1 (555) 000-0000" oninput="this.value = this.value.replace(/[^0-9\+\-\s\(\)]/g, '')"
                    style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; color:#ffffff; font-size:13.5px; outline:none;" />
           </div>
           <div>
@@ -562,7 +574,7 @@
           </div>
           <div>
             <label style="display:block; font-size:11.5px; font-weight:700; color:#d4b270; text-transform:uppercase; margin-bottom:6px; letter-spacing:0.5px;">Target Budget (USD)</label>
-            <input type="text" id="custBudget" placeholder="e.g. $1,500 - $3,000"
+            <input type="text" id="custBudget" placeholder="e.g. $1,500 - $3,000" oninput="this.value = this.value.replace(/[^0-9\$,\s\-]/g, '')"
                    style="width:100%; box-sizing:border-box; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.15); border-radius:10px; padding:11px 14px; color:#ffffff; font-size:13.5px; outline:none;" />
           </div>
         </div>
@@ -655,13 +667,50 @@
       e.preventDefault();
       const alertBox = document.getElementById('customModalAlert');
       const btn = document.getElementById('btnSubmitCustom');
+      const name = document.getElementById('custName').value.trim();
+      const email = document.getElementById('custEmail').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+
+      // Client validation
+      if (!name || /\d/.test(name)) {
+        if (window.Swal) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Name',
+            text: 'Please enter a valid full name without digits.',
+            confirmButtonColor: '#d4b878',
+            background: '#16141a',
+            color: '#ffffff'
+          });
+        } else {
+          alert('Please enter a valid full name without digits.');
+        }
+        return;
+      }
+
+      if (phone && phone.replace(/\D/g, '').length < 10) {
+        if (window.Swal) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Invalid Phone Number',
+            text: 'Please enter a valid phone number with at least 10 digits.',
+            confirmButtonColor: '#d4b878',
+            background: '#16141a',
+            color: '#ffffff'
+          });
+        } else {
+          alert('Please enter a valid phone number with at least 10 digits.');
+        }
+        return;
+      }
+
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Submitting...';
 
       const formData = new FormData();
-      formData.append('name', document.getElementById('custName').value.trim());
-      formData.append('email', document.getElementById('custEmail').value.trim());
-      formData.append('phone', document.getElementById('custPhone').value.trim());
+      formData.append('name', name);
+      formData.append('email', email);
+      formData.append('phone', phone);
       formData.append('category', document.getElementById('custCategory').value);
       formData.append('metal', document.getElementById('custMetal').value);
       formData.append('budget', document.getElementById('custBudget').value.trim());
@@ -680,40 +729,56 @@
         const res = await resp.json();
 
         if (res.success) {
-          alertBox.style.display = 'block';
-          alertBox.style.background = 'rgba(34, 197, 94, 0.2)';
-          alertBox.style.border = '1px solid #22c55e';
-          alertBox.style.color = '#86efac';
-          alertBox.innerHTML = '<i class="fa-solid fa-circle-check"></i> Thank you! Your bespoke request has been saved. Our master gemologists will review your specifications and reach out within 24 hours.';
-          
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-check"></i> Request Submitted!';
-
-          setTimeout(() => {
-            closeCustomDesignModal();
-            alertBox.style.display = 'none';
-            document.getElementById('customDesignForm').reset();
-            document.getElementById('custImgPreview').style.display = 'none';
-            document.getElementById('custUploadText').innerText = 'Click to choose an image file (PNG, JPG, WEBP)';
-            btn.innerHTML = '<i class="fa-solid fa-gem"></i> Submit Custom Request Online';
-          }, 3000);
-        } else {
-          alertBox.style.display = 'block';
-          alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
-          alertBox.style.border = '1px solid #ef4444';
-          alertBox.style.color = '#fca5a5';
-          alertBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> ' + (res.message || 'Submission failed.');
+          closeCustomDesignModal();
+          document.getElementById('customDesignForm').reset();
+          document.getElementById('custImgPreview').style.display = 'none';
+          document.getElementById('custUploadText').innerText = 'Click to choose an image file (PNG, JPG, WEBP)';
           btn.disabled = false;
           btn.innerHTML = '<i class="fa-solid fa-gem"></i> Submit Custom Request Online';
+
+          if (window.Swal) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Custom Ring Inquiry Sent!',
+              text: 'Thank you! Your bespoke request has been successfully submitted. Our master gemologists will review your specifications and reach out within 24 hours.',
+              confirmButtonColor: '#d4b878',
+              background: '#16141a',
+              color: '#ffffff'
+            });
+          } else {
+            alert('Thank you! Your bespoke request has been saved. Our master gemologists will review your specifications and reach out within 24 hours.');
+          }
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fa-solid fa-gem"></i> Submit Custom Request Online';
+          if (window.Swal) {
+            Swal.fire({
+              icon: 'error',
+              title: 'Submission Failed',
+              text: res.message || 'We could not submit your custom ring inquiry. Please try again.',
+              confirmButtonColor: '#d4b878',
+              background: '#16141a',
+              color: '#ffffff'
+            });
+          } else {
+            alert(res.message || 'Submission failed.');
+          }
         }
       } catch (err) {
-        alertBox.style.display = 'block';
-        alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
-        alertBox.style.border = '1px solid #ef4444';
-        alertBox.style.color = '#fca5a5';
-        alertBox.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> An error occurred while submitting your custom inquiry.';
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-gem"></i> Submit Custom Request Online';
+        if (window.Swal) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Submission Error',
+            text: 'An error occurred while submitting your custom inquiry. Please check your network and try again.',
+            confirmButtonColor: '#d4b878',
+            background: '#16141a',
+            color: '#ffffff'
+          });
+        } else {
+          alert('An error occurred while submitting your custom inquiry.');
+        }
       }
     }
     function syncCartBadge() {

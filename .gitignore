@@ -11,3 +11,5 @@ backups/
 *.sql
 wwwroot/uploads/
 scratch*
+*.tmp
+ingest_state.json

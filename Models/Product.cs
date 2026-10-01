@@ -65,6 +65,9 @@ namespace SAT1.Models
         [Column("image_path")]
         public string? ImagePath { get; set; }
 
+        [Column("is_active")]
+        public bool IsActive { get; set; } = true;
+
         // Legacy / Presentation Helper Properties
         [NotMapped]
         public string SKU { get; set; } = string.Empty;

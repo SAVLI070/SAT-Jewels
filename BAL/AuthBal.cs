@@ -233,17 +233,24 @@ namespace SAT1.BAL
         {
             var trimmedEmail = email.Trim().ToLower();
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == trimmedEmail);
+            bool isAdmin = trimmedEmail == "admin@satjewel.com" || trimmedEmail == "admin@satjewels.com" || trimmedEmail == "satjewels31@gmail.com";
+
             if (user == null)
             {
                 user = new User
                 {
                     Id = "user_" + Guid.NewGuid().ToString("N").Substring(0, 10),
-                    FullName = !string.IsNullOrWhiteSpace(name) ? name.Trim() : "Valued Client",
+                    FullName = !string.IsNullOrWhiteSpace(name) ? name.Trim() : (isAdmin ? "VIP Admin" : "Valued Client"),
                     Email = trimmedEmail,
-                    Role = "Client",
+                    Role = isAdmin ? "Admin" : "Client",
                     CreatedAt = DateTime.UtcNow
                 };
                 _context.Users.Add(user);
+                await _context.SaveChangesAsync();
+            }
+            else if (isAdmin && user.Role != "Admin")
+            {
+                user.Role = "Admin";
                 await _context.SaveChangesAsync();
             }
             return user;
