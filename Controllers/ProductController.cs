@@ -360,7 +360,12 @@ namespace SAT1.Controllers
 
             var spec = product.Spec ?? string.Empty;
 
-            // 4. Resolve Stone Type
+            // 4. Check if Product is a Loose Diamond
+            var isLooseDiamond = (product.CategoryId == "2" || product.CategoryId == "7" || 
+                (product.Name != null && (product.Name.Contains("Loose Diamond", StringComparison.OrdinalIgnoreCase) || product.Name.Contains("Certified Lab Grown Diamond", StringComparison.OrdinalIgnoreCase))) ||
+                (!string.IsNullOrEmpty(spec) && spec.Contains("Loose Diamond", StringComparison.OrdinalIgnoreCase)));
+
+            // 5. Resolve Stone Type
             var resolvedStone = "Lab Grown Diamond";
             if (!string.IsNullOrWhiteSpace(stone))
             {
@@ -376,52 +381,80 @@ namespace SAT1.Controllers
                 resolvedStone = "Natural Diamond";
             }
 
-            // 5. Resolve Carat Weight
+            // 6. Resolve Carat Weight
             decimal numericCarat = 1.50m;
-            if (!string.IsNullOrWhiteSpace(carat))
+            var titleCaratMatch = System.Text.RegularExpressions.Regex.Match(product.Name, @"(\d+(\.\d+)?)\s*(Carat|ct|CT)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            var specCaratMatch = System.Text.RegularExpressions.Regex.Match(spec, @"(\d+(\.\d+)?)\s*(ct|CT)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+            if (isLooseDiamond)
             {
-                var match = System.Text.RegularExpressions.Regex.Match(carat, @"(\d+(\.\d+)?)");
-                if (match.Success && decimal.TryParse(match.Groups[1].Value, out var parsed))
-                    numericCarat = parsed;
-            }
-            else if (spec.Contains("ct", StringComparison.OrdinalIgnoreCase))
-            {
-                var match = System.Text.RegularExpressions.Regex.Match(spec, @"(\d+(\.\d+)?)\s*(ct|CT)");
-                if (match.Success && decimal.TryParse(match.Groups[1].Value, out var parsed))
-                    numericCarat = parsed;
-            }
-            else if (!string.IsNullOrWhiteSpace(product.CaratOptions))
-            {
-                var firstCarat = product.CaratOptions.Split('|', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-                if (firstCarat != null)
+                if (titleCaratMatch.Success && decimal.TryParse(titleCaratMatch.Groups[1].Value, out var tc))
                 {
-                    var match = System.Text.RegularExpressions.Regex.Match(firstCarat, @"(\d+(\.\d+)?)");
+                    numericCarat = tc;
+                }
+                else if (specCaratMatch.Success && decimal.TryParse(specCaratMatch.Groups[1].Value, out var sc))
+                {
+                    numericCarat = sc;
+                }
+                else if (!string.IsNullOrWhiteSpace(carat))
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(carat, @"(\d+(\.\d+)?)");
                     if (match.Success && decimal.TryParse(match.Groups[1].Value, out var parsed))
                         numericCarat = parsed;
                 }
             }
-
-            // 6. Resolve Metal
-            var resolvedMetal = "18K White Gold";
-            if (!string.IsNullOrWhiteSpace(metal))
+            else
             {
-                resolvedMetal = metal;
-            }
-            else if (spec.Contains("10K") || spec.Contains("14K") || spec.Contains("18K") || spec.Contains("Platinum") || spec.Contains("Gold") || spec.Contains("Silver"))
-            {
-                var match = System.Text.RegularExpressions.Regex.Match(spec, @"(10K|14K|18K|950 Platinum|Platinum|Sterling Silver)[^\|]*");
-                if (match.Success) resolvedMetal = match.Value.Trim();
-            }
-            else if (!string.IsNullOrWhiteSpace(product.MetalOptions))
-            {
-                var firstMetal = product.MetalOptions.Split('|', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
-                if (firstMetal != null)
+                if (!string.IsNullOrWhiteSpace(carat))
                 {
-                    resolvedMetal = firstMetal.Split('(')[0].Trim();
+                    var match = System.Text.RegularExpressions.Regex.Match(carat, @"(\d+(\.\d+)?)");
+                    if (match.Success && decimal.TryParse(match.Groups[1].Value, out var parsed))
+                        numericCarat = parsed;
+                }
+                else if (titleCaratMatch.Success && decimal.TryParse(titleCaratMatch.Groups[1].Value, out var tc))
+                {
+                    numericCarat = tc;
+                }
+                else if (specCaratMatch.Success && decimal.TryParse(specCaratMatch.Groups[1].Value, out var sc))
+                {
+                    numericCarat = sc;
+                }
+                else if (!string.IsNullOrWhiteSpace(product.CaratOptions))
+                {
+                    var firstCarat = product.CaratOptions.Split('|', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                    if (firstCarat != null)
+                    {
+                        var match = System.Text.RegularExpressions.Regex.Match(firstCarat, @"(\d+(\.\d+)?)");
+                        if (match.Success && decimal.TryParse(match.Groups[1].Value, out var parsed))
+                            numericCarat = parsed;
+                    }
                 }
             }
 
-            // 7. Resolve Shape
+            // 7. Resolve Metal (Loose diamonds have NO metal mounting)
+            var resolvedMetal = isLooseDiamond ? string.Empty : "18K White Gold";
+            if (!isLooseDiamond)
+            {
+                if (!string.IsNullOrWhiteSpace(metal))
+                {
+                    resolvedMetal = metal;
+                }
+                else if (spec.Contains("10K") || spec.Contains("14K") || spec.Contains("18K") || spec.Contains("Platinum") || spec.Contains("Gold") || spec.Contains("Silver"))
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(spec, @"(10K|14K|18K|950 Platinum|Platinum|Sterling Silver)[^\|]*");
+                    if (match.Success) resolvedMetal = match.Value.Trim();
+                }
+                else if (!string.IsNullOrWhiteSpace(product.MetalOptions))
+                {
+                    var firstMetal = product.MetalOptions.Split('|', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                    if (firstMetal != null)
+                    {
+                        resolvedMetal = firstMetal.Split('(')[0].Trim();
+                    }
+                }
+            }
+
+            // 8. Resolve Shape
             var resolvedShape = "Round Brilliant";
             if (!string.IsNullOrWhiteSpace(shape))
             {
@@ -430,8 +463,8 @@ namespace SAT1.Controllers
             else
             {
                 var nameAndSpec = (product.Name + " " + spec).ToLower();
-                if (nameAndSpec.Contains("oval")) resolvedShape = "Oval Brilliant";
-                else if (nameAndSpec.Contains("emerald")) resolvedShape = "Emerald Cut";
+                if (nameAndSpec.Contains("emerald")) resolvedShape = "Emerald Cut";
+                else if (nameAndSpec.Contains("oval")) resolvedShape = "Oval Brilliant";
                 else if (nameAndSpec.Contains("cushion")) resolvedShape = "Cushion Modified Brilliant";
                 else if (nameAndSpec.Contains("radiant")) resolvedShape = "Radiant Cut";
                 else if (nameAndSpec.Contains("pear")) resolvedShape = "Pear Brilliant";
@@ -442,7 +475,7 @@ namespace SAT1.Controllers
                 else resolvedShape = "Round Brilliant";
             }
 
-            // 8. Resolve Color & Clarity
+            // 9. Resolve Color & Clarity
             var colorGrade = "E (Colorless)";
             var clarityGrade = "VVS1";
             if (resolvedStone == "Moissanite")
@@ -452,30 +485,52 @@ namespace SAT1.Controllers
             }
             else
             {
-                if (spec.Contains("D-") || spec.Contains("D ") || spec.Contains("D Color", StringComparison.OrdinalIgnoreCase)) colorGrade = "D (Colorless)";
+                var colorMatch = System.Text.RegularExpressions.Regex.Match(spec, @"Color\s+([D-Z])(\b|\s|\|)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (colorMatch.Success)
+                {
+                    var c = colorMatch.Groups[1].Value.ToUpper();
+                    colorGrade = (c == "D" || c == "E" || c == "F") ? $"{c} (Colorless)" : $"{c} (Near Colorless)";
+                }
+                else if (spec.Contains("D-") || spec.Contains("D ") || spec.Contains("D Color", StringComparison.OrdinalIgnoreCase)) colorGrade = "D (Colorless)";
                 else if (spec.Contains("F-") || spec.Contains("F ") || spec.Contains("F Color", StringComparison.OrdinalIgnoreCase)) colorGrade = "F (Colorless)";
                 else if (spec.Contains("G-") || spec.Contains("G ") || spec.Contains("G Color", StringComparison.OrdinalIgnoreCase)) colorGrade = "G (Near Colorless)";
 
-                if (spec.Contains("VVS2")) clarityGrade = "VVS2";
+                var clarityMatch = System.Text.RegularExpressions.Regex.Match(spec, @"Clarity\s+(FL|IF|VVS1|VVS2|VS1|VS2|SI1|SI2)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (clarityMatch.Success)
+                {
+                    clarityGrade = clarityMatch.Groups[1].Value.ToUpper();
+                }
+                else if (spec.Contains("VVS2")) clarityGrade = "VVS2";
                 else if (spec.Contains("VS1")) clarityGrade = "VS1";
                 else if (spec.Contains("VS2")) clarityGrade = "VS2";
                 else if (spec.Contains("IF") || spec.Contains("Flawless", StringComparison.OrdinalIgnoreCase)) clarityGrade = "Internally Flawless (IF)";
             }
 
-            // 9. Dynamic Gemological Proportions & Measurements based on Shape and Carat
+            // 10. Dynamic Gemological Proportions & Measurements based on Shape and Carat
             var (measurements, tablePct, depthPct, crownAng, pavilionAng) = CalculateGemologicalSpecs(resolvedShape, numericCarat);
+            var measMatch = System.Text.RegularExpressions.Regex.Match(spec, @"Measurements:\s*([0-9\.\s\*\-x×]+)\s*mm?", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (measMatch.Success)
+            {
+                var rawM = measMatch.Groups[1].Value.Replace("*", " × ").Replace("x", " × ").Replace("X", " × ").Trim();
+                measurements = $"{rawM} mm";
+            }
 
-            // 10. Deterministic Report Number & Issue Date
+            // 11. Deterministic Report Number & Issue Date
             var seed = Math.Abs((product.Id + (order?.OrderId ?? "") + numericCarat.ToString("F2") + resolvedShape).GetHashCode());
             var num = 2240000000L + (seed % 80000000L);
             var reportNumber = resolvedStone == "Moissanite" ? $"GRA-{num}" : $"GIA-{num}";
+            var certMatch = System.Text.RegularExpressions.Regex.Match(spec, @"(IGI|GIA)\s*#?([A-Za-z0-9]+)");
+            if (certMatch.Success)
+            {
+                reportNumber = $"{certMatch.Groups[1].Value.ToUpper()}-{certMatch.Groups[2].Value}";
+            }
 
             var issueDate = order != null 
                 ? order.CreatedAt.ToString("MMMM dd, yyyy") 
                 : DateTime.Now.AddDays(-(seed % 45)).ToString("MMMM dd, yyyy");
 
             var inscription = $"{reportNumber} • SAT-JEWELS";
-            if (!string.IsNullOrWhiteSpace(engraving))
+            if (!string.IsNullOrWhiteSpace(engraving) && !isLooseDiamond)
             {
                 inscription += $" • \"{engraving.Trim()}\"";
             }
@@ -498,7 +553,7 @@ namespace SAT1.Controllers
             {
                 ProductId = product.Id,
                 ProductName = product.Name,
-                CategoryName = "Fine Jewelry",
+                CategoryName = isLooseDiamond ? "Loose Diamonds" : (product.CategoryId == "6" ? "Necklaces" : (product.CategoryId == "9" ? "Luxury Watches" : "Fine Jewelry")),
                 ImageUrl = product.ImageUrl ?? "/assets/ring_1.jpg",
                 Sku = product.Id,
                 PriceUSD = product.PriceUSD,
@@ -512,8 +567,8 @@ namespace SAT1.Controllers
 
                 ReportNumber = reportNumber,
                 IssueDate = issueDate,
-                CertType = resolvedStone == "Moissanite" ? "GRA / GIA" : "GIA",
-                ReportTitle = resolvedStone == "Moissanite" ? "Gemological Grading Report" : "Diamond Grading Report",
+                CertType = resolvedStone == "Moissanite" ? "GRA / GIA" : (reportNumber.StartsWith("IGI-") ? "IGI" : "GIA"),
+                ReportTitle = resolvedStone == "Moissanite" ? "Gemological Grading Report" : (reportNumber.StartsWith("IGI-") ? "IGI Diamond Dossier" : "Diamond Grading Report"),
                 StoneType = resolvedStone,
                 VerificationBadge = resolvedStone == "Moissanite" ? "100% Verified Premium Moissanite" : (resolvedStone == "Natural Diamond" ? "100% Verified Natural Diamond" : "100% Verified Lab Grown Diamond"),
 
@@ -534,10 +589,11 @@ namespace SAT1.Controllers
                 CrownAngle = crownAng,
                 PavilionAngle = pavilionAng,
 
+                IsLooseDiamond = isLooseDiamond,
                 MetalType = resolvedMetal,
-                RingSize = size,
+                RingSize = isLooseDiamond ? null : size,
                 LaserInscription = inscription,
-                CustomEngraving = engraving
+                CustomEngraving = isLooseDiamond ? null : engraving
             };
 
             return View(vm);

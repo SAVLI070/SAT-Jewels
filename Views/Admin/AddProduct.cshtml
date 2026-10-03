@@ -99,66 +99,94 @@
     color: #ffffff;
   }
 
-  /* Collection Cards Grid & Smooth 6-Item Carousel */
-  .cat-carousel-viewport {
-    overflow: hidden;
+  /* Collection Cards Horizontal Slider (Matches Landing Page Carousel) */
+  .admin-cat-scroll-viewport {
     width: 100%;
-    position: relative;
-    border-radius: 12px;
-    margin-top: 8px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 4px 2px 8px 2px;
+    margin-top: 6px;
+    box-sizing: border-box;
   }
-  .cat-carousel-track {
+  .admin-cat-scroll-viewport::-webkit-scrollbar {
+    display: none;
+  }
+  .admin-cat-scroll-track {
     display: flex;
-    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-    width: 100%;
-  }
-  .cat-carousel-slide {
-    flex: 0 0 100%;
-    width: 100%;
+    flex-wrap: nowrap !important;
+    gap: 12px;
+    align-items: stretch;
+    width: max-content;
     min-width: 100%;
     box-sizing: border-box;
   }
-  .cat-cards-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-    width: 100%;
-    box-sizing: border-box;
-  }
-
-  @@media (max-width: 600px) {
-    .cat-cards-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-      gap: 8px !important;
-    }
-  }
-
   .cat-select-card {
+    flex: 0 0 135px;
+    min-width: 135px;
     background: #f8fafc;
-    border: 1px solid #cbd5e1;
+    border: 1.5px solid #cbd5e1;
     border-radius: 12px;
-    padding: 14px;
+    padding: 14px 10px;
     text-align: center;
     cursor: pointer;
     transition: all 0.25s ease;
     color: #0f172a;
-    min-width: 0;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    user-select: none;
+  }
+  .cat-select-card:hover {
+    border-color: #b45309;
+    background: #fffbeb;
+    transform: translateY(-2px);
+  }
+  .cat-select-card.active {
+    border-color: #b45309;
+    background: #fef3c7;
+    box-shadow: 0 0 0 1px #b45309, 0 4px 12px rgba(180, 83, 9, 0.15);
+  }
+  .cat-select-card span {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #0f172a;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .cat-select-card i, .cat-select-card svg {
+    font-size: 20px;
+    color: #b45309;
   }
 
   @@media (max-width: 600px) {
+    .admin-cat-scroll-viewport {
+      margin-top: 4px;
+      padding-bottom: 6px;
+    }
+    .admin-cat-scroll-track {
+      gap: 8px !important;
+    }
     .cat-select-card {
+      flex: 0 0 115px !important;
+      min-width: 115px !important;
       padding: 10px 6px !important;
+      border-radius: 10px !important;
+      gap: 6px !important;
     }
     .cat-select-card span {
       font-size: 11px !important;
-      display: block !important;
-      word-break: break-word !important;
-      line-height: 1.25 !important;
     }
     .cat-select-card i, .cat-select-card svg {
-      font-size: 17px !important;
-      margin-bottom: 4px !important;
+      font-size: 18px !important;
     }
   }
 
@@ -458,17 +486,17 @@
 
     <!-- Wizard Steps Indicator -->
     <div class="wizard-steps-bar">
-      <div class="wizard-step-item active" onclick="switchWizardStep(1)">
+      <div class="wizard-step-item active" id="wizardStep1Header" onclick="switchWizardStep(1)">
         <div class="wizard-step-num">1</div> <span>Details &amp; Category</span>
       </div>
-      <div class="wizard-step-item" onclick="switchWizardStep(2)">
+      <div class="wizard-step-item" id="wizardStep2Header" onclick="switchWizardStep(2)">
         <div class="wizard-step-num">2</div> <span>Photo Studio</span>
       </div>
-      <div class="wizard-step-item" onclick="switchWizardStep(3)">
+      <div class="wizard-step-item" id="wizardStep3Header" onclick="switchWizardStep(3)">
         <div class="wizard-step-num">3</div> <span>Metals &amp; Carats</span>
       </div>
-      <div class="wizard-step-item" onclick="switchWizardStep(4)">
-        <div class="wizard-step-num">4</div> <span>Availability Matrix</span>
+      <div class="wizard-step-item" id="wizardStep4Header" onclick="switchWizardStep(4)">
+        <div class="wizard-step-num" id="wizardStep4Num">4</div> <span id="wizardStep4Label">Availability Matrix</span>
       </div>
     </div>
 
@@ -480,39 +508,41 @@
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
             <label style="font-size:13px; font-weight:700; color:var(--champagne-gold); margin:0;">Select Main Collection Category *</label>
             <div id="catCarouselNav" style="display:none; align-items:center; gap:8px;">
-              <button type="button" id="btnCatPrev" onclick="navigateCatPage(-1)" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 9px; font-size:11px; font-weight:700; color:#0f172a; cursor:pointer;" title="Previous categories" disabled>
+              <button type="button" id="btnCatPrev" onclick="scrollAdminCat(-1)" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 9px; font-size:11px; font-weight:700; color:#0f172a; cursor:pointer;" title="Previous categories" disabled>
                 <i class="fa-solid fa-chevron-left"></i>
               </button>
-              <span id="catPageIndicator" style="font-size:11.5px; font-weight:700; color:#64748b;">1 / 1</span>
-              <button type="button" id="btnCatNext" onclick="navigateCatPage(1)" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 9px; font-size:11px; font-weight:700; color:#0f172a; cursor:pointer;" title="Next categories">
+              <span id="catPageIndicator" style="font-size:11.5px; font-weight:700; color:#64748b;">1 / 2</span>
+              <button type="button" id="btnCatNext" onclick="scrollAdminCat(1)" style="background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:3px 9px; font-size:11px; font-weight:700; color:#0f172a; cursor:pointer;" title="Next categories">
                 <i class="fa-solid fa-chevron-right"></i>
               </button>
             </div>
           </div>
-          <div class="cat-carousel-viewport" id="adminCatViewport">
-            <div class="cat-carousel-track" id="adminCatCarouselTrack">
-              <div class="cat-carousel-slide">
-                <div class="cat-cards-grid" id="adminCatCardsGrid">
-                  <div class="cat-select-card active" data-category-id="1" data-category-slug="engagement-rings" data-category-name="Engagement Rings" data-category-name-lower="engagement rings" onclick="setCategory(1, 'Engagement Rings', this)">
-                    <i class="fa-solid fa-gem"></i> <span>1. Engagement Rings</span>
-                  </div>
-                  <div class="cat-select-card" data-category-id="2" data-category-slug="wedding-rings" data-category-name="Wedding Rings" data-category-name-lower="wedding rings" onclick="setCategory(2, 'Wedding Rings', this)">
-                    <i class="fa-solid fa-ring"></i> <span>2. Wedding Rings</span>
-                  </div>
-                  <div class="cat-select-card" data-category-id="3" data-category-slug="bridal-sets" data-category-name="Bridal Sets" data-category-name-lower="bridal sets" onclick="setCategory(3, 'Bridal Sets', this)">
-                    <i class="fa-solid fa-heart"></i> <span>3. Bridal Sets</span>
-                  </div>
-                  <div class="cat-select-card" data-category-id="4" data-category-slug="earrings" data-category-name="Earrings" data-category-name-lower="earrings" onclick="setCategory(4, 'Earrings', this)">
-                    <svg class="cat-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>
-                    <span>4. Earrings</span>
-                  </div>
-                  <div class="cat-select-card" data-category-id="5" data-category-slug="bracelets" data-category-name="Bracelets" data-category-name-lower="bracelets" onclick="setCategory(5, 'Bracelets', this)">
-                    <i class="fa-solid fa-link"></i> <span>5. Bracelets</span>
-                  </div>
-                  <div class="cat-select-card" data-category-id="6" data-category-slug="necklaces" data-category-name="Necklaces" data-category-name-lower="necklaces" onclick="setCategory(6, 'Necklaces', this)">
-                    <i class="fa-solid fa-crown"></i> <span>6. Necklaces</span>
-                  </div>
-                </div>
+          <div class="admin-cat-scroll-viewport" id="adminCatViewport">
+            <div class="admin-cat-scroll-track" id="adminCatCarouselTrack">
+              <div class="cat-select-card active" data-category-id="1" data-category-slug="engagement-rings" data-category-name="Engagement Rings" data-category-name-lower="engagement rings" onclick="setCategory(1, 'Engagement Rings', this)">
+                <i class="fa-solid fa-gem"></i> <span>1. Engagement Rings</span>
+              </div>
+              <div class="cat-select-card" data-category-id="2" data-category-slug="wedding-rings" data-category-name="Wedding Rings" data-category-name-lower="wedding rings" onclick="setCategory(2, 'Wedding Rings', this)">
+                <i class="fa-solid fa-ring"></i> <span>2. Wedding Rings</span>
+              </div>
+              <div class="cat-select-card" data-category-id="3" data-category-slug="bridal-sets" data-category-name="Bridal Sets" data-category-name-lower="bridal sets" onclick="setCategory(3, 'Bridal Sets', this)">
+                <i class="fa-solid fa-heart"></i> <span>3. Bridal Sets</span>
+              </div>
+              <div class="cat-select-card" data-category-id="4" data-category-slug="earrings" data-category-name="Earrings" data-category-name-lower="earrings" onclick="setCategory(4, 'Earrings', this)">
+                <svg class="cat-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>
+                <span>4. Earrings</span>
+              </div>
+              <div class="cat-select-card" data-category-id="5" data-category-slug="bracelets" data-category-name="Bracelets" data-category-name-lower="bracelets" onclick="setCategory(5, 'Bracelets', this)">
+                <i class="fa-solid fa-link"></i> <span>5. Bracelets</span>
+              </div>
+              <div class="cat-select-card" data-category-id="6" data-category-slug="necklaces" data-category-name="Necklaces" data-category-name-lower="necklaces" onclick="setCategory(6, 'Necklaces', this)">
+                <i class="fa-solid fa-crown"></i> <span>6. Necklaces</span>
+              </div>
+              <div class="cat-select-card" data-category-id="7" data-category-slug="diamonds" data-category-name="Diamonds" data-category-name-lower="diamonds" onclick="setCategory(7, 'Diamonds', this)">
+                <i class="fa-solid fa-gem"></i> <span>7. Diamonds</span>
+              </div>
+              <div class="cat-select-card" data-category-id="9" data-category-slug="luxury-watches" data-category-name="Luxury Watches" data-category-name-lower="luxury watches" onclick="setCategory(9, 'Luxury Watches', this)">
+                <i class="fa-solid fa-clock"></i> <span>9. Luxury Watches</span>
               </div>
             </div>
           </div>
@@ -560,7 +590,7 @@
           </div>
         </div>
 
-        <div style="margin-bottom:20px;">
+        <div id="shapeSelectionWrap" style="margin-bottom:20px;">
           <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Select Diamond Cut Shape *</label>
           <div class="shape-chips-wrap">
             <button type="button" class="shape-chip-btn active" data-shape-id="1" data-shape-name="Round" data-shape-name-lower="round" onclick="setShape(1, 'Round', this)"><i class="fa-regular fa-circle"></i> Round</button>
@@ -611,47 +641,90 @@
 
         <div style="display:flex; justify-content:space-between; margin-top:24px;">
           <button type="button" onclick="switchWizardStep(1)" style="background:#ffffff; border:1px solid #cbd5e1; color:#0f172a; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;">&lt; Back</button>
-          <button type="button" class="btn-submit-item" onclick="switchWizardStep(3)" style="padding:10px 24px; font-size:13.5px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Next: Metals &amp; Carats &gt;</button>
+          <button type="button" id="btnStep2Next" class="btn-submit-item" onclick="handleStep2Next()" style="padding:10px 24px; font-size:13.5px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer;">Next: Metals &amp; Carats &gt;</button>
         </div>
       </div>
 
-      <!-- STEP 3: Metals & Carats -->
+      <!-- STEP 3: Metals & Carats / Customization -->
       <div id="wStep3" class="wizard-content-step" style="display:none;">
-        <div style="margin-bottom:24px;">
-          <div style="display:flex; align-items:center; justify-content:space-between;">
-            <label style="font-size:13px; font-weight:700; color:#0f172a;">Select Available Metal Types *</label>
-            <button type="button" onclick="toggleAllMetals(true)" style="background:none; border:none; color:#b45309; font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;">Select All Metals</button>
+        
+        <!-- 3A: Standard Jewelry (Categories 1-6) -->
+        <div id="standardJewelryStep3">
+          <div style="margin-bottom:24px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <label style="font-size:13px; font-weight:700; color:#0f172a;">Select Available Metal Types *</label>
+              <button type="button" onclick="toggleAllMetals(true)" style="background:none; border:none; color:#b45309; font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;">Select All Metals</button>
+            </div>
+            <div class="metal-swatch-picker">
+              <button type="button" class="metal-pill-btn" data-id="11" onclick="toggleMetalPill(this)">925 Silver</button>
+              <button type="button" class="metal-pill-btn" data-id="1" onclick="toggleMetalPill(this)">10K Yellow</button>
+              <button type="button" class="metal-pill-btn" data-id="2" onclick="toggleMetalPill(this)">10K White</button>
+              <button type="button" class="metal-pill-btn" data-id="3" onclick="toggleMetalPill(this)">10K Rose</button>
+              <button type="button" class="metal-pill-btn" data-id="4" onclick="toggleMetalPill(this)">14K Yellow</button>
+              <button type="button" class="metal-pill-btn" data-id="5" onclick="toggleMetalPill(this)">14K White</button>
+              <button type="button" class="metal-pill-btn" data-id="6" onclick="toggleMetalPill(this)">14K Rose</button>
+              <button type="button" class="metal-pill-btn" data-id="7" onclick="toggleMetalPill(this)">18K Yellow</button>
+              <button type="button" class="metal-pill-btn" data-id="8" onclick="toggleMetalPill(this)">18K White</button>
+              <button type="button" class="metal-pill-btn" data-id="9" onclick="toggleMetalPill(this)">18K Rose</button>
+              <button type="button" class="metal-pill-btn" data-id="10" onclick="toggleMetalPill(this)">950 Platinum</button>
+            </div>
           </div>
-          <div class="metal-swatch-picker">
-            <button type="button" class="metal-pill-btn" data-id="11" onclick="toggleMetalPill(this)">925 Silver</button>
-            <button type="button" class="metal-pill-btn" data-id="1" onclick="toggleMetalPill(this)">10K Yellow</button>
-            <button type="button" class="metal-pill-btn" data-id="2" onclick="toggleMetalPill(this)">10K White</button>
-            <button type="button" class="metal-pill-btn" data-id="3" onclick="toggleMetalPill(this)">10K Rose</button>
-            <button type="button" class="metal-pill-btn" data-id="4" onclick="toggleMetalPill(this)">14K Yellow</button>
-            <button type="button" class="metal-pill-btn" data-id="5" onclick="toggleMetalPill(this)">14K White</button>
-            <button type="button" class="metal-pill-btn" data-id="6" onclick="toggleMetalPill(this)">14K Rose</button>
-            <button type="button" class="metal-pill-btn" data-id="7" onclick="toggleMetalPill(this)">18K Yellow</button>
-            <button type="button" class="metal-pill-btn" data-id="8" onclick="toggleMetalPill(this)">18K White</button>
-            <button type="button" class="metal-pill-btn" data-id="9" onclick="toggleMetalPill(this)">18K Rose</button>
-            <button type="button" class="metal-pill-btn" data-id="10" onclick="toggleMetalPill(this)">950 Platinum</button>
+
+          <div style="margin-bottom:24px;">
+            <div style="display:flex; align-items:center; justify-content:space-between;">
+              <label style="font-size:13px; font-weight:700; color:#0f172a;">Select Diamond Carats &amp; MM Sizes *</label>
+              <button type="button" onclick="toggleAllCarats(true)" style="background:none; border:none; color:#b45309; font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;">Select All Carats</button>
+            </div>
+            <div class="carat-badge-picker">
+              <button type="button" class="carat-pill-btn" data-id="1" data-label="0.50 CT (5.2mm)" onclick="toggleCaratPill(this)">0.50 CT (5.2mm)</button>
+              <button type="button" class="carat-pill-btn" data-id="2" data-label="0.75 CT (6.0mm)" onclick="toggleCaratPill(this)">0.75 CT (6.0mm)</button>
+              <button type="button" class="carat-pill-btn" data-id="3" data-label="1.00 CT (6.5mm)" onclick="toggleCaratPill(this)">1.00 CT (6.5mm)</button>
+              <button type="button" class="carat-pill-btn" data-id="4" data-label="1.25 CT (7.0mm)" onclick="toggleCaratPill(this)">1.25 CT (7.0mm)</button>
+              <button type="button" class="carat-pill-btn" data-id="5" data-label="1.50 CT (7.5mm)" onclick="toggleCaratPill(this)">1.50 CT (7.5mm)</button>
+              <button type="button" class="carat-pill-btn" data-id="6" data-label="2.00 CT (8.0mm)" onclick="toggleCaratPill(this)">2.00 CT (8.0mm)</button>
+              <button type="button" class="carat-pill-btn" data-id="7" data-label="3.00 CT (9.0mm)" onclick="toggleCaratPill(this)">3.00 CT (9.0mm)</button>
+              <button type="button" class="carat-pill-btn" data-id="8" data-label="4.00 CT (10.0mm)" onclick="toggleCaratPill(this)">4.00 CT (10.0mm)</button>
+              <button type="button" class="carat-pill-btn" data-id="9" data-label="5.00 CT (11.0mm)" onclick="toggleCaratPill(this)">5.00 CT (11.0mm)</button>
+            </div>
           </div>
         </div>
 
-        <div style="margin-bottom:24px;">
-          <div style="display:flex; align-items:center; justify-content:space-between;">
-            <label style="font-size:13px; font-weight:700; color:#0f172a;">Select Diamond Carats &amp; MM Sizes *</label>
-            <button type="button" onclick="toggleAllCarats(true)" style="background:none; border:none; color:#b45309; font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;">Select All Carats</button>
+        <!-- 3B: Luxury Watches (Category 9) -->
+        <div id="watchCustomStep3" style="display:none;">
+          <div style="margin-bottom:24px;">
+            <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:8px;">Select Available Watch Movements *</label>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button type="button" class="metal-pill-btn watch-mov-btn active" data-id="101" data-name="Japan" onclick="toggleWatchMov(this)">🇯🇵 Japan</button>
+              <button type="button" class="metal-pill-btn watch-mov-btn active" data-id="102" data-name="Swiss" onclick="toggleWatchMov(this)">🇨🇭 Swiss</button>
+            </div>
+            <p style="font-size:11.5px; color:#64748b; margin-top:6px;">Watch case is crafted from 316L Stainless Steel. Select which movement origins to offer.</p>
           </div>
-          <div class="carat-badge-picker">
-            <button type="button" class="carat-pill-btn" data-id="1" data-label="0.50 CT (5.2mm)" onclick="toggleCaratPill(this)">0.50 CT (5.2mm)</button>
-            <button type="button" class="carat-pill-btn" data-id="2" data-label="0.75 CT (6.0mm)" onclick="toggleCaratPill(this)">0.75 CT (6.0mm)</button>
-            <button type="button" class="carat-pill-btn" data-id="3" data-label="1.00 CT (6.5mm)" onclick="toggleCaratPill(this)">1.00 CT (6.5mm)</button>
-            <button type="button" class="carat-pill-btn" data-id="4" data-label="1.25 CT (7.0mm)" onclick="toggleCaratPill(this)">1.25 CT (7.0mm)</button>
-            <button type="button" class="carat-pill-btn" data-id="5" data-label="1.50 CT (7.5mm)" onclick="toggleCaratPill(this)">1.50 CT (7.5mm)</button>
-            <button type="button" class="carat-pill-btn" data-id="6" data-label="2.00 CT (8.0mm)" onclick="toggleCaratPill(this)">2.00 CT (8.0mm)</button>
-            <button type="button" class="carat-pill-btn" data-id="7" data-label="3.00 CT (9.0mm)" onclick="toggleCaratPill(this)">3.00 CT (9.0mm)</button>
-            <button type="button" class="carat-pill-btn" data-id="8" data-label="4.00 CT (10.0mm)" onclick="toggleCaratPill(this)">4.00 CT (10.0mm)</button>
-            <button type="button" class="carat-pill-btn" data-id="9" data-label="5.00 CT (11.0mm)" onclick="toggleCaratPill(this)">5.00 CT (11.0mm)</button>
+
+          <div style="margin-bottom:24px;">
+            <label style="font-size:13px; font-weight:700; color:#0f172a; display:block; margin-bottom:8px;">Select Diamond Stone Type *</label>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button type="button" class="carat-pill-btn watch-stone-btn active" data-id="201" data-label="Moissanite" onclick="toggleWatchStone(this)">✨ Moissanite</button>
+              <button type="button" class="carat-pill-btn watch-stone-btn active" data-id="202" data-label="Lab Grown Diamond" onclick="toggleWatchStone(this)">💎 Lab Grown Diamond</button>
+            </div>
+            <p style="font-size:11.5px; color:#64748b; margin-top:6px;">Offer brilliant Moissanite VVS1 or Ethical Lab Grown Diamonds for the timepiece bezel/dial.</p>
+          </div>
+
+          <div style="background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.3); border-radius:12px; padding:14px; margin-bottom:16px;">
+            <div style="font-size:13px; font-weight:700; color:#b45309;"><i class="fa-solid fa-clock"></i> Luxury Timepiece Specifications:</div>
+            <div style="font-size:12px; color:#475569; margin-top:4px;">
+              Case Diameter: <strong>41 mm</strong> • Metal: <strong>Stainless Steel</strong> • Crystal: <strong>Sapphire Glass</strong> • Water Resistance: <strong>50m</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3C: Loose Diamonds (Category 7) -->
+        <div id="diamondCustomStep3" style="display:none;">
+          <div style="background:#f8fafc; border:1.5px solid #d4b270; border-radius:14px; padding:28px 20px; text-align:center; margin-bottom:20px;">
+            <div style="font-size:32px; margin-bottom:10px;">💎</div>
+            <h4 style="margin:0 0 8px; font-size:16px; font-weight:700; color:#0f172a;">Certified Loose Diamond Product</h4>
+            <p style="margin:0 auto; max-width:480px; color:#64748b; font-size:13px; line-height:1.5;">
+              Loose diamonds are standalone certified lab-grown gemstones. Setting metal types and ring carat sizes do not apply. All cut, color, clarity, and laboratory report numbers are configured in Product Title and Specifications.
+            </p>
           </div>
         </div>
 
@@ -661,9 +734,9 @@
         </div>
       </div>
 
-      <!-- STEP 4: Availability & Dynamic Pricing Matrix -->
+      <!-- STEP 4: Availability & Dynamic Pricing Matrix / Review & Publish -->
       <div id="wStep4" class="wizard-content-step" style="display:none;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+        <div id="step4MatrixHeader" style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
           <div>
             <h3 style="font-size:16px; font-weight:700; color:#0f172a; margin:0 0 4px;">Metal × Diamond Size Dynamic Pricing Matrix</h3>
             <p style="font-size:12px; color:#64748b; margin:0;">Customize exact pricing for each metal type and diamond carat combination (editable for both new products &amp; editing).</p>
@@ -677,13 +750,18 @@
           </div>
         </div>
 
+        <div id="step4DirectPublishHeader" style="display:none; margin-bottom:16px;">
+          <h3 style="font-size:16px; font-weight:700; color:#0f172a; margin:0 0 4px;">Review &amp; Direct Publish Item</h3>
+          <p style="font-size:12px; color:#64748b; margin:0;">Confirm your item configuration below and publish directly to live Neon DB &amp; storefront.</p>
+        </div>
+
         <!-- Dynamic Matrix Table Container -->
         <div class="matrix-table-wrap" id="matrixContainer">
           <!-- Rendered dynamically by JavaScript -->
         </div>
 
         <div style="display:flex; justify-content:space-between; align-items:center; margin-top:28px;">
-          <button type="button" onclick="switchWizardStep(3)" style="background:#ffffff; border:1px solid #cbd5e1; color:#0f172a; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;">&lt; Back</button>
+          <button type="button" onclick="handleStep4Back()" style="background:#ffffff; border:1px solid #cbd5e1; color:#0f172a; padding:10px 20px; border-radius:10px; cursor:pointer; font-weight:600;">&lt; Back</button>
           <button type="button" onclick="handlePublishProduct(event)" class="btn-submit-item" id="btnPublishItem" style="padding:12px 28px; font-size:14px; background:linear-gradient(135deg, #d4b270 0%, #b45309 100%); color:#fff; border:none; border-radius:12px; font-weight:700; cursor:pointer; box-shadow:0 4px 16px rgba(180,83,9,0.25);">
             <i class="fa-solid fa-paper-plane"></i> Save &amp; Publish to Neon DB
           </button>
@@ -729,13 +807,13 @@
         <span style="font-size:11px; background:#16a34a; color:#fff; padding:2px 6px; border-radius:4px; font-weight:700;">Save 15%</span>
       </div>
 
-      <div style="font-size:11px; color:#64748b; margin-bottom:6px;">Selected Metals:</div>
+      <div id="prevMetalListLabel" style="font-size:11px; color:#64748b; margin-bottom:6px;">Selected Metals:</div>
       <div id="prevMetalList" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:12px;">
         <span style="font-size:9.5px; background:#f1f5f9; color:#0f172a; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">14K W</span>
         <span style="font-size:9.5px; background:#f1f5f9; color:#0f172a; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">18K Y</span>
       </div>
 
-      <div style="font-size:11px; color:#64748b; margin-bottom:6px;">Selected Carats:</div>
+      <div id="prevCaratListLabel" style="font-size:11px; color:#64748b; margin-bottom:6px;">Selected Carats:</div>
       <div id="prevCaratList" style="display:flex; flex-wrap:wrap; gap:4px; margin-bottom:16px;">
         <span style="font-size:9.5px; background:rgba(180,83,9,0.1); color:#b45309; padding:2px 6px; border-radius:4px; font-weight:700;">1.00 CT</span>
         <span style="font-size:9.5px; background:rgba(180,83,9,0.1); color:#b45309; padding:2px 6px; border-radius:4px; font-weight:700;">2.00 CT</span>
@@ -757,6 +835,35 @@
     7: '18K Yellow Gold', 8: '18K White Gold', 9: '18K Rose Gold',
     10: '950 Platinum'
   };
+
+  function handleStep2Next() {
+    const presetSelect = document.getElementById('presetImageSelect');
+    const presetVal = presetSelect ? presetSelect.value : '';
+    if ((!currentUploadedUrls || currentUploadedUrls.length === 0) && presetVal) {
+      currentUploadedUrls = [presetVal];
+    }
+    if (!currentUploadedUrls || currentUploadedUrls.length === 0) {
+      showToast('Product Image is required! Please upload a photo or select a preset studio photo.', 'warning');
+      return;
+    }
+
+    const catId = parseInt(document.getElementById('adminCategoryId').value) || 1;
+    if (catId === 7 || catId === 9) {
+      buildMatrixGrid();
+      switchWizardStep(4);
+    } else {
+      switchWizardStep(3);
+    }
+  }
+
+  function handleStep4Back() {
+    const catId = parseInt(document.getElementById('adminCategoryId').value) || 1;
+    if (catId === 7 || catId === 9) {
+      switchWizardStep(2);
+    } else {
+      switchWizardStep(3);
+    }
+  }
 
   function switchWizardStep(step) {
     if (step > 1) {
@@ -786,9 +893,17 @@
       }
     }
 
-    if (step > 3) {
-      const activeMetals = document.querySelectorAll('.metal-pill-btn.active');
-      const activeCarats = document.querySelectorAll('.carat-pill-btn.active');
+    const catId = parseInt(document.getElementById('adminCategoryId').value) || 1;
+    const isDirectCat = (catId === 7 || catId === 9);
+
+    if (isDirectCat && step === 3) {
+      buildMatrixGrid();
+      step = 4;
+    }
+
+    if (step > 3 && !isDirectCat) {
+      const activeMetals = document.querySelectorAll('#standardJewelryStep3 .metal-pill-btn.active');
+      const activeCarats = document.querySelectorAll('#standardJewelryStep3 .carat-pill-btn.active');
       if (activeMetals.length === 0) {
         showToast('Please select at least one Metal Type before generating the matrix.', 'warning');
         return;
@@ -800,13 +915,20 @@
     }
 
     document.querySelectorAll('.wizard-content-step').forEach(el => el.style.display = 'none');
-    document.getElementById(`wStep${step}`).style.display = 'block';
+    const targetStepEl = document.getElementById(`wStep${step}`);
+    if (targetStepEl) targetStepEl.style.display = 'block';
 
-    const items = document.querySelectorAll('.wizard-step-item');
-    items.forEach((item, idx) => {
-      if (idx + 1 === step) item.classList.add('active');
-      else item.classList.remove('active');
-    });
+    const s1 = document.getElementById('wizardStep1Header');
+    const s2 = document.getElementById('wizardStep2Header');
+    const s3 = document.getElementById('wizardStep3Header');
+    const s4 = document.getElementById('wizardStep4Header');
+
+    [s1, s2, s3, s4].forEach(el => el?.classList.remove('active'));
+
+    if (step === 1) s1?.classList.add('active');
+    else if (step === 2) s2?.classList.add('active');
+    else if (step === 3 && !isDirectCat) s3?.classList.add('active');
+    else if (step === 4) s4?.classList.add('active');
   }
 
   const categoryDefaultImageMap = {
@@ -815,18 +937,79 @@
     3: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_3_bridal_sets.png',
     4: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_4_earrings.png',
     5: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_5_bracelets.png',
-    6: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_6_necklaces.png'
+    6: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_6_necklaces.png',
+    7: '/assets/categories/cat_diamonds.png',
+    9: 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1790922325/sat_jewels/categories/cat_9_luxury_watch.jpg'
   };
+
+  function adaptStep3ForCategory(id) {
+    const numericId = parseInt(id) || 1;
+    const shapeWrap = document.getElementById('shapeSelectionWrap');
+    const step3Header = document.getElementById('wizardStep3Header');
+    const step4Num = document.getElementById('wizardStep4Num');
+    const step4Label = document.getElementById('wizardStep4Label');
+    const btnStep2Next = document.getElementById('btnStep2Next');
+    const step4MatrixHeader = document.getElementById('step4MatrixHeader');
+    const step4DirectPublishHeader = document.getElementById('step4DirectPublishHeader');
+
+    // 1. Diamond Cut Shape: NOT visible if category is Watch (9)
+    if (shapeWrap) {
+      if (numericId === 9) {
+        shapeWrap.style.display = 'none';
+        document.getElementById('adminShapeId').value = '1';
+      } else {
+        shapeWrap.style.display = 'block';
+      }
+    }
+
+    // 2. Metals & Carats step: NOT there if category is Diamond (7) or Watch (9)
+    if (numericId === 7 || numericId === 9) {
+      if (step3Header) step3Header.style.display = 'none';
+      if (step4Num) step4Num.textContent = '3';
+      if (step4Label) step4Label.textContent = 'Review & Publish';
+      if (btnStep2Next) btnStep2Next.innerHTML = 'Next: Review &amp; Publish &gt;';
+      if (step4MatrixHeader) step4MatrixHeader.style.display = 'none';
+      if (step4DirectPublishHeader) step4DirectPublishHeader.style.display = 'block';
+    } else {
+      if (step3Header) step3Header.style.display = 'flex';
+      if (step4Num) step4Num.textContent = '4';
+      if (step4Label) step4Label.textContent = 'Availability Matrix';
+      if (btnStep2Next) btnStep2Next.innerHTML = 'Next: Metals &amp; Carats &gt;';
+      if (step4MatrixHeader) step4MatrixHeader.style.display = 'flex';
+      if (step4DirectPublishHeader) step4DirectPublishHeader.style.display = 'none';
+    }
+
+    updateLivePreview();
+  }
 
   function setCategory(id, name, element) {
     document.getElementById('adminCategoryId').value = id;
     document.querySelectorAll('.cat-select-card').forEach(c => c.classList.remove('active'));
-    element.classList.add('active');
+    if (element) {
+      element.classList.add('active');
+      if (typeof element.scrollIntoView === 'function') {
+        element.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
     document.getElementById('prevCategory').textContent = `${id}. ${name}`;
+    adaptStep3ForCategory(id);
     if (currentUploadedUrls.length === 0) {
       const defaultCatImg = categoryDefaultImageMap[id] || DEFAULT_PRODUCT_IMAGE;
       setPreviewImgSrc(defaultCatImg);
     }
+    if (typeof updateAdminCatNav === 'function') {
+      setTimeout(updateAdminCatNav, 250);
+    }
+  }
+
+  function toggleWatchMov(btn) {
+    btn.classList.toggle('active');
+    updateLivePreview();
+  }
+
+  function toggleWatchStone(btn) {
+    btn.classList.toggle('active');
+    updateLivePreview();
   }
 
   function setShape(id, name, element) {
@@ -915,11 +1098,35 @@
     document.getElementById('prevTitle').textContent = titleVal;
     document.getElementById('prevPrice').textContent = `$${activeBasePrice.toLocaleString('en-US')} USD`;
 
-    const activeMetals = Array.from(document.querySelectorAll('.metal-pill-btn.active')).map(b => b.textContent);
-    const activeCarats = Array.from(document.querySelectorAll('.carat-pill-btn.active')).map(b => b.dataset.label.split(' ')[0] + ' ' + b.dataset.label.split(' ')[1]);
+    const catId = parseInt(document.getElementById('adminCategoryId').value) || 1;
+    const metalLabelEl = document.getElementById('prevMetalListLabel');
+    const caratLabelEl = document.getElementById('prevCaratListLabel');
+    const prevMetalList = document.getElementById('prevMetalList');
+    const prevCaratList = document.getElementById('prevCaratList');
 
-    document.getElementById('prevMetalList').innerHTML = activeMetals.map(m => `<span style="font-size:9.5px; background:rgba(255,255,255,0.15); padding:2px 6px; border-radius:4px;">${m}</span>`).join('');
-    document.getElementById('prevCaratList').innerHTML = activeCarats.map(c => `<span style="font-size:9.5px; background:rgba(212,178,112,0.2); color:var(--champagne-gold); padding:2px 6px; border-radius:4px;">${c}</span>`).join('');
+    if (catId === 9) {
+      if (metalLabelEl) metalLabelEl.textContent = 'Included Movements:';
+      if (prevMetalList) prevMetalList.innerHTML = '<span style="font-size:9.5px; background:#f1f5f9; color:#0f172a; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">🇯🇵 Japan</span><span style="font-size:9.5px; background:#f1f5f9; color:#0f172a; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">🇨🇭 Swiss</span>';
+      if (caratLabelEl) caratLabelEl.textContent = 'Diamond Types:';
+      if (prevCaratList) prevCaratList.innerHTML = '<span style="font-size:9.5px; background:rgba(180,83,9,0.1); color:#b45309; padding:2px 6px; border-radius:4px; font-weight:700;">✨ Moissanite</span><span style="font-size:9.5px; background:rgba(180,83,9,0.1); color:#b45309; padding:2px 6px; border-radius:4px; font-weight:700;">💎 Lab Grown</span>';
+    } else if (catId === 7) {
+      if (metalLabelEl) metalLabelEl.textContent = 'Gemstone Type:';
+      if (prevMetalList) prevMetalList.innerHTML = '<span style="font-size:9.5px; background:#f1f5f9; color:#0f172a; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">Certified Loose Diamond</span>';
+      if (caratLabelEl) caratLabelEl.textContent = 'Certification:';
+      if (prevCaratList) prevCaratList.innerHTML = '<span style="font-size:9.5px; background:rgba(180,83,9,0.1); color:#b45309; padding:2px 6px; border-radius:4px; font-weight:700;">IGI / GIA Lab Report</span>';
+    } else {
+      if (metalLabelEl) metalLabelEl.textContent = 'Selected Metals:';
+      if (caratLabelEl) caratLabelEl.textContent = 'Selected Carats:';
+      const activeMetals = Array.from(document.querySelectorAll('#standardJewelryStep3 .metal-pill-btn.active')).map(b => b.textContent);
+      const activeCarats = Array.from(document.querySelectorAll('#standardJewelryStep3 .carat-pill-btn.active')).map(b => {
+        const lbl = b.dataset.label || '';
+        const parts = lbl.split(' ');
+        return parts.length >= 2 ? (parts[0] + ' ' + parts[1]) : lbl;
+      });
+
+      if (prevMetalList) prevMetalList.innerHTML = activeMetals.map(m => `<span style="font-size:9.5px; background:#f1f5f9; color:#0f172a; padding:2px 6px; border-radius:4px; border:1px solid #cbd5e1;">${m}</span>`).join('');
+      if (prevCaratList) prevCaratList.innerHTML = activeCarats.map(c => `<span style="font-size:9.5px; background:rgba(180,83,9,0.1); color:#b45309; padding:2px 6px; border-radius:4px; font-weight:700;">${c}</span>`).join('');
+    }
   }
 
   const DEFAULT_PRODUCT_IMAGE = 'https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png';
@@ -996,9 +1203,16 @@
       setPreviewImgSrc('');
     }
 
-    if (urlToRemove && urlToRemove.includes('res.cloudinary.com')) {
+    if (urlToRemove) {
       try {
-        await fetch(`/api/catalogapi/delete-image?url=${encodeURIComponent(urlToRemove)}`, { method: 'POST', credentials: 'include' });
+        const prodId = typeof editingProductId !== 'undefined' ? (editingProductId || '') : '';
+        await fetch(`/api/catalogapi/delete-image?url=${encodeURIComponent(urlToRemove)}&productId=${encodeURIComponent(prodId)}`, { 
+          method: 'POST', 
+          credentials: 'include' 
+        });
+        if (typeof showToast === 'function') {
+          showToast('Image removed from Cloudinary and database.', 'info');
+        }
       } catch (e) {
         console.warn('Cloudinary image deletion error:', e);
       }
@@ -1113,20 +1327,89 @@
 
   function buildMatrixGrid() {
     const basePrice = parseFloat(document.getElementById('adminPrice').value) || 2020;
+    const catId = parseInt(document.getElementById('adminCategoryId').value) || 1;
+    const container = document.getElementById('matrixContainer');
 
-    const activeMetals = Array.from(document.querySelectorAll('.metal-pill-btn.active')).map(b => ({
+    if (catId === 7) {
+      // Loose Diamond: single direct price review card
+      container.innerHTML = `
+        <div style="padding:32px 24px; text-align:center; background:#f8fafc; border:1.5px solid #d4b270; border-radius:14px;">
+          <div style="font-size:36px; margin-bottom:8px;">💎</div>
+          <h4 style="margin:0 0 8px; font-size:17px; font-weight:700; color:#0f172a;">Certified Loose Diamond Product</h4>
+          <div style="font-size:24px; font-weight:800; color:#b45309; margin-bottom:10px;">$${basePrice.toLocaleString('en-US')} USD</div>
+          <p style="margin:0 auto 16px; max-width:480px; color:#64748b; font-size:13px; line-height:1.5;">
+            Individual IGI / GIA certified loose diamond. No metal settings or ring carat options apply. Ready to publish directly to the live collection.
+          </p>
+          <div style="display:inline-flex; align-items:center; gap:8px; background:#f0fdf4; border:1px solid #86efac; color:#15803d; font-size:12.5px; font-weight:700; padding:8px 16px; border-radius:20px;">
+            <i class="fa-solid fa-check-circle" style="font-size:15px;"></i> Direct Publish Ready — Click "Save &amp; Publish to Neon DB" below to publish.
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    if (catId === 9) {
+      // Luxury Watches: Direct review summary card with standard Swiss / Japan & Moiss / Lab options
+      const moissPrice = parseFloat(document.getElementById('adminMoissanitePrice').value) || Math.round(basePrice * 0.55);
+      container.innerHTML = `
+        <div style="padding:28px 24px; background:#f8fafc; border:1.5px solid #d4b270; border-radius:14px;">
+          <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
+            <div style="font-size:32px; width:52px; height:52px; display:flex; align-items:center; justify-content:center; background:#fef3c7; border:1px solid #d97706; border-radius:12px;">⌚</div>
+            <div>
+              <h4 style="margin:0 0 4px; font-size:17px; font-weight:700; color:#0f172a;">Luxury Timepiece Configuration</h4>
+              <p style="margin:0; font-size:12.5px; color:#64748b;">Direct configuration with standard Swiss / Japan automatic movements and dual stone options.</p>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:12px; margin-bottom:18px;">
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px;">
+              <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Timepiece Case</div>
+              <div style="font-size:14px; font-weight:700; color:#0f172a; margin-top:3px;">41 mm Stainless Steel</div>
+              <div style="font-size:11.5px; color:#64748b; margin-top:2px;">Sapphire Glass • 50m Water Resistance</div>
+            </div>
+
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px;">
+              <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Available Movements</div>
+              <div style="font-size:14px; font-weight:700; color:#0f172a; margin-top:3px;">🇨🇭 Swiss &amp; 🇯🇵 Japan</div>
+              <div style="font-size:11.5px; color:#64748b; margin-top:2px;">ETA Swiss &amp; Japanese Automatic</div>
+            </div>
+
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px;">
+              <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Diamond Stone Options</div>
+              <div style="font-size:14px; font-weight:700; color:#0f172a; margin-top:3px;">Moissanite &amp; Lab Grown</div>
+              <div style="font-size:11.5px; color:#64748b; margin-top:2px;">VVS1 Moissanite / Ethical Lab Diamond</div>
+            </div>
+
+            <div style="background:#ffffff; border:1px solid #e2e8f0; border-radius:10px; padding:14px;">
+              <div style="font-size:11px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.5px;">Base Pricing</div>
+              <div style="font-size:14px; font-weight:800; color:#b45309; margin-top:3px;">
+                💎 $${basePrice.toLocaleString('en-US')} / ✨ $${moissPrice.toLocaleString('en-US')}
+              </div>
+              <div style="font-size:11.5px; color:#64748b; margin-top:2px;">Lab Diamond / Moissanite</div>
+            </div>
+          </div>
+
+          <div style="display:flex; align-items:center; gap:8px; background:#f0fdf4; border:1px solid #86efac; color:#15803d; font-size:12.5px; font-weight:700; padding:10px 16px; border-radius:8px;">
+            <i class="fa-solid fa-check-circle" style="font-size:16px;"></i> Direct Publish Ready — Click "Save &amp; Publish to Neon DB" below to publish.
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    const activeMetals = Array.from(document.querySelectorAll('#standardJewelryStep3 .metal-pill-btn.active')).map(b => ({
       id: parseInt(b.dataset.id),
       name: metalNameMap[b.dataset.id] || b.textContent
     }));
 
-    const activeCarats = Array.from(document.querySelectorAll('.carat-pill-btn.active')).map(b => ({
+    const activeCarats = Array.from(document.querySelectorAll('#standardJewelryStep3 .carat-pill-btn.active')).map(b => ({
       id: parseInt(b.dataset.id),
       label: b.dataset.label
     }));
 
-    const container = document.getElementById('matrixContainer');
+    const containerEl = document.getElementById('matrixContainer');
     if (activeMetals.length === 0 || activeCarats.length === 0) {
-      container.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Please select at least 1 Metal and 1 Carat size in Step 3!</div>';
+      containerEl.innerHTML = '<div style="padding:20px; text-align:center; color:#ef4444;">Please select at least 1 Metal and 1 Carat size in Step 3!</div>';
       return;
     }
 
@@ -1185,26 +1468,38 @@
     document.querySelectorAll('.matrix-chk').forEach(chk => chk.checked = checked);
   }
 
-  let currentCatCarouselPage = 0;
-  let totalCatCarouselPages = 1;
+  let editingProductId = null;
 
-  function navigateCatPage(delta) {
-    const track = document.getElementById('adminCatCarouselTrack');
-    const viewport = document.getElementById('adminCatViewport');
+  function scrollAdminCat(dir) {
+    const vp = document.getElementById('adminCatViewport');
+    if (!vp) return;
+    const step = Math.max(220, vp.clientWidth * 0.7);
+    vp.scrollBy({ left: dir * step, behavior: 'smooth' });
+    setTimeout(updateAdminCatNav, 280);
+  }
+
+  function updateAdminCatNav() {
+    const vp = document.getElementById('adminCatViewport');
     const prevBtn = document.getElementById('btnCatPrev');
     const nextBtn = document.getElementById('btnCatNext');
+    const nav = document.getElementById('catCarouselNav');
     const indicator = document.getElementById('catPageIndicator');
-    if (!track) return;
+    if (!vp) return;
 
-    currentCatCarouselPage = Math.max(0, Math.min(currentCatCarouselPage + delta, totalCatCarouselPages - 1));
-    const offset = viewport ? (currentCatCarouselPage * viewport.clientWidth) : 0;
-    track.style.transform = `translateX(-${offset}px)`;
+    const hasOverflow = vp.scrollWidth > vp.clientWidth + 10;
+    if (nav) nav.style.display = hasOverflow ? 'flex' : 'none';
 
-    if (indicator) indicator.textContent = `${currentCatCarouselPage + 1} / ${totalCatCarouselPages}`;
-    if (prevBtn) prevBtn.disabled = (currentCatCarouselPage === 0);
-    if (nextBtn) nextBtn.disabled = (currentCatCarouselPage >= totalCatCarouselPages - 1);
+    if (prevBtn) prevBtn.disabled = (vp.scrollLeft <= 5);
+    if (nextBtn) nextBtn.disabled = (vp.scrollLeft + vp.clientWidth >= vp.scrollWidth - 5);
+
+    if (indicator && hasOverflow) {
+      const step = Math.max(180, vp.clientWidth * 0.7);
+      const totalPages = Math.max(1, Math.ceil((vp.scrollWidth - vp.clientWidth) / step) + 1);
+      const curPage = Math.min(totalPages, Math.max(1, Math.round(vp.scrollLeft / step) + 1));
+      indicator.textContent = `${curPage} / ${totalPages}`;
+    }
   }
-  window.addEventListener('resize', () => { if (typeof navigateCatPage === 'function') navigateCatPage(0); });
+  window.addEventListener('resize', () => { if (typeof updateAdminCatNav === 'function') updateAdminCatNav(); });
 
   async function loadAdminCategories() {
     try {
@@ -1218,84 +1513,55 @@
       if (visibleCategories.length === 0) return;
 
       const track = document.getElementById('adminCatCarouselTrack');
-      const nav = document.getElementById('catCarouselNav');
       if (!track) return;
 
       const currentSelectedId = document.getElementById('adminCategoryId')?.value;
-      const chunkSize = 6;
-      totalCatCarouselPages = Math.max(1, Math.ceil(visibleCategories.length / chunkSize));
 
-      if (nav) {
-        nav.style.display = totalCatCarouselPages > 1 ? 'flex' : 'none';
-      }
+      track.innerHTML = visibleCategories.map((c, idx) => {
+        const idVal = c.id;
+        const nameVal = c.name;
+        const slugVal = c.slug || nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        const isSelected = String(currentSelectedId) === String(idVal) || (!currentSelectedId && idx === 0);
 
-      // Group into slides of up to 6 categories
-      let slidesHtml = '';
-      let targetSlideIndex = 0;
+        let iconMarkup = `<i class="fa-solid fa-gem"></i>`;
+        const lower = nameVal.toLowerCase();
+        if (lower.includes('wedding') && !lower.includes('men')) {
+          iconMarkup = `<i class="fa-solid fa-ring"></i>`;
+        } else if (lower.includes('men')) {
+          iconMarkup = `<i class="fa-solid fa-ring"></i>`;
+        } else if (lower.includes('bridal')) {
+          iconMarkup = `<i class="fa-solid fa-heart"></i>`;
+        } else if (lower.includes('earring')) {
+          iconMarkup = `<svg class="cat-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>`;
+        } else if (lower.includes('bracelet')) {
+          iconMarkup = `<i class="fa-solid fa-link"></i>`;
+        } else if (lower.includes('necklace')) {
+          iconMarkup = `<i class="fa-solid fa-crown"></i>`;
+        } else if (lower.includes('diamond')) {
+          iconMarkup = `<i class="fa-solid fa-gem"></i>`;
+        } else if (lower.includes('watch')) {
+          iconMarkup = `<i class="fa-solid fa-clock"></i>`;
+        }
 
-      for (let p = 0; p < totalCatCarouselPages; p++) {
-        const slice = visibleCategories.slice(p * chunkSize, (p + 1) * chunkSize);
-        slidesHtml += `
-          <div class="cat-carousel-slide">
-            <div class="cat-cards-grid">
-              ${slice.map((c, idx) => {
-                const idVal = c.id;
-                const nameVal = c.name;
-                const slugVal = c.slug || nameVal.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-                const isSelected = String(currentSelectedId) === String(idVal) || (!currentSelectedId && p === 0 && idx === 0);
-                if (isSelected) targetSlideIndex = p;
-
-                let iconMarkup = `<i class="fa-solid fa-gem"></i>`;
-                const lower = nameVal.toLowerCase();
-                if (lower.includes('wedding')) {
-                  iconMarkup = `<i class="fa-solid fa-ring"></i>`;
-                } else if (lower.includes('bridal')) {
-                  iconMarkup = `<i class="fa-solid fa-heart"></i>`;
-                } else if (lower.includes('earring')) {
-                  iconMarkup = `<svg class="cat-icon-svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><circle cx="7" cy="3.5" r="1.8"/><path d="M7 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="7,8.5 10.5,13 7,20.5 3.5,13"/><circle cx="17" cy="3.5" r="1.8"/><path d="M17 5.3v3.2" stroke="currentColor" stroke-width="1.2"/><polygon points="17,8.5 20.5,13 17,20.5 13.5,13"/></svg>`;
-                } else if (lower.includes('bracelet')) {
-                  iconMarkup = `<i class="fa-solid fa-link"></i>`;
-                } else if (lower.includes('necklace')) {
-                  iconMarkup = `<i class="fa-solid fa-crown"></i>`;
-                } else if (lower.includes('diamond')) {
-                  iconMarkup = `<i class="fa-solid fa-gem"></i>`;
-                }
-
-                return `
-                  <div class="cat-select-card ${isSelected ? 'active' : ''}" 
-                       data-category-id="${idVal}" 
-                       data-category-slug="${slugVal}" 
-                       data-category-name="${nameVal}" 
-                       data-category-name-lower="${lower}" 
-                       onclick="setCategory('${idVal}', '${nameVal.replace(/'/g, "\\'")}', this)">
-                    ${iconMarkup} <span>${nameVal}</span>
-                  </div>
-                `;
-              }).join('')}
-            </div>
+        return `
+          <div class="cat-select-card ${isSelected ? 'active' : ''}" 
+               data-category-id="${idVal}" 
+               data-category-slug="${slugVal}" 
+               data-category-name="${nameVal}" 
+               data-category-name-lower="${lower}" 
+               onclick="setCategory('${idVal}', '${nameVal.replace(/'/g, "\\'")}', this)">
+            ${iconMarkup} <span>${nameVal}</span>
           </div>
         `;
+      }).join('');
+
+      const vp = document.getElementById('adminCatViewport');
+      if (vp) {
+        vp.removeEventListener('scroll', updateAdminCatNav);
+        vp.addEventListener('scroll', updateAdminCatNav, { passive: true });
       }
 
-      track.innerHTML = slidesHtml;
-
-      // Add touch swipe support for mobile
-      let touchStartX = 0;
-      let touchEndX = 0;
-      if (track.parentElement) {
-        track.parentElement.addEventListener('touchstart', e => {
-          touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-        track.parentElement.addEventListener('touchend', e => {
-          touchEndX = e.changedTouches[0].screenX;
-          if (touchStartX - touchEndX > 50) navigateCatPage(1);
-          if (touchEndX - touchStartX > 50) navigateCatPage(-1);
-        }, { passive: true });
-      }
-
-      // Navigate to the slide of the selected category
-      currentCatCarouselPage = targetSlideIndex;
-      navigateCatPage(0);
+      updateAdminCatNav();
 
       const activeCard = track.querySelector('.cat-select-card.active') || track.querySelector('.cat-select-card');
       if (activeCard) {
@@ -1314,6 +1580,9 @@
     if (editId) {
       editingProductId = editId;
       loadProductForEditing(editId);
+    } else {
+      const initialCatId = parseInt(document.getElementById('adminCategoryId')?.value) || 1;
+      adaptStep3ForCategory(initialCatId);
     }
   });
 
@@ -1448,25 +1717,61 @@
     }
 
     const enabledVariants = [];
-    document.querySelectorAll('.matrix-chk').forEach(chk => {
-      if (chk.checked) {
-        const mId = parseInt(chk.dataset.metalId);
-        const cId = parseInt(chk.dataset.caratId);
-        const priceInput = document.querySelector(`.matrix-price-input[data-metal-id="${mId}"][data-carat-id="${cId}"]`);
-        const varPrice = priceInput && parseFloat(priceInput.value) > 0 ? parseFloat(priceInput.value) : priceUSD;
+    if (categoryId === 7) {
+      // Loose Diamond: single direct variant
+      enabledVariants.push({
+        metalId: 0,
+        caratId: 0,
+        priceOverrideUSD: priceUSD,
+        isEnabled: true
+      });
+    } else if (categoryId === 9) {
+      // Luxury Watches: Automatically register Swiss & Japan with Moissanite & Lab Grown Diamond
+      enabledVariants.push({
+        metalId: 101, // Japan
+        caratId: 201, // Moissanite
+        priceOverrideUSD: moissanitePriceUSD,
+        isEnabled: true
+      });
+      enabledVariants.push({
+        metalId: 101, // Japan
+        caratId: 202, // Lab Grown
+        priceOverrideUSD: priceUSD,
+        isEnabled: true
+      });
+      enabledVariants.push({
+        metalId: 102, // Swiss
+        caratId: 201, // Moissanite
+        priceOverrideUSD: moissanitePriceUSD + 250,
+        isEnabled: true
+      });
+      enabledVariants.push({
+        metalId: 102, // Swiss
+        caratId: 202, // Lab Grown
+        priceOverrideUSD: priceUSD + 250,
+        isEnabled: true
+      });
+    } else {
+      document.querySelectorAll('.matrix-chk:not(.matrix-watch-chk)').forEach(chk => {
+        if (chk.checked) {
+          const mId = parseInt(chk.dataset.metalId);
+          const cId = parseInt(chk.dataset.caratId);
+          const priceInput = document.querySelector(`.matrix-price-input[data-metal-id="${mId}"][data-carat-id="${cId}"]`);
+          const varPrice = priceInput && parseFloat(priceInput.value) > 0 ? parseFloat(priceInput.value) : priceUSD;
 
-        enabledVariants.push({
-          metalId: mId,
-          caratId: cId,
-          priceOverrideUSD: varPrice,
-          isEnabled: true
-        });
+          enabledVariants.push({
+            metalId: mId,
+            caratId: cId,
+            priceOverrideUSD: varPrice,
+            isEnabled: true
+          });
+        }
+      });
+
+      if (enabledVariants.length === 0) {
+        showToast('Please enable at least 1 Metal x Carat variant in the matrix!', 'warning');
+        return;
       }
-    });
-
-    if (enabledVariants.length === 0) {
-      showToast('Please enable at least 1 Metal x Carat variant in the matrix!', 'warning');
-      return;
     }
 
     // Ensure all uploaded photos have finished uploading to Cloudinary

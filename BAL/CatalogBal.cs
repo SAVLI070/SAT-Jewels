@@ -2,6 +2,7 @@ using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Primitives;
 using SAT1.Models;
 
 namespace SAT1.BAL
@@ -48,6 +49,7 @@ namespace SAT1.BAL
         private readonly AdminBal _adminBal;
         private readonly IMemoryCache _cache;
         private static bool _categoriesEnsured = false;
+        private static CancellationTokenSource _pagedCatalogResetToken = new CancellationTokenSource();
 
         public CatalogBal(SatJewelDbContext context, IConfiguration configuration, AdminBal adminBal, IMemoryCache cache)
         {
@@ -70,7 +72,7 @@ namespace SAT1.BAL
             {
                 return await _context.Products
                     .AsNoTracking()
-                    .Where(p => p.CategoryId == categoryId && p.DiamondShapeId > 0)
+                    .Where(p => p.CategoryId == categoryId && p.DiamondShapeId > 0 && p.IsActive)
                     .GroupBy(p => p.DiamondShapeId)
                     .Select(g => new { ShapeId = g.Key, Count = g.Count() })
                     .ToDictionaryAsync(x => x.ShapeId, x => x.Count);
@@ -90,6 +92,9 @@ namespace SAT1.BAL
             _cache.Remove("Global_PricingRules");
             _cache.Remove("Global_Metals");
             _cache.Remove("Global_Carats");
+
+            var oldToken = Interlocked.Exchange(ref _pagedCatalogResetToken, new CancellationTokenSource());
+            try { oldToken.Cancel(); oldToken.Dispose(); } catch { }
         }
 
         public async Task<List<DynamicPricingRule>> GetCachedActivePricingRulesAsync()
@@ -139,7 +144,8 @@ namespace SAT1.BAL
             { "4", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366775/sat_jewels/categories/cat_4_earrings.jpg" },
             { "5", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366777/sat_jewels/categories/cat_5_bracelets.jpg" },
             { "6", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366779/sat_jewels/categories/cat_6_necklaces.jpg" },
-            { "7", "/assets/categories/cat_diamonds.png" }
+            { "7", "/assets/categories/cat_diamonds.png" },
+            { "9", "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790922325/sat_jewels/categories/cat_9_luxury_watch.jpg" }
         };
 
         private async Task EnsureDefaultCategoriesAsync()
@@ -196,6 +202,7 @@ namespace SAT1.BAL
                 .ToList();
 
             var productCounts = (await _context.Products.AsNoTracking()
+                .Where(p => p.IsActive)
                 .GroupBy(p => p.CategoryId)
                 .Select(g => new KeyValuePair<long, int>(g.Key, g.Count()))
                 .ToListAsync())
@@ -703,7 +710,9 @@ namespace SAT1.BAL
                 Name = p.ProductName,
                 CategoryId = p.CategoryId.ToString(),
                 DiamondShapeId = p.DiamondShapeId,
-                Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity}",
+                Spec = (p.CategoryId == 9)
+                    ? "Swiss Automatic Mechanical | Sapphire Glass | 50m Water Resistant"
+                    : $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity}",
                 PriceUSD = p.BasePriceUSD,
                 ImageUrl = primaryImg,
                 GalleryImages = string.Join(",", orderedImgs),
@@ -721,7 +730,7 @@ namespace SAT1.BAL
             {
                 var relationalProducts = await _context.Products
                     .Include(p => p.Images)
-                    .Where(p => p.CategoryId == numericId)
+                    .Where(p => p.CategoryId == numericId && p.IsActive)
                     .OrderByDescending(p => p.CreatedAt)
                     .ToListAsync();
 
@@ -745,7 +754,7 @@ namespace SAT1.BAL
             {
                 var query = _context.Products
                     .Include(p => p.Images)
-                    .Where(p => p.CategoryId == categoryId);
+                    .Where(p => p.CategoryId == categoryId && p.IsActive);
 
                 if (!string.IsNullOrWhiteSpace(shape) && shape.ToLower() != "all")
                 {
@@ -804,7 +813,7 @@ namespace SAT1.BAL
 
             try
             {
-                var query = _context.Products.AsNoTracking();
+                var query = _context.Products.AsNoTracking().Where(p => p.IsActive);
                 if (categoryId > 0)
                 {
                     query = query.Where(p => p.CategoryId == categoryId);
@@ -875,7 +884,10 @@ namespace SAT1.BAL
                     PageSize = pageSize
                 };
 
-                _cache.Set(cacheKey, result, TimeSpan.FromMinutes(5));
+                var cacheOptions = new MemoryCacheEntryOptions()
+                    .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
+                    .AddExpirationToken(new CancellationChangeToken(_pagedCatalogResetToken.Token));
+                _cache.Set(cacheKey, result, cacheOptions);
                 return result;
             }
             catch (Exception ex)
@@ -904,7 +916,7 @@ namespace SAT1.BAL
             {
                 var dbItems = await _context.Products
                     .Include(p => p.Images)
-                    .Where(p => p.CategoryId == categoryId)
+                    .Where(p => p.CategoryId == categoryId && p.IsActive)
                     .OrderByDescending(p => p.CreatedAt)
                     .ToListAsync();
 
@@ -1062,9 +1074,10 @@ namespace SAT1.BAL
                         }
                     }
 
-                    if (metalVariants.Count == 0 || caratVariants.Count == 0)
+                    CatalogItem? catItemSync = null;
+                    if (metalVariants.Count == 0 || caratVariants.Count == 0 || p.CategoryId == 7 || p.CategoryId == 9)
                     {
-                        var catItemSync = await _context.CatalogItems.AsNoTracking().FirstOrDefaultAsync(c => c.Id == $"sat-prod-{p.ProductId}" || c.Id == p.ProductId.ToString());
+                        catItemSync = await _context.CatalogItems.AsNoTracking().FirstOrDefaultAsync(c => c.Id == $"sat-prod-{p.ProductId}" || c.Id == p.ProductId.ToString());
                         if (catItemSync != null)
                         {
                             if (metalVariants.Count == 0 && !string.IsNullOrWhiteSpace(catItemSync.MetalOptions))
@@ -1078,7 +1091,7 @@ namespace SAT1.BAL
                         }
                     }
 
-                    if (metalVariants.Count == 0 && p.CategoryId != 7)
+                    if (metalVariants.Count == 0 && p.CategoryId != 7 && p.CategoryId != 9)
                     {
                         var pricingRules = await GetCachedActivePricingRulesAsync();
                         var defaultMetals = await GetCachedMetalsAsync();
@@ -1095,7 +1108,7 @@ namespace SAT1.BAL
                         }).ToList();
                     }
 
-                    if (caratVariants.Count == 0 && p.CategoryId != 7)
+                    if (caratVariants.Count == 0 && p.CategoryId != 7 && p.CategoryId != 9)
                     {
                         var pricingRules = await GetCachedActivePricingRulesAsync();
                         var defaultCarats = await GetCachedCaratsAsync();
@@ -1110,13 +1123,33 @@ namespace SAT1.BAL
                         }).ToList();
                     }
 
+                    string finalSpec;
+                    if (p.CategoryId == 9)
+                    {
+                        finalSpec = "Swiss Automatic Mechanical | Scratch-Resistant Sapphire Crystal | 50m Water Resistance";
+                    }
+                    else if (p.CategoryId == 7 || (!string.IsNullOrWhiteSpace(catItemSync?.Spec) && catItemSync.Spec.Contains("Loose Diamond", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        finalSpec = !string.IsNullOrWhiteSpace(catItemSync?.Spec) 
+                            ? catItemSync.Spec 
+                            : $"{p.DefaultCaratWeight}ct | Color E-F | Clarity VVS-VS | Cut Excellent | Certified Loose Lab Grown Diamond";
+                    }
+                    else if (catItemSync != null && !string.IsNullOrWhiteSpace(catItemSync.Spec) && !catItemSync.Spec.Contains("1.50ct GIA VVS1"))
+                    {
+                        finalSpec = catItemSync.Spec;
+                    }
+                    else
+                    {
+                        finalSpec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}";
+                    }
+
                     return new CatalogItem
                     {
                         Id = $"sat-prod-{p.ProductId}",
                         Name = p.ProductName,
                         CategoryId = p.CategoryId.ToString(),
                         DiamondShapeId = p.DiamondShapeId,
-                        Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct GIA {p.DiamondClarity} | {p.ProductName}",
+                        Spec = finalSpec,
                         PriceUSD = p.BasePriceUSD,
                         ImageUrl = mainImg,
                         GalleryImages = string.Join(",", allImgs),
@@ -1247,7 +1280,7 @@ namespace SAT1.BAL
         {
             if (string.IsNullOrWhiteSpace(optionText)) return 0;
 
-            var match = Regex.Match(optionText, @"\(([\+\-]\d+)\)");
+            var match = Regex.Match(optionText, @"\(([\+\-]?\d+(?:\.\d+)?)\s*(?:USD)?\)");
             if (match.Success && decimal.TryParse(match.Groups[1].Value, out decimal delta))
             {
                 return delta;
@@ -1282,7 +1315,7 @@ namespace SAT1.BAL
                     var fallbackProducts = await _context.Products
                         .AsNoTracking()
                         .Include(p => p.Images)
-                        .Where(p => p.Title.ToLower().Contains(q) || p.Slug.ToLower().Contains(q))
+                        .Where(p => p.IsActive && (p.Title.ToLower().Contains(q) || p.Slug.ToLower().Contains(q)))
                         .OrderByDescending(p => p.CreatedAt)
                         .Take(20)
                         .Select(p => new CatalogItem
@@ -1293,7 +1326,7 @@ namespace SAT1.BAL
                             Spec = $"{p.DefaultMetalType} | {p.DefaultCaratWeight}ct | {p.ProductName}",
                             PriceUSD = p.BasePriceUSD,
                             ImageUrl = p.Images.OrderBy(i => i.DisplayOrder).Select(i => i.ImagePath).FirstOrDefault() ?? p.ImagePath ?? "/assets/ring_1.jpg",
-                            IsActive = true,
+                            IsActive = p.IsActive,
                             CreatedAt = p.CreatedAt
                         })
                         .ToListAsync();

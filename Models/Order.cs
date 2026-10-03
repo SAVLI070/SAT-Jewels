@@ -50,6 +50,9 @@ namespace SAT1.Models
         [MaxLength(50)]
         public string ShippingCountry { get; set; } = "United States";
 
+        [NotMapped]
+        public string ShippingAddress => string.Join(", ", new[] { ShippingStreet, ShippingCity, ShippingState, ShippingPostalCode, ShippingCountry }.Where(s => !string.IsNullOrWhiteSpace(s)));
+
         public string CustomerRegion { get; set; } = "United States";
 
         [Required(ErrorMessage = "Total Amount in USD is required.")]
@@ -102,7 +105,7 @@ namespace SAT1.Models
 
         // Shipping & Fulfillment Tracking Fields (Amazon/Flipkart Automatic Workflow)
         [MaxLength(50)]
-        public string CurrentTrackingStatus { get; set; } = "OrderPlaced";
+        public string CurrentTrackingStatus { get; set; } = "PaymentPending";
 
         [MaxLength(100)]
         public string TrackingNumber { get; set; } = string.Empty;

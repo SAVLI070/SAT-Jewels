@@ -296,53 +296,379 @@
   </div>
 </section>
 
-<!-- 2. SHOP BY CATEGORY SECTION (EXACT 6 MAIN CATEGORIES) -->
-<section id="collections" style="padding: 40px 0 50px; background: transparent; position: relative; z-index: 10;">
-  <div class="container" style="position: relative; z-index: 20;">
-    <div style="text-align: center; margin-bottom: 36px;">
-      <h2 style="font-family: var(--font-serif); font-size: 36px; color: #ffffff; margin: 0 0 10px; font-weight: 500; letter-spacing: 0.5px;">Shop By Category</h2>
-      <div style="width: 50px; height: 1.5px; background: var(--champagne-gold); margin: 0 auto;"></div>
+<!-- 2. SHOP BY CATEGORY SECTION (EXACT BENTO GRID FROM IMAGE 1) -->
+<section id="collections" style="padding: 40px 0 60px; background: transparent; position: relative; z-index: 10;">
+  <div class="container" style="position: relative; z-index: 20; max-width: 1380px;">
+    
+    <!-- Bento Grid Section Header -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 3px; color: var(--champagne-gold, #d4b270); font-weight: 600; display: inline-block; margin-bottom: 8px;">Haute Joaillerie Atelier</span>
+      <h2 style="font-family: var(--font-serif, 'Playfair Display', serif); font-size: 38px; color: #ffffff; margin: 0 0 10px; font-weight: 500; letter-spacing: 0.5px;">Curated Fine Collections</h2>
+      <div style="width: 50px; height: 1.5px; background: var(--champagne-gold, #d4b270); margin: 0 auto;"></div>
     </div>
 
-    <!-- Desktop Horizontal Scroll Carousel & Mobile 2-Column Grid -->
-    <div class="cat-carousel-container">
-      <!-- Carousel Navigation Left Arrow -->
-      <button type="button" class="cat-slider-arrow cat-arrow-left" onclick="scrollCatSlider(-300)" aria-label="Previous Category">
-        <i class="fa-solid fa-chevron-left"></i>
-      </button>
+    <!-- Luxury Bento Grid Layout (Matching Image 1: Main Section Ring on Left) -->
+    <div class="sat-bento-grid">
+      
+      <!-- 1. MAIN SECTION: RINGS (Spans entire Left Side top to bottom) -->
+      <a href="/Product/Category?id=1" class="sat-bento-card sat-bento-card-main-ring" style="text-decoration: none;">
+        <div class="sat-bento-img-wrap">
+          <img src="/assets/hero_slider_1_solitaire.jpg" alt="Curated Fine Engagement Rings" loading="eager" />
+          <div class="sat-bento-overlay-ring"></div>
+        </div>
+        <div class="sat-bento-content sat-bento-content-main">
+          <div>
+            <div class="sat-bento-badge">HAUTE JOAILLERIE</div>
+            <h3 class="sat-bento-title-main">
+              Curated Fine Jewellery,<br />
+              Guaranteed <span class="sat-bento-italic-gold">Flawless</span>
+            </h3>
+            <p class="sat-bento-desc-main">
+              Conflict-free diamonds. Master setters. An intimate salon experience.
+            </p>
+          </div>
+          <div class="sat-bento-cta sat-bento-cta-gold">
+            Explore All Rings <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </div>
+      </a>
 
-      <!-- Track containing ONLY the Active Categories in ONE LINE -->
-      <div class="cat-carousel-track" id="mainCatTrack">
-        @if (publicCategories != null && publicCategories.Count > 0)
-        {
-          @foreach (var cat in publicCategories)
-          {
-            <a href="/Product/Category?id=@cat.Id" class="cat-carousel-card">
-              <div class="cat-card-image-box">
-                <img src="@cat.ImageUrl" alt="@cat.Name" loading="lazy" />
-              </div>
-              <div class="cat-card-title-label">@cat.Name &rarr;</div>
-            </a>
-          }
-        }
-      </div>
+      <!-- 2. LUXURY WATCHES (Top Center) -->
+      <a href="/Product/Category?id=9" class="sat-bento-card sat-bento-card-watch" style="text-decoration: none;">
+        <div class="sat-bento-img-wrap">
+          <img src="/assets/categories/cat_luxury_watch.jpg" alt="Luxury Swiss Horology & Watches" loading="lazy" />
+          <div class="sat-bento-overlay"></div>
+        </div>
+        <div class="sat-bento-content">
+          <div class="sat-bento-tag">SWISS HOROLOGY</div>
+          <h4 class="sat-bento-title">Luxury Watches</h4>
+          <div class="sat-bento-cta">
+            Explore Timepieces <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </div>
+      </a>
 
-      <!-- Carousel Navigation Right Arrow -->
-      <button type="button" class="cat-slider-arrow cat-arrow-right" onclick="scrollCatSlider(300)" aria-label="Next Category">
-        <i class="fa-solid fa-chevron-right"></i>
-      </button>
+      <!-- 3. SOLITAIRE SUITE (Top Right) -->
+      <a href="/Product/Category?id=7" class="sat-bento-card sat-bento-card-solitaire" style="text-decoration: none;">
+        <div class="sat-bento-img-wrap">
+          <img src="/assets/categories/cat_diamonds.png" alt="Solitaire Suite & Loose Diamonds" loading="lazy" />
+          <div class="sat-bento-overlay"></div>
+        </div>
+        <div class="sat-bento-content">
+          <div class="sat-bento-tag">CERTIFIED GEMS</div>
+          <h4 class="sat-bento-title">Solitaire Suite</h4>
+          <div class="sat-bento-cta">
+            Explore Diamonds <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- 4. FOR HER / WEDDING RINGS (Middle Left) -->
+      <a href="/Product/Category?id=2" class="sat-bento-card sat-bento-card-forher" style="text-decoration: none;">
+        <div class="sat-bento-img-wrap">
+          <img src="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366771/sat_jewels/categories/cat_2_wedding_rings.jpg" alt="Wedding Rings & Bridal Bands" loading="lazy" />
+          <div class="sat-bento-overlay"></div>
+        </div>
+        <div class="sat-bento-content">
+          <div class="sat-bento-tag">BRIDAL & CEREMONY</div>
+          <h4 class="sat-bento-title">For Her</h4>
+          <div class="sat-bento-cta">
+            Explore Jewellery <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- 5. FOR ETERNITY / TENNIS BRACELETS (Middle Right) -->
+      <a href="/Product/Category?id=5" class="sat-bento-card sat-bento-card-eternity" style="text-decoration: none;">
+        <div class="sat-bento-img-wrap">
+          <img src="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366777/sat_jewels/categories/cat_5_bracelets.jpg" alt="For Eternity Diamond Tennis Bracelets" loading="lazy" />
+          <div class="sat-bento-overlay"></div>
+        </div>
+        <div class="sat-bento-content">
+          <div class="sat-bento-tag">TENNIS & CUFFS</div>
+          <h4 class="sat-bento-title">For Eternity</h4>
+          <div class="sat-bento-cta">
+            Explore Jewellery <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- 6. DIAMOND PAVÉ / EARRINGS (Bottom Left) -->
+      <a href="/Product/Category?id=4" class="sat-bento-card sat-bento-card-pave" style="text-decoration: none;">
+        <div class="sat-bento-img-wrap">
+          <img src="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366775/sat_jewels/categories/cat_4_earrings.jpg" alt="Diamond Pavé Earrings & Studs" loading="lazy" />
+          <div class="sat-bento-overlay"></div>
+        </div>
+        <div class="sat-bento-content">
+          <div class="sat-bento-tag">ATELIER STUDS</div>
+          <h4 class="sat-bento-title">Diamond Pavé</h4>
+          <div class="sat-bento-cta">
+            Explore <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- 7. VAULT EDITIONS / NECKLACES (Bottom Right) -->
+      <a href="/Product/Category?id=6" class="sat-bento-card sat-bento-card-vault" style="text-decoration: none;">
+        <div class="sat-bento-img-wrap">
+          <img src="https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366779/sat_jewels/categories/cat_6_necklaces.jpg" alt="Vault Editions Diamond Chokers & Necklaces" loading="lazy" />
+          <div class="sat-bento-overlay"></div>
+        </div>
+        <div class="sat-bento-content">
+          <div class="sat-bento-tag">ROYAL EDITIONS</div>
+          <h4 class="sat-bento-title">Vault Editions</h4>
+          <div class="sat-bento-cta">
+            Explore <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </div>
+      </a>
+
     </div>
   </div>
 </section>
 
-<script>
-  function scrollCatSlider(offset) {
-    const track = document.getElementById('mainCatTrack');
-    if (track) {
-      track.scrollBy({ left: offset, behavior: 'smooth' });
-    }
+<style>
+/* ==========================================================================
+   SAT JEWELS - BENTO CATEGORY GRID (INSPIRED BY IMAGE 1)
+   ========================================================================== */
+.sat-bento-grid {
+  display: grid;
+  grid-template-columns: 1.18fr 1fr 1fr;
+  grid-template-rows: repeat(3, minmax(200px, 220px));
+  gap: 18px;
+  width: 100%;
+}
+
+.sat-bento-card {
+  position: relative;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #090c13;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 24px;
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1), 
+              border-color 0.4s ease, 
+              box-shadow 0.4s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.sat-bento-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(212, 178, 112, 0.45);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 25px rgba(212, 178, 112, 0.15);
+}
+
+/* 1. Main Left Rings Card - Spans 3 rows */
+.sat-bento-card-main-ring {
+  grid-column: 1;
+  grid-row: 1 / span 3;
+  justify-content: space-between;
+  padding: 36px 32px;
+  background: radial-gradient(circle at 80% 20%, rgba(212, 178, 112, 0.08) 0%, #07090f 70%);
+}
+
+.sat-bento-img-wrap {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.sat-bento-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.sat-bento-card:hover .sat-bento-img-wrap img {
+  transform: scale(1.06);
+}
+
+/* Gradients for text contrast */
+.sat-bento-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(6, 9, 15, 0.95) 0%, rgba(6, 9, 15, 0.55) 50%, rgba(6, 9, 15, 0.3) 100%);
+  transition: opacity 0.3s ease;
+}
+
+.sat-bento-overlay-ring {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(6, 9, 15, 0.92) 0%, rgba(6, 9, 15, 0.75) 45%, rgba(6, 9, 15, 0.4) 100%);
+}
+
+.sat-bento-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+}
+
+.sat-bento-content-main {
+  height: 100%;
+  justify-content: space-between;
+}
+
+.sat-bento-badge {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.2px;
+  text-transform: uppercase;
+  color: #a0aec0;
+  margin-bottom: 14px;
+}
+
+.sat-bento-title-main {
+  font-family: var(--font-serif, 'Playfair Display', serif);
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: #ffffff;
+  margin: 0 0 12px;
+  letter-spacing: 0.3px;
+}
+
+.sat-bento-italic-gold {
+  font-style: italic;
+  font-family: var(--font-serif, 'Playfair Display', serif);
+  color: var(--champagne-gold, #d4b270);
+  font-weight: 400;
+}
+
+.sat-bento-desc-main {
+  font-family: var(--font-sans);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0 0 24px;
+  max-width: 360px;
+}
+
+.sat-bento-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 6px;
+}
+
+.sat-bento-title {
+  font-family: var(--font-serif, 'Playfair Display', serif);
+  font-size: 21px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0 0 10px;
+  line-height: 1.25;
+}
+
+.sat-bento-cta {
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--champagne-gold, #d4b270);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: gap 0.25s ease, color 0.25s ease;
+}
+
+.sat-bento-cta-gold {
+  background: rgba(212, 178, 112, 0.12);
+  border: 1px solid rgba(212, 178, 112, 0.3);
+  padding: 10px 18px;
+  border-radius: 30px;
+  width: fit-content;
+  color: #ffffff;
+}
+
+.sat-bento-card:hover .sat-bento-cta {
+  gap: 10px;
+  color: #fef08a;
+}
+
+.sat-bento-card:hover .sat-bento-cta-gold {
+  background: rgba(212, 178, 112, 0.22);
+  border-color: #d4b270;
+  color: #ffffff;
+}
+
+/* Tablet Breakpoint (Under 1024px) */
+@@media (max-width: 1024px) {
+  .sat-bento-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
   }
-</script>
+  .sat-bento-card-main-ring {
+    grid-column: 1 / -1;
+    grid-row: auto;
+    min-height: 380px;
+  }
+  .sat-bento-card {
+    min-height: 200px;
+  }
+}
+
+/* Mobile Breakpoint (Under 640px) */
+@@media (max-width: 640px) {
+  .sat-bento-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .sat-bento-card-main-ring {
+    min-height: 320px;
+    padding: 24px 20px;
+  }
+  .sat-bento-title-main {
+    font-size: 24px;
+  }
+  .sat-bento-card {
+    min-height: 180px;
+    padding: 20px;
+  }
+}
+
+/* Mobile View: Clean compact 6 boxes (Remove description content on mobile as requested) */
+@@media (max-width: 768px) {
+  .why-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .why-card {
+    padding: 18px 12px !important;
+    align-items: center !important;
+    text-align: center !important;
+    min-height: auto !important;
+  }
+  .why-card .why-desc {
+    display: none !important;
+  }
+  .why-card .why-icon-wrap {
+    margin: 0 auto 10px auto !important;
+    width: 44px !important;
+    height: 44px !important;
+    font-size: 18px !important;
+  }
+  .why-card .why-title {
+    font-size: 13.5px !important;
+    margin-bottom: 8px !important;
+    line-height: 1.3 !important;
+  }
+  .why-card .why-highlight {
+    margin-top: 2px !important;
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+  }
+}
+</style>
 
 <script>
   function switchDiamondTab(tabType) {

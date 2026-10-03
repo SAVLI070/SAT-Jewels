@@ -297,8 +297,8 @@
         <!-- 2-Column Luxury Architecture: Left (Review & Address & Gateway), Right (Summary Vault) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-          <!-- ==================== CONTAINER 1: CART ITEMS & SHIPPING ADDRESS (7-8 COLS) ==================== -->
-          <div class="lg:col-span-7 xl:col-span-8 lg:row-start-1 space-y-6">
+          <!-- ==================== CONTAINER 1: CART ITEMS, SHIPPING ADDRESS & PAYMENT (7-8 COLS) ==================== -->
+          <div class="lg:col-span-7 xl:col-span-8 space-y-6">
 
             <!-- 1. CART ITEMS VAULT CONTAINER -->
             <div id="cartItemsContainer" class="space-y-4">
@@ -532,12 +532,94 @@
                   </p>
                 </div>
               </label>
+            <!-- 4. FINAL PAYMENT DISPATCH (Express & Gateway Options) -->
+            <div id="paymentSectionBox" class="space-y-6">
+
+              <div class="rounded-xl bg-surface-container p-6 shadow-md space-y-6">
+
+                <!-- Authorization Warning / Status Banner -->
+                <div id="addressWarningNotice" class="p-3.5 rounded-lg bg-surface-container-low flex items-center gap-3 transition-colors">
+                  <span id="addressStatusIcon" class="material-symbols-outlined text-tertiary text-[22px]">verified_user</span>
+                  <p id="addressStatusText" class="font-body-sm text-body-sm text-on-surface">
+                    <strong class="text-tertiary font-semibold">Payment Status:</strong> Enter your verified home delivery shipping address above to authorize payment dispatch.
+                  </p>
+                </div>
+
+                <!-- Payment Header with Subtotal Reminder -->
+                <div class="flex items-baseline justify-between pt-1 border-b border-outline-variant/30 pb-4">
+                  <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Total Order Subtotal:</span>
+                  <span class="font-headline-lg text-headline-lg text-primary font-bold tracking-tight" id="banner-subtotal-display">$0.00 USD</span>
+                </div>
+
+                @if (isAuthenticated)
+                {
+                  <div id="paypalContainerBox" class="space-y-6 opacity-50 pointer-events-none transition-opacity">
+
+                    <!-- OPTION 1: INSTANT ONE-CLICK / PAYPAL EXPRESS CHECKOUT -->
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between">
+                        <span class="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant">Option 1: Pay with PayPal Express</span>
+                        <span class="text-tertiary font-label-caps text-[10px] uppercase font-semibold">Instant USD Clearance</span>
+                      </div>
+
+                      <!-- PayPal Official Smart Buttons Target Container -->
+                      <div id="paypal-button-container" class="min-h-[48px]"></div>
+
+                      <div class="flex items-center justify-center gap-2 font-label-caps text-[10px] text-on-surface-variant">
+                        <span>Powered by</span>
+                        <span class="text-on-surface font-semibold">PayPal Enterprise Live Commerce</span>
+                      </div>
+                    </div>
+
+                    <!-- OPTION 2: EXPANDABLE DEBIT OR CREDIT CARD (RAZORPAY) -->
+                    <div class="space-y-3 pt-2 border-t border-outline-variant/20">
+                      <span class="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant">Option 2: Pay with Credit / Debit Card</span>
+                      <button class="w-full py-3.5 px-6 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-medium transition-colors flex items-center justify-between group" id="btn-method-card" onclick="payWithRazorpay()" type="button">
+                        <div class="flex items-center gap-2.5">
+                          <span class="material-symbols-outlined text-primary text-[20px]">credit_card</span>
+                          <span class="font-body-md text-body-md font-semibold text-left">Debit or Credit Card (Razorpay Gateway)</span>
+                        </div>
+                        <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[20px]">arrow_forward</span>
+                      </button>
+                      <div class="flex items-center justify-center gap-2 font-label-caps text-[10px] text-on-surface-variant">
+                        <span>Accepted:</span>
+                        <span class="text-on-surface font-semibold">Visa • MasterCard • American Express • RuPay</span>
+                      </div>
+                    </div>
+
+                    <!-- OPTION 3: CONCIERGE WIRE PRIVILEGE -->
+                    <div class="pt-1 border-t border-outline-variant/20">
+                      <button class="w-full py-2.5 px-4 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm flex items-center justify-between transition-colors" onclick="toggleWireDetails()" type="button">
+                        <span class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[16px] text-primary">account_balance</span>
+                          <span>Direct Bank Wire Transfer (2% Savings Privilege for High Jewelry Orders)</span>
+                        </span>
+                        <span class="text-primary font-semibold text-[11px] uppercase tracking-wider">Inquire Desk</span>
+                      </button>
+                      <div class="hidden mt-2 p-3.5 rounded bg-surface-container-lowest font-body-sm text-body-sm text-on-surface-variant" id="wire-payment-details">
+                        Upon placing your order via Private Bank Wire, wire instructions for JPMorgan Chase / HDFC Private Banking will be dispatched to your email. Your stone is reserved immediately for 72 hours.
+                      </div>
+                    </div>
+
+                  </div>
+                }
+                else
+                {
+                  <div class="p-6 rounded-lg bg-surface-container-low text-center space-y-3">
+                    <p class="font-body-md text-body-md text-on-surface-variant">
+                      Please sign in above to unlock instant PayPal Express and Credit Card payment options.
+                    </p>
+                  </div>
+                }
+
+              </div>
+
             </div>
 
           </div>
 
-          <!-- ==================== CONTAINER 2: ORDER SUMMARY (BEFORE PAYMENT ON MOBILE, RIGHT COLUMN ON DESKTOP) ==================== -->
-          <div class="lg:col-span-5 xl:col-span-4 lg:row-start-1 lg:row-span-2 lg:sticky lg:top-24 space-y-6">
+          <!-- ==================== CONTAINER 2: ORDER SUMMARY (RIGHT COLUMN ON DESKTOP, BESIDE ADDRESS) ==================== -->
+          <div class="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-24 space-y-6">
 
             <!-- Summary Vault Card -->
             <div class="rounded-xl bg-surface-container p-6 shadow-xl space-y-6 border border-outline-variant/20">
@@ -660,90 +742,6 @@
                   Call or chat with Master Jeweler Sahil Khurana directly via <a href="https://wa.me/917698727798" target="_blank" class="text-primary hover:underline font-semibold">WhatsApp VIP Desk</a>.
                 </p>
               </div>
-            </div>
-
-          </div>
-
-          <!-- ==================== CONTAINER 3: FINAL PAYMENT DISPATCH (LEFT BOTTOM ON DESKTOP, AFTER SUMMARY ON MOBILE) ==================== -->
-          <div id="paymentSectionBox" class="lg:col-span-7 xl:col-span-8 lg:row-start-2 space-y-6">
-
-            <div class="rounded-xl bg-surface-container p-6 shadow-md space-y-6">
-
-              <!-- Authorization Warning / Status Banner -->
-              <div id="addressWarningNotice" class="p-3.5 rounded-lg bg-surface-container-low flex items-center gap-3 transition-colors">
-                <span id="addressStatusIcon" class="material-symbols-outlined text-tertiary text-[22px]">verified_user</span>
-                <p id="addressStatusText" class="font-body-sm text-body-sm text-on-surface">
-                  <strong class="text-tertiary font-semibold">Payment Status:</strong> Enter your verified home delivery shipping address above to authorize payment dispatch.
-                </p>
-              </div>
-
-              <!-- Payment Header with Subtotal Reminder -->
-              <div class="flex items-baseline justify-between pt-1 border-b border-outline-variant/30 pb-4">
-                <span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest">Total Order Subtotal:</span>
-                <span class="font-headline-lg text-headline-lg text-primary font-bold tracking-tight" id="banner-subtotal-display">$0.00 USD</span>
-              </div>
-
-              @if (isAuthenticated)
-              {
-                <div id="paypalContainerBox" class="space-y-6 opacity-50 pointer-events-none transition-opacity">
-
-                  <!-- OPTION 1: INSTANT ONE-CLICK / PAYPAL EXPRESS CHECKOUT -->
-                  <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                      <span class="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant">Option 1: Pay with PayPal Express</span>
-                      <span class="text-tertiary font-label-caps text-[10px] uppercase font-semibold">Instant USD Clearance</span>
-                    </div>
-
-                    <!-- PayPal Official Smart Buttons Target Container -->
-                    <div id="paypal-button-container" class="min-h-[48px]"></div>
-
-                    <div class="flex items-center justify-center gap-2 font-label-caps text-[10px] text-on-surface-variant">
-                      <span>Powered by</span>
-                      <span class="text-on-surface font-semibold">PayPal Enterprise Live Commerce</span>
-                    </div>
-                  </div>
-
-                  <!-- OPTION 2: EXPANDABLE DEBIT OR CREDIT CARD (RAZORPAY) -->
-                  <div class="space-y-3 pt-2 border-t border-outline-variant/20">
-                    <span class="font-label-caps text-[11px] uppercase tracking-widest text-on-surface-variant">Option 2: Pay with Credit / Debit Card</span>
-                    <button class="w-full py-3.5 px-6 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-medium transition-colors flex items-center justify-between group" id="btn-method-card" onclick="payWithRazorpay()" type="button">
-                      <div class="flex items-center gap-2.5">
-                        <span class="material-symbols-outlined text-primary text-[20px]">credit_card</span>
-                        <span class="font-body-md text-body-md font-semibold text-left">Debit or Credit Card (Razorpay Gateway)</span>
-                      </div>
-                      <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors text-[20px]">arrow_forward</span>
-                    </button>
-                    <div class="flex items-center justify-center gap-2 font-label-caps text-[10px] text-on-surface-variant">
-                      <span>Accepted:</span>
-                      <span class="text-on-surface font-semibold">Visa • MasterCard • American Express • RuPay</span>
-                    </div>
-                  </div>
-
-                  <!-- OPTION 3: CONCIERGE WIRE PRIVILEGE -->
-                  <div class="pt-1 border-t border-outline-variant/20">
-                    <button class="w-full py-2.5 px-4 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm flex items-center justify-between transition-colors" onclick="toggleWireDetails()" type="button">
-                      <span class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-[16px] text-primary">account_balance</span>
-                        <span>Direct Bank Wire Transfer (2% Savings Privilege for High Jewelry Orders)</span>
-                      </span>
-                      <span class="text-primary font-semibold text-[11px] uppercase tracking-wider">Inquire Desk</span>
-                    </button>
-                    <div class="hidden mt-2 p-3.5 rounded bg-surface-container-lowest font-body-sm text-body-sm text-on-surface-variant" id="wire-payment-details">
-                      Upon placing your order via Private Bank Wire, wire instructions for JPMorgan Chase / HDFC Private Banking will be dispatched to your email. Your stone is reserved immediately for 72 hours.
-                    </div>
-                  </div>
-
-                </div>
-              }
-              else
-              {
-                <div class="p-6 rounded-lg bg-surface-container-low text-center space-y-3">
-                  <p class="font-body-md text-body-md text-on-surface-variant">
-                    Please sign in above to unlock instant PayPal Express and Credit Card payment options.
-                  </p>
-                </div>
-              }
-
             </div>
 
           </div>

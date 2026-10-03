@@ -1252,6 +1252,10 @@
   <!-- Category Redirection Banner Section with AI Generated Background Banners -->
   @{
     var catNameLower = (categoryName ?? "").ToLower().Trim();
+    bool isWatchCategory = (categoryName != null && categoryName.Contains("Watch", StringComparison.OrdinalIgnoreCase))
+                        || (categoryId != null && $"{categoryId}" == "9")
+                        || (ViewBag.CategorySlug as string ?? "").Contains("watch", StringComparison.OrdinalIgnoreCase);
+
     string categoryBannerImg = $"/assets/categories/banners/cat_banner_{categoryId}.jpg";
     if (catNameLower == "diamonds" || catNameLower == "diamond" || catNameLower.Contains("loose diamond") || (catNameLower.Contains("diamond") && !catNameLower.Contains("ring") && !catNameLower.Contains("earring") && !catNameLower.Contains("necklace") && !catNameLower.Contains("bracelet")))
     {
@@ -1261,13 +1265,27 @@
     {
       categoryBannerImg = "/assets/categories/banners/cat_banner_diamonds.jpg";
     }
+    else if (isWatchCategory)
+    {
+      categoryBannerImg = "/assets/categories/banners/cat_banner_9.jpg";
+    }
   }
   <section class="cat-redir-section" style="background-image: linear-gradient(180deg, rgba(5, 11, 20, 0.40) 0%, rgba(5, 11, 20, 0.75) 100%), url('@categoryBannerImg');">
     <div class="cat-container">
-      <h1 class="cat-redir-title">Lab Grown Diamond @categoryName</h1>
-      <p class="cat-redir-desc">
-        Shop Lab Grown Diamond @categoryName, the perfect symbol of love and commitment. Explore @(categoryName?.ToLower() ?? "jewelry") in a variety of styles, including solitaire, pavé, hidden halo, halo, halo &amp; pavé, three stone, bezel, cluster, split shank, Toi et Moi, and many other beautiful designs.
-      </p>
+      @if (isWatchCategory)
+      {
+        <h1 class="cat-redir-title">Swiss Precision &amp; Bespoke Luxury Watches</h1>
+        <p class="cat-redir-desc">
+          Explore our prestigious collection of Swiss automatic mechanical timepieces and diamond-encrusted watches. Masterfully assembled with scratch-resistant sapphire crystal, hand-finished cases, and chronometer-grade movements.
+        </p>
+      }
+      else
+      {
+        <h1 class="cat-redir-title">Lab Grown Diamond @categoryName</h1>
+        <p class="cat-redir-desc">
+          Shop Lab Grown Diamond @categoryName, the perfect symbol of love and commitment. Explore @(categoryName?.ToLower() ?? "jewelry") in a variety of styles, including solitaire, pavé, hidden halo, halo, halo &amp; pavé, three stone, bezel, cluster, split shank, Toi et Moi, and many other beautiful designs.
+        </p>
+      }
 
       <!-- Category Redirection Buttons Carousel (Matches Landing Page Carousel with Arrows) -->
       @{
@@ -1303,6 +1321,8 @@
     </div>
   </section>
 
+  @if (!isWatchCategory)
+  {
     <!-- Diamond Shape Line-Art Circle Icon Bar (Matches Landing Page & Bianca Chiara Style) -->
     <div class="diamond-shapes-wrapper">
       <div class="diamond-shapes-track">
@@ -1387,6 +1407,7 @@
         </a>
       </div>
     </div>
+  }
 
     <!-- Sub Sort Controls Bar with SAT Jewel Luxury Custom SORT BY Dropdown -->
     <div class="sub-sort-bar">

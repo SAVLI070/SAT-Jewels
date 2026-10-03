@@ -481,6 +481,66 @@
     color: #ffffff;
   }
 
+  /* Delete Loading Animation & Overlay on Product Card */
+  .product-square-card.is-deleting {
+    border-color: #fca5a5 !important;
+    box-shadow: 0 4px 20px rgba(220, 38, 38, 0.18) !important;
+    pointer-events: none !important;
+    user-select: none !important;
+  }
+
+  .card-deleting-overlay {
+    position: absolute;
+    inset: 0;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 25;
+    pointer-events: all;
+    animation: fadeInDeleteOverlay 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @@keyframes fadeInDeleteOverlay {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .card-deleting-spinner {
+    width: 38px;
+    height: 38px;
+    border: 3.5px solid #fee2e2;
+    border-top: 3.5px solid #dc2626;
+    border-radius: 50%;
+    animation: spinDelete 0.8s linear infinite;
+  }
+
+  @@keyframes spinDelete {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+  .card-deleting-text {
+    font-size: 13px;
+    font-weight: 800;
+    color: #dc2626;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   /* Responsive Adjustments */
   @@media (max-width: 1200px) {
     .product-square-grid {
@@ -572,25 +632,33 @@
       justify-content: center;
       flex-wrap: wrap;
     }
-  /* Table Toggle Switch Styling (Same as Category Visibility) */
+  }
+
+  /* Table Toggle Switch Styling (Modern Luxury Pill Slider) */
   .cat-toggle-wrap {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
+    cursor: pointer;
+    user-select: none;
   }
 
   .cat-switch {
     position: relative;
     display: inline-block;
-    width: 36px;
+    width: 38px;
     height: 20px;
     flex-shrink: 0;
+    margin: 0;
+    cursor: pointer;
   }
 
   .cat-switch input {
     opacity: 0;
     width: 0;
     height: 0;
+    position: absolute;
+    pointer-events: none;
   }
 
   .cat-slider {
@@ -598,7 +666,7 @@
     cursor: pointer;
     top: 0; left: 0; right: 0; bottom: 0;
     background-color: #cbd5e1;
-    transition: .3s;
+    transition: all .25s ease-in-out;
     border-radius: 20px;
   }
 
@@ -609,22 +677,26 @@
     width: 14px;
     left: 3px;
     bottom: 3px;
-    background-color: white;
-    transition: .3s;
+    background-color: #ffffff;
+    transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 50%;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
   }
 
-  input:checked + .cat-slider {
+  .cat-switch input:checked + .cat-slider {
     background-color: #10b981;
   }
 
-  input:checked + .cat-slider:before {
-    transform: translateX(16px);
+  .cat-switch input:checked + .cat-slider:before {
+    transform: translateX(18px);
+  }
+
+  .cat-switch:hover .cat-slider {
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
   }
 
   .status-tag-active {
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: 700;
     padding: 2px 7px;
     border-radius: 10px;
@@ -632,10 +704,12 @@
     border: 1px solid #86efac;
     color: #16a34a;
     line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
   }
 
   .status-tag-hidden {
-    font-size: 10px;
+    font-size: 10.5px;
     font-weight: 700;
     padding: 2px 7px;
     border-radius: 10px;
@@ -643,6 +717,8 @@
     border: 1px solid #cbd5e1;
     color: #64748b;
     line-height: 1.2;
+    display: inline-flex;
+    align-items: center;
   }
 </style>
 
@@ -1013,7 +1089,7 @@
     gridContainer.innerHTML = `
       <div class="product-square-grid">
         ${currentLineItems.map(item => `
-          <div class="product-square-card">
+          <div class="product-square-card" id="prod-card-${item.id}">
             <div class="product-square-img-wrap" style="position:relative;">
               <div class="catalog-img-loading" style="position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#f8fafc; color:#b45309; font-size:11px; font-weight:700; z-index:1; gap:4px;">
                 <i class="fa-solid fa-spinner fa-spin" style="font-size:15px;"></i>
@@ -1241,17 +1317,66 @@
       if (!confirm(`Are you sure you want to delete product "${name}" from Neon DB?`)) return;
     }
 
+    // Attach loading animation and overlay on the deleted item card
+    const cardEl = (event && event.target) ? event.target.closest('.product-square-card') : document.getElementById(`prod-card-${id}`);
+    if (cardEl) {
+      cardEl.classList.add('is-deleting');
+      const existingOverlay = cardEl.querySelector('.card-deleting-overlay');
+      if (existingOverlay) existingOverlay.remove();
+
+      const overlay = document.createElement('div');
+      overlay.className = 'card-deleting-overlay';
+      overlay.innerHTML = `
+        <div class="card-deleting-spinner"></div>
+        <div class="card-deleting-text">
+          <i class="fa-solid fa-trash-can fa-fade"></i> Deleting...
+        </div>
+        <span style="font-size:11px; color:#64748b; font-weight:600;">Removing from Neon DB</span>
+      `;
+      cardEl.appendChild(overlay);
+    }
+
     try {
-      const res = await fetch(`/api/catalogapi/items/${id}`, { method: 'DELETE' });
-      const data = await res.json();
+      let res = await fetch(`/admin/items/${encodeURIComponent(id)}`, { 
+        method: 'DELETE',
+        credentials: 'include',
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (res.status === 404) {
+        res = await fetch(`/api/catalogapi/items/${encodeURIComponent(id)}`, { 
+          method: 'DELETE',
+          credentials: 'include',
+          headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        });
+      }
+      const data = await res.json().catch(() => ({ success: false, message: 'Server communication error' }));
       if (data.success) {
         if (typeof showToast === 'function') {
           showToast(`Deleted product "${name}" from database.`, 'success', 'Deleted');
         }
-        loadGroupedCatalog();
+        if (cardEl) {
+          cardEl.style.transition = 'all 0.35s ease';
+          cardEl.style.opacity = '0';
+          cardEl.style.transform = 'scale(0.85)';
+        }
+        setTimeout(() => {
+          loadGroupedCatalog();
+        }, 320);
+      } else {
+        if (cardEl) {
+          cardEl.classList.remove('is-deleting');
+          cardEl.querySelector('.card-deleting-overlay')?.remove();
+        }
+        if (typeof showToast === 'function') {
+          showToast(data.message || 'Error deleting item from database.', 'error');
+        }
       }
     } catch (err) {
       console.error('Error deleting catalog item:', err);
+      if (cardEl) {
+        cardEl.classList.remove('is-deleting');
+        cardEl.querySelector('.card-deleting-overlay')?.remove();
+      }
       if (typeof showToast === 'function') {
         showToast('Error deleting item from database.', 'error');
       }
@@ -1260,25 +1385,56 @@
 
   async function toggleProductActive(id, catId, isActive, event) {
     if (event) event.stopPropagation();
+
+    // Optimistic UI updates on toggle wrapper
+    const toggleWrap = event?.target?.closest('.cat-toggle-wrap');
+    const badge = toggleWrap?.querySelector('.status-tag-active, .status-tag-hidden');
+    const checkbox = toggleWrap?.querySelector('input[type="checkbox"]');
+
+    if (badge) {
+      badge.className = isActive ? 'status-tag-active' : 'status-tag-hidden';
+      badge.textContent = isActive ? 'Visible' : 'Hidden';
+    }
+
     try {
-      const res = await fetch(`/api/catalogapi/items/${encodeURIComponent(id)}/toggle-visibility?active=${isActive}`, { method: 'POST' });
-      const data = await res.json();
+      let res = await fetch(`/admin/items/${encodeURIComponent(id)}/toggle-visibility?active=${isActive}`, { 
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+      });
+      if (res.status === 404) {
+        res = await fetch(`/api/catalogapi/items/${encodeURIComponent(id)}/toggle-visibility?active=${isActive}`, { 
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        });
+      }
+      const data = await res.json().catch(() => ({ success: false, message: 'Server communication error' }));
       if (data.success) {
         if (typeof showToast === 'function') {
-          showToast(`Product visibility updated to ${isActive ? 'Visible' : 'Hidden'} on storefront.`, isActive ? 'success' : 'info', 'Visibility Updated');
+          showToast(`Product is now ${isActive ? 'Visible' : 'Hidden'} on storefront.`, isActive ? 'success' : 'info', 'Visibility Updated');
         }
-        // Update local items array so re-render reflects changes immediately
+        // Update in-memory models
         const cKey = (catId || '').toString().toLowerCase();
         if (loadedCategoryItems[cKey]) {
           const it = loadedCategoryItems[cKey].find(x => String(x.id) === String(id));
           if (it) it.isActive = isActive;
         }
+        if (allCatalogItems) {
+          const it = allCatalogItems.find(x => String(x.id) === String(id));
+          if (it) it.isActive = isActive;
+        }
         if (categoryFilteredItemsMap[catId]) {
           const it = categoryFilteredItemsMap[catId].find(x => String(x.id) === String(id));
           if (it) it.isActive = isActive;
-          renderCategoryItemsGrid(catId, categoryFilteredItemsMap[catId], categoryPageMap[catId] || 1);
         }
       } else {
+        // Rollback state on error
+        if (checkbox) checkbox.checked = !isActive;
+        if (badge) {
+          badge.className = !isActive ? 'status-tag-active' : 'status-tag-hidden';
+          badge.textContent = !isActive ? 'Visible' : 'Hidden';
+        }
         if (typeof showToast === 'function') {
           showToast(data.message || 'Error updating product visibility', 'error');
         } else {
@@ -1287,6 +1443,11 @@
       }
     } catch (e) {
       console.error('Error toggling product visibility:', e);
+      if (checkbox) checkbox.checked = !isActive;
+      if (badge) {
+        badge.className = !isActive ? 'status-tag-active' : 'status-tag-hidden';
+        badge.textContent = !isActive ? 'Visible' : 'Hidden';
+      }
       if (typeof showToast === 'function') {
         showToast('Failed to communicate with server', 'error');
       }

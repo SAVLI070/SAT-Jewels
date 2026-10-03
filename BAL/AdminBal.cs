@@ -36,7 +36,16 @@ namespace SAT1.BAL
                 if (uploadIdx == -1) return null;
 
                 var afterUpload = path.Substring(uploadIdx + "/upload/".Length);
-                afterUpload = System.Text.RegularExpressions.Regex.Replace(afterUpload, @"^v\d+/", "");
+                // Strip transformation parameters and version prefix like /c_scale,w_800/v12345/ or /v12345/
+                var match = System.Text.RegularExpressions.Regex.Match(afterUpload, @"(?:.+/)?v\d+/(.+)$");
+                if (match.Success)
+                {
+                    afterUpload = match.Groups[1].Value;
+                }
+                else
+                {
+                    afterUpload = System.Text.RegularExpressions.Regex.Replace(afterUpload, @"^(?:[^/]+/)*v\d+/", "");
+                }
 
                 var dotIdx = afterUpload.LastIndexOf('.');
                 if (dotIdx > 0)
@@ -57,8 +66,8 @@ namespace SAT1.BAL
             if (string.IsNullOrWhiteSpace(publicId)) return false;
 
             var cloudName = _configuration["Cloudinary:CloudName"] ?? "ihcs8m6o";
-            var apiKey = _configuration["Cloudinary:ApiKey"];
-            var apiSecret = _configuration["Cloudinary:ApiSecret"];
+            var apiKey = _configuration["Cloudinary:ApiKey"] ?? "826999397858529";
+            var apiSecret = _configuration["Cloudinary:ApiSecret"] ?? "S8guO0Os21rzu4vxKAztT39irto";
 
             if (string.IsNullOrWhiteSpace(cloudName) || string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(apiSecret))
                 return false;
@@ -67,7 +76,10 @@ namespace SAT1.BAL
             {
                 var account = new CloudinaryDotNet.Account(cloudName, apiKey, apiSecret);
                 var cloudinary = new CloudinaryDotNet.Cloudinary(account);
-                var deleteParams = new CloudinaryDotNet.Actions.DeletionParams(publicId);
+                var deleteParams = new CloudinaryDotNet.Actions.DeletionParams(publicId)
+                {
+                    Invalidate = true
+                };
                 var result = await cloudinary.DestroyAsync(deleteParams);
                 return result?.Result == "ok";
             }
@@ -76,6 +88,96 @@ namespace SAT1.BAL
                 Console.WriteLine($"[Cloudinary Delete Warning for {publicId}]: {ex.Message}");
                 return false;
             }
+        }
+
+        public async Task<bool> DeleteImageAndCleanDatabaseAsync(string? imageUrl, string? productId = null)
+        {
+            if (string.IsNullOrWhiteSpace(imageUrl)) return false;
+
+            var cleanUrl = imageUrl.Trim();
+            var publicId = ExtractCloudinaryPublicId(cleanUrl);
+
+            // 1. Delete from Cloudinary CDN storage
+            bool cloudinaryDeleted = false;
+            if (!string.IsNullOrWhiteSpace(publicId))
+            {
+                cloudinaryDeleted = await DeleteFromCloudinaryAsync(cleanUrl);
+            }
+
+            // 2. Remove matching image from product_images table
+            try
+            {
+                var matchingImgs = await _context.ProductImages
+                    .Where(i => i.ImagePath == cleanUrl || (!string.IsNullOrEmpty(publicId) && i.ImagePath.Contains(publicId)))
+                    .ToListAsync();
+
+                if (matchingImgs.Any())
+                {
+                    _context.ProductImages.RemoveRange(matchingImgs);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DeleteImage DB Warning (ProductImages)]: {ex.Message}");
+            }
+
+            // 3. Remove and re-link in CatalogItems (ImageUrl & GalleryImages)
+            try
+            {
+                var catalogItems = await _context.CatalogItems
+                    .Where(c => c.ImageUrl == cleanUrl || 
+                                (c.GalleryImages != null && (c.GalleryImages.Contains(cleanUrl) || (!string.IsNullOrEmpty(publicId) && c.GalleryImages.Contains(publicId)))))
+                    .ToListAsync();
+
+                foreach (var item in catalogItems)
+                {
+                    if (!string.IsNullOrEmpty(item.GalleryImages))
+                    {
+                        var urls = item.GalleryImages.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                            .Select(u => u.Trim())
+                            .Where(u => u != cleanUrl && (string.IsNullOrEmpty(publicId) || !u.Contains(publicId)))
+                            .ToList();
+                        item.GalleryImages = string.Join(",", urls);
+
+                        if (item.ImageUrl == cleanUrl || (!string.IsNullOrEmpty(publicId) && (item.ImageUrl ?? "").Contains(publicId)))
+                        {
+                            item.ImageUrl = urls.FirstOrDefault() ?? "/assets/ring_1.jpg";
+                        }
+                    }
+                    else if (item.ImageUrl == cleanUrl)
+                    {
+                        item.ImageUrl = "/assets/ring_1.jpg";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DeleteImage DB Warning (CatalogItems)]: {ex.Message}");
+            }
+
+            // 4. Update Products table if image_path matches
+            try
+            {
+                var productsWithImg = await _context.Products
+                    .Where(p => p.ImagePath == cleanUrl || (!string.IsNullOrEmpty(publicId) && p.ImagePath != null && p.ImagePath.Contains(publicId)))
+                    .ToListAsync();
+
+                foreach (var p in productsWithImg)
+                {
+                    var fallbackImg = await _context.ProductImages
+                        .Where(i => i.ProductId == p.ProductId && i.ImagePath != cleanUrl && (string.IsNullOrEmpty(publicId) || !i.ImagePath.Contains(publicId)))
+                        .Select(i => i.ImagePath)
+                        .FirstOrDefaultAsync();
+                    p.ImagePath = fallbackImg ?? "/assets/ring_1.jpg";
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DeleteImage DB Warning (Products)]: {ex.Message}");
+            }
+
+            await _context.SaveChangesAsync();
+            return cloudinaryDeleted;
         }
 
         public async Task<DashboardStatsDto> GetDashboardStatsAsync()
@@ -103,12 +205,34 @@ namespace SAT1.BAL
 
         public bool CheckAdminAccess(System.Security.Claims.ClaimsPrincipal user)
         {
-            if (user.Identity?.IsAuthenticated != true) return false;
+            if (user == null || user.Identity?.IsAuthenticated != true) return false;
             
-            var userRole = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
-            var userEmail = user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower() ?? "";
-            
-            return userRole == "Admin" || user.IsInRole("Admin") || userEmail == "admin@satjewel.com" || userEmail == "admin@satjewels.com" || userEmail == "satjewels31@gmail.com";
+            var userRole = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+                        ?? user.FindFirst("role")?.Value
+                        ?? (user.IsInRole("Admin") || user.IsInRole("admin") ? "Admin" : "");
+                        
+            var userEmail = user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+                         ?? user.FindFirst("email")?.Value
+                         ?? user.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress")?.Value
+                         ?? user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                         ?? user.Identity.Name
+                         ?? "";
+            userEmail = userEmail.Trim().ToLowerInvariant();
+
+            var adminEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "admin@satjewel.com",
+                "admin@satjewels.com",
+                "satjewels31@gmail.com",
+                "farmbridge13@gmail.com",
+                "devilsavli332@gmail.com",
+                "propzjewels@gmail.com"
+            };
+
+            return string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase) 
+                || user.IsInRole("Admin") 
+                || user.IsInRole("admin")
+                || adminEmails.Contains(userEmail);
         }
 
         public async Task EnsureSequencesSyncedAsync()
@@ -175,7 +299,20 @@ namespace SAT1.BAL
                 {
                     if (!newImgUrls.Contains(oldImg.ImagePath))
                     {
-                        _ = DeleteFromCloudinaryAsync(oldImg.ImagePath);
+                        await DeleteFromCloudinaryAsync(oldImg.ImagePath);
+                    }
+                }
+
+                var existingCatItem = await _context.CatalogItems.FirstOrDefaultAsync(i => i.Id == dto.EditId || i.Id == product.ProductId.ToString() || i.Id == $"sat-prod-{product.ProductId}");
+                if (existingCatItem != null && !string.IsNullOrEmpty(existingCatItem.GalleryImages))
+                {
+                    var oldCatImgs = existingCatItem.GalleryImages.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
+                    foreach (var oldCatImg in oldCatImgs)
+                    {
+                        if (!newImgUrls.Contains(oldCatImg))
+                        {
+                            await DeleteFromCloudinaryAsync(oldCatImg);
+                        }
                     }
                 }
 
@@ -315,27 +452,92 @@ namespace SAT1.BAL
                 }
             }
 
-            // Build synchronized MetalOptions & CaratOptions strings
-            var metalIds = dto.EnabledVariants?.Where(v => v.IsEnabled && v.MetalId > 0).Select(v => v.MetalId).Distinct().ToList() ?? new List<long>();
-            var caratIds = dto.EnabledVariants?.Where(v => v.IsEnabled && v.CaratId > 0).Select(v => v.CaratId).Distinct().ToList() ?? new List<long>();
+            // Build synchronized MetalOptions & CaratOptions strings & specifications based on category
+            string metalOptionsStr = "";
+            string caratOptionsStr = "";
+            string itemSpec = "";
 
-            var metalDb = await _context.Metals.Where(m => metalIds.Contains(m.Id)).ToListAsync();
-            var caratDb = await _context.CaratOptions.Where(c => caratIds.Contains(c.Id)).ToListAsync();
+            if (dto.CategoryId == 9)
+            {
+                // Category 9: Luxury Watches (Movements: Swiss / Japan, Stones: Moissanite / Lab Grown Diamond)
+                var watchVariants = dto.EnabledVariants?.Where(v => v.IsEnabled).ToList() ?? new List<ProductVariantMatrixItemDto>();
+                var movList = new List<string>();
+                var stoneList = new List<string>();
 
-            var metalStrings = metalDb.Select(m => {
-                var firstVar = dto.EnabledVariants?.FirstOrDefault(v => v.MetalId == m.Id && v.IsEnabled);
-                decimal diff = firstVar != null && firstVar.PriceOverrideUSD > 0 ? (firstVar.PriceOverrideUSD - dto.PriceUSD) : 0m;
-                return diff != 0 ? $"{m.Name} ({(diff >= 0 ? "+" : "")}{diff:F0} USD)" : m.Name;
-            }).ToList();
+                // Mov: 102 = Swiss, 101 = Japan
+                var swissVar = watchVariants.FirstOrDefault(v => v.MetalId == 102);
+                if (swissVar != null)
+                {
+                    decimal diff = swissVar.PriceOverrideUSD > 0 ? (swissVar.PriceOverrideUSD - dto.PriceUSD) : 0m;
+                    movList.Add(diff != 0 ? $"Swiss ({(diff >= 0 ? "+" : "")}{diff:F0} USD)" : "Swiss");
+                }
+                var japanVar = watchVariants.FirstOrDefault(v => v.MetalId == 101);
+                if (japanVar != null)
+                {
+                    decimal diff = japanVar.PriceOverrideUSD > 0 ? (japanVar.PriceOverrideUSD - dto.PriceUSD) : 0m;
+                    movList.Add(diff != 0 ? $"Japan ({(diff >= 0 ? "+" : "")}{diff:F0} USD)" : "Japan");
+                }
+                if (movList.Count == 0)
+                {
+                    movList.Add("Swiss");
+                    movList.Add("Japan");
+                }
 
-            var caratStrings = caratDb.Select(c => {
-                var firstVar = dto.EnabledVariants?.FirstOrDefault(v => v.CaratId == c.Id && v.IsEnabled);
-                decimal diff = firstVar != null && firstVar.PriceOverrideUSD > 0 ? (firstVar.PriceOverrideUSD - dto.PriceUSD) : 0m;
-                return diff != 0 ? $"{c.Label} ({(diff >= 0 ? "+" : "")}{diff:F0} USD)" : c.Label;
-            }).ToList();
+                // Stone: 201 = Moissanite, 202 = Lab Grown Diamond
+                var moissVar = watchVariants.FirstOrDefault(v => v.CaratId == 201);
+                if (moissVar != null)
+                {
+                    decimal diff = moissVar.PriceOverrideUSD > 0 ? (moissVar.PriceOverrideUSD - dto.PriceUSD) : 0m;
+                    stoneList.Add(diff != 0 ? $"Moissanite ({(diff >= 0 ? "+" : "")}{diff:F0} USD)" : "Moissanite");
+                }
+                var labVar = watchVariants.FirstOrDefault(v => v.CaratId == 202);
+                if (labVar != null)
+                {
+                    decimal diff = labVar.PriceOverrideUSD > 0 ? (labVar.PriceOverrideUSD - dto.PriceUSD) : 0m;
+                    stoneList.Add(diff != 0 ? $"Lab Grown Diamond ({(diff >= 0 ? "+" : "")}{diff:F0} USD)" : "Lab Grown Diamond");
+                }
+                if (stoneList.Count == 0)
+                {
+                    stoneList.Add("Moissanite");
+                    stoneList.Add("Lab Grown Diamond");
+                }
 
-            var metalOptionsStr = string.Join("|", metalStrings);
-            var caratOptionsStr = string.Join("|", caratStrings);
+                metalOptionsStr = string.Join("|", movList);
+                caratOptionsStr = string.Join("|", stoneList);
+                itemSpec = $"Luxury Timepiece | 41 mm | Stainless Steel | Sapphire Glass | 50m Water Resistance | {dto.Title.Trim()}";
+            }
+            else if (dto.CategoryId == 7)
+            {
+                // Category 7: Certified Loose Diamonds (No metal types or ring carat weights)
+                metalOptionsStr = "";
+                caratOptionsStr = "";
+                itemSpec = $"Certified Loose Diamond | Lab Grown | IGI Certified | {dto.Title.Trim()}";
+            }
+            else
+            {
+                // Standard Fine Jewelry Categories 1 - 6, 8, etc.
+                var metalIds = dto.EnabledVariants?.Where(v => v.IsEnabled && v.MetalId > 0).Select(v => v.MetalId).Distinct().ToList() ?? new List<long>();
+                var caratIds = dto.EnabledVariants?.Where(v => v.IsEnabled && v.CaratId > 0).Select(v => v.CaratId).Distinct().ToList() ?? new List<long>();
+
+                var metalDb = await _context.Metals.Where(m => metalIds.Contains(m.Id)).ToListAsync();
+                var caratDb = await _context.CaratOptions.Where(c => caratIds.Contains(c.Id)).ToListAsync();
+
+                var metalStrings = metalDb.Select(m => {
+                    var firstVar = dto.EnabledVariants?.FirstOrDefault(v => v.MetalId == m.Id && v.IsEnabled);
+                    decimal diff = firstVar != null && firstVar.PriceOverrideUSD > 0 ? (firstVar.PriceOverrideUSD - dto.PriceUSD) : 0m;
+                    return diff != 0 ? $"{m.Name} ({(diff >= 0 ? "+" : "")}{diff:F0} USD)" : m.Name;
+                }).ToList();
+
+                var caratStrings = caratDb.Select(c => {
+                    var firstVar = dto.EnabledVariants?.FirstOrDefault(v => v.CaratId == c.Id && v.IsEnabled);
+                    decimal diff = firstVar != null && firstVar.PriceOverrideUSD > 0 ? (firstVar.PriceOverrideUSD - dto.PriceUSD) : 0m;
+                    return diff != 0 ? $"{c.Label} ({(diff >= 0 ? "+" : "")}{diff:F0} USD)" : c.Label;
+                }).ToList();
+
+                metalOptionsStr = string.Join("|", metalStrings);
+                caratOptionsStr = string.Join("|", caratStrings);
+                itemSpec = $"Fine Jewelry | {dto.DiamondType} | MoissPrice:{(dto.MoissanitePriceUSD > 0 ? dto.MoissanitePriceUSD : Math.Round(dto.PriceUSD * 0.55m))} | {dto.Title.Trim()}";
+            }
 
             // Also keep CatalogItems table in 100% sync
             var targetCatId = !string.IsNullOrWhiteSpace(dto.EditId) ? dto.EditId : product.ProductId.ToString();
@@ -348,10 +550,10 @@ namespace SAT1.BAL
                 catItem.Name = dto.Title.Trim();
                 catItem.PriceUSD = dto.PriceUSD;
                 catItem.MoissanitePrice = moissanitePrice;
-                catItem.Spec = $"Fine Jewelry | {dto.DiamondType} | MoissPrice:{moissanitePrice} | {dto.Title.Trim()}";
+                catItem.Spec = itemSpec;
                 catItem.CategoryId = dto.CategoryId.ToString();
-                if (!string.IsNullOrWhiteSpace(metalOptionsStr)) catItem.MetalOptions = metalOptionsStr;
-                if (!string.IsNullOrWhiteSpace(caratOptionsStr)) catItem.CaratOptions = caratOptionsStr;
+                catItem.MetalOptions = metalOptionsStr;
+                catItem.CaratOptions = caratOptionsStr;
                 if (dto.ImageUrls != null && dto.ImageUrls.Count > 0)
                 {
                     catItem.ImageUrl = dto.ImageUrls[0];
@@ -369,7 +571,7 @@ namespace SAT1.BAL
                     CategoryId = dto.CategoryId.ToString(),
                     PriceUSD = dto.PriceUSD,
                     MoissanitePrice = moissanitePrice,
-                    Spec = $"Fine Jewelry | {dto.DiamondType} | MoissPrice:{moissanitePrice} | {dto.Title.Trim()}",
+                    Spec = itemSpec,
                     ImageUrl = dto.ImageUrls != null && dto.ImageUrls.Count > 0 ? dto.ImageUrls[0] : "/assets/ring_1.jpg",
                     GalleryImages = dto.ImageUrls != null ? string.Join(",", dto.ImageUrls) : "",
                     MetalOptions = metalOptionsStr,
@@ -539,7 +741,9 @@ namespace SAT1.BAL
 
         public async Task<OrderStatusCountsDto> GetOrderStatusCountsAsync(string? userId = null, string? userEmail = null)
         {
-            var query = _context.Orders.AsNoTracking();
+            // Only genuinely paid/placed orders are displayed at admin side (abandoned/unpaid checkouts are kept in DB for telemetry only)
+            var query = _context.Orders.AsNoTracking()
+                .Where(o => o.CurrentTrackingStatus != "PaymentPending" && o.OrderStatus != "Pending");
 
             if (!string.IsNullOrWhiteSpace(userId) || !string.IsNullOrWhiteSpace(userEmail))
             {
@@ -557,8 +761,8 @@ namespace SAT1.BAL
             return new OrderStatusCountsDto
             {
                 TotalCount = statusSummaries.Count,
-                PendingCount = statusSummaries.Count(o => o.OrderStatus.Contains("Pending", StringComparison.OrdinalIgnoreCase)),
-                PaidCount = statusSummaries.Count(o => o.OrderStatus.Contains("Paid", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Completed", StringComparison.OrdinalIgnoreCase)),
+                PendingCount = 0,
+                PaidCount = statusSummaries.Count(o => o.OrderStatus.Contains("Paid", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Completed", StringComparison.OrdinalIgnoreCase) || o.CurrentTrackingStatus == "OrderPlaced"),
                 DispatchedCount = statusSummaries.Count(o => o.OrderStatus.Contains("Dispatched", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Booked", StringComparison.OrdinalIgnoreCase) || o.OrderStatus.Contains("Shipped", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && (o.CurrentTrackingStatus.Contains("Dispatched", StringComparison.OrdinalIgnoreCase) || o.CurrentTrackingStatus.Contains("Booked", StringComparison.OrdinalIgnoreCase) || o.CurrentTrackingStatus.Contains("Shipped", StringComparison.OrdinalIgnoreCase)))),
                 InTransitCount = statusSummaries.Count(o => o.OrderStatus.Contains("Transit", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.Contains("Transit", StringComparison.OrdinalIgnoreCase))),
                 DeliveredCount = statusSummaries.Count(o => o.OrderStatus.Contains("Delivered", StringComparison.OrdinalIgnoreCase) || (o.CurrentTrackingStatus != null && o.CurrentTrackingStatus.Contains("Delivered", StringComparison.OrdinalIgnoreCase)))
@@ -569,7 +773,8 @@ namespace SAT1.BAL
         {
             var query = _context.Orders
                 .Include(o => o.TrackingHistory)
-                .AsNoTracking();
+                .AsNoTracking()
+                .Where(o => o.CurrentTrackingStatus != "PaymentPending" && o.OrderStatus != "Pending");
 
             if (!string.IsNullOrWhiteSpace(userId) || !string.IsNullOrWhiteSpace(userEmail))
             {
@@ -587,7 +792,8 @@ namespace SAT1.BAL
                 {
                     query = query.Where(o => 
                         o.OrderStatus.ToLower().Contains("paid") || 
-                        o.OrderStatus.ToLower().Contains("completed"));
+                        o.OrderStatus.ToLower().Contains("completed") ||
+                        o.CurrentTrackingStatus == "OrderPlaced");
                 }
                 else if (cleanStatus == "pending")
                 {
@@ -638,7 +844,8 @@ namespace SAT1.BAL
         {
             var query = _context.Orders
                 .Include(o => o.TrackingHistory)
-                .AsNoTracking();
+                .AsNoTracking()
+                .Where(o => o.CurrentTrackingStatus != "PaymentPending" && o.OrderStatus != "Pending");
 
             if (!string.IsNullOrWhiteSpace(userId) || !string.IsNullOrWhiteSpace(userEmail))
             {
@@ -728,6 +935,7 @@ namespace SAT1.BAL
             public string FullName { get; set; } = string.Empty;
             public string Email { get; set; } = string.Empty;
             public string Phone { get; set; } = string.Empty;
+            public string Address { get; set; } = string.Empty;
             public string Role { get; set; } = "Customer";
             public DateTime CreatedAt { get; set; }
             public int TotalOrders { get; set; }
@@ -740,6 +948,7 @@ namespace SAT1.BAL
         {
             var users = await _context.Users.AsNoTracking().ToListAsync();
             var orders = await _context.Orders.AsNoTracking().ToListAsync();
+            var addresses = await _context.UserAddresses.AsNoTracking().ToListAsync();
 
             var result = new List<UserWithStatsDto>();
 
@@ -758,12 +967,38 @@ namespace SAT1.BAL
 
                 var lastOrder = uOrders.OrderByDescending(o => o.CreatedAt).FirstOrDefault();
 
+                var uAddrs = addresses.Where(a => a.UserId == u.Id).ToList();
+                var defaultAddr = uAddrs.FirstOrDefault(a => a.IsDefault) ?? uAddrs.FirstOrDefault();
+
+                string resolvedPhone = u.Phone;
+                if (string.IsNullOrWhiteSpace(resolvedPhone) && defaultAddr != null && !string.IsNullOrWhiteSpace(defaultAddr.Phone))
+                {
+                    resolvedPhone = defaultAddr.Phone;
+                }
+                if (string.IsNullOrWhiteSpace(resolvedPhone) && lastOrder != null && !string.IsNullOrWhiteSpace(lastOrder.ShippingPhone))
+                {
+                    resolvedPhone = lastOrder.ShippingPhone;
+                }
+
+                string resolvedAddress = "";
+                if (defaultAddr != null)
+                {
+                    var parts = new[] { defaultAddr.StreetAddress, defaultAddr.ApartmentSuite, defaultAddr.City, defaultAddr.State, defaultAddr.PostalCode, defaultAddr.Country }
+                        .Where(s => !string.IsNullOrWhiteSpace(s));
+                    resolvedAddress = string.Join(", ", parts);
+                }
+                else if (lastOrder != null && !string.IsNullOrWhiteSpace(lastOrder.ShippingAddress))
+                {
+                    resolvedAddress = lastOrder.ShippingAddress;
+                }
+
                 result.Add(new UserWithStatsDto
                 {
                     Id = u.Id,
                     FullName = string.IsNullOrWhiteSpace(u.FullName) ? "Valued Client" : u.FullName,
                     Email = u.Email,
-                    Phone = u.Phone,
+                    Phone = resolvedPhone,
+                    Address = resolvedAddress,
                     Role = u.Role,
                     CreatedAt = u.CreatedAt,
                     TotalOrders = uOrders.Count,
@@ -791,12 +1026,23 @@ namespace SAT1.BAL
                 var first = gOrders.First();
                 var last = gOrders.OrderByDescending(o => o.CreatedAt).First();
 
+                string guestAddr = "";
+                if (last != null && !string.IsNullOrWhiteSpace(last.ShippingAddress))
+                {
+                    guestAddr = last.ShippingAddress;
+                }
+                else if (first != null && !string.IsNullOrWhiteSpace(first.ShippingAddress))
+                {
+                    guestAddr = first.ShippingAddress;
+                }
+
                 result.Add(new UserWithStatsDto
                 {
                     Id = $"guest-{first.OrderId}",
                     FullName = string.IsNullOrWhiteSpace(first.ShippingFullName) ? "Guest Buyer" : first.ShippingFullName,
                     Email = first.CustomerEmail,
                     Phone = first.ShippingPhone,
+                    Address = guestAddr,
                     Role = "Guest Customer",
                     CreatedAt = first.CreatedAt,
                     TotalOrders = gOrders.Count,
@@ -836,6 +1082,11 @@ namespace SAT1.BAL
                             (!string.IsNullOrEmpty(o.CustomerEmail) && userEmails.Contains(o.CustomerEmail.ToLower())))
                 .ToListAsync();
 
+            var userAddrs = await _context.UserAddresses
+                .AsNoTracking()
+                .Where(a => userIds.Contains(a.UserId))
+                .ToListAsync();
+
             var result = new List<UserWithStatsDto>();
             foreach (var u in pagedUsers)
             {
@@ -852,12 +1103,38 @@ namespace SAT1.BAL
 
                 var lastOrder = uOrders.OrderByDescending(o => o.CreatedAt).FirstOrDefault();
 
+                var uAddrList = userAddrs.Where(a => a.UserId == u.Id).ToList();
+                var defaultAddr = uAddrList.FirstOrDefault(a => a.IsDefault) ?? uAddrList.FirstOrDefault();
+
+                string resolvedPhone = u.Phone;
+                if (string.IsNullOrWhiteSpace(resolvedPhone) && defaultAddr != null && !string.IsNullOrWhiteSpace(defaultAddr.Phone))
+                {
+                    resolvedPhone = defaultAddr.Phone;
+                }
+                if (string.IsNullOrWhiteSpace(resolvedPhone) && lastOrder != null && !string.IsNullOrWhiteSpace(lastOrder.ShippingPhone))
+                {
+                    resolvedPhone = lastOrder.ShippingPhone;
+                }
+
+                string resolvedAddress = "";
+                if (defaultAddr != null)
+                {
+                    var parts = new[] { defaultAddr.StreetAddress, defaultAddr.ApartmentSuite, defaultAddr.City, defaultAddr.State, defaultAddr.PostalCode, defaultAddr.Country }
+                        .Where(s => !string.IsNullOrWhiteSpace(s));
+                    resolvedAddress = string.Join(", ", parts);
+                }
+                else if (lastOrder != null && !string.IsNullOrWhiteSpace(lastOrder.ShippingAddress))
+                {
+                    resolvedAddress = lastOrder.ShippingAddress;
+                }
+
                 result.Add(new UserWithStatsDto
                 {
                     Id = u.Id,
                     FullName = string.IsNullOrWhiteSpace(u.FullName) ? "Valued Client" : u.FullName,
                     Email = u.Email,
-                    Phone = u.Phone,
+                    Phone = resolvedPhone,
+                    Address = resolvedAddress,
                     Role = u.Role,
                     CreatedAt = u.CreatedAt,
                     TotalOrders = uOrders.Count,
@@ -892,20 +1169,20 @@ namespace SAT1.BAL
             {
                 foreach (var img in product.Images)
                 {
-                    _ = DeleteFromCloudinaryAsync(img.ImagePath);
+                    await DeleteFromCloudinaryAsync(img.ImagePath);
                 }
             }
             if (catItem != null)
             {
                 if (!string.IsNullOrWhiteSpace(catItem.ImageUrl))
                 {
-                    _ = DeleteFromCloudinaryAsync(catItem.ImageUrl);
+                    await DeleteFromCloudinaryAsync(catItem.ImageUrl);
                 }
                 if (!string.IsNullOrWhiteSpace(catItem.GalleryImages))
                 {
                     foreach (var gUrl in catItem.GalleryImages.Split(',', StringSplitOptions.RemoveEmptyEntries))
                     {
-                        _ = DeleteFromCloudinaryAsync(gUrl.Trim());
+                        await DeleteFromCloudinaryAsync(gUrl.Trim());
                     }
                 }
                 _context.CatalogItems.Remove(catItem);

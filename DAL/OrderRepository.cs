@@ -95,7 +95,8 @@ namespace SAT1.DAL
                 return (false, false, order);
             }
 
-            order.OrderStatus = "Completed (Insured GIA Home Delivery Dispatch)";
+            order.OrderStatus = "Paid";
+            order.CurrentTrackingStatus = "OrderPlaced";
             order.AmountPaid = amountPaid;
             order.PaidAt = DateTime.Now;
             order.ProviderPaymentId = providerTransactionId;

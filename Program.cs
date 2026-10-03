@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Microsoft.EntityFrameworkCore;
@@ -120,6 +121,12 @@ builder.Services.AddResponseCompression(options =>
     options.EnableForHttps = true;
 });
 
+var keysPath = Path.Combine(builder.Environment.ContentRootPath, "App_Data", "dp_keys");
+try { Directory.CreateDirectory(keysPath); } catch { }
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(keysPath))
+    .SetApplicationName("SATJewelsWeb");
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
@@ -131,8 +138,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.SameSite = SameSiteMode.Lax;
         options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
         options.Cookie.Expiration = null;
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
-        options.SlidingExpiration = false;
+        options.ExpireTimeSpan = TimeSpan.FromDays(7);
+        options.SlidingExpiration = true;
     });
 
 var app = builder.Build();
@@ -249,7 +256,8 @@ using (var scope = app.Services.CreateScope())
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""BuyerInfo"" text NOT NULL DEFAULT '';
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""IsSuspicious"" boolean NOT NULL DEFAULT false;
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""SuspiciousReason"" text;
-            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""CurrentTrackingStatus"" text NOT NULL DEFAULT 'OrderPlaced';
+            ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""CurrentTrackingStatus"" text NOT NULL DEFAULT 'PaymentPending';
+            UPDATE ""Orders"" SET ""CurrentTrackingStatus"" = 'PaymentPending' WHERE ""OrderStatus"" = 'Pending' AND ""CurrentTrackingStatus"" = 'OrderPlaced';
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""TrackingNumber"" text NOT NULL DEFAULT '';
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""CarrierName"" text NOT NULL DEFAULT 'DHL Express';
             ALTER TABLE ""Orders"" ADD COLUMN IF NOT EXISTS ""TrackingUrl"" text NOT NULL DEFAULT '';
@@ -459,11 +467,25 @@ app.Use(async (context, next) =>
             return;
         }
 
-        var userEmail = context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value?.ToLower() ?? "";
+        var userEmail = (context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value
+                     ?? context.User.FindFirst("email")?.Value
+                     ?? context.User.Identity?.Name
+                     ?? "").Trim().ToLower();
+
+        var adminEmails = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "admin@satjewel.com",
+            "admin@satjewels.com",
+            "satjewels31@gmail.com",
+            "farmbridge13@gmail.com",
+            "devilsavli332@gmail.com",
+            "propzjewels@gmail.com"
+        };
+
         bool isAdmin = string.Equals(userRole, "Admin", StringComparison.OrdinalIgnoreCase) ||
-                       userEmail == "admin@satjewel.com" ||
-                       userEmail == "admin@satjewels.com" ||
-                       userEmail == "satjewels31@gmail.com";
+                       context.User.IsInRole("Admin") ||
+                       context.User.IsInRole("admin") ||
+                       adminEmails.Contains(userEmail);
 
         if (!isAdmin)
         {

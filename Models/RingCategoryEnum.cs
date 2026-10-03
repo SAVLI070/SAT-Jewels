@@ -25,6 +25,9 @@ namespace SAT1.Models
         [Display(Name = "Diamonds")]
         Diamonds = 7,
 
+        [Display(Name = "Luxury Watch")]
+        LuxuryWatch = 9,
+
         // Legacy Enum Aliases mapping to primary 6 categories
         AnniversaryRings = 1,
         RoseCutRings = 1,

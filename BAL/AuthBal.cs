@@ -163,6 +163,17 @@ namespace SAT1.BAL
             }
 
             _context.UserAddresses.Add(address);
+
+            // Sync phone to Users table so Admin cards and customer directory stay 100% updated
+            if (!string.IsNullOrWhiteSpace(address.Phone))
+            {
+                var userRecord = await _context.Users.FirstOrDefaultAsync(u => u.Id == address.UserId);
+                if (userRecord != null && (string.IsNullOrWhiteSpace(userRecord.Phone) || address.IsDefault))
+                {
+                    userRecord.Phone = address.Phone;
+                }
+            }
+
             await _context.SaveChangesAsync();
             return address;
         }
@@ -189,6 +200,16 @@ namespace SAT1.BAL
                     item.IsDefault = false;
                 }
                 existing.IsDefault = true;
+            }
+
+            // Sync phone to Users table
+            if (!string.IsNullOrWhiteSpace(address.Phone))
+            {
+                var userRecord = await _context.Users.FirstOrDefaultAsync(u => u.Id == address.UserId);
+                if (userRecord != null && (string.IsNullOrWhiteSpace(userRecord.Phone) || address.IsDefault))
+                {
+                    userRecord.Phone = address.Phone;
+                }
             }
 
             await _context.SaveChangesAsync();

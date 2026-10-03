@@ -2832,6 +2832,9 @@ a {
   }
   .stat-item::after { display: none; }
   .footer-grid { grid-template-columns: 1fr 1fr; }
+  .why-card .why-desc { display: none !important; }
+  .why-card { padding: 18px 14px !important; text-align: center !important; }
+  .why-card .why-icon-wrap { margin: 0 auto 10px auto !important; }
 
   /* Admin Mobile Topbar & Off-Canvas Drawer Fixes */
   .adm-collapse-btn {

@@ -4,6 +4,10 @@
 **/.vscode
 **/bin
 **/obj
+**/backups
+**/scratch
+**/*.py
+**/*.tmp
 **/*.user
 **/*.suo
 **/*.log

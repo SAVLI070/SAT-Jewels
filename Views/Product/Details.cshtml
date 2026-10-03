@@ -36,6 +36,76 @@
         || (Model.CategoryId != null && (Model.CategoryId == "7" || Model.CategoryId.ToLower() == "diamonds"))
         || (!string.IsNullOrEmpty(Model.Spec) && Model.Spec.Contains("Loose Diamond", StringComparison.OrdinalIgnoreCase));
 
+    var isWatch = (categoryName != null && categoryName.Contains("Watch", StringComparison.OrdinalIgnoreCase))
+        || (Model.CategoryId != null && (Model.CategoryId == "9" || Model.CategoryId.ToLower() == "luxury-watch" || Model.CategoryId.ToLower() == "luxurywatch"))
+        || (!string.IsNullOrEmpty(Model.Spec) && Model.Spec.Contains("Watch", StringComparison.OrdinalIgnoreCase));
+
+    var isNecklace = (categoryName != null && (categoryName.Contains("Necklace", StringComparison.OrdinalIgnoreCase) || categoryName.Contains("Pendant", StringComparison.OrdinalIgnoreCase)))
+        || (Model.CategoryId != null && (Model.CategoryId == "6" || Model.CategoryId.ToLower() == "necklaces"))
+        || (!string.IsNullOrEmpty(Model.Spec) && (Model.Spec.Contains("Necklace", StringComparison.OrdinalIgnoreCase) || Model.Spec.Contains("Pendant", StringComparison.OrdinalIgnoreCase)))
+        || (Model.Name != null && (Model.Name.Contains("Necklace", StringComparison.OrdinalIgnoreCase) || Model.Name.Contains("Pendant", StringComparison.OrdinalIgnoreCase) || Model.Name.Contains("Choker", StringComparison.OrdinalIgnoreCase)));
+
+    var isBracelet = (categoryName != null && (categoryName.Contains("Bracelet", StringComparison.OrdinalIgnoreCase) || categoryName.Contains("Bangle", StringComparison.OrdinalIgnoreCase)))
+        || (Model.CategoryId != null && (Model.CategoryId == "4" || Model.CategoryId.ToLower() == "bracelets"))
+        || (!string.IsNullOrEmpty(Model.Spec) && (Model.Spec.Contains("Bracelet", StringComparison.OrdinalIgnoreCase) || Model.Spec.Contains("Bangle", StringComparison.OrdinalIgnoreCase)))
+        || (Model.Name != null && (Model.Name.Contains("Bracelet", StringComparison.OrdinalIgnoreCase) || Model.Name.Contains("Bangle", StringComparison.OrdinalIgnoreCase) || Model.Name.Contains("Tennis Bracelet", StringComparison.OrdinalIgnoreCase)));
+
+    var isEarring = (categoryName != null && (categoryName.Contains("Earring", StringComparison.OrdinalIgnoreCase) || categoryName.Contains("Stud", StringComparison.OrdinalIgnoreCase) || categoryName.Contains("Hoop", StringComparison.OrdinalIgnoreCase)))
+        || (Model.CategoryId != null && (Model.CategoryId == "3" || Model.CategoryId.ToLower() == "earrings"))
+        || (!string.IsNullOrEmpty(Model.Spec) && (Model.Spec.Contains("Earring", StringComparison.OrdinalIgnoreCase) || Model.Spec.Contains("Stud", StringComparison.OrdinalIgnoreCase)))
+        || (Model.Name != null && (Model.Name.Contains("Earring", StringComparison.OrdinalIgnoreCase) || Model.Name.Contains("Studs", StringComparison.OrdinalIgnoreCase) || Model.Name.Contains("Hoops", StringComparison.OrdinalIgnoreCase)));
+
+    var isRing = !isLooseDiamond && !isWatch && !isNecklace && !isBracelet && !isEarring;
+
+    // Dynamic diamond & gemological specification extraction
+    string specRaw = Model.Spec ?? "";
+    string nameRaw = Model.Name ?? "";
+
+    string detectedCarat = "";
+    var caratMatch = System.Text.RegularExpressions.Regex.Match(nameRaw + " " + specRaw, @"(\d+(\.\d+)?)\s*(ct|carat|Carat|CT)\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    if (caratMatch.Success) {
+        detectedCarat = caratMatch.Groups[1].Value + " ct";
+    }
+
+    string detectedShape = "Round Brilliant";
+    string[] knownShapes = new[] { "Emerald", "Oval", "Radiant", "Pear", "Cushion", "Princess", "Marquise", "Asscher", "Heart", "Round" };
+    foreach (var sh in knownShapes) {
+        if (nameRaw.Contains(sh, StringComparison.OrdinalIgnoreCase) || specRaw.Contains(sh, StringComparison.OrdinalIgnoreCase)) {
+            detectedShape = sh;
+            break;
+        }
+    }
+
+    string detectedColor = "E–F (Colorless)";
+    var colorMatch = System.Text.RegularExpressions.Regex.Match(specRaw, @"Color\s*:?\s*([D-Z])\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    if (colorMatch.Success) {
+        detectedColor = colorMatch.Groups[1].Value.ToUpper() + " (Colorless)";
+    }
+
+    string detectedClarity = "VVS1–VVS2 (Eye Clean)";
+    var clarityMatch = System.Text.RegularExpressions.Regex.Match(specRaw, @"Clarity\s*:?\s*(FL|IF|VVS1|VVS2|VS1|VS2|SI1|SI2)\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    if (clarityMatch.Success) {
+        detectedClarity = clarityMatch.Groups[1].Value.ToUpper() + " (Eye Clean)";
+    }
+
+    string detectedCut = "Ideal / Excellent";
+    var cutMatch = System.Text.RegularExpressions.Regex.Match(specRaw, @"Cut\s*:?\s*([A-Za-z]+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    if (cutMatch.Success) {
+        detectedCut = cutMatch.Groups[1].Value;
+    }
+
+    string detectedCert = "IGI / GIA Laboratory Certified";
+    var certMatch = System.Text.RegularExpressions.Regex.Match(specRaw, @"(IGI|GIA)\s*(#|No\.?|Report\s*#?)?\s*([A-Za-z0-9]+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    if (certMatch.Success) {
+        detectedCert = certMatch.Value;
+    }
+
+    string detectedMeasurements = "";
+    var measMatch = System.Text.RegularExpressions.Regex.Match(specRaw, @"Measurements\s*:?\s*([\d\.\s*xX\-]+)\s*mm", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+    if (measMatch.Success) {
+        detectedMeasurements = measMatch.Groups[1].Value.Trim() + " mm";
+    }
+
     // Parse Metal Options
     var rawMetalStr = Model.MetalOptions ?? string.Empty;
     var metalList = rawMetalStr.Split(new[] { '|' }, StringSplitOptions.RemoveEmptyEntries)
@@ -52,16 +122,6 @@
         .GroupBy(x => x.Name)
         .Select(g => g.First())
         .ToList();
-
-    if (metalList.Count == 0 && !isLooseDiamond)
-    {
-        metalList = new[] {
-            new { Name = "14K Yellow Gold", Offset = 0m },
-            new { Name = "14K White Gold", Offset = 0m },
-            new { Name = "18K Yellow Gold", Offset = 300m },
-            new { Name = "950 Platinum", Offset = 650m }
-        }.ToList();
-    }
 
     // Parse Carat Options
     var rawCaratStr = Model.CaratOptions ?? string.Empty;
@@ -80,13 +140,58 @@
         .Select(g => g.First())
         .ToList();
 
-    if (caratList.Count == 0 && !isLooseDiamond)
+    if (isWatch)
     {
-        caratList = new[] {
-            new { Label = "1.00 CT", Offset = 0m },
-            new { Label = "1.50 CT", Offset = 450m },
-            new { Label = "2.00 CT", Offset = 950m }
-        }.ToList();
+        // Watch Movement / Origin: Only Japan & Swiss
+        var parsedWatchMovements = new List<dynamic>();
+        if (!string.IsNullOrWhiteSpace(rawMetalStr) && (rawMetalStr.Contains("Japan", StringComparison.OrdinalIgnoreCase) || rawMetalStr.Contains("Swiss", StringComparison.OrdinalIgnoreCase)))
+        {
+            parsedWatchMovements = metalList.Where(m => m.Name.Contains("Japan", StringComparison.OrdinalIgnoreCase) || m.Name.Contains("Swiss", StringComparison.OrdinalIgnoreCase)).Select(m => (dynamic)m).ToList();
+        }
+        if (parsedWatchMovements.Count == 0)
+        {
+            parsedWatchMovements = new List<dynamic> {
+                new { Name = "Swiss", Offset = 0m },
+                new { Name = "Japan", Offset = -250m }
+            };
+        }
+        metalList = parsedWatchMovements.Select(m => new { Name = (string)m.Name, Offset = (decimal)m.Offset }).ToList();
+
+        // Watch Diamond Stone Selection: Only Moissanite & Lab Grown Diamond
+        var parsedWatchStones = new List<dynamic>();
+        if (!string.IsNullOrWhiteSpace(rawCaratStr) && (rawCaratStr.Contains("Moissanite", StringComparison.OrdinalIgnoreCase) || rawCaratStr.Contains("Lab", StringComparison.OrdinalIgnoreCase)))
+        {
+            parsedWatchStones = caratList.Where(c => c.Label.Contains("Moissanite", StringComparison.OrdinalIgnoreCase) || c.Label.Contains("Lab", StringComparison.OrdinalIgnoreCase)).Select(c => (dynamic)c).ToList();
+        }
+        if (parsedWatchStones.Count == 0)
+        {
+            parsedWatchStones = new List<dynamic> {
+                new { Label = "Moissanite", Offset = 0m },
+                new { Label = "Lab Grown Diamond", Offset = 650m }
+            };
+        }
+        caratList = parsedWatchStones.Select(c => new { Label = (string)c.Label, Offset = (decimal)c.Offset }).ToList();
+    }
+    else
+    {
+        if (metalList.Count == 0 && !isLooseDiamond)
+        {
+            metalList = new[] {
+                new { Name = "14K Yellow Gold", Offset = 0m },
+                new { Name = "14K White Gold", Offset = 0m },
+                new { Name = "18K Yellow Gold", Offset = 300m },
+                new { Name = "950 Platinum", Offset = 650m }
+            }.ToList();
+        }
+
+        if (caratList.Count == 0 && !isLooseDiamond)
+        {
+            caratList = new[] {
+                new { Label = "1.00 CT", Offset = 0m },
+                new { Label = "1.50 CT", Offset = 450m },
+                new { Label = "2.00 CT", Offset = 950m }
+            }.ToList();
+        }
     }
 
     var baseUrl = $"{Context.Request.Scheme}://{Context.Request.Host}";
@@ -1488,7 +1593,10 @@
       <div class="pd-hero-sticky-col">
         <div class="pd-hero-img-card sat-skeleton-shimmer">
           <img id="heroMainImg" src="@mainImage" alt="@Model.Name" onload="this.parentElement.classList.remove('sat-skeleton-shimmer');" onerror="this.onerror=null;this.src='/assets/ring_1.jpg';this.parentElement.classList.remove('sat-skeleton-shimmer');" />
-          <span class="hero-badge-tag" id="heroBadgeTag">💎 Lab Grown Diamond</span>
+          @if (!isLooseDiamond && !isWatch)
+          {
+            <span class="hero-badge-tag" id="heroBadgeTag">💎 Lab Grown Diamond</span>
+          }
         </div>
       </div>
 
@@ -1528,15 +1636,27 @@
 
         <!-- Trust Pills -->
         <div class="pd-trust-row">
-          <span class="pd-trust-pill"><i class="fa-solid fa-certificate"></i> <span id="certPillText">IGI Certified</span></span>
-          <span class="pd-trust-pill"><i class="fa-solid fa-shield-check"></i> BIS Hallmarked</span>
-          <span class="pd-trust-pill"><i class="fa-solid fa-truck-fast"></i> Free Insured Express</span>
+          @if (isWatch)
+          {
+            <span class="pd-trust-pill"><i class="fa-solid fa-clock"></i> Swiss Movement</span>
+            <span class="pd-trust-pill"><i class="fa-solid fa-shield-check"></i> 2-Year Luxury Warranty</span>
+            <span class="pd-trust-pill"><i class="fa-solid fa-truck-fast"></i> Armored Insured Dispatch</span>
+          }
+          else
+          {
+            <span class="pd-trust-pill"><i class="fa-solid fa-certificate"></i> <span id="certPillText">IGI Certified</span></span>
+            <span class="pd-trust-pill"><i class="fa-solid fa-shield-check"></i> BIS Hallmarked</span>
+            <span class="pd-trust-pill"><i class="fa-solid fa-truck-fast"></i> Free Insured Express</span>
+          }
         </div>
-        <div style="margin-top: 8px;">
-          <a href="/Product/GiaCertificate/@Model.Id" id="btnGiaCertLink" target="_blank" style="display:inline-flex; align-items:center; gap:6px; color:#fbbf24; text-decoration:none; font-size:12px; font-weight:600; padding:5px 12px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); border-radius:6px; transition:all 0.2s ease;">
-            <i class="fa-solid fa-file-shield"></i> <span id="btnGiaCertLinkText">View &amp; Download Digital GIA Certificate</span> <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;"></i>
-          </a>
-        </div>
+        @if (!isWatch)
+        {
+          <div style="margin-top: 8px;">
+            <a href="/Product/GiaCertificate/@Model.Id" id="btnGiaCertLink" target="_blank" style="display:inline-flex; align-items:center; gap:6px; color:#fbbf24; text-decoration:none; font-size:12px; font-weight:600; padding:5px 12px; background:rgba(251,191,36,0.1); border:1px solid rgba(251,191,36,0.3); border-radius:6px; transition:all 0.2s ease;">
+              <i class="fa-solid fa-file-shield"></i> <span id="btnGiaCertLinkText">View &amp; Download Digital GIA Certificate</span> <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px;"></i>
+            </a>
+          </div>
+        }
 
         @if (isLooseDiamond)
         {
@@ -1546,13 +1666,89 @@
               <span style="font-size: 14.5px; font-weight: 700; color: #ffffff; letter-spacing: 0.04em;">IGI CERTIFIED LOOSE LAB DIAMOND</span>
             </div>
             <div style="font-size: 13px; color: #e2e8f0; line-height: 1.6; font-weight: 500;">
-              @(string.IsNullOrWhiteSpace(Model.Spec) ? "Precision-cut loose lab-grown diamond with certified gemological authentication, maximum optical brilliance, and 100% sustainable origin." : Model.Spec)
+              @{
+                var rawSpec = Model.Spec ?? "";
+                var parts = rawSpec.Split('|', StringSplitOptions.RemoveEmptyEntries).Select(p => p.Trim()).ToList();
+                var filteredParts = parts.Where(p => 
+                    !p.Contains("Gold", StringComparison.OrdinalIgnoreCase) && 
+                    !p.Contains("Platinum", StringComparison.OrdinalIgnoreCase) && 
+                    !p.Contains("Silver", StringComparison.OrdinalIgnoreCase) &&
+                    !p.Contains("10K", StringComparison.OrdinalIgnoreCase) &&
+                    !p.Contains("14K", StringComparison.OrdinalIgnoreCase) &&
+                    !p.Contains("18K", StringComparison.OrdinalIgnoreCase) &&
+                    !p.Contains("1.50ct GIA VVS1", StringComparison.OrdinalIgnoreCase)
+                ).ToList();
+
+                string cleanLooseSpec = filteredParts.Count > 0 ? string.Join(" | ", filteredParts) : "";
+                if (string.IsNullOrWhiteSpace(cleanLooseSpec))
+                {
+                    cleanLooseSpec = $"{detectedCarat} | Shape: {detectedShape} | Color {detectedColor} | Clarity {detectedClarity} | Cut {detectedCut} {(!string.IsNullOrEmpty(detectedMeasurements) ? "| Measurements: " + detectedMeasurements : "")} | Certified Loose Lab Grown Diamond";
+                }
+              }
+              @cleanLooseSpec
             </div>
             <div style="margin-top: 14px; font-size: 12px; color: #94a3b8; display: flex; gap: 16px; flex-wrap: wrap;">
               <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-check" style="color: #10b981;"></i> 100% Conflict Free</span>
               <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-check" style="color: #10b981;"></i> Precision Faceted</span>
               <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-check" style="color: #10b981;"></i> Ready for Custom Setting</span>
             </div>
+          </div>
+        }
+        else if (isWatch)
+        {
+          <div id="watchGoldenBlock" style="background: rgba(212, 175, 55, 0.08); border: 1px solid rgba(212, 175, 55, 0.35); border-radius: 12px; padding: 18px 20px; margin: 12px 0; transition: all 0.3s ease;">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+              <span style="font-size: 1.2rem; color: #d4b878;">⌚</span>
+              <span id="watchGoldenTitle" style="font-size: 14.5px; font-weight: 700; color: #ffffff; letter-spacing: 0.04em;">SWISS AUTOMATIC LUXURY TIMEPIECE</span>
+            </div>
+            <div id="watchGoldenSpec" style="font-size: 13px; color: #e2e8f0; line-height: 1.6; font-weight: 500;">
+              Swiss Automatic Mechanical (ETA Swiss) | Scratch-Resistant Sapphire Glass | 50m Water Resistance | 41 mm Stainless Steel Case
+            </div>
+            <div id="watchGoldenBadges" style="margin-top: 14px; font-size: 12px; color: #94a3b8; display: flex; gap: 16px; flex-wrap: wrap;">
+              <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-check" style="color: #10b981;"></i> <span id="watchBadgeMovement">Automatic Movement (ETA Swiss)</span></span>
+              <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-check" style="color: #10b981;"></i> Sapphire Crystal</span>
+              <span style="display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-check" style="color: #10b981;"></i> Armored Insured Dispatch</span>
+            </div>
+          </div>
+
+          <!-- Watch Movement & Origin: Japan & Swiss -->
+          @if (metalList.Count > 0)
+          {
+            <div style="margin-top: 6px;">
+              <div class="opt-label">Case Movement &amp; Finish: <span id="lblMetal">@(metalList.FirstOrDefault()?.Name ?? "Swiss")</span></div>
+              <div class="metal-swatch-list">
+                @foreach (var metal in metalList)
+                {
+                  var isDef = (metal == metalList.First());
+                  <button type="button" class="metal-swatch-btn @(isDef ? "active" : "")" onclick="setWatchMovement('@metal.Name', this)">
+                    <i class="fa-regular fa-clock"></i> @metal.Name
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Diamond Stone Selection: Moissanite & Lab Grown Diamond -->
+          @if (caratList.Count > 0)
+          {
+            <div style="margin-top: 10px;">
+              <div class="opt-label">Diamond Details / Stone Type: <span id="lblCarat">@(caratList.FirstOrDefault()?.Label ?? "Moissanite")</span></div>
+              <div class="carat-btn-list">
+                @foreach (var carat in caratList)
+                {
+                  var isDef = (carat == caratList.First());
+                  <button type="button" class="carat-btn @(isDef ? "active" : "")" onclick="setWatchStone('@carat.Label', this)">
+                    @(carat.Label.Contains("Lab", StringComparison.OrdinalIgnoreCase) ? "💎 " : "✨ ")@carat.Label
+                  </button>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Free Caseback Engraving -->
+          <div>
+            <div class="opt-label">Free Caseback Engraving</div>
+            <input type="text" class="pd-input" id="txtEngraving" placeholder="Engrave Text (e.g. Initials or Date ♡)" maxlength="30" />
           </div>
         }
         else
@@ -1631,21 +1827,24 @@
           </div>
         }
 
-        <!-- Physical GIA Hardcopy Certificate Add-on Option -->
-        <div style="background: rgba(212, 178, 112, 0.08); border: 1px solid rgba(212, 178, 112, 0.35); border-radius: 10px; padding: 12px 16px; margin: 16px 0;">
-          <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; user-select: none;">
-            <input type="checkbox" id="chkPhysicalGiaCert" onchange="handlePhysicalCertToggle()" style="width: 18px; height: 18px; margin-top: 2px; accent-color: #d4b270; cursor: pointer;" />
-            <div>
-              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                <span style="font-weight: 700; color: #ffffff; font-size: 13.5px;">Include Hardcopy Physical GIA Certificate</span>
-                <span style="background: #fbbf24; color: #0f172a; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px;">+$50 USD</span>
+        @if (!isWatch)
+        {
+          <!-- Physical GIA Hardcopy Certificate Add-on Option -->
+          <div style="background: rgba(212, 178, 112, 0.08); border: 1px solid rgba(212, 178, 112, 0.35); border-radius: 10px; padding: 12px 16px; margin: 16px 0;">
+            <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; user-select: none;">
+              <input type="checkbox" id="chkPhysicalGiaCert" onchange="handlePhysicalCertToggle()" style="width: 18px; height: 18px; margin-top: 2px; accent-color: #d4b270; cursor: pointer;" />
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                  <span style="font-weight: 700; color: #ffffff; font-size: 13.5px;">Include Hardcopy Physical GIA Certificate</span>
+                  <span style="background: #fbbf24; color: #0f172a; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 999px;">+$50 USD</span>
+                </div>
+                <div style="font-size: 11.5px; color: #cbd5e1; margin-top: 3px; line-height: 1.4;">
+                  Sealed, laminated physical GIA Gemological dossier with holographic tamper seal, packaged in parcel from Surat, India.
+                </div>
               </div>
-              <div style="font-size: 11.5px; color: #cbd5e1; margin-top: 3px; line-height: 1.4;">
-                Sealed, laminated physical GIA Gemological dossier with holographic tamper seal, packaged in parcel from Surat, India.
-              </div>
-            </div>
-          </label>
-        </div>
+            </label>
+          </div>
+        }
 
         <!-- CTA Action Buttons -->
         <div class="pd-cta-group">
@@ -1683,78 +1882,298 @@
           </div>
         </div>
 
-        <!-- ALL 7 SPECIFICATION ACCORDIONS ON THE RIGHT SIDE -->
+        <!-- ALL SPECIFICATION ACCORDIONS ON THE RIGHT SIDE -->
         <div class="pd-accordions-group">
-          
-          <div class="acc-item open">
-            <div class="acc-header" onclick="toggleAcc(this)">
-              <span>Product Overview</span>
-              <i class="fa-solid fa-chevron-down"></i>
+          @if (isWatch)
+          {
+            <!-- Watch Details (Dynamic Movement: Swiss or Japan) -->
+            <div class="acc-item open">
+              <div class="acc-header" onclick="toggleAcc(this)">
+                <span>Watch Details</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="acc-body">
+                <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:#cbd5e1; line-height:1.6;">
+                  <div>~ <strong>Brand :</strong> Branded</div>
+                  <div>~ <strong>Brand Metal :</strong> Stainless Steel</div>
+                  <div>~ <strong>Movement :</strong> <span id="watchSpecMovement" style="color:#fbbf24; font-weight:700;">Automatic Movement (ETA Swiss)</span></div>
+                  <div>~ <strong>Dial Window Material Type :</strong> Sapphire Glass</div>
+                  <div>~ <strong>Handmade :</strong> Yes</div>
+                  <div>~ <strong>Size :</strong> 41 mm</div>
+                </div>
+              </div>
             </div>
-            <div class="acc-body">
-              This handcrafted @Model.Name features precision 3D-engineered prongs, micro-pave accents, and a mirror-polished solid metal finish. Hand-selected for exceptional fire and symmetry.
-            </div>
-          </div>
 
-          <div class="acc-item">
-            <div class="acc-header" onclick="toggleAcc(this)">
-              <span>Clarity &amp; Color Grading</span>
-              <i class="fa-solid fa-chevron-down"></i>
+            <!-- Diamond Details (Dynamic Stone Type: Moissanite or Lab Grown Diamond) -->
+            <div class="acc-item open">
+              <div class="acc-header" onclick="toggleAcc(this)">
+                <span>Diamond Details</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="acc-body">
+                <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:#cbd5e1; line-height:1.6;">
+                  <div>~ <strong>Diamond Type :</strong> <span id="watchSpecDiamondType" style="color:#fbbf24; font-weight:700;">Moissanite</span></div>
+                  <div>~ <strong>Clarity :</strong> VVS1</div>
+                  <div>~ <strong>Shape :</strong> Round Brilliant Cut</div>
+                  <div>~ <strong>Cut :</strong> Excellent</div>
+                  <div>~ <strong>Polish :</strong> Excellent</div>
+                  <div>~ <strong>Diamond Colour :</strong> White / Colourless / EF</div>
+                  <div style="color:#10b981; font-weight:700;">~ It will Pass All Diamond Test</div>
+                </div>
+              </div>
             </div>
-            <div class="acc-body" id="accClarityText">
-              Stone Color: <strong>E–F (Colorless)</strong> • Clarity: <strong>VVS1–VVS2 (Eye Clean)</strong> • Polish &amp; Symmetry: <strong>Excellent</strong>.
-            </div>
-          </div>
 
-          <div class="acc-item">
-            <div class="acc-header" onclick="toggleAcc(this)">
-              <span>Diamond &amp; Gemstone Details</span>
-              <i class="fa-solid fa-chevron-down"></i>
+            <!-- Other Detail -->
+            <div class="acc-item">
+              <div class="acc-header" onclick="toggleAcc(this)">
+                <span>Other Detail</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="acc-body">
+                <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:#cbd5e1; line-height:1.6;">
+                  <div>~ <strong>Country :</strong> India</div>
+                  <div>~ <strong>Packing Type :</strong> Box</div>
+                  <div>~ <strong>Minimum Order Quantity :</strong> 1</div>
+                  <div>~ <strong>Customised :</strong> Acceptable</div>
+                </div>
+              </div>
             </div>
-            <div class="acc-body" id="accDiamondDetails">
-              Center Stone: <strong>Selected Carat Weight</strong> • Setting Type: <strong>4-Prong Comfort Fit</strong> • Conflict-free &amp; 100% sustainable.
-            </div>
-          </div>
 
-          <div class="acc-item">
-            <div class="acc-header" onclick="toggleAcc(this)">
-              <span>Metal &amp; Craft Details</span>
-              <i class="fa-solid fa-chevron-down"></i>
+            <!-- Provide 5 Star Services -->
+            <div class="acc-item">
+              <div class="acc-header" onclick="toggleAcc(this)">
+                <span>Provide 5 Star Services</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="acc-body">
+                <div style="display:flex; flex-direction:column; gap:6px; font-size:13px; color:#cbd5e1; line-height:1.6;">
+                  <div>~ Come with Card, Paper and Premium Box</div>
+                  <div>~ 100% Conflict Free Materials</div>
+                  <div>~ Easy Payment Plans</div>
+                  <div>~ Free Shipping Worldwide</div>
+                  <div>~ All Type of Customisation Service</div>
+                  <div>~ Rush Orders Service</div>
+                  <div>~ 24/7 Customers Service</div>
+                  <div>~ 100% Money Back Guarantee</div>
+                </div>
+              </div>
             </div>
-            <div class="acc-body">
-              Available in Solid 10K, 14K, 18K Yellow, White &amp; Rose Gold, as well as 950 Platinum. Stamped with official BIS/Hallmark authenticity.
+          }
+          else
+          {
+            <div class="acc-item open">
+              <div class="acc-header" onclick="toggleAcc(this)">
+                <span>Product Overview</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="acc-body">
+                @if (isLooseDiamond)
+                {
+                  <text>This certified @detectedShape lab-grown diamond @(!string.IsNullOrEmpty(detectedCarat) ? $"({detectedCarat})" : "") offers exceptional optical purity, high scintillation, and precision facet alignment. Hand-selected and verified with international gemological laboratory certification.</text>
+                }
+                else if (isNecklace)
+                {
+                  <text>This handcrafted @Model.Name features brilliant lab-grown diamonds set along a fluid, master-crafted chain. Engineered with supple drape and reinforced links for everyday wear and evening elegance.</text>
+                }
+                else if (isBracelet)
+                {
+                  <text>This @Model.Name is handcrafted with continuous hand-selected stones set into individual articulated links. Designed to lay flat against the wrist with fluid movement and non-flipping geometry.</text>
+                }
+                else if (isEarring)
+                {
+                  <text>These @Model.Name are balanced for maximum light reflection and all-day wearable comfort. Featuring perfectly matched stones and low-profile settings engineered to sit flush against the earlobe.</text>
+                }
+                else
+                {
+                  <text>This handcrafted @Model.Name features precision 3D-engineered prongs, micro-pave accents, and a mirror-polished solid metal finish. Hand-selected for exceptional fire, symmetry, and everyday comfort.</text>
+                }
+              </div>
             </div>
-          </div>
 
-          <div class="acc-item">
-            <div class="acc-header" onclick="toggleAcc(this)">
-              <span>Ring Sizing &amp; Custom Fit</span>
-              <i class="fa-solid fa-chevron-down"></i>
+            <div class="acc-item">
+              <div class="acc-header" onclick="toggleAcc(this)">
+                <span>Clarity &amp; Color Grading</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="acc-body" id="accClarityText">
+                @if (isLooseDiamond)
+                {
+                  <text>Color Grade: <strong>@detectedColor</strong> • Clarity Grade: <strong>@detectedClarity</strong> • Cut Quality: <strong>@detectedCut</strong> • Shape: <strong>@detectedShape</strong> @(!string.IsNullOrEmpty(detectedMeasurements) ? $"• Dimensions: <strong>{detectedMeasurements}</strong>" : ""). Graded under 10x magnification under standardized daylight lighting.</text>
+                }
+                else
+                {
+                  <text>Stone Color: <strong>E–F (Colorless)</strong> • Clarity: <strong>VVS1–VVS2 (Eye Clean)</strong> • Polish &amp; Symmetry: <strong>Excellent</strong> • Origin: <strong>Ethical Lab-Grown (Zero Carbon Impact)</strong>.</text>
+                }
+              </div>
             </div>
-            <div class="acc-body">
-              Crafted in standard US sizes 4.0 to 10.0. We offer 1 complimentary resize within 60 days of delivery.
-            </div>
-          </div>
 
-          <div class="acc-item">
-            <div class="acc-header" onclick="toggleAcc(this)">
-              <span>Jewelry Certification &amp; Laser Inscription</span>
-              <i class="fa-solid fa-chevron-down"></i>
+            <div class="acc-item">
+              <div class="acc-header" onclick="toggleAcc(this)">
+                <span>@(isLooseDiamond ? "Cut & Facet Proportions" : "Diamond & Gemstone Details")</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="acc-body" id="accDiamondDetails">
+                @if (isLooseDiamond)
+                {
+                  <text>Shape &amp; Faceting: <strong>@detectedShape Brilliant Cut</strong> • Polish: <strong>Excellent</strong> • Symmetry: <strong>Excellent</strong> • Fluorescence: <strong>None</strong> • Inscription: <strong>Laser Inscribed on Girdle</strong>.</text>
+                }
+                else if (isNecklace)
+                {
+                  <text>Center / Accent Gems: <strong>Hand-selected Lab-Grown Diamonds</strong> • Setting Type: <strong>Micro-Prong / Low-Profile Basket</strong> • Table and pavilion angles calibrated for maximum scintillation.</text>
+                }
+                else if (isBracelet)
+                {
+                  <text>Stones: <strong>Continuous Lab-Grown Diamonds</strong> • Setting: <strong>4-Prong Basket Comfort Links</strong> • Articulation: <strong>Smooth flexible drape engineered to resist flipping</strong>.</text>
+                }
+                else if (isEarring)
+                {
+                  <text>Matched Pair: <strong>Color &amp; Clarity Matched Lab-Grown Diamonds</strong> • Setting: <strong>4-Prong Basket / Low-Profile Martini</strong> • Conflict-free &amp; 100% sustainable origin.</text>
+                }
+                else
+                {
+                  <text>Center Stone: <strong>Selected Carat Weight (@detectedShape)</strong> • Setting Type: <strong>4-Prong Comfort Fit with Micro-Pave Gallery</strong> • Conflict-free &amp; 100% sustainable.</text>
+                }
+              </div>
             </div>
-            <div class="acc-body" id="accCertText">
-              Includes physical IGI Certificate of Authenticity card and microscopic girdle laser inscription matching laboratory reports.
-            </div>
-          </div>
 
-          <div class="acc-item">
-            <div class="acc-header" onclick="toggleAcc(this)">
-              <span>Shipping, Delivery &amp; Warranty</span>
-              <i class="fa-solid fa-chevron-down"></i>
+            @if (isLooseDiamond)
+            {
+              <div class="acc-item">
+                <div class="acc-header" onclick="toggleAcc(this)">
+                  <span>Packaging &amp; Sealed Cassette</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="acc-body">
+                  Delivered securely sealed in a tamper-evident gemological cassette with physical laboratory certification card, micro-envelope, and protective velvet presentation vault.
+                </div>
+              </div>
+
+              <div class="acc-item">
+                <div class="acc-header" onclick="toggleAcc(this)">
+                  <span>Sizing, Fit &amp; Bespoke Setting</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="acc-body">
+                  Calibrated millimeter dimensions suitable for seamless custom setting into any engagement ring, solitaire pendant, or bespoke jewelry design. SAT Jewel offers full custom CAD casting services upon request.
+                </div>
+              </div>
+            }
+            else if (isNecklace)
+            {
+              <div class="acc-item">
+                <div class="acc-header" onclick="toggleAcc(this)">
+                  <span>Metal &amp; Chain Craftsmanship</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="acc-body">
+                  Forged in Solid 10K, 14K, 18K Yellow, White, or Rose Gold, or 950 Platinum. Stamped with official BIS/Hallmark authenticity and finished with high-luster rhodium dipping for lasting radiance.
+                </div>
+              </div>
+
+              <div class="acc-item">
+                <div class="acc-header" onclick="toggleAcc(this)">
+                  <span>Chain Length &amp; Drape</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="acc-body">
+                  Standard chain length 16" with a 2" extender (adjustable up to 18") with a reinforced secure lobster claw clasp. Custom lengths available upon request.
+                </div>
+              </div>
+            }
+            else if (isBracelet)
+            {
+              <div class="acc-item">
+                <div class="acc-header" onclick="toggleAcc(this)">
+                  <span>Metal &amp; Link Craftsmanship</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="acc-body">
+                  Forged in Solid 10K, 14K, 18K Yellow, White, or Rose Gold, or 950 Platinum. Stamped with official BIS/Hallmark authenticity. Hand-assembled with solid articulation pins.
+                </div>
+              </div>
+
+              <div class="acc-item">
+                <div class="acc-header" onclick="toggleAcc(this)">
+                  <span>Bracelet Sizing &amp; Safety Clasp</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="acc-body">
+                  Standard 7.0 Inch length (fits wrists up to 6.8"). Custom 6.5" and 7.5" lengths available upon request. Features an integrated double-latch safety lock mechanism to prevent accidental opening.
+                </div>
+              </div>
+            }
+            else if (isEarring)
+            {
+              <div class="acc-item">
+                <div class="acc-header" onclick="toggleAcc(this)">
+                  <span>Metal &amp; Setting Craftsmanship</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="acc-body">
+                  Cast in Solid 10K, 14K, 18K Yellow, White, or Rose Gold, or 950 Platinum. Stamped with official hallmark authenticity. 100% hypoallergenic and nickel-free.
+                </div>
+              </div>
+
+              <div class="acc-item">
+                <div class="acc-header" onclick="toggleAcc(this)">
+                  <span>Earring Fit &amp; Backing Security</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="acc-body">
+                  Engineered with secure double-notched friction posts (or threaded screw-backs) for comfortable, fail-safe daily wear without earlobe drooping.
+                </div>
+              </div>
+            }
+            else
+            {
+              <div class="acc-item">
+                <div class="acc-header" onclick="toggleAcc(this)">
+                  <span>Metal &amp; Craft Details</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="acc-body">
+                  Available in Solid 10K, 14K, 18K Yellow, White &amp; Rose Gold, as well as 950 Platinum. Stamped with official BIS/Hallmark authenticity.
+                </div>
+              </div>
+
+              <div class="acc-item">
+                <div class="acc-header" onclick="toggleAcc(this)">
+                  <span>Ring Sizing &amp; Custom Fit</span>
+                  <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div class="acc-body">
+                  Crafted in standard US sizes 4.0 to 10.0 (including half sizes). We offer 1 complimentary resize within 60 days of delivery.
+                </div>
+              </div>
+            }
+
+            <div class="acc-item">
+              <div class="acc-header" onclick="toggleAcc(this)">
+                <span>@(isLooseDiamond ? "Jewelry Certification & Laser Inscription" : "Jewelry Certification & Laser Inscription")</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="acc-body" id="accCertText">
+                @if (isLooseDiamond)
+                {
+                  <text>Includes official <strong>@detectedCert</strong> report with 1:1 matching serial number laser-inscribed directly onto the diamond's girdle, verifiable on the official international laboratory database.</text>
+                }
+                else
+                {
+                  <text>Includes physical IGI / GIA Certificate of Authenticity card and girdle laser inscription.</text>
+                }
+              </div>
             </div>
-            <div class="acc-body">
-              Includes 100% Free Insured Courier Delivery with signature required. Backed by SAT Jewel Lifetime Manufacturing Warranty and 30-Day returns.
+
+            <div class="acc-item">
+              <div class="acc-header" onclick="toggleAcc(this)">
+                <span>Shipping, Delivery &amp; Warranty</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </div>
+              <div class="acc-body">
+                Includes 100% Free Insured Courier Delivery with signature required. Backed by SAT Jewel Lifetime Manufacturing Warranty and 30-Day returns.
+              </div>
             </div>
-          </div>
+          }
 
         </div>
 
@@ -1921,14 +2340,27 @@
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
               </div>
-              <div class="review-stars">★★★★★</div>
+              <div class="review-stars">
+                @for (int s = 1; s <= 5; s++)
+                {
+                  if (s <= rev.Rating)
+                  {
+                    <span style="color:#f59e0b;">★</span>
+                  }
+                  else
+                  {
+                    <span style="color:#d1d5db;">★</span>
+                  }
+                }
+              </div>
               <p class="review-snippet">"@rev.ReviewText"</p>
               <button type="button" class="btn-view-review" 
                       data-name="@rev.CustomerName" 
                       data-photo="@rev.PhotoUrl" 
                       data-title="@rev.ReviewTitle" 
                       data-text="@rev.ReviewText" 
-                      onclick="openReviewModal(this.dataset.name, this.dataset.photo, this.dataset.title, this.dataset.text)">
+                      data-rating="@rev.Rating" 
+                      onclick="openReviewModal(this.dataset.name, this.dataset.photo, this.dataset.title, this.dataset.text, this.dataset.rating)">
                 View Review
               </button>
             </div>
@@ -1956,14 +2388,27 @@
                   <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
                 </svg>
               </div>
-              <div class="review-stars">★★★★★</div>
+              <div class="review-stars">
+                @for (int s = 1; s <= 5; s++)
+                {
+                  if (s <= rev.Rating)
+                  {
+                    <span style="color:#f59e0b;">★</span>
+                  }
+                  else
+                  {
+                    <span style="color:#d1d5db;">★</span>
+                  }
+                }
+              </div>
               <p class="review-snippet">"@rev.ReviewText"</p>
               <button type="button" class="btn-view-review" 
                       data-name="@rev.CustomerName" 
                       data-photo="@rev.PhotoUrl" 
                       data-title="@rev.ReviewTitle" 
                       data-text="@rev.ReviewText" 
-                      onclick="openReviewModal(this.dataset.name, this.dataset.photo, this.dataset.title, this.dataset.text)">
+                      data-rating="@rev.Rating" 
+                      onclick="openReviewModal(this.dataset.name, this.dataset.photo, this.dataset.title, this.dataset.text, this.dataset.rating)">
                 View Review
               </button>
             </div>
@@ -1992,7 +2437,7 @@
               </div>
             </div>
           </div>
-          <div style="color:#f59e0b; font-size:16px; letter-spacing:2px; margin-bottom:10px;">★★★★★</div>
+          <div id="modalReviewStars" style="color:#f59e0b; font-size:16px; letter-spacing:2px; margin-bottom:10px;">★★★★★</div>
           <h3 id="modalReviewTitle" style="font-size:16px; font-weight:800; color:#0f172a; margin:0 0 10px; line-height:1.35;"></h3>
           <p id="modalReviewText" style="font-size:13.5px; line-height:1.65; color:#475569; margin:0;"></p>
         </div>
@@ -2087,12 +2532,13 @@
 
   <script>
     const isLooseDiamond = @(isLooseDiamond ? "true" : "false");
+    const isWatch = @(isWatch ? "true" : "false");
     const basePriceUSD = @Model.Price;
     const moissaniteBasePriceUSD = @(Model.MoissanitePrice > 0 ? Model.MoissanitePrice : Math.Round(Model.Price * 0.55m));
     let currentStoneType = 'LabGrownDiamond'; // 'LabGrownDiamond' or 'Moissanite'
-    let selectedMetal = '@(metalList.FirstOrDefault()?.Name ?? (isLooseDiamond ? "Loose Diamond" : "14K Yellow Gold"))';
-    let selectedCarat = '@(caratList.FirstOrDefault()?.Label ?? (isLooseDiamond ? "Certified" : "1.50 CT"))';
-    let selectedRingSize = isLooseDiamond ? 'Loose Gem' : 'US 6.0 (16.5mm)';
+    let selectedMetal = '@(metalList.FirstOrDefault()?.Name ?? (isLooseDiamond ? "Loose Diamond" : (isWatch ? "316L Stainless Steel" : "14K Yellow Gold")))';
+    let selectedCarat = '@(caratList.FirstOrDefault()?.Label ?? (isLooseDiamond ? "Certified" : (isWatch ? "40mm Case" : "1.50 CT")))';
+    let selectedRingSize = isLooseDiamond ? 'Loose Gem' : (isWatch ? 'Standard Watch Fit' : 'US 6.0 (16.5mm)');
 
     // Metal, Carat & Ring Size Adjustments Pre-populated from Server
     let metalAdjustments = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(metalList.ToDictionary(m => (string)m.Name, m => (decimal)m.Offset)));
@@ -2165,22 +2611,75 @@
         document.querySelectorAll('.stone-opt-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
 
+        const hb = document.getElementById('heroBadgeTag');
         if (type === 'Moissanite') {
           box.classList.add('moissanite-active');
           document.getElementById('lblStoneChoice').textContent = 'Moissanite Diamond';
-          document.getElementById('heroBadgeTag').textContent = '✨ Moissanite';
+          if (hb) hb.textContent = '✨ Moissanite';
           document.getElementById('certPillText').textContent = 'SGL / GRA Certified';
           document.getElementById('accCertText').innerHTML = 'Includes physical SGL / GRA Authenticity Card verifying Grade D Colorless Moissanite.';
         } else {
           box.classList.remove('moissanite-active');
           document.getElementById('lblStoneChoice').textContent = 'Lab Grown Diamond';
-          document.getElementById('heroBadgeTag').textContent = '💎 Lab Grown Diamond';
+          if (hb) hb.textContent = '💎 Lab Grown Diamond';
           document.getElementById('certPillText').textContent = 'IGI Certified';
           document.getElementById('accCertText').innerHTML = 'Includes physical IGI Certificate of Authenticity card and girdle laser inscription.';
         }
       }
 
       recalculatePrice();
+    }
+
+    function setWatchMovement(name, btn) {
+      selectedMetal = name;
+      const lbl = document.getElementById('lblMetal');
+      if (lbl) lbl.textContent = name;
+      document.querySelectorAll('.metal-swatch-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      updateWatchDynamicUI();
+      recalculatePrice();
+    }
+
+    function setWatchStone(label, btn) {
+      selectedCarat = label;
+      currentStoneType = label.toLowerCase().includes('lab') ? 'LabGrownDiamond' : 'Moissanite';
+      const lbl = document.getElementById('lblCarat');
+      if (lbl) lbl.textContent = label;
+      document.querySelectorAll('.carat-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      updateWatchDynamicUI();
+      recalculatePrice();
+    }
+
+    function updateWatchDynamicUI() {
+      if (!isWatch) return;
+      const isJapan = (selectedMetal || '').toLowerCase().includes('japan');
+      const isLab = (selectedCarat || '').toLowerCase().includes('lab');
+
+      const goldenTitle = document.getElementById('watchGoldenTitle');
+      const goldenSpec = document.getElementById('watchGoldenSpec');
+      const goldenBadge = document.getElementById('watchBadgeMovement');
+      if (goldenTitle) {
+        goldenTitle.textContent = isJapan ? 'JAPANESE AUTOMATIC LUXURY TIMEPIECE' : 'SWISS AUTOMATIC LUXURY TIMEPIECE';
+      }
+      if (goldenSpec) {
+        goldenSpec.textContent = isJapan 
+          ? 'Japanese Automatic Mechanical Movement | Scratch-Resistant Sapphire Glass | 50m Water Resistance | 41 mm Stainless Steel Case' 
+          : 'Swiss Automatic Mechanical (ETA Swiss) | Scratch-Resistant Sapphire Glass | 50m Water Resistance | 41 mm Stainless Steel Case';
+      }
+      if (goldenBadge) {
+        goldenBadge.textContent = isJapan ? 'Japanese Automatic Movement' : 'Automatic Movement (ETA Swiss)';
+      }
+
+      const specMovement = document.getElementById('watchSpecMovement');
+      if (specMovement) {
+        specMovement.textContent = isJapan ? 'Automatic Movement (Japanese)' : 'Automatic Movement (ETA Swiss)';
+      }
+
+      const specStone = document.getElementById('watchSpecDiamondType');
+      if (specStone) {
+        specStone.textContent = isLab ? 'Lab Grown Diamond' : 'Moissanite';
+      }
     }
 
     function setMetal(name, btn) {
@@ -2212,9 +2711,9 @@
     function recalculatePrice() {
       const metalAdj = isLooseDiamond ? 0 : (metalAdjustments[selectedMetal] || 0);
       const caratAdj = isLooseDiamond ? 0 : (caratAdjustments[selectedCarat] || 0);
-      const ringSizeAdj = isLooseDiamond ? 0 : (ringSizeAdjustments[selectedRingSize] || 0);
+      const ringSizeAdj = (isLooseDiamond || isWatch) ? 0 : (ringSizeAdjustments[selectedRingSize] || 0);
 
-      const activeBasePrice = (currentStoneType === 'Moissanite') ? moissaniteBasePriceUSD : basePriceUSD;
+      const activeBasePrice = isWatch ? basePriceUSD : ((currentStoneType === 'Moissanite') ? moissaniteBasePriceUSD : basePriceUSD);
       let finalPrice = isLooseDiamond ? Math.round(basePriceUSD) : Math.max(100, Math.round(activeBasePrice + metalAdj + caratAdj + ringSizeAdj));
       let originalPrice = Math.floor(finalPrice * 1.15);
       let monthly = (finalPrice / 4).toFixed(2);
@@ -2236,6 +2735,8 @@
       if (floatSpecs) {
         if (isLooseDiamond) {
           floatSpecs.textContent = `Emerald Cut • Loose Lab Diamond • IGI Certified`;
+        } else if (isWatch) {
+          floatSpecs.textContent = `${selectedMetal} Movement • ${selectedCarat} • 41 mm Case`;
         } else {
           const stoneLabel = currentStoneType === 'Moissanite' ? 'Moissanite' : 'Lab Diamond';
           const sizeShort = (selectedRingSize || 'US 6.0').split(' ')[0] + ' ' + ((selectedRingSize || '').split(' ')[1] || '');
@@ -2254,7 +2755,12 @@
       const size = sizeSelect ? sizeSelect.value : '';
       const txtEngraving = document.getElementById('txtEngraving');
       const engraving = txtEngraving ? txtEngraving.value.trim() : '';
-      link.href = `/Product/GiaCertificate/@Model.Id?carat=${encodeURIComponent(selectedCarat)}&metal=${encodeURIComponent(selectedMetal)}&stone=${encodeURIComponent(stone)}&size=${encodeURIComponent(size)}${engraving ? `&engraving=${encodeURIComponent(engraving)}` : ''}`;
+
+      if (@(isLooseDiamond ? "true" : "false")) {
+        link.href = `/Product/GiaCertificate/@Model.Id?stone=${encodeURIComponent(stone)}`;
+      } else {
+        link.href = `/Product/GiaCertificate/@Model.Id?carat=${encodeURIComponent(selectedCarat)}&metal=${encodeURIComponent(selectedMetal)}&stone=${encodeURIComponent(stone)}&size=${encodeURIComponent(size)}${engraving ? `&engraving=${encodeURIComponent(engraving)}` : ''}`;
+      }
 
       const linkText = document.getElementById('btnGiaCertLinkText');
       if (linkText) {
@@ -2441,9 +2947,12 @@
         const includeCert = chkCert ? chkCert.checked : false;
 
         const isLoose = @(isLooseDiamond ? "true" : "false");
+        const isWatchItem = @(isWatch ? "true" : "false");
         const variantTitle = isLoose 
           ? `@Model.Name (IGI Certified Loose Diamond)` 
-          : `@Model.Name (${stoneName}, ${selectedMetal}, ${selectedCarat}, Size: ${ringSize}${engraving ? `, Engraved: "${engraving}"` : ''})`;
+          : (isWatchItem
+              ? `@Model.Name (${selectedMetal} Movement, ${selectedCarat}, 41 mm Stainless Steel${engraving ? `, Engraved: "${engraving}"` : ''})`
+              : `@Model.Name (${stoneName}, ${selectedMetal}, ${selectedCarat}, Size: ${ringSize}${engraving ? `, Engraved: "${engraving}"` : ''})`);
 
         function getCartStorageKey() {
           const isUserAuth = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
@@ -2461,14 +2970,14 @@
           id: '@Model.Id',
           name: variantTitle,
           priceUSD: finalPrice,
-          metal: isLoose ? 'Loose Diamond' : selectedMetal,
-          carat: isLoose ? 'Certified' : selectedCarat,
-          stone: 'Lab Grown Diamond',
-          size: isLoose ? 'Loose Gem' : ringSize,
+          metal: isWatchItem ? 'Stainless Steel' : (isLoose ? 'Loose Diamond' : selectedMetal),
+          carat: isWatchItem ? '41 mm' : (isLoose ? 'Certified' : selectedCarat),
+          stone: isWatchItem ? `${selectedMetal} Movement (${selectedCarat})` : (isLoose ? 'Certified Loose Diamond' : stoneName),
+          size: isWatchItem ? '41 mm Standard Fit' : (isLoose ? 'Loose Gem' : ringSize),
           engraving: isLoose ? '' : engraving,
           img: '@mainImage',
           quantity: 1,
-          includePhysicalGiaCert: includeCert
+          includePhysicalGiaCert: isWatchItem ? false : includeCert
         });
         localStorage.setItem(key, JSON.stringify(items));
         if (includeCert) {
@@ -2592,13 +3101,23 @@
         .catch(() => {});
     })();
 
-    function openReviewModal(name, photoUrl, title, text) {
+    function openReviewModal(name, photoUrl, title, text, rating) {
       document.getElementById('modalReviewName').textContent = name || 'Verified Customer';
       document.getElementById('modalReviewAvatar').textContent = (name && name.length > 0) ? name[0].toUpperCase() : 'C';
       document.getElementById('modalReviewImg').src = photoUrl || '';
       document.getElementById('modalReviewTitle').textContent = title || 'Customer Review';
       document.getElementById('modalReviewText').textContent = text || '';
       
+      const starsContainer = document.getElementById('modalReviewStars');
+      if (starsContainer) {
+        const starCount = parseInt(rating || '5', 10);
+        let starHtml = '';
+        for (let i = 1; i <= 5; i++) {
+          starHtml += `<span style="color:${i <= starCount ? '#f59e0b' : '#d1d5db'};">★</span>`;
+        }
+        starsContainer.innerHTML = starHtml;
+      }
+
       const modal = document.getElementById('reviewDetailModal');
       if (modal) modal.style.display = 'flex';
     }
@@ -2699,6 +3218,9 @@
     }
 
     recalculatePrice();
+    if (isWatch) {
+      updateWatchDynamicUI();
+    }
 
     function updateStickyGallery() {
       const gal = document.getElementById('detailGalleryCol');

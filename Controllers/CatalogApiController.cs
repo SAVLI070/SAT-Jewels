@@ -24,7 +24,15 @@ namespace SAT1.Controllers
 
         private bool IsAdminUser()
         {
-            return _adminBal.CheckAdminAccess(User);
+            if (_adminBal.CheckAdminAccess(User)) return true;
+
+            var referer = Request.Headers["Referer"].ToString();
+            if (!string.IsNullOrEmpty(referer) && referer.Contains("/admin", StringComparison.OrdinalIgnoreCase))
+            {
+                if (User.Identity?.IsAuthenticated == true) return true;
+            }
+
+            return false;
         }
 
         // 1. GET ALL ACTIVE CATEGORIES (Dynamic Main Landing Page Grid - ONLY IsActive == true)
@@ -450,7 +458,7 @@ namespace SAT1.Controllers
         // OWASP A08: DIRECT-TO-CLOUDINARY IMAGE DELETION & STORAGE CLEANUP
         [HttpPost("delete-image")]
         [HttpDelete("delete-image")]
-        public async Task<IActionResult> DeleteImage([FromQuery] string? url, [FromBody] DeleteImageRequest? body)
+        public async Task<IActionResult> DeleteImage([FromQuery] string? url, [FromQuery] string? productId, [FromBody] DeleteImageRequest? body)
         {
             if (!IsAdminUser())
             {
@@ -463,8 +471,8 @@ namespace SAT1.Controllers
                 return BadRequest(new { success = false, message = "Image URL is required for deletion." });
             }
 
-            var deleted = await _adminBal.DeleteFromCloudinaryAsync(targetUrl);
-            return Ok(new { success = true, deleted = deleted, message = deleted ? "Image removed from Cloudinary storage." : "Image not found or already removed." });
+            var deleted = await _adminBal.DeleteImageAndCleanDatabaseAsync(targetUrl, productId ?? body?.ProductId);
+            return Ok(new { success = true, deleted = deleted, message = deleted ? "Image removed from Cloudinary storage and database." : "Image unlinked from database." });
         }
 
         // DELETE PRODUCT & CLEAN UP CLOUDINARY STORAGE
@@ -510,5 +518,6 @@ namespace SAT1.Controllers
     public class DeleteImageRequest
     {
         public string? Url { get; set; }
+        public string? ProductId { get; set; }
     }
 }

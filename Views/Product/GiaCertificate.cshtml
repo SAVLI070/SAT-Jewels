@@ -435,10 +435,16 @@
         <span style="display:inline-flex; align-items:center; gap:6px; background:#ffffff; border:1px solid var(--gia-gold); padding:4px 10px; border-radius:4px; font-size:11px; font-weight:700; color:var(--gia-navy);">
           <i class="fa-solid fa-circle-check" style="color:#16a34a;"></i> @Model.VerificationBadge
         </span>
-        @if (!string.IsNullOrWhiteSpace(Model.MetalType))
+        @if (!string.IsNullOrWhiteSpace(Model.MetalType) && !Model.IsLooseDiamond)
         {
           <div style="font-size:11px; color:#475569; margin-top:4px; font-weight:600;">
             <i class="fa-solid fa-ring" style="color:var(--gia-gold); margin-right:4px;"></i>@Model.MetalType @(!string.IsNullOrWhiteSpace(Model.RingSize) ? $" • Size {Model.RingSize}" : "")
+          </div>
+        }
+        else if (Model.IsLooseDiamond)
+        {
+          <div style="font-size:11px; color:#475569; margin-top:4px; font-weight:600;">
+            <i class="fa-solid fa-gem" style="color:var(--gia-gold); margin-right:4px;"></i>Certified Loose Diamond
           </div>
         }
       </div>

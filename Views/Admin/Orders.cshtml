@@ -65,10 +65,9 @@
       <p style="font-size: 14px; color: #64748b; margin: 4px 0 0;">Manage customer orders, save courier tracking details, and notify buyers via email and WhatsApp.</p>
     </div>
     
-    <!-- Filter Tabs -->
+    <!-- Filter Tabs (Displaying Paid / Completed Orders Only) -->
     <div style="display: flex; gap: 8px; background: #ffffff; padding: 6px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); flex-wrap: wrap;">
       <a href="@BuildOrderUrl("All", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "All" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">All Orders (@(ViewBag.TotalCount ?? Model.Count))</a>
-      <a href="@BuildOrderUrl("Pending", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Pending" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Pending (@(ViewBag.PendingCount ?? 0))</a>
       <a href="@BuildOrderUrl("Paid", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Paid" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Paid (@(ViewBag.PaidCount ?? 0))</a>
       <a href="@BuildOrderUrl("Shipped", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "Shipped" || statusFilter == "ShipmentBooked" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">Shipped (@(ViewBag.DispatchedCount ?? 0))</a>
       <a href="@BuildOrderUrl("InTransit", pageNum: 1)" style="padding: 8px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; text-decoration: none; @(statusFilter == "InTransit" ? "background:#b45309; color:#ffffff;" : "color:#64748b;")">In Transit (@(ViewBag.InTransitCount ?? 0))</a>
@@ -135,54 +134,101 @@
           <tbody>
             @foreach (var o in Model)
             {
+              bool isPending = string.Equals(o.OrderStatus, "Pending", StringComparison.OrdinalIgnoreCase) 
+                            || string.Equals(o.CurrentTrackingStatus, "PaymentPending", StringComparison.OrdinalIgnoreCase);
+              if (isPending) continue;
+
               <tr style="border-bottom: 1px solid #f1f5f9; transition: background 0.15s ease;" onmouseover="this.style.background='#fbfcfe'" onmouseout="this.style.background='transparent'">
                 
                 <!-- Order ID & Date -->
-                <td style="padding: 16px 20px; vertical-align: top;">
-                  <div style="font-weight: 800; color: #0f172a; font-family: monospace;">#@o.OrderNumber</div>
+                <td style="padding: 14px 18px; vertical-align: top;">
+                  <div style="font-weight: 800; color: #0f172a; font-family: monospace; font-size: 13px;">#@o.OrderNumber</div>
                   <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">@o.CreatedAt.ToString("MMM dd, yyyy HH:mm")</div>
-                  <span style="display: inline-block; margin-top: 4px; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: @(o.OrderStatus == "Paid" ? "#ecfdf5; color:#059669;" : "#fffbeb; color:#b45309;")">
-                    @o.OrderStatus
-                  </span>
+                  @if (isPending)
+                  {
+                    <span style="display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: #fffbeb; color: #b45309; border: 1px solid #fde68a;" title="Customer initiated checkout but has not completed payment yet">
+                      <i class="fa-regular fa-clock" style="font-size: 9px;"></i> Pending
+                    </span>
+                  }
+                  else
+                  {
+                    <span style="display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">
+                      <i class="fa-solid fa-circle-check" style="font-size: 9px;"></i> Paid
+                    </span>
+                  }
                 </td>
 
                 <!-- Customer Details -->
-                <td style="padding: 16px 20px; vertical-align: top;">
-                  <div style="font-weight: 700; color: #0f172a;">@o.ShippingFullName</div>
-                  <div style="font-size: 12px; color: #64748b;">@o.CustomerEmail</div>
+                <td style="padding: 14px 18px; vertical-align: top;">
+                  <div style="font-weight: 700; color: #0f172a; font-size: 13.5px;">@o.ShippingFullName</div>
+                  <div style="font-size: 11.5px; color: #64748b;">@o.CustomerEmail</div>
                   <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">
-                    <i class="fa-solid fa-location-dot" style="font-size: 10px; margin-right: 4px;"></i>
+                    <i class="fa-solid fa-location-dot" style="font-size: 9.5px; margin-right: 3px; color: #94a3b8;"></i>
                     @o.ShippingCity, @o.ShippingState, @o.ShippingCountry
                   </div>
                   @if (!string.IsNullOrWhiteSpace(o.ShippingPhone))
                   {
-                    <div style="font-size: 11px; color: #94a3b8;"><i class="fa-solid fa-phone" style="font-size: 9px; margin-right: 4px;"></i>@o.ShippingPhone</div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 2px; font-weight: 600;">
+                      <i class="fa-solid fa-phone" style="font-size: 9.5px; margin-right: 3px; color: #059669;"></i>@o.ShippingPhone
+                    </div>
                   }
                 </td>
 
-                <!-- Item Description -->
-                <td style="padding: 16px 20px; vertical-align: top; max-width: 230px;">
-                  <div style="font-weight: 600; color: #334155; line-height: 1.4;">@o.ItemName</div>
-                  @if (o.IncludesPhysicalGiaCert)
-                  {
-                    <div style="margin-top: 6px;">
-                      <span style="display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 4px; font-size: 10.5px; font-weight: 700; background: #fef3c7; color: #92400e; border: 1px solid #fcd34d;">
-                        <i class="fa-solid fa-stamp" style="color: #d97706;"></i> Physical GIA Hardcopy Enclosed (+$50)
-                      </span>
-                    </div>
+                <!-- Item Description (Small, Structured, Luxury UI) -->
+                <td style="padding: 14px 18px; vertical-align: top; max-width: 320px; min-width: 250px;">
+                  @{
+                    var rawItemStr = (o.ItemName ?? "")
+                        .Replace("[Includes Physical GIA Hardcopy Certificate]", "", StringComparison.OrdinalIgnoreCase)
+                        .Trim();
+                    var splitItems = rawItemStr.Split(new[] { " + " }, StringSplitOptions.RemoveEmptyEntries);
                   }
-                  else
-                  {
-                    <div style="margin-top: 4px;">
-                      <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 10px; color: #64748b;">
-                        <i class="fa-solid fa-file-shield" style="color: #3b82f6;"></i> Digital GIA Cert
-                      </span>
-                    </div>
-                  }
+                  <div style="display: flex; flex-direction: column; gap: 6px;">
+                    @foreach (var subItem in splitItems)
+                    {
+                      var trimmedItem = subItem.Trim();
+                      if (string.IsNullOrWhiteSpace(trimmedItem)) continue;
+                      
+                      string titleOnly = trimmedItem;
+                      string specsStr = "";
+                      int pOpen = trimmedItem.LastIndexOf('(');
+                      int pClose = trimmedItem.LastIndexOf(')');
+                      if (pOpen > 0 && pClose > pOpen)
+                      {
+                        titleOnly = trimmedItem.Substring(0, pOpen).Trim();
+                        specsStr = trimmedItem.Substring(pOpen + 1, pClose - pOpen - 1).Trim();
+                      }
+
+                      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 9px;">
+                        <div style="font-size: 12px; font-weight: 700; color: #1e293b; line-height: 1.35;" title="@titleOnly">
+                          <i class="fa-solid fa-gem" style="font-size: 10px; color: #b45309; margin-right: 4px;"></i>@titleOnly
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(specsStr))
+                        {
+                          <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+                            @foreach (var token in specsStr.Split(',', StringSplitOptions.RemoveEmptyEntries))
+                            {
+                              var tok = token.Trim();
+                              bool isQtyTok = tok.StartsWith("Qty", StringComparison.OrdinalIgnoreCase);
+                              <span style="font-size: 10px; font-weight: 600; padding: 1px 6px; border-radius: 4px; @(isQtyTok ? "background:#e2e8f0; color:#334155;" : "background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;")">
+                                @tok
+                              </span>
+                            }
+                          </div>
+                        }
+                      </div>
+                    }
+
+                    @if (o.IncludesPhysicalGiaCert)
+                    {
+                      <div style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 700; background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; width: fit-content; margin-top: 2px;">
+                        <i class="fa-solid fa-certificate" style="color: #d97706; font-size: 10px;"></i> Physical GIA Hardcopy Enclosed (+$50)
+                      </div>
+                    }
+                  </div>
                 </td>
 
                 <!-- Financials -->
-                <td style="padding: 16px 20px; vertical-align: top;">
+                <td style="padding: 14px 18px; vertical-align: top;">
                   <div style="font-size: 15px; font-weight: 800; color: #0f172a;">$@o.TotalAmountUSD.ToString("N2") USD</div>
                   @if (o.IncludesPhysicalGiaCert && o.GiaCertFeeUSD > 0)
                   {
@@ -191,19 +237,31 @@
                     </div>
                   }
                   <div style="font-size: 11px; font-weight: 600; color: #64748b; margin-top: 2px;">
-                    <i class="fa-brands @(o.PaymentProvider?.ToLower() == "paypal" ? "fa-paypal" : "fa-credit-card")" style="margin-right: 3px;"></i>
+                    <i class="fa-brands @(o.PaymentProvider?.ToLower() == "paypal" ? "fa-paypal" : "fa-credit-card")" style="margin-right: 3px; color: @(o.PaymentProvider?.ToLower() == "paypal" ? "#003087" : "#475569");"></i>
                     @o.PaymentProvider
                   </div>
                 </td>
 
                 <!-- Live Tracking Stage -->
-                <td style="padding: 16px 20px; vertical-align: top;">
-                  @{
-                    var badgeBg = "#f1f5f9";
-                    var badgeColor = "#475569";
-                    var icon = "fa-clock";
+                <td style="padding: 14px 18px; vertical-align: top;">
+                  @if (isPending)
+                  {
+                    <span style="display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #fffbeb; color: #b45309; border: 1px solid #fde68a;" title="Customer initiated checkout but has not completed payment yet.">
+                      <i class="fa-solid fa-hourglass-start" style="font-size: 10px;"></i>
+                      Payment Pending
+                    </span>
+                    <div style="font-size: 10.5px; color: #94a3b8; margin-top: 3px;">
+                      Checkout Incomplete
+                    </div>
+                  }
+                  else
+                  {
+                    var badgeBg = "#eff6ff";
+                    var badgeColor = "#2563eb";
+                    var icon = "fa-box";
                     switch(o.CurrentTrackingStatus)
                     {
+                      case "OrderPlaced": badgeBg = "#eff6ff"; badgeColor = "#2563eb"; icon = "fa-box"; break;
                       case "ShipmentBooked": badgeBg = "#eff6ff"; badgeColor = "#2563eb"; icon = "fa-file-invoice"; break;
                       case "InTransit": badgeBg = "#fef3c7"; badgeColor = "#d97706"; icon = "fa-plane-departure"; break;
                       case "CustomsClearance": badgeBg = "#fae8ff"; badgeColor = "#a855f7"; icon = "fa-passport"; break;
@@ -211,22 +269,28 @@
                       case "Delivered": badgeBg = "#dcfce7"; badgeColor = "#16a34a"; icon = "fa-circle-check"; break;
                       case "Exception": badgeBg = "#fee2e2"; badgeColor = "#dc2626"; icon = "fa-triangle-exclamation"; break;
                     }
-                  }
-                  <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: @badgeBg; color: @badgeColor;">
-                    <i class="fa-solid @icon" style="font-size: 10px;"></i>
-                    @o.CurrentTrackingStatus
-                  </span>
-                  @if (o.EstimatedDeliveryDate.HasValue)
-                  {
-                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
-                      Est: @o.EstimatedDeliveryDate.Value.ToString("MMM dd, yyyy")
-                    </div>
+                    <span style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; background: @badgeBg; color: @badgeColor;">
+                      <i class="fa-solid @icon" style="font-size: 10px;"></i>
+                      @o.CurrentTrackingStatus
+                    </span>
+                    @if (o.EstimatedDeliveryDate.HasValue)
+                    {
+                      <div style="font-size: 11px; color: #64748b; margin-top: 4px;">
+                        Est: @o.EstimatedDeliveryDate.Value.ToString("MMM dd, yyyy")
+                      </div>
+                    }
                   }
                 </td>
 
                 <!-- Carrier & Tracking -->
-                <td style="padding: 16px 20px; vertical-align: top;">
-                  @if (!string.IsNullOrWhiteSpace(o.TrackingNumber))
+                <td style="padding: 14px 18px; vertical-align: top;">
+                  @if (isPending)
+                  {
+                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 6px; font-size: 10.5px; font-weight: 600; background: #f8fafc; color: #94a3b8; border: 1px solid #e2e8f0;" title="Cannot book shipment for unpaid checkout">
+                      <i class="fa-solid fa-ban" style="font-size: 9.5px;"></i> Unpaid Order
+                    </span>
+                  }
+                  else if (!string.IsNullOrWhiteSpace(o.TrackingNumber))
                   {
                     <div style="font-weight: 700; color: #0f172a; font-family: monospace;">@o.TrackingNumber</div>
                     <div style="font-size: 11px; color: #64748b; margin-top: 1px;">@(string.IsNullOrWhiteSpace(o.CarrierName) ? "Courier" : o.CarrierName)</div>
@@ -252,24 +316,48 @@
                 </td>
 
                 <!-- Actions -->
-                <td style="padding: 16px 20px; vertical-align: top; text-align: right;">
+                <td style="padding: 14px 18px; vertical-align: top; text-align: right;">
                   <div style="display: inline-flex; gap: 6px; align-items: center;">
-                    <button type="button" class="btn-open-tracking"
-                            data-id="@o.OrderId"
-                            data-number="@o.OrderNumber"
-                            data-name="@o.ShippingFullName"
-                            data-email="@o.CustomerEmail"
-                            data-phone="@o.ShippingPhone"
-                            data-city="@o.ShippingCity"
-                            data-carrier="@o.CarrierName"
-                            data-awb="@o.TrackingNumber"
-                            data-url="@o.TrackingUrl"
-                            data-sent="@(o.TrackingInfoSentAt?.ToString("MMM dd, yyyy hh:mm tt") ?? "")"
-                            data-cert="@(o.IncludesPhysicalGiaCert ? "true" : "false")"
-                            onclick="openTrackingModalFromBtn(this)"
-                            style="background: #0f172a; color: #ffffff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
-                      <i class="fa-solid fa-truck-fast"></i> Tracking
-                    </button>
+                    @if (isPending)
+                    {
+                      <button type="button" class="btn-open-tracking"
+                              data-id="@o.OrderId"
+                              data-number="@o.OrderNumber"
+                              data-name="@o.ShippingFullName"
+                              data-email="@o.CustomerEmail"
+                              data-phone="@o.ShippingPhone"
+                              data-city="@o.ShippingCity"
+                              data-carrier="@o.CarrierName"
+                              data-awb="@o.TrackingNumber"
+                              data-url="@o.TrackingUrl"
+                              data-status="@o.CurrentTrackingStatus"
+                              data-sent="@(o.TrackingInfoSentAt?.ToString("MMM dd, yyyy hh:mm tt") ?? "")"
+                              data-cert="@(o.IncludesPhysicalGiaCert ? "true" : "false")"
+                              onclick="openTrackingModalFromBtn(this)"
+                              style="background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; padding: 6px 10px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" title="Payment Pending (Awaiting Customer Payment)">
+                        <i class="fa-regular fa-clock"></i> Unpaid
+                      </button>
+                    }
+                    else
+                    {
+                      <button type="button" class="btn-open-tracking"
+                              data-id="@o.OrderId"
+                              data-number="@o.OrderNumber"
+                              data-name="@o.ShippingFullName"
+                              data-email="@o.CustomerEmail"
+                              data-phone="@o.ShippingPhone"
+                              data-city="@o.ShippingCity"
+                              data-carrier="@o.CarrierName"
+                              data-awb="@o.TrackingNumber"
+                              data-url="@o.TrackingUrl"
+                              data-status="@o.CurrentTrackingStatus"
+                              data-sent="@(o.TrackingInfoSentAt?.ToString("MMM dd, yyyy hh:mm tt") ?? "")"
+                              data-cert="@(o.IncludesPhysicalGiaCert ? "true" : "false")"
+                              onclick="openTrackingModalFromBtn(this)"
+                              style="background: #0f172a; color: #ffffff; border: none; padding: 7px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                        <i class="fa-solid fa-truck-fast"></i> Tracking
+                      </button>
+                    }
 
                     <button type="button" class="btn-quick-msg-hub"
                             data-id="@o.OrderId"
@@ -280,6 +368,7 @@
                             data-carrier="@o.CarrierName"
                             data-awb="@o.TrackingNumber"
                             data-url="@o.TrackingUrl"
+                            data-status="@o.CurrentTrackingStatus"
                             data-cert="@(o.IncludesPhysicalGiaCert ? "true" : "false")"
                             onclick="openCustomerContactHub(this)"
                             style="background: #2563eb; color: #ffffff; border: none; padding: 7px 11px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;" title="Send Notification (WhatsApp & Email)">
@@ -386,8 +475,21 @@
     <!-- Form Inputs -->
     <div style="display: flex; flex-direction: column; gap: 16px;">
       <div>
+        <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Delivery &amp; Tracking Stage</label>
+        <select id="trackingModalStatus" style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 13.5px; font-weight: 700; color: #0f172a; background: #f8fafc; cursor: pointer;">
+          <option value="OrderPlaced">📦 OrderPlaced (Order confirmed, in workshop)</option>
+          <option value="ShipmentBooked">📋 ShipmentBooked / Dispatched (Prepared for courier)</option>
+          <option value="InTransit" selected>✈️ InTransit (En route via courier)</option>
+          <option value="CustomsClearance">🛃 CustomsClearance (International customs)</option>
+          <option value="OutForDelivery">🚚 OutForDelivery (Local courier out for delivery)</option>
+          <option value="Delivered">✨ Delivered (Delivered to customer)</option>
+        </select>
+        <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Controls the live status badge, timeline history, and customizes customer notifications.</div>
+      </div>
+
+      <div>
         <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Courier / Logistics Provider</label>
-        <input type="text" id="trackingModalCourier" list="courierList" placeholder="e.g. DHL Express, FedEx, India Post, Aramex"
+        <input type="text" id="trackingModalCourier" list="courierList" oninput="autoFillTrackingUrl()" placeholder="e.g. DHL Express, FedEx, India Post, Aramex"
                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; font-weight: 600; color: #0f172a;" />
         <datalist id="courierList">
           <option value="DHL Express"></option>
@@ -402,7 +504,7 @@
 
       <div>
         <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Tracking / Waybill (AWB) Number</label>
-        <input type="text" id="trackingModalAwb" placeholder="e.g. 1234567890 or IN123456789IN"
+        <input type="text" id="trackingModalAwb" oninput="autoFillTrackingUrl()" placeholder="e.g. 1234567890 or IN123456789IN"
                style="width: 100%; box-sizing: border-box; padding: 10px 14px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; font-family: monospace; outline: none; font-weight: 700; color: #0f172a;" />
       </div>
 
@@ -415,7 +517,7 @@
             <i class="fa-solid fa-arrow-up-right-from-square"></i> Test
           </button>
         </div>
-        <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Paste the official tracking web page link provided by the courier for the customer.</div>
+        <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Paste the official tracking web page link, or let it auto-fill when you type the Courier &amp; AWB.</div>
       </div>
     </div>
 
@@ -462,6 +564,18 @@
 
     <!-- Editable Order Details Form -->
     <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
+      <div>
+        <label style="display: block; font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase;">Delivery &amp; Tracking Stage</label>
+        <select id="hubTrackingStatus" onchange="updateContactHubPreview()" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 700; color: #0f172a; background: #f8fafc; cursor: pointer;">
+          <option value="OrderPlaced">📦 OrderPlaced (Order confirmed, in workshop)</option>
+          <option value="ShipmentBooked">📋 ShipmentBooked / Dispatched (Prepared for courier)</option>
+          <option value="InTransit" selected>✈️ InTransit (En route via courier)</option>
+          <option value="CustomsClearance">🛃 CustomsClearance (International customs)</option>
+          <option value="OutForDelivery">🚚 OutForDelivery (Local courier out for delivery)</option>
+          <option value="Delivered">✨ Delivered (Delivered to customer)</option>
+        </select>
+      </div>
+
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <div>
           <label style="display: block; font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase;">Order Number</label>
@@ -469,7 +583,7 @@
         </div>
         <div>
           <label style="display: block; font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase;">Courier / Carrier</label>
-          <input type="text" id="hubCarrier" oninput="updateContactHubPreview()" placeholder="DHL Express / FedEx / Blue Dart" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #0f172a;" />
+          <input type="text" id="hubCarrier" oninput="autoFillHubTrackingUrl(); updateContactHubPreview();" placeholder="DHL Express / FedEx / Blue Dart" style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; font-weight: 600; color: #0f172a;" />
         </div>
       </div>
 
@@ -486,7 +600,7 @@
 
       <div>
         <label style="display: block; font-size: 11.5px; font-weight: 700; color: #475569; margin-bottom: 5px; text-transform: uppercase;">Tracking Number (AWB)</label>
-        <input type="text" id="hubAwb" oninput="updateContactHubPreview()" placeholder="Enter AWB or Tracking ID..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #0f172a; font-family: monospace;" />
+        <input type="text" id="hubAwb" oninput="autoFillHubTrackingUrl(); updateContactHubPreview();" placeholder="Enter AWB or Tracking ID..." style="width: 100%; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px; color: #0f172a; font-family: monospace;" />
       </div>
 
       <div>
@@ -518,14 +632,95 @@
 </div>
 
 <script>
-  function buildWhatsAppUrl(phone, orderNumber, customerName, courier, awb, url, hasCert) {
+  function autoFillTrackingUrl() {
+    const courier = (document.getElementById('trackingModalCourier').value || '').trim().toLowerCase();
+    const awb = (document.getElementById('trackingModalAwb').value || '').trim();
+    const urlInput = document.getElementById('trackingModalUrl');
+    if (!awb) return;
+
+    const cur = urlInput.value.trim().toLowerCase();
+    const isAuto = !cur || cur.includes('dhl.com') || cur.includes('fedex.com') || cur.includes('indiapost.gov.in') || cur.includes('bluedart.com') || cur.includes('ups.com') || cur.includes('aramex.com') || cur.includes('dtdc.in');
+
+    if (isAuto) {
+      if (courier.includes('dhl')) {
+        urlInput.value = `https://www.dhl.com/en/express/tracking.html?AWB=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('fedex')) {
+        urlInput.value = `https://www.fedex.com/fedextrack/?trknbr=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('india post') || courier.includes('indiapost') || courier.includes('ems')) {
+        urlInput.value = `https://www.indiapost.gov.in/_layouts/15/dpt.ptc.trackandtrace/trackandtrace.aspx?awb=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('blue dart') || courier.includes('bluedart')) {
+        urlInput.value = `https://www.bluedart.com/tracking?track=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('ups')) {
+        urlInput.value = `https://www.ups.com/track?tracknum=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('aramex')) {
+        urlInput.value = `https://www.aramex.com/track/results?shipmentNumber=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('dtdc')) {
+        urlInput.value = `https://www.dtdc.in/tracking/shipment-tracking.asp?awb=${encodeURIComponent(awb)}`;
+      }
+    }
+  }
+
+  function autoFillHubTrackingUrl() {
+    const courier = (document.getElementById('hubCarrier').value || '').trim().toLowerCase();
+    const awb = (document.getElementById('hubAwb').value || '').trim();
+    const urlInput = document.getElementById('hubTrackingUrl');
+    if (!awb) return;
+
+    const cur = urlInput.value.trim().toLowerCase();
+    const isAuto = !cur || cur.includes('dhl.com') || cur.includes('fedex.com') || cur.includes('indiapost.gov.in') || cur.includes('bluedart.com') || cur.includes('ups.com') || cur.includes('aramex.com') || cur.includes('dtdc.in');
+
+    if (isAuto) {
+      if (courier.includes('dhl')) {
+        urlInput.value = `https://www.dhl.com/en/express/tracking.html?AWB=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('fedex')) {
+        urlInput.value = `https://www.fedex.com/fedextrack/?trknbr=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('india post') || courier.includes('indiapost') || courier.includes('ems')) {
+        urlInput.value = `https://www.indiapost.gov.in/_layouts/15/dpt.ptc.trackandtrace/trackandtrace.aspx?awb=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('blue dart') || courier.includes('bluedart')) {
+        urlInput.value = `https://www.bluedart.com/tracking?track=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('ups')) {
+        urlInput.value = `https://www.ups.com/track?tracknum=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('aramex')) {
+        urlInput.value = `https://www.aramex.com/track/results?shipmentNumber=${encodeURIComponent(awb)}`;
+      } else if (courier.includes('dtdc')) {
+        urlInput.value = `https://www.dtdc.in/tracking/shipment-tracking.asp?awb=${encodeURIComponent(awb)}`;
+      }
+    }
+  }
+
+  function buildWhatsAppUrl(phone, orderNumber, customerName, courier, awb, url, hasCert, stage) {
     let cleanPhone = (phone || '').replace(/[^\d]/g, '');
     if (cleanPhone.length === 10) {
       cleanPhone = '1' + cleanPhone; // standard default country code if 10-digit
     }
     
     let courierName = courier || 'Courier';
-    let msg = `Hello ${customerName || 'Valued Customer'}! Your SAT Fine Jewelry order #${orderNumber} has been dispatched for delivery via ${courierName}.`;
+    let greeting = `Hello ${customerName || 'Valued Customer'}! `;
+    let stageMsg = '';
+
+    switch (stage) {
+      case 'OrderPlaced':
+        stageMsg = `Your SAT Fine Jewelry order #${orderNumber} is confirmed and is currently being handcrafted in our workshop.`;
+        break;
+      case 'ShipmentBooked':
+        stageMsg = `Your SAT Fine Jewelry order #${orderNumber} has been packaged, certified, and booked for dispatch via ${courierName}.`;
+        break;
+      case 'CustomsClearance':
+        stageMsg = `Transit Update: Your SAT Fine Jewelry parcel for order #${orderNumber} has arrived at destination customs for clearance.`;
+        break;
+      case 'OutForDelivery':
+        stageMsg = `Great news! Your SAT Fine Jewelry order #${orderNumber} is OUT FOR DELIVERY TODAY with your local ${courierName} courier. Please keep your phone available.`;
+        break;
+      case 'Delivered':
+        stageMsg = `Your SAT Fine Jewelry order #${orderNumber} has been delivered! We hope you cherish your exquisite fine jewelry.`;
+        break;
+      case 'InTransit':
+      default:
+        stageMsg = `Your SAT Fine Jewelry order #${orderNumber} has been dispatched and is in transit via ${courierName}.`;
+        break;
+    }
+
+    let msg = greeting + stageMsg;
     if (awb) {
       msg += ` Tracking Number: ${awb}.`;
     }
@@ -552,11 +747,21 @@
     const url = btn.dataset.url;
     const sent = btn.dataset.sent;
     const cert = btn.dataset.cert;
+    const status = btn.dataset.status || 'InTransit';
 
     document.getElementById('trackingModalOrderId').value = id;
     document.getElementById('trackingModalOrderNumber').value = num;
     document.getElementById('trackingModalCustomerName').value = name;
     document.getElementById('trackingModalPhone').value = phone;
+
+    const statusSelect = document.getElementById('trackingModalStatus');
+    if (statusSelect) {
+      if ([...statusSelect.options].some(o => o.value === status)) {
+        statusSelect.value = status;
+      } else {
+        statusSelect.value = 'InTransit';
+      }
+    }
 
     // Show/hide GIA certificate packing reminder
     const certBox = document.getElementById('modalCertNotice');
@@ -620,10 +825,11 @@
     const courier = document.getElementById('trackingModalCourier').value.trim();
     const awb = document.getElementById('trackingModalAwb').value.trim();
     const url = document.getElementById('trackingModalUrl').value.trim();
+    const stage = document.getElementById('trackingModalStatus') ? document.getElementById('trackingModalStatus').value : 'InTransit';
     const certBox = document.getElementById('modalCertNotice');
     const hasCert = certBox && certBox.style.display !== 'none';
 
-    const waUrl = buildWhatsAppUrl(phone, num, name, courier, awb, url, hasCert);
+    const waUrl = buildWhatsAppUrl(phone, num, name, courier, awb, url, hasCert, stage);
     window.open(waUrl, '_blank');
   }
 
@@ -638,27 +844,21 @@
     const courier = btn.dataset.carrier;
     const awb = btn.dataset.awb;
     const url = btn.dataset.url;
+    const stage = btn.dataset.status || 'InTransit';
     const hasCert = btn.dataset.cert === 'true';
 
-    const waUrl = buildWhatsAppUrl(phone, num, name, courier, awb, url, hasCert);
+    const waUrl = buildWhatsAppUrl(phone, num, name, courier, awb, url, hasCert, stage);
     window.open(waUrl, '_blank');
   }
 
   async function saveTrackingDetails(sendEmail) {
     const orderId = document.getElementById('trackingModalOrderId').value;
+    const trackingStatus = document.getElementById('trackingModalStatus').value;
     const courier = document.getElementById('trackingModalCourier').value.trim();
     const trackingNo = document.getElementById('trackingModalAwb').value.trim();
     const trackingUrl = document.getElementById('trackingModalUrl').value.trim();
     const alertBox = document.getElementById('trackingModalAlert');
     const btn = sendEmail ? document.getElementById('btnSaveAndEmail') : document.getElementById('btnSaveOnly');
-
-    if (!trackingNo && sendEmail) {
-      alertBox.style.display = 'block';
-      alertBox.style.background = '#fee2e2';
-      alertBox.style.color = '#b91c1c';
-      alertBox.innerText = 'Please enter a Tracking / AWB Number before notifying the customer.';
-      return;
-    }
 
     btn.disabled = true;
     const originalText = btn.innerHTML;
@@ -670,10 +870,11 @@
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          orderId: parseInt(orderId),
+          orderId: orderId,
           courierName: courier,
           trackingNumber: trackingNo,
           trackingUrl: trackingUrl,
+          trackingStatus: trackingStatus,
           sendEmail: sendEmail
         })
       });
@@ -714,6 +915,7 @@
     const awb = btn.dataset.awb || '';
     const url = btn.dataset.url || '';
     const cert = btn.dataset.cert;
+    const status = btn.dataset.status || 'InTransit';
 
     document.getElementById('hubOrderNumber').value = num;
     document.getElementById('hubCustomerName').value = name;
@@ -723,6 +925,15 @@
     document.getElementById('hubAwb').value = awb;
     document.getElementById('hubTrackingUrl').value = url;
     document.getElementById('hubHasCert').value = cert === 'true' ? 'true' : 'false';
+
+    const hubStatus = document.getElementById('hubTrackingStatus');
+    if (hubStatus) {
+      if ([...hubStatus.options].some(o => o.value === status)) {
+        hubStatus.value = status;
+      } else {
+        hubStatus.value = 'InTransit';
+      }
+    }
 
     document.getElementById('hubModalTitle').innerText = `Order #${num} — Contact Customer`;
     document.getElementById('hubCustomerSubtitle').innerText = `${name} • ${phone ? phone : 'No Phone'} • ${email ? email : 'No Email'}`;
@@ -741,9 +952,35 @@
     const carrier = document.getElementById('hubCarrier').value.trim() || 'Courier';
     const awb = document.getElementById('hubAwb').value.trim();
     const url = document.getElementById('hubTrackingUrl').value.trim();
+    const status = document.getElementById('hubTrackingStatus') ? document.getElementById('hubTrackingStatus').value : 'InTransit';
     const hasCert = document.getElementById('hubHasCert').value === 'true';
 
-    let msg = `Hello ${name}! Greetings from SAT Fine Jewelry.\n\nYour bespoke order #${num} has been securely packaged and dispatched via ${carrier}.`;
+    let greeting = `Hello ${name}! Greetings from SAT Fine Jewelry.\n\n`;
+    let stageMsg = '';
+
+    switch(status) {
+      case 'OrderPlaced':
+        stageMsg = `Your bespoke jewelry order #${num} is confirmed and is currently being handcrafted by our master artisans in our workshop.`;
+        break;
+      case 'ShipmentBooked':
+        stageMsg = `Your bespoke order #${num} has been packaged, certified, and booked for dispatch via ${carrier}.`;
+        break;
+      case 'CustomsClearance':
+        stageMsg = `Status update on your order #${num}: Your luxury jewelry package has arrived in your destination country and is currently undergoing official customs clearance.`;
+        break;
+      case 'OutForDelivery':
+        stageMsg = `Great news! Your SAT Fine Jewelry order #${num} is OUT FOR DELIVERY TODAY with your local ${carrier} delivery agent. Please keep your phone available.`;
+        break;
+      case 'Delivered':
+        stageMsg = `Delivered! Your SAT Fine Jewelry parcel for order #${num} has been successfully delivered. We hope you cherish your exquisite fine jewelry piece!`;
+        break;
+      case 'InTransit':
+      default:
+        stageMsg = `Your bespoke order #${num} has departed and is securely en route to your shipping address via ${carrier}.`;
+        break;
+    }
+
+    let msg = greeting + stageMsg;
     if (awb) {
       msg += `\nTracking ID: ${awb}`;
     }
@@ -753,7 +990,7 @@
     if (hasCert) {
       msg += `\nYour official sealed physical GIA Gemological Certificate is safely enclosed inside your parcel.`;
     }
-    msg += `\n\nThank you for choosing SAT Jewel! Should you have any questions, our master artisans are here to assist.`;
+    msg += `\n\nThank you for choosing SAT Jewel! Should you have any questions, our concierge team is always here to assist.`;
     return msg;
   }
 
@@ -786,7 +1023,18 @@
       return;
     }
     const num = document.getElementById('hubOrderNumber').value || '';
-    const subject = `Your SAT Jewel Order #${num} Has Been Dispatched!`;
+    const status = document.getElementById('hubTrackingStatus') ? document.getElementById('hubTrackingStatus').value : 'InTransit';
+    let subject = `Your SAT Jewel Order #${num} Status Update`;
+    switch(status) {
+      case 'OrderPlaced': subject = `💎 Order Confirmed: #${num} is in Production - SAT Jewel`; break;
+      case 'ShipmentBooked': subject = `📦 Shipment Booked: #${num} Prepared for Dispatch - SAT Jewel`; break;
+      case 'CustomsClearance': subject = `🛃 International Transit Update: #${num} - SAT Jewel`; break;
+      case 'OutForDelivery': subject = `🚚 Out For Delivery Today: Order #${num} - SAT Jewel`; break;
+      case 'Delivered': subject = `✨ Delivered: Order #${num} - SAT Fine Jewelry`; break;
+      case 'InTransit':
+      default:
+        subject = `✈️ Dispatched & In Transit: Order #${num} - SAT Jewel`; break;
+    }
     const msg = getContactHubMessage();
     const mailtoUrl = `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(msg)}`;
     window.location.href = mailtoUrl;

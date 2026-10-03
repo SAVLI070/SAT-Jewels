@@ -74,6 +74,7 @@ namespace SAT1.Models
             if (categoryId == 5 || clean.Contains("bracelet")) return "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366777/sat_jewels/categories/cat_5_bracelets.jpg";
             if (categoryId == 6 || clean.Contains("necklace") || clean.Contains("pendant")) return "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366779/sat_jewels/categories/cat_6_necklaces.jpg";
             if (categoryId == 7 || clean.Contains("diamond")) return "/assets/categories/cat_diamonds.png";
+            if (categoryId == 9 || clean.Contains("watch")) return "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790922325/sat_jewels/categories/cat_9_luxury_watch.jpg";
 
             return categoryId switch
             {
@@ -84,6 +85,7 @@ namespace SAT1.Models
                 5 => "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366777/sat_jewels/categories/cat_5_bracelets.jpg",
                 6 => "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366779/sat_jewels/categories/cat_6_necklaces.jpg",
                 7 => "/assets/categories/cat_diamonds.png",
+                9 => "https://res.cloudinary.com/ihcs8m6o/image/upload/v1790922325/sat_jewels/categories/cat_9_luxury_watch.jpg",
                 _ => "https://res.cloudinary.com/ihcs8m6o/image/upload/v1788366770/sat_jewels/categories/cat_1_engagement_rings.png"
             };
         }

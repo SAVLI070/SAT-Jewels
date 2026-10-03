@@ -11,15 +11,46 @@ namespace SAT1.Controllers
     public class AdminController : Controller
     {
         private readonly AdminBal _adminBal;
+        private readonly CatalogBal _catalogBal;
 
-        public AdminController(AdminBal adminBal)
+        public AdminController(AdminBal adminBal, CatalogBal catalogBal)
         {
             _adminBal = adminBal;
+            _catalogBal = catalogBal;
         }
 
         private bool CheckAccess()
         {
             return _adminBal.CheckAdminAccess(User);
+        }
+
+        [HttpPost("items/{id}/toggle-visibility")]
+        [HttpPost("products/{id}/toggle-visibility")]
+        public async Task<IActionResult> ToggleProductVisibility(string id, [FromQuery] bool active)
+        {
+            if (!CheckAccess())
+            {
+                return StatusCode(403, new { success = false, message = "Access Denied: Admin authorization required." });
+            }
+
+            var success = await _catalogBal.ToggleProductVisibilityAsync(id, active);
+            if (!success) return NotFound(new { success = false, message = "Product not found" });
+
+            return Ok(new { success = true, message = $"Product visibility updated to {(active ? "Visible" : "Hidden")}" });
+        }
+
+        [HttpDelete("items/{id}")]
+        public async Task<IActionResult> DeleteCatalogItem(string id)
+        {
+            if (!CheckAccess())
+            {
+                return StatusCode(403, new { success = false, message = "Access Denied: Admin authorization required." });
+            }
+
+            var success = await _catalogBal.DeleteCatalogItemAsync(id);
+            if (!success) return NotFound(new { success = false, message = "Catalog item not found" });
+
+            return Ok(new { success = true, message = "Catalog item deleted successfully." });
         }
 
         private IActionResult HandleUnauthorized()
@@ -183,10 +214,12 @@ namespace SAT1.Controllers
 
         public class SaveTrackingRequest
         {
-            public long OrderId { get; set; }
+            public string? OrderId { get; set; }
             public string? CourierName { get; set; }
             public string? TrackingNumber { get; set; }
             public string? TrackingUrl { get; set; }
+            public string? TrackingStatus { get; set; }
+            public string? StatusNote { get; set; }
             public bool SendEmail { get; set; } = true;
         }
 
@@ -194,21 +227,54 @@ namespace SAT1.Controllers
         public async Task<IActionResult> SaveTrackingInfo([FromBody] SaveTrackingRequest req, [FromServices] SatJewelDbContext db, [FromServices] EmailNotificationService emailService)
         {
             if (!CheckAccess()) return Unauthorized(new { success = false, message = "Admin privileges required." });
-            if (req == null || req.OrderId <= 0) return BadRequest(new { success = false, message = "Invalid order ID." });
+            if (req == null || string.IsNullOrWhiteSpace(req.OrderId)) return BadRequest(new { success = false, message = "Invalid order ID." });
 
-            var order = await db.Orders.FindAsync(req.OrderId);
+            var order = await db.Orders.FirstOrDefaultAsync(o => o.OrderId == req.OrderId || o.OrderNumber == req.OrderId);
             if (order == null) return NotFound(new { success = false, message = "Order not found." });
 
-            order.CarrierName = !string.IsNullOrWhiteSpace(req.CourierName) ? req.CourierName.Trim() : "Courier";
+            var status = !string.IsNullOrWhiteSpace(req.TrackingStatus) ? req.TrackingStatus.Trim() : "InTransit";
+            order.CarrierName = !string.IsNullOrWhiteSpace(req.CourierName) ? req.CourierName.Trim() : "DHL Express";
             order.TrackingNumber = req.TrackingNumber?.Trim() ?? string.Empty;
             order.TrackingUrl = req.TrackingUrl?.Trim() ?? string.Empty;
-            order.OrderStatus = "Shipped";
-            order.CurrentTrackingStatus = "InTransit";
+            order.CurrentTrackingStatus = status;
+
+            if (status == "Delivered")
+            {
+                order.OrderStatus = "Delivered";
+            }
+            else if (status == "OrderPlaced")
+            {
+                order.OrderStatus = "Paid";
+            }
+            else
+            {
+                order.OrderStatus = "Shipped";
+            }
+
+            try
+            {
+                var history = new OrderTrackingHistory
+                {
+                    OrderId = order.OrderId,
+                    Status = status,
+                    CarrierName = order.CarrierName,
+                    TrackingNumber = order.TrackingNumber,
+                    TrackingUrl = order.TrackingUrl,
+                    StatusNote = !string.IsNullOrWhiteSpace(req.StatusNote) ? req.StatusNote.Trim() : $"Admin updated stage to {status}",
+                    Source = "Admin",
+                    CreatedAt = DateTime.UtcNow
+                };
+                db.OrderTrackingHistory.Add(history);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[OrderTrackingHistory Error]: {ex.Message}");
+            }
 
             if (req.SendEmail)
             {
-                order.TrackingInfoSentAt = DateTime.Now;
-                await emailService.SendOrderShippedEmailAsync(order, order.CarrierName, order.TrackingNumber, order.TrackingUrl);
+                order.TrackingInfoSentAt = DateTime.UtcNow;
+                await emailService.SendTrackingStatusUpdateEmailAsync(order, order.CurrentTrackingStatus, order.CarrierName, order.TrackingNumber, order.TrackingUrl);
             }
 
             await db.SaveChangesAsync();
@@ -217,8 +283,8 @@ namespace SAT1.Controllers
             {
                 success = true,
                 message = req.SendEmail
-                    ? "Tracking saved & shipped notification email sent to customer!"
-                    : "Tracking information saved successfully!",
+                    ? $"Status updated to '{status}' & notification email sent to customer!"
+                    : $"Status updated to '{status}' and tracking saved successfully!",
                 sentAt = order.TrackingInfoSentAt?.ToString("MMM dd, yyyy hh:mm tt")
             });
         }

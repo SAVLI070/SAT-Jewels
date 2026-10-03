@@ -441,7 +441,13 @@
     </div>
 
     <!-- RIGHT: Active Category & Sub-Category Tree Listing Table -->
-    <div class="cat-card-panel">
+    <div class="cat-card-panel" style="position: relative;">
+      <!-- Real-time Action & Table Loading Overlay -->
+      <div id="catTreeLoadingOverlay" style="display:none; position:absolute; inset:0; background:rgba(255,255,255,0.88); backdrop-filter:blur(3px); z-index:50; border-radius:16px; align-items:center; justify-content:center; flex-direction:column; gap:12px; color:#b45309;">
+        <i class="fa-solid fa-spinner fa-spin" style="font-size:32px; color:#b45309;"></i>
+        <span id="catTreeLoadingMsg" style="font-size:14px; font-weight:700;">Loading categories &amp; sub-categories... Please wait</span>
+      </div>
+
       <h3 style="font-family:var(--font-serif);color:#0f172a;margin-top:0;margin-bottom:14px;font-size:18px;display:flex;align-items:center;gap:10px;font-weight:700;flex-shrink:0;">
         <i class="fa-solid fa-sitemap" style="color:#b45309;"></i> Categories &amp; Sub-Categories Tree
       </h3>
@@ -617,12 +623,28 @@
     if (statusBox) statusBox.style.display = 'none';
   }
 
+  function showCatTreeLoading(msg) {
+    const overlay = document.getElementById('catTreeLoadingOverlay');
+    const text = document.getElementById('catTreeLoadingMsg');
+    if (text && msg) text.textContent = msg;
+    if (overlay) overlay.style.display = 'flex';
+  }
+
+  function hideCatTreeLoading() {
+    const overlay = document.getElementById('catTreeLoadingOverlay');
+    if (overlay) overlay.style.display = 'none';
+  }
+
   async function loadAdminCategoriesTable() {
+    showCatTreeLoading('Loading categories & sub-categories... Please wait');
+    const tbody = document.getElementById('adminCategoriesTableBody');
+    if (tbody && (!window.adminCategoriesCache || window.adminCategoriesCache.length === 0)) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:32px;color:#b45309;font-weight:600;"><i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;font-size:16px;"></i> Loading categories & sub-categories... Please wait</td></tr>';
+    }
     try {
       const res = await fetch('/api/catalogapi/admin-categories');
       const categories = await res.json();
       window.adminCategoriesCache = categories || [];
-      const tbody = document.getElementById('adminCategoriesTableBody');
       const parentSelect = document.getElementById('adminParentId');
       if (!tbody) return;
 
@@ -696,10 +718,16 @@
       }).join('');
     } catch (e) {
       console.error(e);
+      if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#dc2626;">Error loading categories from database.</td></tr>';
+      }
+    } finally {
+      hideCatTreeLoading();
     }
   }
 
   async function toggleCategoryActive(id, isActive) {
+    showCatTreeLoading(`Updating category visibility to ${isActive ? 'Visible' : 'Hidden'}... Please wait`);
     try {
       const res = await fetch(`/api/catalogapi/categories/${encodeURIComponent(id)}/toggle-visibility?active=${isActive}`, { method: 'POST' });
       const data = await res.json();
@@ -723,6 +751,8 @@
         alert('Network error updating category visibility');
       }
       await loadAdminCategoriesTable();
+    } finally {
+      hideCatTreeLoading();
     }
   }
 
@@ -731,6 +761,7 @@
       return;
     }
 
+    showCatTreeLoading(`Deleting category "${name}"... Please wait`);
     try {
       const res = await fetch(`/api/catalogapi/categories/${encodeURIComponent(id)}`, {
         method: 'DELETE'
@@ -758,6 +789,8 @@
       } else {
         alert('Network error while deleting category');
       }
+    } finally {
+      hideCatTreeLoading();
     }
   }
 
@@ -772,6 +805,7 @@
 
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving to Database...';
+    showCatTreeLoading(isEdit ? 'Updating category in database... Please wait' : 'Saving new category to database... Please wait');
 
     try {
       let finalImgUrl = document.getElementById('adminCatImg').value.trim();
@@ -883,6 +917,7 @@
       btn.innerHTML = defaultBtnHtml;
     } finally {
       btn.disabled = false;
+      hideCatTreeLoading();
     }
   }
 

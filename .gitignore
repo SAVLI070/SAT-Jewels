@@ -13,3 +13,5 @@ wwwroot/uploads/
 scratch*
 *.tmp
 ingest_state.json
+*.db-*
+App_Data/

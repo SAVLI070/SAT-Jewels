@@ -46,11 +46,25 @@ namespace SAT1.BAL
             var numericIdStr = cleanId.Replace("sat-prod-", "").Replace("sat-local-", "");
 
             var reviews = await _context.ProductReviews
+                .AsNoTracking()
                 .Where(r => (r.ProductId == cleanId || r.ProductId == numericIdStr) && r.Status == "Approved")
-                .OrderByDescending(r => r.CreatedAt)
+                .OrderBy(r => EF.Functions.Random())
                 .ToListAsync();
 
-            // Default seed reviews if empty so customer always sees high trust reviews
+            // If product has fewer than 6 reviews, supplement with rotating storewide approved reviews
+            if (reviews.Count < 6)
+            {
+                var existingIds = reviews.Select(r => r.ReviewId).ToList();
+                var needed = 8 - reviews.Count;
+                var extraReviews = await _context.ProductReviews
+                    .AsNoTracking()
+                    .Where(r => r.Status == "Approved" && !existingIds.Contains(r.ReviewId))
+                    .OrderBy(r => EF.Functions.Random())
+                    .Take(needed)
+                    .ToListAsync();
+                reviews.AddRange(extraReviews);
+            }
+
             if (reviews.Count == 0)
             {
                 reviews = new List<ProductReview>
@@ -255,31 +269,32 @@ namespace SAT1.BAL
         {
             try
             {
-                var query = _context.ProductReviews
+                var baseQuery = _context.ProductReviews
                     .AsNoTracking()
                     .Where(r => r.Status == "Approved");
+
+                var dbReviews = new List<ProductReview>();
 
                 if (!string.IsNullOrEmpty(productId))
                 {
                     var cleanId = productId.Trim().Replace("sat-prod-", "").Replace("sat-local-", "");
-                    query = query.Where(r => r.ProductId == productId || r.ProductId == cleanId);
+                    var prodReviews = await baseQuery
+                        .Where(r => r.ProductId == productId || r.ProductId == cleanId)
+                        .OrderBy(r => EF.Functions.Random())
+                        .Take(6)
+                        .ToListAsync();
+                    dbReviews.AddRange(prodReviews);
                 }
 
-                var dbReviews = await query
-                    .OrderBy(r => r.ReviewId >= 1684 ? 0 : 1)
-                    .ThenBy(r => r.ReviewId >= 1684 ? r.ReviewId : -r.ReviewId)
-                    .Take(15)
-                    .ToListAsync();
-
-                // If specific product has fewer than 8 reviews, supplement with top storewide approved photo reviews
-                if (dbReviews.Count < 8 && !string.IsNullOrEmpty(productId))
+                // Fill remaining up to 15 with dynamically rotating storewide approved reviews
+                var existingIds = dbReviews.Select(d => d.ReviewId).ToList();
+                var needed = 15 - dbReviews.Count;
+                if (needed > 0)
                 {
-                    var existingIds = dbReviews.Select(d => d.ReviewId).ToList();
-                    var extraReviews = await _context.ProductReviews
-                        .AsNoTracking()
-                        .Where(r => r.Status == "Approved" && !existingIds.Contains(r.ReviewId))
-                        .OrderByDescending(r => r.CreatedAt)
-                        .Take(15 - dbReviews.Count)
+                    var extraReviews = await baseQuery
+                        .Where(r => !existingIds.Contains(r.ReviewId))
+                        .OrderBy(r => EF.Functions.Random())
+                        .Take(needed)
                         .ToListAsync();
                     dbReviews.AddRange(extraReviews);
                 }

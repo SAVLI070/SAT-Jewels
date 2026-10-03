@@ -49,6 +49,7 @@ namespace SAT1.Models
         public string PavilionAngle { get; set; } = "40.8°";
 
         // Metal, Size & Inscription
+        public bool IsLooseDiamond { get; set; } = false;
         public string MetalType { get; set; } = "18K Gold";
         public string? RingSize { get; set; }
         public string LaserInscription { get; set; } = string.Empty;
