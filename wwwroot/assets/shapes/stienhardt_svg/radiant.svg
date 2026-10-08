@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="5.6 -1.4 39.8 52.8" preserveAspectRatio="xMidYMid meet" fill="none">
+    <title>RadiantDiamond</title>
+    <g id="Page-1" stroke="none" stroke-width="2.23" fill="none" fill-rule="evenodd">
+        <g id="RadiantDiamond" stroke="#14344a">
+            <polygon id="Stroke-1" points="43 6.36565365 37.6927555 1 13.3072445 1 8 6.36565365 8 43.6343463 13.3072445 49 37.6927555 49 43 43.6343463"></polygon>
+            <polygon id="Stroke-3" stroke-width="2.23" points="14.78517 45 12 42.2786452 11.4997505 8.0968332 15.235 5 36 5 38.9115117 7.70159575 38.9115117 42.2786452 36.1816469 45"></polygon>
+            <g id="Group-20" transform="translate(8.000000, 1.000000)">
+                <line x1="5.45869192" y1="0" x2="7.235" y2="4" id="Stroke-4"></line>
+                <line x1="29.5413081" y1="0" x2="27.7405208" y2="4.38814383" id="Stroke-6"></line>
+                <line x1="35" y1="5.36558178" x2="30.4780723" y2="7.0449281" id="Stroke-8" stroke-width="2.23"></line>
+                <line x1="35" y1="42.6344182" x2="30.3893636" y2="40.9183058" id="Stroke-10" stroke-width="2.23"></line>
+                <line x1="29.5413081" y1="48" x2="27.6529209" y2="43.6572731" id="Stroke-12" stroke-width="2.23"></line>
+                <line x1="5.45869192" y1="48" x2="7.20292739" y2="43.6572731" id="Stroke-14" stroke-width="2.23"></line>
+                <line x1="0" y1="42.6344182" x2="4.41215063" y2="40.9183058" id="Stroke-16" stroke-width="2.23"></line>
+                <line x1="2.84358915e-14" y1="5.36565365" x2="3.49975051" y2="7.0968332" id="Stroke-18" stroke-width="2.23"></line>
+            </g>
+            <polygon id="Stroke-21" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round" points="25.5700253 45 15 44.9529561 20.3306106 43 25.5700253 41.2434585 30.8105258 43 35.9174111 45"></polygon>
+            <polygon id="Stroke-22" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round" points="25.4842579 5.04525456 36 5 30.7236726 7.02262728 25.4842579 9 20.2437574 7.02262728 15 5.04525456"></polygon>
+            <polygon id="Stroke-23" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round" points="15.235 5 15.765 9 11.4997505 8.0968332"></polygon>
+            <polygon id="Stroke-24" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round" points="36.1448395 5 35 9 39 7.82528736"></polygon>
+            <polygon id="Stroke-25" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round" points="38.9115117 25.4178266 38.9115117 42 36.5971145 33.6815222 34.765 25.4178266 36.5971145 17.1530775 38.9115117 8.0449281"></polygon>
+            <polygon id="Stroke-26" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round" points="12 25.4931419 11.4997505 8.0968332 13.6323753 17.2666176 15.235 25.4931419 13.6323753 33.7186111 12 42"></polygon>
+            <line x1="15.765" y1="9" x2="25.4842579" y2="9" id="Stroke-27" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round"></line>
+            <line x1="35" y1="9" x2="25.4842579" y2="9" id="Stroke-28" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round"></line>
+            <line x1="34.765" y1="25" x2="35.1125339" y2="9" id="Stroke-29" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round"></line>
+            <line x1="15.235" y1="25" x2="15.765" y2="9" id="Stroke-30" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round"></line>
+            <polygon id="Stroke-31" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round" points="36 45.1724481 34.235 41 39 42.1823939"></polygon>
+            <polygon id="Stroke-32" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round" points="14.9985115 45 16 41 12 42.0781205"></polygon>
+            <line x1="15.235" y1="25.2820991" x2="15.8535799" y2="41" id="Stroke-33" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round"></line>
+            <line x1="34.765" y1="25" x2="34.235" y2="41" id="Stroke-34" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round"></line>
+            <line x1="16" y1="41" x2="25.4587055" y2="41" id="Stroke-35" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round"></line>
+            <line x1="34.235" y1="41" x2="25.5" y2="41" id="Stroke-36" stroke-width="2.23" stroke-linecap="round" stroke-linejoin="round"></line>
+        </g>
+    </g>
+</svg>

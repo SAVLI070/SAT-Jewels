@@ -142,35 +142,17 @@
 
     if (isWatch)
     {
-        // Watch Movement / Origin: Only Japan & Swiss
-        var parsedWatchMovements = new List<dynamic>();
-        if (!string.IsNullOrWhiteSpace(rawMetalStr) && (rawMetalStr.Contains("Japan", StringComparison.OrdinalIgnoreCase) || rawMetalStr.Contains("Swiss", StringComparison.OrdinalIgnoreCase)))
-        {
-            parsedWatchMovements = metalList.Where(m => m.Name.Contains("Japan", StringComparison.OrdinalIgnoreCase) || m.Name.Contains("Swiss", StringComparison.OrdinalIgnoreCase)).Select(m => (dynamic)m).ToList();
-        }
-        if (parsedWatchMovements.Count == 0)
-        {
-            parsedWatchMovements = new List<dynamic> {
-                new { Name = "Swiss", Offset = 0m },
-                new { Name = "Japan", Offset = -250m }
-            };
-        }
-        metalList = parsedWatchMovements.Select(m => new { Name = (string)m.Name, Offset = (decimal)m.Offset }).ToList();
+        // Watch Movement / Origin: Japan & Swiss
+        metalList = new List<dynamic> {
+            new { Name = "Japan", Offset = 0m },
+            new { Name = "Swiss", Offset = 350m }
+        }.Select(m => new { Name = (string)m.Name, Offset = (decimal)m.Offset }).ToList();
 
-        // Watch Diamond Stone Selection: Only Moissanite & Lab Grown Diamond
-        var parsedWatchStones = new List<dynamic>();
-        if (!string.IsNullOrWhiteSpace(rawCaratStr) && (rawCaratStr.Contains("Moissanite", StringComparison.OrdinalIgnoreCase) || rawCaratStr.Contains("Lab", StringComparison.OrdinalIgnoreCase)))
-        {
-            parsedWatchStones = caratList.Where(c => c.Label.Contains("Moissanite", StringComparison.OrdinalIgnoreCase) || c.Label.Contains("Lab", StringComparison.OrdinalIgnoreCase)).Select(c => (dynamic)c).ToList();
-        }
-        if (parsedWatchStones.Count == 0)
-        {
-            parsedWatchStones = new List<dynamic> {
-                new { Label = "Moissanite", Offset = 0m },
-                new { Label = "Lab Grown Diamond", Offset = 650m }
-            };
-        }
-        caratList = parsedWatchStones.Select(c => new { Label = (string)c.Label, Offset = (decimal)c.Offset }).ToList();
+        // Watch Diamond Stone Selection: Moissanite & Lab Grown Diamond
+        caratList = new List<dynamic> {
+            new { Label = "Moissanite", Offset = 0m },
+            new { Label = "Lab Grown Diamond", Offset = 1600m }
+        }.Select(c => new { Label = (string)c.Label, Offset = (decimal)c.Offset }).ToList();
     }
     else
     {
@@ -1712,41 +1694,49 @@
           </div>
 
           <!-- Watch Movement & Origin: Japan & Swiss -->
-          @if (metalList.Count > 0)
-          {
-            <div style="margin-top: 6px;">
-              <div class="opt-label">Case Movement &amp; Finish: <span id="lblMetal">@(metalList.FirstOrDefault()?.Name ?? "Swiss")</span></div>
-              <div class="metal-swatch-list">
-                @foreach (var metal in metalList)
-                {
-                  var isDef = (metal == metalList.First());
-                  <button type="button" class="metal-swatch-btn @(isDef ? "active" : "")" onclick="setWatchMovement('@metal.Name', this)">
-                    <i class="fa-regular fa-clock"></i> @metal.Name
-                  </button>
-                }
-              </div>
+          <div style="margin-top: 6px;">
+            <div class="opt-label">Case Movement &amp; Finish: <span id="lblMetal">Japan</span></div>
+            <div class="metal-swatch-list">
+              <button type="button" class="metal-swatch-btn active" id="btnWatchJapan" onclick="setWatchMovement('Japan', this)">
+                <i class="fa-regular fa-clock"></i> Japan
+              </button>
+              <button type="button" class="metal-swatch-btn" id="btnWatchSwiss" onclick="setWatchMovement('Swiss', this)">
+                <i class="fa-regular fa-clock"></i> Swiss
+              </button>
             </div>
-          }
+          </div>
 
           <!-- Diamond Stone Selection: Moissanite & Lab Grown Diamond -->
-          @if (caratList.Count > 0)
-          {
-            <div style="margin-top: 10px;">
-              <div class="opt-label">Diamond Details / Stone Type: <span id="lblCarat">@(caratList.FirstOrDefault()?.Label ?? "Moissanite")</span></div>
-              <div class="carat-btn-list">
-                @foreach (var carat in caratList)
-                {
-                  var isDef = (carat == caratList.First());
-                  <button type="button" class="carat-btn @(isDef ? "active" : "")" onclick="setWatchStone('@carat.Label', this)">
-                    @(carat.Label.Contains("Lab", StringComparison.OrdinalIgnoreCase) ? "💎 " : "✨ ")@carat.Label
-                  </button>
-                }
-              </div>
+          <div style="margin-top: 10px;">
+            <div class="opt-label">Diamond Details / Stone Type: <span id="lblCarat">Moissanite</span></div>
+            <div class="carat-btn-list" id="watchStoneBtnList">
+              <button type="button" class="carat-btn active" id="btnWatchMoiss" onclick="setWatchStone('Moissanite', this)">
+                ✨ Moissanite
+              </button>
+              <button type="button" class="carat-btn" id="btnWatchLab" onclick="setWatchStone('Lab Grown Diamond', this)">
+                💎 Lab Grown Diamond
+              </button>
             </div>
-          }
+          </div>
+
+          <!-- Diamond Setting Coverage: Just Bezel, Half Ice, Full Ice Out -->
+          <div style="margin-top: 10px;">
+            <div class="opt-label">Diamond Setting Coverage: <span id="lblCoverage">Just Bezel</span></div>
+            <div class="carat-btn-list" id="watchCoverageBtnList">
+              <button type="button" class="carat-btn active" onclick="setWatchCoverage('Just Bezel', this)">
+                Just Bezel
+              </button>
+              <button type="button" class="carat-btn" onclick="setWatchCoverage('Half Ice', this)">
+                Half Ice
+              </button>
+              <button type="button" class="carat-btn" onclick="setWatchCoverage('Full Ice Out', this)">
+                Full Ice Out
+              </button>
+            </div>
+          </div>
 
           <!-- Free Caseback Engraving -->
-          <div>
+          <div style="margin-top: 10px;">
             <div class="opt-label">Free Caseback Engraving</div>
             <input type="text" class="pd-input" id="txtEngraving" placeholder="Engrave Text (e.g. Initials or Date ♡)" maxlength="30" />
           </div>
@@ -2630,31 +2620,71 @@
       recalculatePrice();
     }
 
+    let selectedWatchMovement = 'Japan';
+    let selectedWatchStone = 'Moissanite';
+    let selectedWatchCoverage = 'Just Bezel';
+
+    const watchPricingMatrix = {
+      'japan': {
+        'moissanite': { 'just bezel': 400, 'half ice': 570, 'full ice out': 750 },
+        'lab grown diamond': { 'just bezel': 2000, 'half ice': 2500, 'full ice out': 4000 }
+      },
+      'swiss': {
+        'moissanite': { 'just bezel': 750, 'half ice': 1000, 'full ice out': 1500 },
+        'lab grown diamond': { 'just bezel': 4000, 'half ice': 4500, 'full ice out': 6000 }
+      }
+    };
+
     function setWatchMovement(name, btn) {
+      selectedWatchMovement = name;
       selectedMetal = name;
       const lbl = document.getElementById('lblMetal');
       if (lbl) lbl.textContent = name;
       document.querySelectorAll('.metal-swatch-btn').forEach(b => b.classList.remove('active'));
       if (btn) btn.classList.add('active');
+
+      // Gallery auto switch: image 2 for Swiss, image 1 for Japan
+      if (name.toLowerCase().includes('swiss') && pdGalleryImages && pdGalleryImages.length > 1) {
+        switchHeroImage(pdGalleryImages[1], 1);
+      } else if (pdGalleryImages && pdGalleryImages.length > 0) {
+        switchHeroImage(pdGalleryImages[0], 0);
+      }
+
       updateWatchDynamicUI();
       recalculatePrice();
     }
 
     function setWatchStone(label, btn) {
+      selectedWatchStone = label;
       selectedCarat = label;
       currentStoneType = label.toLowerCase().includes('lab') ? 'LabGrownDiamond' : 'Moissanite';
       const lbl = document.getElementById('lblCarat');
       if (lbl) lbl.textContent = label;
-      document.querySelectorAll('.carat-btn').forEach(b => b.classList.remove('active'));
+      const container = document.getElementById('watchStoneBtnList');
+      if (container) {
+        container.querySelectorAll('.carat-btn').forEach(b => b.classList.remove('active'));
+      }
       if (btn) btn.classList.add('active');
       updateWatchDynamicUI();
       recalculatePrice();
     }
 
+    function setWatchCoverage(cov, btn) {
+      selectedWatchCoverage = cov;
+      const lbl = document.getElementById('lblCoverage');
+      if (lbl) lbl.textContent = cov;
+      const container = document.getElementById('watchCoverageBtnList');
+      if (container) {
+        container.querySelectorAll('.carat-btn').forEach(b => b.classList.remove('active'));
+      }
+      if (btn) btn.classList.add('active');
+      recalculatePrice();
+    }
+
     function updateWatchDynamicUI() {
       if (!isWatch) return;
-      const isJapan = (selectedMetal || '').toLowerCase().includes('japan');
-      const isLab = (selectedCarat || '').toLowerCase().includes('lab');
+      const isJapan = (selectedWatchMovement || 'Japan').toLowerCase().includes('japan');
+      const isLab = (selectedWatchStone || 'Moissanite').toLowerCase().includes('lab');
 
       const goldenTitle = document.getElementById('watchGoldenTitle');
       const goldenSpec = document.getElementById('watchGoldenSpec');
@@ -2715,6 +2745,20 @@
 
       const activeBasePrice = isWatch ? basePriceUSD : ((currentStoneType === 'Moissanite') ? moissaniteBasePriceUSD : basePriceUSD);
       let finalPrice = isLooseDiamond ? Math.round(basePriceUSD) : Math.max(100, Math.round(activeBasePrice + metalAdj + caratAdj + ringSizeAdj));
+
+      if (isWatch) {
+        const mov = (selectedWatchMovement || 'Japan').toLowerCase().includes('swiss') ? 'swiss' : 'japan';
+        const st = (selectedWatchStone || 'Moissanite').toLowerCase().includes('lab') ? 'lab grown diamond' : 'moissanite';
+        let cov = (selectedWatchCoverage || 'Just Bezel').toLowerCase();
+        if (cov.includes('full')) cov = 'full ice out';
+        else if (cov.includes('half')) cov = 'half ice';
+        else cov = 'just bezel';
+
+        finalPrice = (watchPricingMatrix[mov] && watchPricingMatrix[mov][st] && watchPricingMatrix[mov][st][cov]) 
+          ? watchPricingMatrix[mov][st][cov] 
+          : 400;
+      }
+
       let originalPrice = Math.floor(finalPrice * 1.15);
       let monthly = (finalPrice / 4).toFixed(2);
 
@@ -2736,7 +2780,7 @@
         if (isLooseDiamond) {
           floatSpecs.textContent = `Emerald Cut • Loose Lab Diamond • IGI Certified`;
         } else if (isWatch) {
-          floatSpecs.textContent = `${selectedMetal} Movement • ${selectedCarat} • 41 mm Case`;
+          floatSpecs.textContent = `${selectedWatchMovement} Movement • ${selectedWatchStone} • ${selectedWatchCoverage} • 41 mm Case`;
         } else {
           const stoneLabel = currentStoneType === 'Moissanite' ? 'Moissanite' : 'Lab Diamond';
           const sizeShort = (selectedRingSize || 'US 6.0').split(' ')[0] + ' ' + ((selectedRingSize || '').split(' ')[1] || '');

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <defs>
+    <linearGradient id="vGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E1E0CC" />
+      <stop offset="100%" stop-color="rgba(225,224,204,0.3)" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" fill="#000000" rx="20"/>
+  <!-- Sleek outer hex-ring nodes -->
+  <path d="M50 15 L85 35 L85 65 L50 85 L15 65 L15 35 Z" fill="none" stroke="url(#vGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/>
+  <!-- Sleek V converging to a central node -->
+  <path d="M28 35 L50 70 L72 35" fill="none" stroke="url(#vGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Central bright AI node (vertex point) -->
+  <circle cx="50" cy="45" r="7" fill="#E1E0CC" />
+  <!-- Dynamic network connections radiating from node -->
+  <path d="M50 45 L50 15 M50 45 L85 35 M50 45 L85 65 M50 45 L15 35 M50 45 L15 65" fill="none" stroke="url(#vGrad)" stroke-width="2" stroke-dasharray="3 3" opacity="0.5"/>
+</svg>

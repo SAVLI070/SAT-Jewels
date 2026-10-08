@@ -1,10 +1,12 @@
+@inject Microsoft.Extensions.Configuration.IConfiguration Configuration
 @{
     var title = (ViewData["Title"] ?? "SAT Jewel | Buy Certified Lab Grown Diamond Engagement Rings & Fine Jewelry").ToString();
     var description = (ViewData["Description"] ?? "Shop bespoke fine jewelry, certified lab grown diamond engagement rings, solitaires, and wedding bands online at factory-direct pricing. 100% GIA & IGI certified diamonds with free insured worldwide shipping.").ToString();
-    var keywords = (ViewData["Keywords"] ?? "buy jewelry online, diamond engagement rings, lab grown diamonds, lab grown diamond engagement rings, solitaire diamond ring, custom engagement rings, moissanite rings, certified diamonds, wedding bands, diamond necklace, diamond earrings, tennis bracelet, fine jewelry USA, GIA certified diamonds, SAT Jewel").ToString();
+    var keywords = (ViewData["Keywords"] ?? "Sat jewel, SAT Jewel, buy jewelry online, diamond engagement rings, lab grown diamonds, lab grown diamond engagement rings, solitaire diamond ring, custom engagement rings, moissanite rings, certified diamonds, wedding bands, diamond necklace, diamond earrings, tennis bracelet, fine jewelry USA, GIA certified diamonds").ToString();
     var canonicalUrl = (ViewData["CanonicalUrl"] ?? $"https://www.satjewel.com{Context.Request.Path}").ToString();
     var ogImage = (ViewData["OgImage"] ?? "https://www.satjewel.com/assets/auth_luxury_highjewelry.jpg").ToString();
     var siteUrl = "https://www.satjewel.com";
+    var googleVerificationCode = Configuration["Google:SiteVerification"] ?? ViewData["GoogleSiteVerification"]?.ToString() ?? "TObPREmxOn155EOzsRD02qX8rhzmhUM3uxFkYVd1sVU";
 }
 
 <!-- Primary Search Engine Meta Tags -->
@@ -16,6 +18,9 @@
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
 <meta name="theme-color" content="#06070a" />
 <link rel="canonical" href="@canonicalUrl" />
+
+<!-- Google Search Console Site Verification -->
+<meta name="google-site-verification" content="@googleVerificationCode" />
 
 <!-- Geo-Targeting Meta Tags -->
 <meta name="geo.region" content="US-NY" />

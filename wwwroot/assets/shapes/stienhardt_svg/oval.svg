@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="3.6 -1.4 42.8 52.8" preserveAspectRatio="xMidYMid meet" fill="none">
+    <title>OvalDiamond</title>
+    <g id="Page-1" stroke="none" stroke-width="2.23" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="OvalDiamond">
+            <path d="M44,25.0005113 C44,38.2553948 35.4938212,49 25.001012,49 C14.5061788,49 6,38.2553948 6,25.0005113 C6,11.7456277 14.5061788,1 25.001012,1 C35.4938212,1 44,11.7456277 44,25.0005113 Z" id="Stroke-1" stroke="#14344a"></path>
+            <polygon id="Stroke-3" stroke="#14344a" points="15 37 36 37 36 11 15 11"></polygon>
+            <polygon id="Stroke-5" stroke="#14344a" points="25.5004988 43 11 25.0187791 25.5004988 7 40 25.0187791"></polygon>
+            <line x1="15" y1="11" x2="12" y2="8" id="Stroke-6" stroke="#14344a"></line>
+            <line x1="25.5" y1="7" x2="25.5" y2="1" id="Stroke-7" stroke="#14344a"></line>
+            <line x1="25.5" y1="43" x2="25.5" y2="49" id="Stroke-8" stroke="#14344a"></line>
+            <line x1="36" y1="25" x2="44" y2="25" id="Stroke-9" stroke="#14344a"></line>
+            <line x1="15" y1="25" x2="6" y2="25" id="Stroke-10" stroke="#14344a"></line>
+            <line x1="36" y1="11" x2="38.5394425" y2="8.4527191" id="Stroke-11" stroke="#14344a"></line>
+            <line x1="16" y1="37" x2="12" y2="41" id="Stroke-12" stroke="#14344a"></line>
+            <line x1="36" y1="37" x2="39.4770599" y2="40.5085173" id="Stroke-13" stroke="#14344a"></line>
+        </g>
+    </g>
+</svg>

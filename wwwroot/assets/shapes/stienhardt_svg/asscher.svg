@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1.4 -1.4 52.8 52.8" preserveAspectRatio="xMidYMid meet" fill="none">
+    <title>AsscherDiamond</title>
+    <g id="Page-1" stroke="none" stroke-width="2.23" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="Group-21-Copy" stroke="#14344a" transform="translate(1.000000, 1.000000)">
+            <polygon id="Stroke-1" points="39 14.3522467 33.715405 9 13.3666643 9 8 14.3522467 8 34.8451631 13.3666643 40 33.715405 40 39 34.8451631"></polygon>
+            <g id="Group-20">
+                <polygon id="Stroke-2" points="48 8.28801953 39.8183549 0 8.3099932 0 0 8.28801953 0 40.0178995 8.3099932 48 39.8183549 48 48 40.0178995"></polygon>
+                <line x1="8.37478193" y1="0.436553716" x2="13.3666643" y2="9" id="Stroke-4"></line>
+                <line x1="39.6146125" y1="0.436553716" x2="34" y2="9" id="Stroke-6"></line>
+                <line x1="47.6149195" y1="8.28801953" x2="39" y2="14" id="Stroke-8"></line>
+                <line x1="8" y1="14" x2="0" y2="8.28801953" id="Stroke-10"></line>
+                <line x1="0" y1="40" x2="8" y2="34.8451631" id="Stroke-12"></line>
+                <line x1="13.3666643" y1="40" x2="8.36640447" y2="47.6149876" id="Stroke-14"></line>
+                <line x1="34" y1="40" x2="39.6098609" y2="47.6149876" id="Stroke-16"></line>
+                <line x1="39" y1="34.8451631" x2="47.6149195" y2="40" id="Stroke-18"></line>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="3.6 -1.4 42.8 52.8" preserveAspectRatio="xMidYMid meet" fill="none"><g transform="rotate(180 25 25)">
+    <title>PearDiamond</title>
+    <g id="Page-1" stroke="none" stroke-width="2.23" fill="none" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
+        <g id="Group-21-Copy-2" stroke="#14344a" transform="translate(6.000000, 1.000000)">
+            <path d="M38,19.2273984 C38,29.8458842 20.1643041,48 19,48 C17.8367563,48 0,29.8458842 0,19.2273984 C0,8.60783388 8.50747851,0 19,0 C29.4946423,0 38,8.60783388 38,19.2273984 Z" id="Stroke-1"></path>
+            <path d="M31,20.4176469 C31,27.2754707 19.7343586,39 18.9994524,39 C18.2645462,39 7,27.2754707 7,20.4176469 C7,13.5598231 12.3721535,8 18.9994524,8 C25.6278465,8 31,13.5598231 31,20.4176469 Z" id="Stroke-3"></path>
+            <line x1="19.5" y1="8" x2="19.5" y2="0" id="Stroke-5"></line>
+            <line x1="19" y1="39" x2="19" y2="48" id="Stroke-7"></line>
+            <line x1="0" y1="19.5" x2="7" y2="19.5" id="Stroke-9"></line>
+            <line x1="31" y1="19.5" x2="38" y2="19.5" id="Stroke-11"></line>
+            <line x1="6" y1="33" x2="10.3515472" y2="28.8809444" id="Stroke-13"></line>
+            <line x1="27.4832715" y1="11.4387648" x2="32.5816638" y2="6.42678914" id="Stroke-15"></line>
+            <line x1="6" y1="6" x2="11" y2="11" id="Stroke-17"></line>
+            <line x1="28.2220223" y1="28" x2="32.5816638" y2="32.4936355" id="Stroke-19"></line>
+        </g>
+    </g>
+</g></svg>
